@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.4.1';
+    this.appVersion = '1.4.2';
     this.init();
   }
 
@@ -287,15 +287,30 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.4.1 -->
+          <!-- v1.4.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.4.1 (最新版本)
+                v1.4.2 (最新版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 頂部按鈕全面改為全螢幕可見之醒目「🎓 新手教學」膠囊標籤。</li>
+              <li>• 移除彈窗上的代點按鈕，改為目標上方漂浮「👆 請點這裡！」跳動手指，強制親手操作！</li>
+              <li>• 實裝零遮擋智慧避讓定位，彈窗自動避開下方 4 大標籤與座位表。</li>
+            </ul>
+          </div>
+
+          <!-- v1.4.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.4.1
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 全新「動態高亮聚焦 ＋ 動態箭頭強制互動導覽 (Spotlight Tour)」，真實動手操作指引。</li>
               <li>• 實裝步驟強制性點擊驗證與各步驟「跳過此步」功能。</li>
               <li>• 升級 Network-First 網路優先更新架構，徹底杜絕離線快取卡舊版本問題。</li>

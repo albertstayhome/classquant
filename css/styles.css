@@ -141,8 +141,8 @@
 
 @keyframes kittyBowWiggle {
   0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-8deg) scale(1.08); }
-  75% { transform: rotate(8deg) scale(1.08); }
+  25% { rotate: -8deg; scale: 1.08; }
+  75% { rotate: 8deg; scale: 1.08; }
 }
 
 .kitty-bow:hover, .kitty-cat-avatar:hover {
@@ -172,15 +172,25 @@
 /* Spotlight Focus Pulse for Dynamic Interactive Tour */
 @keyframes spotlightGlow {
   0%, 100% { 
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 63, 94, 0.9);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 25px rgba(244, 63, 94, 0.95);
   }
   50% { 
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 35px rgba(244, 63, 94, 1);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.78), 0 0 45px rgba(244, 63, 94, 1);
   }
 }
 
 #tour-spotlight {
   animation: spotlightGlow 1.8s ease-in-out infinite;
+}
+
+/* Floating Bouncing Finger Pointer attached to Target Element */
+@keyframes bounceHandPointer {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.12); }
+}
+
+.tour-target-hand {
+  animation: bounceHandPointer 1s ease-in-out infinite;
 }
 
 /* Hide scrollbar for clean UI */
