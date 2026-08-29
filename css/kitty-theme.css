@@ -1,0 +1,183 @@
+/* Sanrio Hello Kitty & Little Twin Stars (Kiki & Lala) Aesthetic Theme */
+
+html[data-theme="kitty"] body {
+  background-color: #fff0f3;
+  background-image: 
+    radial-gradient(#ffccd5 1.2px, transparent 1.2px),
+    radial-gradient(#bae6fd 1.2px, transparent 1.2px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  color: #33272a;
+}
+
+/* Sanrio Glassmorphism Card */
+html[data-theme="kitty"] .glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 2px solid #ffccd5;
+  box-shadow: 0 8px 24px -4px rgba(255, 117, 143, 0.12), 0 4px 8px -2px rgba(186, 230, 253, 0.1);
+  border-radius: 1.25rem;
+  color: #33272a;
+}
+
+html[data-theme="kitty"] .glass-card-hover:hover {
+  border-color: #ff758f;
+  box-shadow: 0 12px 30px -4px rgba(255, 117, 143, 0.22);
+  transform: translateY(-2px);
+}
+
+/* Header & Nav */
+html[data-theme="kitty"] header,
+html[data-theme="kitty"] nav,
+html[data-theme="kitty"] footer {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: #ffccd5;
+}
+
+html[data-theme="kitty"] .nav-tab-btn {
+  color: #594a4e;
+  border-radius: 0.875rem;
+}
+html[data-theme="kitty"] .nav-tab-btn:hover {
+  background-color: #ffe5ec;
+  color: #ff4d6d;
+}
+html[data-theme="kitty"] .tab-active {
+  color: #c9184a !important;
+  background-color: #ffccd5 !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -2px 0 0 #ff4d6d;
+  font-weight: 800;
+}
+
+/* Sanrio Kitty Cat Mascot Avatar */
+.kitty-cat-avatar {
+  display: inline-block;
+  width: 2.75rem;
+  height: 2.75rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M25 45 C15 30 18 10 38 22 C50 15 70 15 82 22 C102 10 105 30 95 45 C108 65 98 95 60 95 C22 95 12 65 25 45 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='4.5' stroke-linejoin='round'/%3E%3Cellipse cx='42' cy='58' rx='4.5' ry='6.5' fill='%2333272a'/%3E%3Cellipse cx='78' cy='58' rx='4.5' ry='6.5' fill='%2333272a'/%3E%3Cellipse cx='60' cy='67' rx='5.5' ry='4' fill='%23fbbf24' stroke='%2333272a' stroke-width='2.5'/%3E%3Cpath d='M16 56 L32 58 M14 66 L30 66 M18 76 L32 73' stroke='%2333272a' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M104 56 L88 58 M106 66 L90 66 M102 76 L88 73' stroke='%2333272a' stroke-width='3.5' stroke-linecap='round'/%3E%3Cg transform='translate(75, 18)'%3E%3Cpath d='M14 14 C2 0 -6 16 2 24 C10 28 14 18 14 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='3.5'/%3E%3Cpath d='M18 14 C30 0 38 16 30 24 C22 28 18 18 18 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='3.5'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff0033' stroke='%2333272a' stroke-width='3.5'/%3E%3Ccircle cx='14' cy='14' r='2' fill='%23ffffff'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.kitty-cat-mini {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M25 45 C15 30 18 10 38 22 C50 15 70 15 82 22 C102 10 105 30 95 45 C108 65 98 95 60 95 C22 95 12 65 25 45 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='5'/%3E%3Cellipse cx='42' cy='58' rx='5' ry='7' fill='%2333272a'/%3E%3Cellipse cx='78' cy='58' rx='5' ry='7' fill='%2333272a'/%3E%3Cellipse cx='60' cy='67' rx='6' ry='4.5' fill='%23fbbf24' stroke='%2333272a' stroke-width='3'/%3E%3Cpath d='M16 56 L32 58 M14 66 L30 66 M18 76 L32 73 M104 56 L88 58 M106 66 L90 66 M102 76 L88 73' stroke='%2333272a' stroke-width='4' stroke-linecap='round'/%3E%3Cg transform='translate(75, 18)'%3E%3Cpath d='M14 14 C2 0 -6 16 2 24 C10 28 14 18 14 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='4'/%3E%3Cpath d='M18 14 C30 0 38 16 30 24 C22 28 18 18 18 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='7.5' fill='%23ff0033' stroke='%2333272a' stroke-width='4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Little Twin Stars (Kiki & Lala) Full Illustration Badge */
+.twin-stars-avatar {
+  display: inline-block;
+  width: 3.25rem;
+  height: 2.75rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 120'%3E%3C!-- Golden Star in background --%3E%3Cpolygon points='80,10 93,42 128,45 101,68 109,102 80,83 51,102 59,68 32,45 67,42' fill='%23fef08a' stroke='%23facc15' stroke-width='3'/%3E%3C!-- Kiki (Left, Cyan Hair) --%3E%3Cg transform='translate(15, 20)'%3E%3C!-- Hair --%3E%3Cpath d='M15 35 C10 15 35 5 50 15 C65 5 80 20 75 40 C75 55 65 60 50 60 C30 60 15 50 15 35 Z' fill='%2338bdf8' stroke='%2333272a' stroke-width='3.5'/%3E%3C!-- Face --%3E%3Cellipse cx='45' cy='42' rx='18' ry='16' fill='%23fff1f2' stroke='%2333272a' stroke-width='3'/%3E%3Cellipse cx='38' cy='42' rx='2.5' ry='3.5' fill='%2333272a'/%3E%3Cellipse cx='52' cy='42' rx='2.5' ry='3.5' fill='%2333272a'/%3E%3Cellipse cx='45' cy='47' rx='2' ry='1' fill='%23f43f5e'/%3E%3C!-- White Gown --%3E%3Cpath d='M30 56 L20 85 C20 88 70 88 70 85 L60 56 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='3'/%3E%3C/g%3E%3C!-- Lala (Right, Pink Hair) --%3E%3Cg transform='translate(75, 20)'%3E%3C!-- Long Pink Hair --%3E%3Cpath d='M15 35 C10 10 40 5 55 15 C70 5 85 15 80 45 C85 70 80 85 70 85 C65 85 65 60 50 60 C35 60 30 85 20 85 C15 85 10 65 15 35 Z' fill='%23f472b6' stroke='%2333272a' stroke-width='3.5'/%3E%3C!-- Face --%3E%3Cellipse cx='45' cy='42' rx='18' ry='16' fill='%23fff1f2' stroke='%2333272a' stroke-width='3'/%3E%3Cellipse cx='38' cy='42' rx='2.5' ry='3.5' fill='%2333272a'/%3E%3Cellipse cx='52' cy='42' rx='2.5' ry='3.5' fill='%2333272a'/%3E%3Cellipse cx='45' cy='47' rx='2' ry='1' fill='%23f43f5e'/%3E%3C!-- White Gown & Star Wand --%3E%3Cpath d='M30 56 L20 85 C20 88 70 88 70 85 L60 56 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='3'/%3E%3Cpath d='M68 45 L82 30' stroke='%23fbbf24' stroke-width='3'/%3E%3Cpolygon points='82,25 85,32 92,32 87,36 89,42 82,38 75,42 77,36 72,32 79,32' fill='%23facc15'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.kiki-lala-banner {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: 65px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 90'%3E%3C!-- Cloud Base --%3E%3Cpath d='M30 75 C15 75 10 55 30 50 C25 35 50 30 65 40 C75 25 105 25 115 40 C130 30 155 35 150 50 C170 55 165 75 150 75 Z' fill='%23ffffff' opacity='0.9'/%3E%3C!-- Golden Stars --%3E%3Cpolygon points='120,5 125,20 140,20 128,30 132,45 120,35 108,45 112,30 100,20 115,20' fill='%23facc15' stroke='%23eab308' stroke-width='2'/%3E%3Cpolygon points='35,15 38,25 48,25 40,31 43,41 35,35 27,41 30,31 22,25 32,25' fill='%23fde047'/%3E%3Cpolygon points='205,15 208,25 218,25 210,31 213,41 205,35 197,41 200,31 192,25 202,25' fill='%23fde047'/%3E%3C!-- Kiki (Left) --%3E%3Cg transform='translate(50, 10)'%3E%3Cpath d='M10 25 C5 10 25 0 40 8 C55 0 65 10 60 30 C60 42 50 48 38 48 C20 48 10 38 10 25 Z' fill='%2338bdf8' stroke='%2333272a' stroke-width='2.5'/%3E%3Cellipse cx='35' cy='32' rx='14' ry='12' fill='%23fff1f2' stroke='%2333272a' stroke-width='2.5'/%3E%3Cellipse cx='30' cy='32' rx='2' ry='3' fill='%2333272a'/%3E%3Cellipse cx='40' cy='32' rx='2' ry='3' fill='%2333272a'/%3E%3Cpath d='M23 44 L15 68 C15 70 55 70 55 68 L47 44 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='2.5'/%3E%3C/g%3E%3C!-- Lala (Right) --%3E%3Cg transform='translate(120, 10)'%3E%3Cpath d='M10 25 C5 5 30 0 42 8 C55 0 68 8 62 32 C68 55 60 68 52 68 C48 68 48 48 38 48 C28 48 25 68 18 68 C12 68 8 50 10 25 Z' fill='%23f472b6' stroke='%2333272a' stroke-width='2.5'/%3E%3Cellipse cx='35' cy='32' rx='14' ry='12' fill='%23fff1f2' stroke='%2333272a' stroke-width='2.5'/%3E%3Cellipse cx='30' cy='32' rx='2' ry='3' fill='%2333272a'/%3E%3Cellipse cx='40' cy='32' rx='2' ry='3' fill='%2333272a'/%3E%3Cpath d='M23 44 L15 68 C15 70 55 70 55 68 L47 44 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='2.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Full Hello Kitty Standing Character Illustration */
+.kitty-full-illustration {
+  display: block;
+  width: 5rem;
+  height: 5rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 160'%3E%3Cpath d='M35 45 C25 30 28 10 48 22 C60 15 80 15 92 22 C112 10 115 30 105 45 C118 65 108 95 70 95 C32 95 22 65 35 45 Z' fill='%23ffffff' stroke='%2333272a' stroke-width='4.5'/%3E%3Cellipse cx='52' cy='58' rx='4.5' ry='6.5' fill='%2333272a'/%3E%3Cellipse cx='88' cy='58' rx='4.5' ry='6.5' fill='%2333272a'/%3E%3Cellipse cx='70' cy='67' rx='5.5' ry='4' fill='%23fbbf24' stroke='%2333272a' stroke-width='2.5'/%3E%3Cpath d='M26 56 L42 58 M24 66 L40 66 M28 76 L42 73 M114 56 L98 58 M116 66 L100 66 M112 76 L98 73' stroke='%2333272a' stroke-width='3.5' stroke-linecap='round'/%3E%3Cg transform='translate(85, 18)'%3E%3Cpath d='M14 14 C2 0 -6 16 2 24 C10 28 14 18 14 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='3.5'/%3E%3Cpath d='M18 14 C30 0 38 16 30 24 C22 28 18 18 18 14 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='3.5'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff0033' stroke='%2333272a' stroke-width='3.5'/%3E%3C/g%3E%3Cpath d='M42 90 L32 115 C30 120 38 126 44 120 L48 108 L48 135 L68 135 L68 118 L72 118 L72 135 L92 135 L92 108 L96 120 C102 126 110 120 108 115 L98 90 Z' fill='%2338bdf8' stroke='%2333272a' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M50 90 L90 90 L88 102 L52 102 Z' fill='%23fbbf24' stroke='%2333272a' stroke-width='3'/%3E%3Cellipse cx='56' cy='138' rx='10' ry='5' fill='%23ffffff' stroke='%2333272a' stroke-width='3.5'/%3E%3Cellipse cx='84' cy='138' rx='10' ry='5' fill='%23ffffff' stroke='%2333272a' stroke-width='3.5'/%3E%3C/svg%3E");
+}
+
+/* Kitty Student Cards */
+html[data-theme="kitty"] .student-seat-card {
+  background: #ffffff;
+  border: 2px solid #ffccd5;
+  border-radius: 1.15rem;
+  box-shadow: 0 4px 12px rgba(255, 117, 143, 0.08);
+}
+
+html[data-theme="kitty"] .student-seat-card:hover {
+  border-color: #ff4d6d;
+  box-shadow: 0 8px 20px rgba(255, 77, 109, 0.18);
+}
+
+html[data-theme="kitty"] .student-seat-card.selected {
+  border-color: #ff2a55 !important;
+  box-shadow: 0 0 0 3px rgba(255, 42, 85, 0.35);
+  background: #fff0f3 !important;
+}
+
+/* Dual Badges (Academic vs Character) */
+.badge-academic {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.badge-character-pos {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  color: #db2777;
+  font-weight: 700;
+}
+
+.badge-character-neg {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
+  font-weight: 700;
+}
+
+.badge-character-zero {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+/* Form Controls in Kitty Theme */
+html[data-theme="kitty"] input,
+html[data-theme="kitty"] select,
+html[data-theme="kitty"] textarea {
+  background-color: #ffffff !important;
+  color: #33272a !important;
+  border-color: #ffccd5 !important;
+  border-radius: 0.75rem;
+}
+
+html[data-theme="kitty"] input:focus,
+html[data-theme="kitty"] select:focus,
+html[data-theme="kitty"] textarea:focus {
+  border-color: #ff4d6d !important;
+  box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.2);
+}
+
+/* Kitty Red Bow Icon */
+.kitty-bow {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.35rem;
+  height: 1.35rem;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M46 50 C30 35 15 42 18 58 C20 72 38 68 46 55 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='4'/%3E%3Cpath d='M54 50 C70 35 85 42 82 58 C80 72 62 68 54 55 Z' fill='%23ff2a55' stroke='%2333272a' stroke-width='4'/%3E%3Ccircle cx='50' cy='52' r='8.5' fill='%23ff0033' stroke='%2333272a' stroke-width='4'/%3E%3Ccircle cx='47' cy='49' r='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
+}

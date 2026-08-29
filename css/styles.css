@@ -1,0 +1,173 @@
+/* Base & Layout Styles */
+:root {
+  --primary-pink: #ff4d6d;
+  --primary-pink-hover: #c9184a;
+  --bg-pink-light: #fff0f3;
+  --border-pink: #ffccd5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Glassmorphism Defaults */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 204, 213, 0.8);
+  border-radius: 1rem;
+}
+
+/* Header Collapse Animation */
+#global-header {
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease;
+  overflow: hidden;
+}
+
+#global-header.header-collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+  pointer-events: none;
+}
+
+/* Mini Header Unhide Floating Tab */
+#header-unhide-pill {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* UNIFIED 3-TIER COLOR SYSTEM (嚴格統一規律色彩) */
+/* 1. Positive (+ Points): Soft Mint Green */
+.color-rule-pos {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #065f46 !important;
+}
+.color-rule-pos-badge {
+  background-color: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+  color: #065f46 !important;
+}
+
+/* 2. Negative (- Points): Soft Rose / Red */
+.color-rule-neg {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+  color: #9f1239 !important;
+}
+.color-rule-neg-badge {
+  background-color: #ffe4e6 !important;
+  border-color: #fda4af !important;
+  color: #9f1239 !important;
+}
+
+/* 3. Neutral (0 Points / Info): Soft Slate Gray */
+.color-rule-zero {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+.color-rule-zero-badge {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+/* Student Seat Card / Tile Selection Styles */
+.student-seat-card,
+.compact-seat-tile {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.student-seat-card:active,
+.compact-seat-tile:active {
+  transform: scale(0.96);
+}
+
+.student-seat-card.selected,
+.compact-seat-tile.selected {
+  border-color: #ff2a55 !important;
+  background-color: #ffe5ec !important;
+  box-shadow: 0 0 0 3px #ff2a55, 0 4px 12px rgba(255, 42, 85, 0.25) !important;
+  transform: translateY(-2px);
+  z-index: 10;
+}
+
+/* Tag Pager Carousel (Strict Single-Page Scroll Snap) */
+.tag-pager-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.tag-page-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always !important; /* CRITICAL: Prevents skipping past page 2 directly to 3! */
+}
+
+/* Live Clock Indicator */
+.live-indicator {
+  animation: pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.15); }
+}
+
+/* Floating Stamp Point Bubble */
+.point-bubble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 50;
+  animation: float-stamp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes float-stamp {
+  0% { opacity: 0; transform: translate(-50%, -20%) scale(0.6); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+}
+
+/* Hide scrollbar for clean UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dark Theme Overrides */
+html.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+html.dark .glass-card {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #f8fafc;
+}
+html.dark .student-seat-card.selected,
+html.dark .compact-seat-tile.selected {
+  border-color: #f43f5e !important;
+  background-color: rgba(244, 63, 94, 0.2) !important;
+  box-shadow: 0 0 0 3px #f43f5e !important;
+}

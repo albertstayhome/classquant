@@ -1,0 +1,18 @@
+{
+  "name": "ClassQuant Hub • 班級量化統計與記事戰情室",
+  "short_name": "ClassQuant",
+  "description": "專屬國中導師與數學科任之班級量化統計、事件記事與因材施教戰情室",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff1f2",
+  "theme_color": "#f43f5e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f43f5e'/%3E%3Cpath d='M30 45 C30 35 40 28 50 28 C60 28 70 35 70 45 C70 58 60 65 50 65 C40 65 30 58 30 45 Z' fill='%23ffffff'/%3E%3Cellipse cx='42' cy='46' rx='3' ry='4.5' fill='%23222'/%3E%3Cellipse cx='58' cy='46' rx='3' ry='4.5' fill='%23222'/%3E%3Cellipse cx='50' cy='53' rx='3.5' ry='2.5' fill='%23fbbf24'/%3E%3Cpath d='M62 32 C65 26 74 26 77 31 C79 35 75 40 70 39 C72 44 68 49 63 47 C58 45 59 38 62 32 Z' fill='%23ef4444'/%3E%3Ccircle cx='66' cy='36' r='3.5' fill='%23ffedd5'/%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

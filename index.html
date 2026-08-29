@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="kitty">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClassQuant Hub • 國中教師班級量化統計與記事系統 (三麗鷗 Hello Kitty ＆ 小雙星版)</title>
+
+  <!-- PWA Manifest & Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff758f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ClassQuant">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff0f3',
+              500: '#ff758f',
+              600: '#ff4d6d',
+              700: '#c9184a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles & Sanrio Kitty/TwinStars Theme -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/kitty-theme.css">
+  <link rel="stylesheet" href="css/sanrio-characters.css">
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-pink-400 selection:text-white transition-colors duration-200">
+
+  <!-- Mini Header Unhide Floating Tab (Shown when Header is Collapsed) -->
+  <div id="header-unhide-pill" class="hidden sticky top-0 z-50 flex justify-center py-1 bg-pink-50/80 backdrop-blur-sm border-b border-pink-200 shadow-sm">
+    <button onclick="appState.toggleHeader(true)" class="px-3.5 py-1 rounded-full bg-white border border-pink-300 shadow-sm text-xs font-black text-pink-600 hover:bg-pink-100 transition flex items-center gap-1.5 active:scale-95">
+      <span class="kitty-bow !w-3 !h-3"></span>
+      <span>▼ 展開頂部選單 (ClassQuant Hub)</span>
+    </button>
+  </div>
+
+  <!-- Top Global Header with Collapsible Mascot Banner -->
+  <header id="global-header" class="sticky top-0 z-40 glass-card border-b px-3 sm:px-6 py-2">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
+      
+      <!-- Brand with Authentic Hello Kitty & Little Twin Stars Mascots -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="flex items-center space-x-1 bg-white px-1.5 py-0.5 rounded-2xl shadow-sm border border-pink-200">
+          <div class="kitty-cat-avatar cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('Hello Kitty 陪伴老師一起快樂教學！🎀', 'info')" title="Hello Kitty"></div>
+          <div class="sanrio-twinstars-badge cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('小雙星 Kiki & Lala 守護班級每一顆星星！✨', 'info')" title="Little Twin Stars (Kiki & Lala)"></div>
+        </div>
+
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-sm sm:text-lg font-black tracking-wide flex items-center gap-1 text-pink-600">
+              ClassQuant Hub
+              <span class="kitty-bow !w-3.5 !h-3.5"></span>
+            </h1>
+            <span class="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300">
+              三麗鷗家族版 • 數學科任 兼 導師
+            </span>
+          </div>
+          <div class="flex items-center space-x-1.5 text-[11px] opacity-80">
+            <span id="header-live-clock" class="font-mono font-semibold">載入時間...</span>
+            <span>•</span>
+            <div id="header-schedule-status" class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span>
+              <span class="text-emerald-600 font-bold">自動感知中</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Controls: Class Select, Theme, Collapse Header, PWA Install -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2.5">
+        <!-- PWA Install Button -->
+        <button id="pwa-install-btn" onclick="appState.installPWA()" 
+          class="hidden sm:flex px-2.5 py-1 text-xs font-bold rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md transition items-center gap-1">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+          <span>安裝 App</span>
+        </button>
+
+        <!-- Sound Toggle Button -->
+        <button id="sound-toggle-btn" onclick="appState.toggleSound()" 
+          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="操作音效切換">
+          <i data-lucide="volume-2" class="w-4 h-4 text-pink-600"></i>
+        </button>
+
+        <!-- Theme Switcher Button -->
+        <button id="theme-toggle-btn" onclick="appState.toggleTheme()" 
+          class="px-2.5 py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white">
+          <span class="kitty-bow !w-3.5 !h-3.5"></span>
+          <span class="text-xs font-bold text-pink-600 ml-0.5 hidden sm:inline">三麗鷗模式</span>
+        </button>
+
+        <!-- Restore Auto Timetable Button (Hidden when not override) -->
+        <button id="header-override-restore-btn" onclick="appState.restoreTimetableAuto()" 
+          class="hidden px-2.5 py-1 text-xs font-semibold rounded-xl bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200 transition flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 恢復課表
+        </button>
+
+        <!-- Class Dropdown -->
+        <div class="flex items-center space-x-1 border border-pink-300 rounded-xl px-2.5 py-1 shadow-inner bg-white">
+          <i data-lucide="users" class="w-3.5 h-3.5 text-pink-500"></i>
+          <select id="global-class-select" onchange="appState.handleManualClassChange(this.value)" 
+            class="bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1 text-slate-800">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <!-- 1-Tap Header Collapse Button (解決礙眼與佔位問題) -->
+        <button onclick="appState.toggleHeader()" 
+          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold text-xs transition flex items-center gap-1 shadow-sm" title="隱藏頂部橫幅">
+          <i data-lucide="chevron-up" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">收合頂部</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Navigation Tab Bar -->
+  <nav class="glass-card border-b px-2 sm:px-6 sticky top-0 z-30 overflow-x-auto no-scrollbar">
+    <div class="max-w-7xl mx-auto flex items-center space-x-1 sm:space-x-2 py-1">
+      <button onclick="appState.switchTab('matrix')" data-tab="matrix" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-pink-500"></i>
+        <span>課堂點記板</span>
+      </button>
+
+      <button onclick="appState.switchTab('roster')" data-tab="roster" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-pink-700 bg-pink-50/50">
+        <i data-lucide="user-plus" class="w-3.5 h-3.5 text-pink-600"></i>
+        <span>👥 班級名單</span>
+      </button>
+
+      <button onclick="appState.switchTab('dashboard')" data-tab="dashboard" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-500"></i>
+        <span>統計戰情室</span>
+      </button>
+
+      <button onclick="appState.switchTab('timetable')" data-tab="timetable" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-500"></i>
+        <span>課表排程</span>
+      </button>
+
+      <button onclick="appState.switchTab('events')" data-tab="events" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-500"></i>
+        <span>學生記事檢索</span>
+      </button>
+
+      <button onclick="appState.switchTab('student-dossier')" data-tab="student-dossier" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="user-check" class="w-3.5 h-3.5 text-amber-500"></i>
+        <span>檔案 & 晤談</span>
+      </button>
+
+      <button onclick="appState.switchTab('nas-sync')" data-tab="nas-sync" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-blue-500"></i>
+        <span>NAS 同步</span>
+      </button>
+
+      <button onclick="appState.switchTab('guide')" data-tab="guide" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-pink-700 bg-pink-100 border border-pink-300 font-black">
+        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-600"></i>
+        <span>📖 圖文說明書</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-6">
+    <!-- Tab 1: Classroom Matrix View -->
+    <section id="classroom-matrix-view" class="tab-panel"></section>
+
+    <!-- Tab 2: Class & Student Roster Manager View -->
+    <section id="roster-manager-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 3: Class Dashboard View -->
+    <section id="dashboard-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 4: Timetable View -->
+    <section id="timetable-editor-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 5: Events Log & Narrative Notes View -->
+    <section id="events-log-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 6: Student Dossier View -->
+    <section id="student-dossier-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 7: NAS Data Sync View -->
+    <section id="nas-sync-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 8: AI Hub & Schema View -->
+    <section id="ai-hub-view" class="tab-panel hidden"></section>
+
+    <!-- Tab 9: Visual User Guide View -->
+    <section id="user-guide-view" class="tab-panel hidden"></section>
+  </main>
+
+  <!-- Floating Quick Guide Button on Bottom-Left (Hidden on small mobile) -->
+  <button onclick="appState.switchTab('guide')" class="hidden sm:flex floating-guide-btn px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-xs shadow-xl transition items-center gap-2">
+    <span class="kitty-bow"></span>
+    <span>💡 點我看圖文說明書</span>
+  </button>
+
+  <!-- Global Footer with Hello Kitty, Little Twin Stars, and Kuromi signature -->
+  <footer class="hidden sm:flex glass-card border-t py-3.5 px-6 text-center text-xs opacity-85 items-center justify-center gap-3">
+    <div class="flex items-center space-x-2">
+      <span class="kitty-cat-mini"></span>
+      <span class="sanrio-twinstars-badge !w-6 !h-6"></span>
+      <span class="sanrio-kuromi-badge !w-6 !h-6"></span>
+    </div>
+    <span class="font-semibold text-slate-700">ClassQuant Hub • 三麗鷗家族 (Hello Kitty • 小雙星 • 酷洛米) 守護班級經營 🎀✨</span>
+  </footer>
+
+  <!-- Global Modal Container -->
+  <div id="global-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm hidden">
+    <div class="glass-card border border-pink-200 rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" id="global-modal-content">
+      <!-- Injected Dynamically -->
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="global-toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none">
+    <!-- Injected Dynamically -->
+  </div>
+
+  <!-- Application JavaScript Modules -->
+  <script src="js/store.js"></script>
+  <script src="js/timetable.js"></script>
+  <script src="js/statistics.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/tagManager.js"></script>
+  <script src="js/matrix.js"></script>
+  <script src="js/rosterManager.js"></script>
+  <script src="js/eventsLog.js"></script>
+  <script src="js/studentDossier.js"></script>
+  <script src="js/timetableEditor.js"></script>
+  <script src="js/nasSync.js"></script>
+  <script src="js/aiImportExport.js"></script>
+  <script src="js/userGuide.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('PWA ServiceWorker registered:', reg.scope))
+          .catch(err => console.log('PWA ServiceWorker registration failed:', err));
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

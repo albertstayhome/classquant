@@ -1,0 +1,15 @@
+{
+  "version": "1.2.0",
+  "buildNumber": 2026082901,
+  "releaseDate": "2026-08-29",
+  "appName": "ClassQuant Hub",
+  "releaseNotes": [
+    "1. 4大標籤排版置於座位表下方，字體大且清晰不遮字",
+    "2. 導師班與數學科任班分區，標籤使用頻率各班獨立計算",
+    "3. 課堂事後快速補記助手 (Retro-Logging Assistant)",
+    "4. 日期時序時間軸 (Timeline) 與多生交叉事證查詢",
+    "5. 零依賴原生可愛音效與離線即時推播熱更新機制"
+  ],
+  "minAppVersion": "1.0.0",
+  "otaUpdateEnabled": true
+}

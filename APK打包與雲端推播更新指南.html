@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassQuant Hub - APK 打包與雲端推播熱更新指南</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  </style>
+</head>
+<body class="bg-pink-50/40 text-slate-800 p-4 sm:p-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-3xl p-6 sm:p-10 shadow-lg border-2 border-pink-200">
+    
+    <!-- Header -->
+    <div class="flex items-center space-x-4 border-b border-pink-100 pb-6 mb-8">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-400 to-rose-500 flex items-center justify-center text-white text-2xl font-black shadow-md">
+        📱
+      </div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+          ClassQuant Hub • APK 打包與自動推播熱更新指南
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1 font-bold">免重新安裝 APK • 連上 Wi-Fi 自動無感熱更新 • 100% 離線可用</p>
+      </div>
+    </div>
+
+    <!-- Core Explanation -->
+    <div class="p-5 rounded-2xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 mb-8">
+      <h2 class="text-base sm:text-lg font-black text-pink-700 mb-2 flex items-center gap-2">
+        💡 為什麼這個架構「連網就能自動推播更新」？
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+        傳統原生 App 每次新增功能或改介面，使用者都要手動下載新的 <code>.apk</code> 並覆蓋安裝；<br>
+        而本系統採用 <strong>Web + Service Worker 混合熱更新技術 (Live OTA)</strong>：
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 text-xs">
+        <div class="p-3 bg-white rounded-xl border border-pink-200 shadow-sm">
+          <strong class="text-emerald-700 block mb-1">📶 連上網路時：</strong>
+          App 啟動時自動在背景向雲端檢查 <code>version.json</code>，一旦發現新版程式碼，秒級自動下載並替換，<strong>手機畫面直接變成最新版，完全不用重裝 APK！</strong>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-pink-200 shadow-sm">
+          <strong class="text-blue-700 block mb-1">🟢 斷網離線時：</strong>
+          自動無縫切換到手機本機的高速快取與本地資料庫，教室沒網路照樣極速順暢記點！
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Implementation Methods -->
+    <h2 class="text-xl font-black text-slate-900 mb-4">🚀 三種最簡單的 APK 取得與發布方式：</h2>
+
+    <!-- Method 1 -->
+    <div class="border-2 border-pink-300 rounded-3xl p-6 mb-6 bg-pink-50/30">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base sm:text-lg font-black text-pink-700 flex items-center gap-2">
+          🌟 方式一：PWABuilder 線上 30 秒 1 鍵生成 APK（最推薦、零技術門檻）
+        </h3>
+        <span class="text-xs px-3 py-1 rounded-full bg-pink-500 text-white font-black">官方開源</span>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed font-medium">
+        微軟與 Google 共同維護的開源工具，只要貼上您的網址，即可在雲端一鍵生成可安裝的 Android APK 與 Google Play AAB 檔。
+      </p>
+      <div class="space-y-2 text-xs sm:text-sm text-slate-800 font-medium">
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-pink-200 text-pink-800 font-black flex items-center justify-center shrink-0">1</span>
+          <span>將本專案部署至免費的 <strong>GitHub Pages</strong>、<strong>Vercel</strong> 或您家中的 NAS Web 站點。</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-pink-200 text-pink-800 font-black flex items-center justify-center shrink-0">2</span>
+          <span>在瀏覽器打開 <a href="https://www.pwabuilder.com" target="_blank" class="text-pink-600 font-black underline">PWABuilder.com</a>，貼上您的網址並點擊 <strong>Start</strong>。</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-pink-200 text-pink-800 font-black flex items-center justify-center shrink-0">3</span>
+          <span>點擊 <strong>Package for Android</strong> $\rightarrow$ 下載 <code>.apk</code> 檔直接安裝到手機！</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Method 2 -->
+    <div class="border border-slate-200 rounded-3xl p-6 mb-6 bg-white">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
+          ☁️ 方式二：GitHub Actions 雲端自動打包工作流（完全全自動）
+        </h3>
+        <span class="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-black">CI/CD</span>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed font-medium">
+        專案已為您內建 <code>.github/workflows/build-apk.yml</code> 工作流：
+      </p>
+      <div class="space-y-2 text-xs sm:text-sm text-slate-800 font-medium">
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black flex items-center justify-center shrink-0">1</span>
+          <span>在電腦修改任何程式碼後，執行 <code>git push</code> 推送到 GitHub。</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black flex items-center justify-center shrink-0">2</span>
+          <span>GitHub Actions 自動在雲端打包最新 APK，手機打開 App 瞬間自動連網熱更新！</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Method 3 -->
+    <div class="border border-slate-200 rounded-3xl p-6 mb-8 bg-white">
+      <h3 class="text-base sm:text-lg font-black text-slate-800 mb-3 flex items-center gap-2">
+        💻 方式三：本機 Android Studio 原生專案源碼編譯
+      </h3>
+      <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed font-medium">
+        專案已在 <code>android/</code> 目錄為您生成完整的 Gradle 原生專案，支援離線 WebView、雙向連線與手勢下拉刷新更新。
+      </p>
+      <div class="space-y-2 text-xs sm:text-sm text-slate-800 font-medium">
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black flex items-center justify-center shrink-0">1</span>
+          <span>用 Android Studio 打開 <code>d:\class_point_app_dev\android</code>。</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black flex items-center justify-center shrink-0">2</span>
+          <span>點選 <strong>Build $\rightarrow$ Build Bundle(s) / APK(s) $\rightarrow$ Build APK(s)</strong> 即可產出本機安裝檔！</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Summary -->
+    <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-900 font-bold flex items-center justify-between">
+      <span>🎉 系統已具備完整的 Live OTA 熱更新引擎與 APK 雲端編譯配置！</span>
+    </div>
+
+  </div>
+</body>
+</html>
