@@ -61,7 +61,7 @@
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
             <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.4.9</span>
+              <span>v1.5.0</span>
               <span>📢</span>
             </button>
           </div>
@@ -87,9 +87,9 @@
 
         <!-- Onboarding Tour Button (新手實戰教學) -->
         <button id="onboarding-guide-btn" onclick="onboardingTour.start(0)" 
-          class="px-2.5 py-1 rounded-xl border-2 border-pink-400 bg-gradient-to-r from-pink-100 to-rose-100 hover:from-pink-200 hover:to-rose-200 text-pink-900 transition flex items-center gap-1 shadow-md active:scale-95 animate-pulse shrink-0" title="點我啟動動態實戰教學">
+          class="px-2.5 sm:px-3 py-1 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 transition flex items-center gap-1 shadow-sm active:scale-95 shrink-0" title="開啟新手教學">
           <span class="text-xs font-black">🎓</span>
-          <span class="text-xs font-black text-pink-900">新手教學</span>
+          <span class="text-xs font-bold text-pink-700">新手教學</span>
         </button>
 
         <!-- Sound Toggle Button -->
@@ -138,6 +138,11 @@
         <span>👥 班級名單</span>
       </button>
 
+      <button onclick="appState.switchTab('retro')" data-tab="retro" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-amber-800 bg-amber-50/60 border border-amber-200">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+        <span>⏰ 課堂事後補記</span>
+      </button>
+
       <button onclick="appState.switchTab('dashboard')" data-tab="dashboard" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-500"></i>
         <span>統計戰情室</span>
@@ -183,22 +188,25 @@
     <!-- Tab 2: Class & Student Roster Manager View -->
     <section id="roster-manager-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 3: Class Dashboard View -->
+    <!-- Tab 3: Dedicated Post-Class Retro-Logging View -->
+    <section id="retro-log-view" class="tab-panel hidden animate-fade-in-up"></section>
+
+    <!-- Tab 4: Class Dashboard View -->
     <section id="dashboard-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 4: Timetable View -->
+    <!-- Tab 5: Timetable View -->
     <section id="timetable-editor-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 5: Events Log & Narrative Notes View -->
+    <!-- Tab 6: Events Log & Narrative Notes View -->
     <section id="events-log-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 6: Student Dossier View -->
+    <!-- Tab 7: Student Dossier View -->
     <section id="student-dossier-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 7: AI Hub & Schema View -->
+    <!-- Tab 8: AI Hub & Schema View -->
     <section id="ai-hub-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 8: Visual User Guide View -->
+    <!-- Tab 9: Visual User Guide View -->
     <section id="user-guide-view" class="tab-panel hidden animate-fade-in-up"></section>
   </main>
 
@@ -235,21 +243,22 @@
   <div id="global-toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none"></div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/store.js?v=1.4.9"></script>
-  <script src="./js/timetable.js?v=1.4.9"></script>
-  <script src="./js/statistics.js?v=1.4.9"></script>
-  <script src="./js/charts.js?v=1.4.9"></script>
-  <script src="./js/tagManager.js?v=1.4.9"></script>
-  <script src="./js/matrix.js?v=1.4.9"></script>
-  <script src="./js/rosterManager.js?v=1.4.9"></script>
-  <script src="./js/eventsLog.js?v=1.4.9"></script>
-  <script src="./js/studentDossier.js?v=1.4.9"></script>
-  <script src="./js/timetableEditor.js?v=1.4.9"></script>
-  <script src="./js/aiImportExport.js?v=1.4.9"></script>
-  <script src="./js/onboardingTour.js?v=1.4.9"></script>
-  <script src="./js/onboardingWizard.js?v=1.4.9"></script>
-  <script src="./js/userGuide.js?v=1.4.9"></script>
-  <script src="./js/app.js?v=1.4.9"></script>
+  <script src="./js/store.js?v=1.5.0"></script>
+  <script src="./js/timetable.js?v=1.5.0"></script>
+  <script src="./js/statistics.js?v=1.5.0"></script>
+  <script src="./js/charts.js?v=1.5.0"></script>
+  <script src="./js/tagManager.js?v=1.5.0"></script>
+  <script src="./js/matrix.js?v=1.5.0"></script>
+  <script src="./js/rosterManager.js?v=1.5.0"></script>
+  <script src="./js/retroLogView.js?v=1.5.0"></script>
+  <script src="./js/eventsLog.js?v=1.5.0"></script>
+  <script src="./js/studentDossier.js?v=1.5.0"></script>
+  <script src="./js/timetableEditor.js?v=1.5.0"></script>
+  <script src="./js/aiImportExport.js?v=1.5.0"></script>
+  <script src="./js/onboardingTour.js?v=1.5.0"></script>
+  <script src="./js/onboardingWizard.js?v=1.5.0"></script>
+  <script src="./js/userGuide.js?v=1.5.0"></script>
+  <script src="./js/app.js?v=1.5.0"></script>
 
   <!-- Register Service Worker for 100% Offline PWA functionality -->
   <script>

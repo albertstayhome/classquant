@@ -1,10 +1,11 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.9)
- * Zero-Lag, Modal-Safe, 60fps Silky Smooth 11-Step Interactive Guide:
- * 1. Zero Modal Collisions: Guarded all sub-modals so clicking buttons advances smoothly without traps.
- * 2. Zero-Lag 16ms Transitions: Eliminated 600ms setTimeout chains with requestAnimationFrame.
- * 3. Deep 11-Step Practical Guide covering entire workflow.
- * 4. 9999px Box-Shadow dark spotlight (100% dark screen + crystal clear bright hole).
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.0)
+ * 11-Step Master Guided Journey:
+ * 1. Zero Lag: 16ms requestAnimationFrame instant transitions.
+ * 2. Zero Modal Collisions: Guarded sub-modals so clicking buttons advances seamlessly.
+ * 3. Step 3 & 4 Distinction: Clear education on batch paste + individual student/class edits.
+ * 4. Step 9 Promotion: Highlights the new dedicated "⏰ 課堂事後補記" primary tab!
+ * 5. Indestructible 9999px Box-Shadow dark spotlight + Direction-Aware Animated Pointers.
  */
 
 class OnboardingTour {
@@ -46,7 +47,7 @@ class OnboardingTour {
         targetSelector: "#roster-class-select",
         fallbackSelector: "#roster-manager-view",
         title: "4. 學生名冊個別細項調整 (改名/換座號/調班)",
-        content: "在名單下方，您可以<strong>隨時點擊學生卡片修改姓名、調整座號</strong>，或點擊「➕ 新增班級 / 刪除班級」，靈活管理所有任教班級！",
+        content: "在名單下方，您可以<strong>隨時點擊任意學生卡片修改姓名、調整座號</strong>，或點擊「➕ 新增班級 / 刪除班級」，靈活管理所有任教班級！",
         forceAction: null,
         tab: "roster"
       },
@@ -86,13 +87,13 @@ class OnboardingTour {
         tab: "matrix"
       },
       {
-        id: "step-retro-log",
-        targetSelector: "#retro-log-top-btn",
-        fallbackSelector: "button:has(i[data-lucide='clock']), button:contains('事後補記')",
-        title: "9. 課堂事後補記神器 (下課 1 鍵補齊)",
-        content: "上課不方便掏手機？下課回辦公室點擊<strong>「⏰ 事後補記」</strong>，1 秒批次勾選學生補記，並自動生成親師聯絡簿評語！",
+        id: "step-retro-tab",
+        targetSelector: 'button[data-tab="retro"]',
+        fallbackSelector: "button:contains('事後補記')",
+        title: "9. 獨立專區：『⏰ 課堂事後補記』",
+        content: "全新獨立專區！請<strong>點擊「⏰ 課堂事後補記」</strong>，下課回辦公室 1 秒批次勾選學生補記，並自動生成親師聯絡簿評語！",
         forceAction: "click",
-        tab: "matrix"
+        tab: null
       },
       {
         id: "step-dashboard",
