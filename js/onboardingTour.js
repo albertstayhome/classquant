@@ -1,14 +1,11 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.7)
- * Core Architecture:
- * 1. Indestructible 9999px Box-Shadow Dark Spotlight:
- *    Guarantees 100% full-screen 85% dark slate overlay with a crystal-clear focused cutout!
- * 2. 8-Step Complete Precision Anchoring:
- *    - Step 1: Active class switch listener on #global-class-select
- *    - Step 3: Precise focus on #roster-paste-btn
- *    - Step 7: Precise focus on #retro-log-top-btn
- * 3. Direction-Aware Animated Pointer (👆 / 👇) on ALL steps!
- * 4. Absolute TouchMove Scroll Lock (passive: false) preventing all touch scrolling.
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.8)
+ * Complete 11-Step Deep Guidance & Bulletproof Stability:
+ * 1. Disabled header auto-collapse during tour (zero flickering/jumping).
+ * 2. Removed confusing timetable override buttons that pushed dropdown off-screen.
+ * 3. Deep 11-Step walkthrough covering Class Switch, 1-Click Excel Paste, Student Detail Edits, Matrix Scoring, Custom Tags, Retro Log, and 4-Quadrant Analytics.
+ * 4. 9999px Box-Shadow dark spotlight (100% stable 85% dark screen with crystal-clear focus hole).
+ * 5. Direction-aware bouncing pointer (👆 / 👇) on ALL steps!
  */
 
 class OnboardingTour {
@@ -23,33 +20,42 @@ class OnboardingTour {
       {
         id: "step-class-select",
         targetSelector: "#global-class-select",
-        title: "1. 認識班級切換 (請切換班級)",
-        content: "請<strong>點擊上方班級選單切換班級</strong>（例如：803 班），體驗導師與科任班獨立記點！",
+        title: "1. 班級快速切換 (請切換班級)",
+        content: "這裡是核心班級切換樞紐！請<strong>點擊選單切換至另一個班級</strong>（例如 803 班），導師班與數學科任班的分流點數將完全獨立計算！",
         forceAction: "change",
         tab: "matrix"
       },
       {
         id: "step-goto-roster",
         targetSelector: 'button[data-tab="roster"]',
-        title: "2. 前往『班級名單』",
-        content: "請<strong>親手點擊發光的「👥 班級名單」</strong>按鈕進入名單管理！",
+        title: "2. 前往『班級名單』管理中心",
+        content: "請<strong>親手點擊發光的「👥 班級名單」</strong>按鈕進入名單管理中心！",
         forceAction: "click",
         tab: null
       },
       {
-        id: "step-roster-actions",
+        id: "step-roster-paste",
         targetSelector: "#roster-paste-btn",
         fallbackSelector: "#roster-manager-view button",
-        title: "3. 1 秒批次貼上名冊",
-        content: "支援<strong>「1 鍵批次貼上名冊」</strong>！直接從 Excel/Word 複製貼上整班名單，系統自動去除座號贅字！",
+        title: "3. 1 秒批次貼上全班名單 (Excel 智能匯入)",
+        content: "換新學期免手打！點擊<strong>「📋 1秒批次貼上名單」</strong>，直接從 Excel 或 Word 複製貼上整班名單，系統自動去除座號贅字與雜訊！",
+        forceAction: null,
+        tab: "roster"
+      },
+      {
+        id: "step-roster-details",
+        targetSelector: "#roster-class-select",
+        fallbackSelector: "#roster-manager-view",
+        title: "4. 學生名冊個別細項調整 (改名/換座號/調班)",
+        content: "在名單下方，您可以<strong>隨時點擊學生卡片修改姓名、調整座號</strong>，或點擊「➕ 新增班級 / 刪除班級」，靈活管理所有任教班級！",
         forceAction: null,
         tab: "roster"
       },
       {
         id: "step-goto-matrix",
         targetSelector: 'button[data-tab="matrix"]',
-        title: "4. 前往『課堂點記板』實戰",
-        content: "現在請<strong>親手點擊「課堂點記板」</strong>回到座位表，體驗 3 秒極速記點！",
+        title: "5. 前往『課堂點記板』實戰",
+        content: "名單建好後，現在請<strong>點擊「課堂點記板」</strong>回到座位表，體驗 3 秒極速記點！",
         forceAction: "click",
         tab: null
       },
@@ -57,8 +63,8 @@ class OnboardingTour {
         id: "step-select-student",
         targetSelector: "#seat-card-1",
         fallbackSelector: ".student-seat-card:first-child",
-        title: "5. 點選學生座位",
-        content: "請<strong>親手點擊 1 號學生「陳冠宇」</strong>的座位方塊來選取他！",
+        title: "6. 點選學生座位 (支援多選/分組)",
+        content: "請<strong>親手點擊 1 號學生「陳冠宇」</strong>的座位方塊來選取他！（支援多選、整排快選與男女生快選）",
         forceAction: "click",
         tab: "matrix"
       },
@@ -66,25 +72,42 @@ class OnboardingTour {
         id: "step-click-tag",
         targetSelector: "#first-quick-tag-btn",
         fallbackSelector: ".tag-page-slide button:first-child, .quick-tag-button",
-        title: "6. 點擊課堂加分標籤",
-        content: "選好學生後，請<strong>親手點擊座位正下方的第一個加分標籤</strong>為他快速記點！",
+        title: "7. 課堂快速記點與動態回饋",
+        content: "選好學生後，請<strong>親手點擊座位正下方的第一個加分標籤</strong>為他快速記點（觸發彩帶粒子與音效）！",
         forceAction: "click",
+        tab: "matrix"
+      },
+      {
+        id: "step-custom-tags",
+        targetSelector: "button[onclick*='openTagManagerModal'], button:contains('自訂')",
+        fallbackSelector: "#first-quick-tag-btn",
+        title: "8. 自訂班級專屬快速標籤",
+        content: "每個班級上課習慣不同！點擊<strong>「⚙️ 自訂」</strong>可自訂加分/扣分項目、分值與分類，常用標籤會智慧自動排在最前頁！",
+        forceAction: null,
         tab: "matrix"
       },
       {
         id: "step-retro-log",
         targetSelector: "#retro-log-top-btn",
         fallbackSelector: "button:has(i[data-lucide='clock']), button:contains('事後補記')",
-        title: "7. 課堂事後補記神器",
-        content: "上課無法掏手機時，下課回辦公室點擊<strong>「⏰ 事後補記」</strong>，1 秒批次補齊並寫評語！",
+        title: "9. 課堂事後補記神器 (下課 1 鍵補齊)",
+        content: "上課不方便掏手機？下課回辦公室點擊<strong>「⏰ 事後補記」</strong>，1 秒批次勾選學生補記，並自動生成親師聯絡簿評語！",
         forceAction: null,
         tab: "matrix"
       },
       {
+        id: "step-dashboard",
+        targetSelector: 'button[data-tab="dashboard"]',
+        title: "10. 段考學業 ✕ 品格常規四象限戰情室",
+        content: "點擊<strong>「📊 統計戰情室」</strong>，段考後一鍵自動產出「學業均分 ✕ 常規點數」四象限拔尖與關懷清單，親師座談報告神器！",
+        forceAction: null,
+        tab: null
+      },
+      {
         id: "step-finish",
         targetSelector: "#header-version-badge",
-        title: "🎉 恭喜完成實戰教學！",
-        content: "您已親手掌握 ClassQuant 戰情室的核心操作！隨時可點擊頂部<strong>「📢 公佈欄」</strong>查看歷史功能與教學提醒！",
+        title: "🎉 恭喜通關！戰力全面就緒！",
+        content: "您已完整掌握 ClassQuant Hub 的核心操作與進階技巧！隨時可點擊頂部<strong>「📢 公佈欄」</strong>查看更新歷史與教學指南！",
         forceAction: null,
         tab: "matrix"
       }
@@ -114,7 +137,7 @@ class OnboardingTour {
           <div class="flex items-center space-x-2">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
             <span id="tour-step-badge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700">
-              步驟 1 / 8
+              步驟 1 / 11
             </span>
           </div>
           <button onclick="onboardingTour.endTour()" class="text-xs font-bold text-slate-400 hover:text-pink-600 transition" title="結束教學">
@@ -145,7 +168,12 @@ class OnboardingTour {
     this.isActive = true;
     this.currentStep = fromStep;
 
-    // 1. Lock touchmove scroll completely on mobile
+    // 1. Ensure header is expanded and stable
+    if (window.appState) {
+      window.appState.toggleHeader(true, true);
+    }
+
+    // 2. Lock touchmove scroll completely on mobile
     this.touchBlocker = (e) => {
       if (!e.target.closest('#tour-popover') && !e.target.closest('#global-class-select')) {
         e.preventDefault();

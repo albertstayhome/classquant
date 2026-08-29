@@ -61,7 +61,7 @@
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
             <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.4.7</span>
+              <span>v1.4.8</span>
               <span>📢</span>
             </button>
           </div>
@@ -105,11 +105,6 @@
           <span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">主題</span>
         </button>
 
-        <!-- Restore Auto Timetable Button (Hidden when not override) -->
-        <button id="header-override-restore-btn" onclick="appState.restoreTimetableAuto()" 
-          class="hidden px-2.5 py-1 text-xs font-semibold rounded-xl bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200 transition flex items-center gap-1">
-          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 恢復課表
-        </button>
 
         <!-- Class Dropdown -->
         <div class="flex items-center space-x-1 border border-pink-300 rounded-xl px-2 py-1 shadow-inner bg-white">
@@ -240,21 +235,21 @@
   <div id="global-toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none"></div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/store.js?v=1.4.7"></script>
-  <script src="./js/timetable.js?v=1.4.7"></script>
-  <script src="./js/statistics.js?v=1.4.7"></script>
-  <script src="./js/charts.js?v=1.4.7"></script>
-  <script src="./js/tagManager.js?v=1.4.7"></script>
-  <script src="./js/matrix.js?v=1.4.7"></script>
-  <script src="./js/rosterManager.js?v=1.4.7"></script>
-  <script src="./js/eventsLog.js?v=1.4.7"></script>
-  <script src="./js/studentDossier.js?v=1.4.7"></script>
-  <script src="./js/timetableEditor.js?v=1.4.7"></script>
-  <script src="./js/aiImportExport.js?v=1.4.7"></script>
-  <script src="./js/onboardingTour.js?v=1.4.7"></script>
-  <script src="./js/onboardingWizard.js?v=1.4.7"></script>
-  <script src="./js/userGuide.js?v=1.4.7"></script>
-  <script src="./js/app.js?v=1.4.7"></script>
+  <script src="./js/store.js?v=1.4.8"></script>
+  <script src="./js/timetable.js?v=1.4.8"></script>
+  <script src="./js/statistics.js?v=1.4.8"></script>
+  <script src="./js/charts.js?v=1.4.8"></script>
+  <script src="./js/tagManager.js?v=1.4.8"></script>
+  <script src="./js/matrix.js?v=1.4.8"></script>
+  <script src="./js/rosterManager.js?v=1.4.8"></script>
+  <script src="./js/eventsLog.js?v=1.4.8"></script>
+  <script src="./js/studentDossier.js?v=1.4.8"></script>
+  <script src="./js/timetableEditor.js?v=1.4.8"></script>
+  <script src="./js/aiImportExport.js?v=1.4.8"></script>
+  <script src="./js/onboardingTour.js?v=1.4.8"></script>
+  <script src="./js/onboardingWizard.js?v=1.4.8"></script>
+  <script src="./js/userGuide.js?v=1.4.8"></script>
+  <script src="./js/app.js?v=1.4.8"></script>
 
   <!-- Register Service Worker for 100% Offline PWA functionality -->
   <script>

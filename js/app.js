@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.4.7';
+    this.appVersion = '1.4.8';
     this.init();
   }
 
@@ -87,6 +87,9 @@ class AppState {
     let ticking = false;
 
     window.addEventListener('scroll', () => {
+      // If onboarding tour is active, DO NOT AUTO-COLLAPSE HEADER!
+      if (window.onboardingTour && window.onboardingTour.isActive) return;
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
@@ -287,18 +290,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.4.7 -->
+          <!-- v1.4.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.4.7 (最新版本)
+                v1.4.8 (最新版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 修復步驟 3 頂部橫幅反覆收合/展開閃爍問題，教學期間橫幅維持 100% 絕對穩固！</li>
+              <li>• 移除頂部干擾且擠出選單的「恢復課表」黃色按鈕，班級選單全螢幕視野無遮擋。</li>
+              <li>• 升級為超詳細「11 大步驟深度實戰引導」（含 1 秒貼上 Excel 名冊、名冊細項編修、自訂標籤、事後補記、四象限戰情室）。</li>
+            </ul>
+          </div>
+
+          <!-- v1.4.7 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.4.7
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 實裝 9999px Box-Shadow 暗化聚光燈，100% 保證全螢幕深黑 85%、目標 100% 原始透光高亮！</li>
               <li>• 全部 8 個教學步驟全面實裝精準功能目標定位與方位跳動箭頭。</li>
-              <li>• 步驟 1 換班級實裝切換即時感應、步驟 3 精準指引「📋 批次貼上名冊」、步驟 7 精準指引「⏰ 事後補記」。</li>
             </ul>
           </div>
 
@@ -783,11 +800,7 @@ class AppState {
     }
 
     if (overrideBtn) {
-      if (isOverride) {
-        overrideBtn.classList.remove('hidden');
-      } else {
-        overrideBtn.classList.add('hidden');
-      }
+      overrideBtn.classList.add('hidden');
     }
   }
 
