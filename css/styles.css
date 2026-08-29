@@ -169,37 +169,39 @@
   animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* --- 4-Curtain Physical Cutout Spotlight Engine (100% Natural Brightness & Clickability) --- */
-.tour-curtain {
+/* --- Clip-Path Dark Spotlight Backdrop Engine (80% Dark + 100% Clear Cutout Hole) --- */
+#tour-backdrop {
   position: fixed;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82) !important;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 9998;
   pointer-events: auto;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: clip-path 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.tour-spotlight-ring {
+#tour-spotlight-ring {
   position: fixed;
   z-index: 9999;
   pointer-events: none;
   border-radius: 18px;
-  border: 3px solid #f43f5e;
-  box-shadow: 0 0 25px rgba(244, 63, 94, 0.9), inset 0 0 15px rgba(244, 63, 94, 0.3);
-  animation: ringPulse 1.6s ease-in-out infinite;
+  border: 3.5px solid #f43f5e;
+  box-shadow: 0 0 35px rgba(244, 63, 94, 1), 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: ringGlowPulse 1.6s ease-in-out infinite;
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes ringPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(244, 63, 94, 0.85), inset 0 0 10px rgba(244, 63, 94, 0.25); }
-  50% { transform: scale(1.02); box-shadow: 0 0 35px rgba(244, 63, 94, 1), inset 0 0 20px rgba(244, 63, 94, 0.45); }
+@keyframes ringGlowPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(244, 63, 94, 0.95), inset 0 0 10px rgba(244, 63, 94, 0.3); }
+  50% { transform: scale(1.02); box-shadow: 0 0 45px rgba(244, 63, 94, 1), 0 0 15px rgba(255, 255, 255, 0.9), inset 0 0 15px rgba(244, 63, 94, 0.5); }
 }
 
-/* Scroll Lock during Onboarding Tour */
-body.tour-scroll-locked {
+/* Touchmove Scroll Lock during Onboarding Tour */
+html.tour-locked, body.tour-locked {
   overflow: hidden !important;
   touch-action: none !important;
+  overscroll-behavior: none !important;
 }
 
 /* Directional Bouncing Hand Pointer */

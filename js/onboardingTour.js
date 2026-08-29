@@ -1,14 +1,16 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.5)
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.6)
  * Core Architecture:
- * 1. 4-Curtain Physical Cutout (Top, Bottom, Left, Right):
- *    Target is 100% physically open-air — ZERO overlay on top of target!
- *    100% Naturally Bright + 100% Direct Touch Reaction!
- * 2. Direction-Aware Pointer:
- *    - Targets in top half -> Pointer sits BELOW and points UP (👆 請點上方目標)
- *    - Targets in bottom half -> Pointer sits ABOVE and points DOWN (👇 請點下方目標)
- * 3. Safe Viewport Popover with zero off-screen overflow.
- * 4. Programmatic smooth repositioning and strict action enforcement.
+ * 1. Clip-Path Dark Spotlight:
+ *    82% dark backdrop covers entire screen, precisely clipped with a hollow transparent hole over target.
+ *    Target is 100% naturally bright, stands out clearly, and clicks pass directly through to the button!
+ * 2. Absolute TouchMove Scroll Lock (passive: false):
+ *    Completely prevents mobile touch dragging/scrolling, 100% stable viewport!
+ * 3. Direction-Aware Animated Pointer:
+ *    - Targets in top half -> Pointer sits BELOW and points UP (👆 請點上方發光目標)
+ *    - Targets in bottom half -> Pointer sits ABOVE and points DOWN (👇 請點下方發光目標)
+ * 4. Safe Area Pinned Popover:
+ *    Auto-flips to opposite side of screen, 100% inside mobile viewport.
  */
 
 class OnboardingTour {
@@ -17,6 +19,7 @@ class OnboardingTour {
     this.isActive = false;
     this.activeListener = null;
     this.lastTargetEl = null;
+    this.touchBlocker = null;
 
     this.steps = [
       {
@@ -98,14 +101,11 @@ class OnboardingTour {
     container.id = 'tour-overlay-container';
     container.className = 'fixed inset-0 pointer-events-none hidden z-[9990]';
     container.innerHTML = `
-      <!-- 4-Curtain Physical Cutout Masks (Surround target, leaving target 100% uncovered) -->
-      <div id="tour-curtain-top" class="tour-curtain"></div>
-      <div id="tour-curtain-bottom" class="tour-curtain"></div>
-      <div id="tour-curtain-left" class="tour-curtain"></div>
-      <div id="tour-curtain-right" class="tour-curtain"></div>
+      <!-- 82% Dark Fullscreen Backdrop with Dynamic Clip-Path Cutout Hole -->
+      <div id="tour-backdrop"></div>
 
       <!-- Glowing Pink Ring Border around the Cutout Hole -->
-      <div id="tour-spotlight-ring" class="tour-spotlight-ring"></div>
+      <div id="tour-spotlight-ring"></div>
 
       <!-- Direction-Aware Bouncing Hand Pointer -->
       <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden transition-all duration-200"></div>
@@ -149,8 +149,16 @@ class OnboardingTour {
     this.isActive = true;
     this.currentStep = fromStep;
 
-    // Lock page scrolling during tour
-    document.body.classList.add('tour-scroll-locked');
+    // 1. Lock touchmove scroll completely on mobile
+    this.touchBlocker = (e) => {
+      // Allow interaction with buttons inside popover or target, but cancel all native page scrolling!
+      if (!e.target.closest('#tour-popover')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('touchmove', this.touchBlocker, { passive: false });
+    document.documentElement.classList.add('tour-locked');
+    document.body.classList.add('tour-locked');
 
     const container = document.getElementById('tour-overlay-container');
     if (container) container.classList.remove('hidden');
@@ -190,20 +198,17 @@ class OnboardingTour {
         window.scrollTo({ top: targetScrollY, behavior: 'instant' });
       }
 
-      // 2. Position 4-box curtains and direction-aware pointer
+      // 2. Position clip-path dark backdrop and direction-aware pointer
       setTimeout(() => {
         this.highlightElement(targetEl, step);
         this.setupEnforcement(targetEl, step);
-      }, 50);
+      }, 60);
 
     }, 120);
   }
 
   highlightElement(el, step) {
-    const cTop = document.getElementById('tour-curtain-top');
-    const cBottom = document.getElementById('tour-curtain-bottom');
-    const cLeft = document.getElementById('tour-curtain-left');
-    const cRight = document.getElementById('tour-curtain-right');
+    const backdrop = document.getElementById('tour-backdrop');
     const ring = document.getElementById('tour-spotlight-ring');
     const pointer = document.getElementById('tour-pointer-container');
     const popover = document.getElementById('tour-popover');
@@ -212,7 +217,7 @@ class OnboardingTour {
     const badgeEl = document.getElementById('tour-step-badge');
     const actionContainer = document.getElementById('tour-action-container');
 
-    if (!cTop || !popover || !el) return;
+    if (!backdrop || !popover || !el) return;
 
     const rect = el.getBoundingClientRect();
     const pad = 6;
@@ -223,41 +228,41 @@ class OnboardingTour {
     const right = left + width;
     const bottom = top + height;
 
-    // 1. Position 4 Physical Curtains (Leaves target area 100% uncovered in open air!)
-    cTop.style.cssText = `top: 0px; left: 0px; width: 100vw; height: ${top}px;`;
-    cBottom.style.cssText = `top: ${bottom}px; left: 0px; width: 100vw; height: calc(100vh - ${bottom}px);`;
-    cLeft.style.cssText = `top: ${top}px; left: 0px; width: ${left}px; height: ${height}px;`;
-    cRight.style.cssText = `top: ${top}px; left: ${right}px; width: calc(100vw - ${right}px); height: ${height}px;`;
+    // 1. Cutout Hollow Hole in 82% Dark Backdrop using CSS Polygon:
+    backdrop.style.clipPath = `polygon(0% 0%, 0% 100%, ${left}px 100%, ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px 100%, 100% 100%, 100% 0%)`;
 
     // 2. Position Glowing Ring Border
-    ring.style.cssText = `top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px;`;
+    ring.style.top = `${top}px`;
+    ring.style.left = `${left}px`;
+    ring.style.width = `${width}px`;
+    ring.style.height = `${height}px`;
 
     // 3. Direction-Aware Animated Pointer Logic:
     const isTargetInTopHalf = (rect.top + (rect.height / 2)) < (window.innerHeight / 2);
 
     if (pointer && step.forceAction === 'click') {
       pointer.classList.remove('hidden');
-      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 120, left + (width / 2) - 50));
+      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 140, left + (width / 2) - 60));
 
       if (isTargetInTopHalf) {
-        // Target is in top half -> Pointer is BELOW target and points UP (👆)
+        // Target in top half -> Pointer sits BELOW and points UP (👆)
         pointer.style.top = `${bottom + 8}px`;
         pointer.style.left = `${pointerCenterX}px`;
         pointer.className = 'tour-pointer-up fixed z-[10000] pointer-events-none flex flex-col items-center';
         pointer.innerHTML = `
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
-          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
-            請點上方目標
+          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
+            請點上方發光目標
           </span>
         `;
       } else {
-        // Target is in bottom half -> Pointer is ABOVE target and points DOWN (👇)
+        // Target in bottom half -> Pointer sits ABOVE and points DOWN (👇)
         pointer.style.top = `${Math.max(10, top - 68)}px`;
         pointer.style.left = `${pointerCenterX}px`;
         pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center';
         pointer.innerHTML = `
-          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
-            請點下方目標
+          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
+            請點下方發光目標
           </span>
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👇</span>
         `;
@@ -339,8 +344,13 @@ class OnboardingTour {
   endTour() {
     this.isActive = false;
 
-    // Restore page scroll
-    document.body.classList.remove('tour-scroll-locked');
+    // 1. Remove touchmove scroll lock
+    if (this.touchBlocker) {
+      document.removeEventListener('touchmove', this.touchBlocker, { passive: false });
+      this.touchBlocker = null;
+    }
+    document.documentElement.classList.remove('tour-locked');
+    document.body.classList.remove('tour-locked');
 
     if (this.activeListener && this.lastTargetEl) {
       this.lastTargetEl.removeEventListener('click', this.activeListener);
