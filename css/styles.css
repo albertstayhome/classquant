@@ -169,6 +169,20 @@
   animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+/* Spotlight Focus Pulse for Dynamic Interactive Tour */
+@keyframes spotlightGlow {
+  0%, 100% { 
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 63, 94, 0.9);
+  }
+  50% { 
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 35px rgba(244, 63, 94, 1);
+  }
+}
+
+#tour-spotlight {
+  animation: spotlightGlow 1.8s ease-in-out infinite;
+}
+
 /* Hide scrollbar for clean UI */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
