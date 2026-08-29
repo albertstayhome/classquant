@@ -169,18 +169,31 @@
   animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* --- Real Target Elevation & Glow during Onboarding Tour --- */
-.tour-active-target {
-  position: relative !important;
-  z-index: 10002 !important;
-  pointer-events: auto !important;
-  box-shadow: 0 0 0 4px #f43f5e, 0 0 30px rgba(244, 63, 94, 0.95) !important;
-  animation: targetElevatedPulse 1.5s ease-in-out infinite !important;
+/* --- 4-Curtain Physical Cutout Spotlight Engine (100% Natural Brightness & Clickability) --- */
+.tour-curtain {
+  position: fixed;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  z-index: 9998;
+  pointer-events: auto;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes targetElevatedPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px #f43f5e, 0 0 22px rgba(244, 63, 94, 0.85); }
-  50% { transform: scale(1.03); box-shadow: 0 0 0 5px #f43f5e, 0 0 38px rgba(244, 63, 94, 1); }
+.tour-spotlight-ring {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 18px;
+  border: 3px solid #f43f5e;
+  box-shadow: 0 0 25px rgba(244, 63, 94, 0.9), inset 0 0 15px rgba(244, 63, 94, 0.3);
+  animation: ringPulse 1.6s ease-in-out infinite;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(244, 63, 94, 0.85), inset 0 0 10px rgba(244, 63, 94, 0.25); }
+  50% { transform: scale(1.02); box-shadow: 0 0 35px rgba(244, 63, 94, 1), inset 0 0 20px rgba(244, 63, 94, 0.45); }
 }
 
 /* Scroll Lock during Onboarding Tour */
@@ -189,14 +202,23 @@ body.tour-scroll-locked {
   touch-action: none !important;
 }
 
-/* Floating Bouncing Finger Pointer attached to Target Element */
-@keyframes bounceHandPointer {
+/* Directional Bouncing Hand Pointer */
+@keyframes bouncePointingUp {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-12px) scale(1.15); }
+  50% { transform: translateY(-10px) scale(1.12); }
 }
 
-.tour-target-hand {
-  animation: bounceHandPointer 1s ease-in-out infinite;
+@keyframes bouncePointingDown {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(10px) scale(1.12); }
+}
+
+.tour-pointer-up {
+  animation: bouncePointingUp 1s ease-in-out infinite;
+}
+
+.tour-pointer-down {
+  animation: bouncePointingDown 1s ease-in-out infinite;
 }
 
 /* Hide scrollbar for clean UI */

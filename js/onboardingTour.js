@@ -1,13 +1,14 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.4)
- * Features:
- * 1. Target Element True Elevation (.tour-active-target with z-index: 10002):
- *    Target floats ABOVE dark backdrop, 100% brightly lit, 100% directly touchable!
- * 2. Scroll Lock (body.tour-scroll-locked):
- *    Locks manual page scrolling during tour, auto-smoothly positions targets programmatically.
- * 3. Viewport-Safe Popover:
- *    Auto-flips TOP/BOTTOM and respects safe-area-inset, guaranteed 100% inside all mobile screens.
- * 4. Animated Bouncing Finger Pointer (👆 請點這裡！) floating on target.
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.5)
+ * Core Architecture:
+ * 1. 4-Curtain Physical Cutout (Top, Bottom, Left, Right):
+ *    Target is 100% physically open-air — ZERO overlay on top of target!
+ *    100% Naturally Bright + 100% Direct Touch Reaction!
+ * 2. Direction-Aware Pointer:
+ *    - Targets in top half -> Pointer sits BELOW and points UP (👆 請點上方目標)
+ *    - Targets in bottom half -> Pointer sits ABOVE and points DOWN (👇 請點下方目標)
+ * 3. Safe Viewport Popover with zero off-screen overflow.
+ * 4. Programmatic smooth repositioning and strict action enforcement.
  */
 
 class OnboardingTour {
@@ -30,7 +31,7 @@ class OnboardingTour {
         id: "step-goto-roster",
         targetSelector: 'button[data-tab="roster"]',
         title: "2. 前往『班級名單』",
-        content: "請<strong>親手點擊上方發光的「👥 班級名單」</strong>按鈕進入名單管理！",
+        content: "請<strong>親手點擊發光的「👥 班級名單」</strong>按鈕進入名單管理！",
         forceAction: "click",
         tab: null
       },
@@ -95,21 +96,22 @@ class OnboardingTour {
 
     const container = document.createElement('div');
     container.id = 'tour-overlay-container';
-    container.className = 'fixed inset-0 z-[9999] pointer-events-none hidden';
+    container.className = 'fixed inset-0 pointer-events-none hidden z-[9990]';
     container.innerHTML = `
-      <!-- Dark Backdrop (Blocks background clicks, but elevated target sits on top) -->
-      <div id="tour-backdrop" class="fixed inset-0 bg-black/65 backdrop-blur-[1.5px] transition-all duration-300 pointer-events-auto"></div>
+      <!-- 4-Curtain Physical Cutout Masks (Surround target, leaving target 100% uncovered) -->
+      <div id="tour-curtain-top" class="tour-curtain"></div>
+      <div id="tour-curtain-bottom" class="tour-curtain"></div>
+      <div id="tour-curtain-left" class="tour-curtain"></div>
+      <div id="tour-curtain-right" class="tour-curtain"></div>
 
-      <!-- Floating Bouncing Hand Pointer -->
-      <div id="tour-hand-pointer" class="tour-target-hand fixed pointer-events-none z-[10003] flex flex-col items-center transition-all duration-150 hidden">
-        <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
-        <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
-          請點這裡！
-        </span>
-      </div>
+      <!-- Glowing Pink Ring Border around the Cutout Hole -->
+      <div id="tour-spotlight-ring" class="tour-spotlight-ring"></div>
+
+      <!-- Direction-Aware Bouncing Hand Pointer -->
+      <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden transition-all duration-200"></div>
 
       <!-- Viewport-Safe Popover Guidance Card -->
-      <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 w-auto sm:w-[360px] max-w-[94vw] bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300 z-[10004] animate-fade-in-up">
+      <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 w-auto sm:w-[360px] max-w-[94vw] bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300 z-[10001] animate-fade-in-up">
         
         <!-- Header -->
         <div class="flex items-center justify-between pb-2 mb-2 border-b border-pink-100">
@@ -170,14 +172,6 @@ class OnboardingTour {
       window.appState.switchTab(step.tab);
     }
 
-    // Clean up previous elevated target
-    if (this.lastTargetEl) {
-      this.lastTargetEl.classList.remove('tour-active-target');
-      if (this.activeListener) {
-        this.lastTargetEl.removeEventListener('click', this.activeListener);
-      }
-    }
-
     // Allow DOM to settle
     setTimeout(() => {
       let targetEl = document.querySelector(step.targetSelector);
@@ -196,7 +190,7 @@ class OnboardingTour {
         window.scrollTo({ top: targetScrollY, behavior: 'instant' });
       }
 
-      // 2. Elevate target above backdrop and position UI
+      // 2. Position 4-box curtains and direction-aware pointer
       setTimeout(() => {
         this.highlightElement(targetEl, step);
         this.setupEnforcement(targetEl, step);
@@ -206,51 +200,87 @@ class OnboardingTour {
   }
 
   highlightElement(el, step) {
+    const cTop = document.getElementById('tour-curtain-top');
+    const cBottom = document.getElementById('tour-curtain-bottom');
+    const cLeft = document.getElementById('tour-curtain-left');
+    const cRight = document.getElementById('tour-curtain-right');
+    const ring = document.getElementById('tour-spotlight-ring');
+    const pointer = document.getElementById('tour-pointer-container');
     const popover = document.getElementById('tour-popover');
-    const handPointer = document.getElementById('tour-hand-pointer');
     const titleEl = document.getElementById('tour-title');
     const contentEl = document.getElementById('tour-content');
     const badgeEl = document.getElementById('tour-step-badge');
     const actionContainer = document.getElementById('tour-action-container');
 
-    if (!popover || !el) return;
-
-    // ELEVATE TARGET ELEMENT:
-    // Add .tour-active-target so it sits at z-index: 10002 above dark backdrop!
-    // 100% Bright, 100% Touchable!
-    if (el !== document.body) {
-      el.classList.add('tour-active-target');
-      this.lastTargetEl = el;
-    }
+    if (!cTop || !popover || !el) return;
 
     const rect = el.getBoundingClientRect();
+    const pad = 6;
+    const top = Math.max(0, rect.top - pad);
+    const left = Math.max(0, rect.left - pad);
+    const width = Math.min(window.innerWidth - left, rect.width + pad * 2);
+    const height = rect.height + pad * 2;
+    const right = left + width;
+    const bottom = top + height;
 
-    // Attach bouncing hand pointer directly above the elevated target
-    if (handPointer && step.forceAction === 'click') {
-      handPointer.classList.remove('hidden');
-      handPointer.style.top = `${Math.max(8, rect.top - 62)}px`;
-      handPointer.style.left = `${rect.left + (rect.width / 2) - 30}px`;
-    } else if (handPointer) {
-      handPointer.classList.add('hidden');
+    // 1. Position 4 Physical Curtains (Leaves target area 100% uncovered in open air!)
+    cTop.style.cssText = `top: 0px; left: 0px; width: 100vw; height: ${top}px;`;
+    cBottom.style.cssText = `top: ${bottom}px; left: 0px; width: 100vw; height: calc(100vh - ${bottom}px);`;
+    cLeft.style.cssText = `top: ${top}px; left: 0px; width: ${left}px; height: ${height}px;`;
+    cRight.style.cssText = `top: ${top}px; left: ${right}px; width: calc(100vw - ${right}px); height: ${height}px;`;
+
+    // 2. Position Glowing Ring Border
+    ring.style.cssText = `top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px;`;
+
+    // 3. Direction-Aware Animated Pointer Logic:
+    const isTargetInTopHalf = (rect.top + (rect.height / 2)) < (window.innerHeight / 2);
+
+    if (pointer && step.forceAction === 'click') {
+      pointer.classList.remove('hidden');
+      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 120, left + (width / 2) - 50));
+
+      if (isTargetInTopHalf) {
+        // Target is in top half -> Pointer is BELOW target and points UP (👆)
+        pointer.style.top = `${bottom + 8}px`;
+        pointer.style.left = `${pointerCenterX}px`;
+        pointer.className = 'tour-pointer-up fixed z-[10000] pointer-events-none flex flex-col items-center';
+        pointer.innerHTML = `
+          <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
+          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
+            請點上方目標
+          </span>
+        `;
+      } else {
+        // Target is in bottom half -> Pointer is ABOVE target and points DOWN (👇)
+        pointer.style.top = `${Math.max(10, top - 68)}px`;
+        pointer.style.left = `${pointerCenterX}px`;
+        pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center';
+        pointer.innerHTML = `
+          <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
+            請點下方目標
+          </span>
+          <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👇</span>
+        `;
+      }
+    } else if (pointer) {
+      pointer.classList.add('hidden');
     }
 
-    // Text content
+    // 4. Viewport Safe Popover Positioning:
+    if (isTargetInTopHalf) {
+      // Popover stays safely at BOTTOM
+      popover.style.top = 'auto';
+      popover.style.bottom = 'max(14px, env(safe-area-inset-bottom, 14px))';
+    } else {
+      // Popover stays safely at TOP
+      popover.style.bottom = 'auto';
+      popover.style.top = 'max(14px, env(safe-area-inset-top, 14px))';
+    }
+
+    // 5. Populate Text Content:
     badgeEl.innerText = `步驟 ${this.currentStep + 1} / ${this.steps.length}`;
     titleEl.innerHTML = step.title;
     contentEl.innerHTML = step.content;
-
-    // VIEWPORT-SAFE POSITIONING:
-    // If target center is in bottom half of screen -> Pin card to TOP
-    // If target center is in top half of screen -> Pin card to BOTTOM
-    const isTargetInBottomHalf = (rect.top + (rect.height / 2)) > (window.innerHeight / 2);
-
-    if (isTargetInBottomHalf) {
-      popover.style.top = 'max(14px, env(safe-area-inset-top, 14px))';
-      popover.style.bottom = 'auto';
-    } else {
-      popover.style.bottom = 'max(14px, env(safe-area-inset-bottom, 14px))';
-      popover.style.top = 'auto';
-    }
 
     // Action button area
     if (step.forceAction === 'click') {
@@ -278,6 +308,10 @@ class OnboardingTour {
   }
 
   setupEnforcement(targetEl, step) {
+    if (this.activeListener && this.lastTargetEl) {
+      this.lastTargetEl.removeEventListener('click', this.activeListener);
+    }
+
     if (step.forceAction === 'click') {
       const listener = (e) => {
         if (window.appState?.playPop) window.appState.playPop();
@@ -286,6 +320,7 @@ class OnboardingTour {
 
       targetEl.addEventListener('click', listener, { once: true });
       this.activeListener = listener;
+      this.lastTargetEl = targetEl;
     }
   }
 
@@ -307,17 +342,13 @@ class OnboardingTour {
     // Restore page scroll
     document.body.classList.remove('tour-scroll-locked');
 
-    // Clean up elevated target
-    if (this.lastTargetEl) {
-      this.lastTargetEl.classList.remove('tour-active-target');
-      if (this.activeListener) {
-        this.lastTargetEl.removeEventListener('click', this.activeListener);
-      }
+    if (this.activeListener && this.lastTargetEl) {
+      this.lastTargetEl.removeEventListener('click', this.activeListener);
       this.lastTargetEl = null;
     }
 
-    const handPointer = document.getElementById('tour-hand-pointer');
-    if (handPointer) handPointer.classList.add('hidden');
+    const pointer = document.getElementById('tour-pointer-container');
+    if (pointer) pointer.classList.add('hidden');
 
     const container = document.getElementById('tour-overlay-container');
     if (container) container.classList.add('hidden');
