@@ -217,10 +217,20 @@ class AppState {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  dismissReleaseNotes(version) {
+  async dismissReleaseNotes(version) {
     localStorage.setItem('classquant_last_seen_version', version);
     this.closeModal();
     this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
+    // If the currently loaded DOM does not have the latest elements, clear cache and hard reload
+    if (this.appVersion !== version || !document.getElementById('onboarding-guide-btn')) {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (let k of keys) {
+          await caches.delete(k);
+        }
+      }
+      setTimeout(() => location.reload(true), 300);
+    }
   }
 
   // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
