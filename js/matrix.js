@@ -469,6 +469,10 @@ class ClassroomMatrix {
 
   // --- Post-Class Retro-Logging & Recall Assistant (⏰ 課堂事後快速補記助手) ---
   openRetroLogModal(classId) {
+    if (window.onboardingTour && window.onboardingTour.isActive) {
+      window.onboardingTour.nextStep();
+      return;
+    }
     const students = this.store.getStudents(classId);
     const tags = this.store.getTagsSortedByClassFrequency(classId);
     const modal = document.getElementById('global-modal');

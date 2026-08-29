@@ -113,6 +113,10 @@ class RosterManager {
 
   // --- 1-Click Batch Paste Modal ---
   openBatchPasteModal(classId) {
+    if (window.onboardingTour && window.onboardingTour.isActive) {
+      window.onboardingTour.nextStep();
+      return;
+    }
     const cls = this.store.getClass(classId);
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
