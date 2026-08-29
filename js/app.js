@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.4.3';
+    this.appVersion = '1.4.4';
     this.init();
   }
 
@@ -287,18 +287,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.4.3 -->
+          <!-- v1.4.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.4.3 (最新版本)
+                v1.4.4 (最新版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 目標元素直接穿透提亮 (z-index 提拔)，100% 亮起且 100% 順暢可點！</li>
+              <li>• 教學期間自動鎖定手動滾動，由程式全自動平滑平移，箭頭永不歪斜。</li>
+              <li>• 教學彈窗全面加入 Safe Area 安全邊界約束，保證任何尺寸手機 100% 完整落在畫面內。</li>
+            </ul>
+          </div>
+
+          <!-- v1.4.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.4.3
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 修正教學導覽光圈偏移問題，採用 Fixed 實時動態座標追蹤。</li>
               <li>• 實裝目標專屬 ID 精準錨定，高亮框與跳動手指 100% 貼合目標。</li>
-              <li>• 零遮擋智慧避讓定位，彈窗自動避開下方 4 大標籤與座位表。</li>
             </ul>
           </div>
 

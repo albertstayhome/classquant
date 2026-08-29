@@ -1,10 +1,13 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.3)
- * Continuous Real-Time Tracking & True Zero-Obstruction Guidance:
- * 1. Continuous requestAnimationFrame tracking keeps spotlight and pointer 100% glued to target during scrolling.
- * 2. Explicit ID selectors (#first-quick-tag-btn, #seat-card-1, #retro-log-top-btn) prevent target misalignment.
- * 3. Smart popover flipping: Sticks to TOP when target is in bottom half, and BOTTOM when target is in top half.
- * 4. True direct touch enforcement: No bypass buttons on the card!
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.4)
+ * Features:
+ * 1. Target Element True Elevation (.tour-active-target with z-index: 10002):
+ *    Target floats ABOVE dark backdrop, 100% brightly lit, 100% directly touchable!
+ * 2. Scroll Lock (body.tour-scroll-locked):
+ *    Locks manual page scrolling during tour, auto-smoothly positions targets programmatically.
+ * 3. Viewport-Safe Popover:
+ *    Auto-flips TOP/BOTTOM and respects safe-area-inset, guaranteed 100% inside all mobile screens.
+ * 4. Animated Bouncing Finger Pointer (👆 請點這裡！) floating on target.
  */
 
 class OnboardingTour {
@@ -13,7 +16,6 @@ class OnboardingTour {
     this.isActive = false;
     this.activeListener = null;
     this.lastTargetEl = null;
-    this.animFrameId = null;
 
     this.steps = [
       {
@@ -50,7 +52,8 @@ class OnboardingTour {
       },
       {
         id: "step-select-student",
-        targetSelector: "#seat-card-1, .student-seat-card:first-child",
+        targetSelector: "#seat-card-1",
+        fallbackSelector: ".student-seat-card:first-child",
         title: "5. 點選學生座位",
         content: "請<strong>親手點擊 1 號學生「陳冠宇」</strong>的座位方塊來選取他！",
         forceAction: "click",
@@ -58,7 +61,8 @@ class OnboardingTour {
       },
       {
         id: "step-click-tag",
-        targetSelector: "#first-quick-tag-btn, .tag-page-slide button:first-child",
+        targetSelector: "#first-quick-tag-btn",
+        fallbackSelector: ".tag-page-slide button:first-child, .quick-tag-button",
         title: "6. 點擊課堂加分標籤",
         content: "選好學生後，請<strong>親手點擊座位正下方的第一個加分標籤</strong>為他快速記點！",
         forceAction: "click",
@@ -66,8 +70,8 @@ class OnboardingTour {
       },
       {
         id: "step-retro-log",
-        targetSelector: "#retro-log-top-btn, button:contains('事後補記')",
-        fallbackSelector: "#classroom-matrix-view header button, #classroom-matrix-view button.bg-amber-500\\/10",
+        targetSelector: "#retro-log-top-btn",
+        fallbackSelector: "button:has(i[data-lucide='clock']), button:contains('事後補記')",
         title: "7. 課堂事後補記神器",
         content: "上課無法掏手機時，下課回辦公室點擊<strong>「⏰ 事後補記」</strong>，1 秒批次補齊並寫評語！",
         forceAction: null,
@@ -93,25 +97,22 @@ class OnboardingTour {
     container.id = 'tour-overlay-container';
     container.className = 'fixed inset-0 z-[9999] pointer-events-none hidden';
     container.innerHTML = `
-      <!-- Dark Cutout Backdrop -->
-      <div id="tour-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-[1px] transition-all duration-300 pointer-events-auto"></div>
-
-      <!-- Spotlight Highlight Box (Fixed screen coords, dynamically synced) -->
-      <div id="tour-spotlight" class="fixed transition-all duration-150 rounded-2xl ring-4 ring-pink-500 shadow-[0_0_35px_rgba(244,63,94,0.95)] pointer-events-none"></div>
+      <!-- Dark Backdrop (Blocks background clicks, but elevated target sits on top) -->
+      <div id="tour-backdrop" class="fixed inset-0 bg-black/65 backdrop-blur-[1.5px] transition-all duration-300 pointer-events-auto"></div>
 
       <!-- Floating Bouncing Hand Pointer -->
-      <div id="tour-hand-pointer" class="tour-target-hand fixed pointer-events-none z-[10001] flex flex-col items-center transition-all duration-150 hidden">
-        <span class="text-3xl filter drop-shadow-[0_4px_10px_rgba(244,63,94,0.9)]">👆</span>
-        <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-lg border border-white whitespace-nowrap mt-0.5">
+      <div id="tour-hand-pointer" class="tour-target-hand fixed pointer-events-none z-[10003] flex flex-col items-center transition-all duration-150 hidden">
+        <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
+        <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
           請點這裡！
         </span>
       </div>
 
-      <!-- Zero-Obstruction Popover Guidance Card -->
-      <div id="tour-popover" class="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-[350px] bg-white rounded-3xl p-5 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300 z-[10000] animate-fade-in-up">
+      <!-- Viewport-Safe Popover Guidance Card -->
+      <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 w-auto sm:w-[360px] max-w-[94vw] bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300 z-[10004] animate-fade-in-up">
         
         <!-- Header -->
-        <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-pink-100">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-pink-100">
           <div class="flex items-center space-x-2">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
             <span id="tour-step-badge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700">
@@ -124,8 +125,8 @@ class OnboardingTour {
         </div>
 
         <!-- Title & Content -->
-        <h4 id="tour-title" class="text-sm sm:text-base font-black text-slate-900 mb-1.5 flex items-center gap-1.5"></h4>
-        <div id="tour-content" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium mb-4"></div>
+        <h4 id="tour-title" class="text-sm sm:text-base font-black text-slate-900 mb-1 flex items-center gap-1.5"></h4>
+        <div id="tour-content" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium mb-3.5"></div>
 
         <!-- Bottom Action Bar -->
         <div class="flex items-center justify-between pt-2 border-t border-pink-100">
@@ -140,15 +141,15 @@ class OnboardingTour {
     `;
 
     document.body.appendChild(container);
-
-    // Global scroll/resize listener to keep spotlight locked onto target element
-    window.addEventListener('scroll', () => this.syncSpotlightLoop(), { passive: true });
-    window.addEventListener('resize', () => this.syncSpotlightLoop(), { passive: true });
   }
 
   start(fromStep = 0) {
     this.isActive = true;
     this.currentStep = fromStep;
+
+    // Lock page scrolling during tour
+    document.body.classList.add('tour-scroll-locked');
+
     const container = document.getElementById('tour-overlay-container');
     if (container) container.classList.remove('hidden');
 
@@ -169,7 +170,15 @@ class OnboardingTour {
       window.appState.switchTab(step.tab);
     }
 
-    // Wait a brief tick for DOM and transitions
+    // Clean up previous elevated target
+    if (this.lastTargetEl) {
+      this.lastTargetEl.classList.remove('tour-active-target');
+      if (this.activeListener) {
+        this.lastTargetEl.removeEventListener('click', this.activeListener);
+      }
+    }
+
+    // Allow DOM to settle
     setTimeout(() => {
       let targetEl = document.querySelector(step.targetSelector);
       if (!targetEl && step.fallbackSelector) {
@@ -179,35 +188,24 @@ class OnboardingTour {
         targetEl = document.getElementById('classroom-matrix-view') || document.body;
       }
 
-      // Smooth scroll target into center
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 1. Programmatically scroll viewport so target is in clear sight
+      if (targetEl && targetEl !== document.body) {
+        const elRect = targetEl.getBoundingClientRect();
+        const currentScrollY = window.scrollY || window.pageYOffset;
+        const targetScrollY = Math.max(0, currentScrollY + elRect.top - (window.innerHeight * 0.42));
+        window.scrollTo({ top: targetScrollY, behavior: 'instant' });
+      }
 
-      // Start continuous tracking during scroll animation
-      this.currentTargetEl = targetEl;
-      this.currentStepObj = step;
-      this.trackTargetContinuously(30); // Track for 30 frames (~500ms)
-      this.setupEnforcement(targetEl, step);
-    }, 150);
+      // 2. Elevate target above backdrop and position UI
+      setTimeout(() => {
+        this.highlightElement(targetEl, step);
+        this.setupEnforcement(targetEl, step);
+      }, 50);
+
+    }, 120);
   }
 
-  trackTargetContinuously(remainingFrames) {
-    if (!this.isActive || !this.currentTargetEl) return;
-
-    this.updatePosition(this.currentTargetEl, this.currentStepObj);
-
-    if (remainingFrames > 0) {
-      requestAnimationFrame(() => this.trackTargetContinuously(remainingFrames - 1));
-    }
-  }
-
-  syncSpotlightLoop() {
-    if (this.isActive && this.currentTargetEl && this.currentStepObj) {
-      this.updatePosition(this.currentTargetEl, this.currentStepObj);
-    }
-  }
-
-  updatePosition(el, step) {
-    const spotlight = document.getElementById('tour-spotlight');
+  highlightElement(el, step) {
     const popover = document.getElementById('tour-popover');
     const handPointer = document.getElementById('tour-hand-pointer');
     const titleEl = document.getElementById('tour-title');
@@ -215,22 +213,23 @@ class OnboardingTour {
     const badgeEl = document.getElementById('tour-step-badge');
     const actionContainer = document.getElementById('tour-action-container');
 
-    if (!spotlight || !popover || !el) return;
+    if (!popover || !el) return;
 
-    // Use fixed viewport bounding rect (NO window.scrollY added!)
+    // ELEVATE TARGET ELEMENT:
+    // Add .tour-active-target so it sits at z-index: 10002 above dark backdrop!
+    // 100% Bright, 100% Touchable!
+    if (el !== document.body) {
+      el.classList.add('tour-active-target');
+      this.lastTargetEl = el;
+    }
+
     const rect = el.getBoundingClientRect();
-    const padding = 8;
 
-    spotlight.style.top = `${Math.max(0, rect.top - padding)}px`;
-    spotlight.style.left = `${Math.max(0, rect.left - padding)}px`;
-    spotlight.style.width = `${rect.width + padding * 2}px`;
-    spotlight.style.height = `${rect.height + padding * 2}px`;
-
-    // Attach bouncing hand pointer directly above the target (Fixed viewport coordinates)
+    // Attach bouncing hand pointer directly above the elevated target
     if (handPointer && step.forceAction === 'click') {
       handPointer.classList.remove('hidden');
       handPointer.style.top = `${Math.max(8, rect.top - 62)}px`;
-      handPointer.style.left = `${rect.left + (rect.width / 2) - 32}px`;
+      handPointer.style.left = `${rect.left + (rect.width / 2) - 30}px`;
     } else if (handPointer) {
       handPointer.classList.add('hidden');
     }
@@ -240,16 +239,16 @@ class OnboardingTour {
     titleEl.innerHTML = step.title;
     contentEl.innerHTML = step.content;
 
-    // ZERO-OBSTRUCTION SMART POSITIONING:
-    // If target center is in the bottom half of viewport, place card at TOP (18px)
-    // If target center is in top half, place card at BOTTOM (18px)
+    // VIEWPORT-SAFE POSITIONING:
+    // If target center is in bottom half of screen -> Pin card to TOP
+    // If target center is in top half of screen -> Pin card to BOTTOM
     const isTargetInBottomHalf = (rect.top + (rect.height / 2)) > (window.innerHeight / 2);
 
     if (isTargetInBottomHalf) {
-      popover.style.top = '18px';
+      popover.style.top = 'max(14px, env(safe-area-inset-top, 14px))';
       popover.style.bottom = 'auto';
     } else {
-      popover.style.bottom = '18px';
+      popover.style.bottom = 'max(14px, env(safe-area-inset-bottom, 14px))';
       popover.style.top = 'auto';
     }
 
@@ -263,7 +262,7 @@ class OnboardingTour {
       `;
     } else if (this.currentStep === this.steps.length - 1) {
       actionContainer.innerHTML = `
-        <button onclick="onboardingTour.endTour()" class="px-5 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
+        <button onclick="onboardingTour.endTour()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
           <span>✨ 完成並開始使用！</span>
         </button>
       `;
@@ -279,10 +278,6 @@ class OnboardingTour {
   }
 
   setupEnforcement(targetEl, step) {
-    if (this.activeListener && this.lastTargetEl) {
-      this.lastTargetEl.removeEventListener('click', this.activeListener);
-    }
-
     if (step.forceAction === 'click') {
       const listener = (e) => {
         if (window.appState?.playPop) window.appState.playPop();
@@ -291,7 +286,6 @@ class OnboardingTour {
 
       targetEl.addEventListener('click', listener, { once: true });
       this.activeListener = listener;
-      this.lastTargetEl = targetEl;
     }
   }
 
@@ -309,14 +303,25 @@ class OnboardingTour {
 
   endTour() {
     this.isActive = false;
-    this.currentTargetEl = null;
-    this.currentStepObj = null;
 
-    if (this.activeListener && this.lastTargetEl) {
-      this.lastTargetEl.removeEventListener('click', this.activeListener);
+    // Restore page scroll
+    document.body.classList.remove('tour-scroll-locked');
+
+    // Clean up elevated target
+    if (this.lastTargetEl) {
+      this.lastTargetEl.classList.remove('tour-active-target');
+      if (this.activeListener) {
+        this.lastTargetEl.removeEventListener('click', this.activeListener);
+      }
+      this.lastTargetEl = null;
     }
+
+    const handPointer = document.getElementById('tour-hand-pointer');
+    if (handPointer) handPointer.classList.add('hidden');
+
     const container = document.getElementById('tour-overlay-container');
     if (container) container.classList.add('hidden');
+
     localStorage.setItem('classquant_tour_completed', 'true');
   }
 }

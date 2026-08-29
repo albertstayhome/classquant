@@ -169,24 +169,30 @@
   animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* Spotlight Focus Pulse for Dynamic Interactive Tour */
-@keyframes spotlightGlow {
-  0%, 100% { 
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 25px rgba(244, 63, 94, 0.95);
-  }
-  50% { 
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.78), 0 0 45px rgba(244, 63, 94, 1);
-  }
+/* --- Real Target Elevation & Glow during Onboarding Tour --- */
+.tour-active-target {
+  position: relative !important;
+  z-index: 10002 !important;
+  pointer-events: auto !important;
+  box-shadow: 0 0 0 4px #f43f5e, 0 0 30px rgba(244, 63, 94, 0.95) !important;
+  animation: targetElevatedPulse 1.5s ease-in-out infinite !important;
 }
 
-#tour-spotlight {
-  animation: spotlightGlow 1.8s ease-in-out infinite;
+@keyframes targetElevatedPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px #f43f5e, 0 0 22px rgba(244, 63, 94, 0.85); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 5px #f43f5e, 0 0 38px rgba(244, 63, 94, 1); }
+}
+
+/* Scroll Lock during Onboarding Tour */
+body.tour-scroll-locked {
+  overflow: hidden !important;
+  touch-action: none !important;
 }
 
 /* Floating Bouncing Finger Pointer attached to Target Element */
 @keyframes bounceHandPointer {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-12px) scale(1.12); }
+  50% { transform: translateY(-12px) scale(1.15); }
 }
 
 .tour-target-hand {
