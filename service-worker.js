@@ -1,12 +1,13 @@
 /**
- * Service Worker for 100% Offline PWA functionality (ClassQuant Hub v3)
+ * Service Worker for 100% Offline PWA functionality (ClassQuant Hub v5)
  */
 
-const CACHE_NAME = 'classquant-hub-v4';
+const CACHE_NAME = 'classquant-hub-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './version.json',
   './css/styles.css',
   './css/kitty-theme.css',
   './css/sanrio-characters.css',
@@ -21,7 +22,6 @@ const ASSETS_TO_CACHE = [
   './js/studentDossier.js',
   './js/timetableEditor.js',
   './js/aiImportExport.js',
-  './js/nasSync.js',
   './js/userGuide.js',
   './js/app.js',
   './assets/images/twin_stars.png',

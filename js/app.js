@@ -1,7 +1,7 @@
 /**
- * ClassQuant Hub - Main App Controller
- * Theme Switcher, Native Web Audio Chime Engine, Header Collapsing, PWA Support, Tab Router,
- * and Live Over-The-Air (OTA) Remote Push Update Engine.
+ * ClassQuant Hub - Main App Controller v1.3.0
+ * Theme Switcher, Native Web Audio Chime Engine, Smart Auto-Collapsing Header on Scroll,
+ * Delightful Micro-Animations, Tab Router, and In-App Live Over-The-Air (OTA) Remote Update Engine.
  */
 
 class AppState {
@@ -11,7 +11,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.2.0';
+    this.appVersion = '1.3.0';
     this.init();
   }
 
@@ -39,7 +39,10 @@ class AppState {
       this.updateHeaderClock();
     }, 1000);
 
-    // 5. Setup PWA Install Prompt Listener
+    // 5. Setup Smart Scroll for Auto-Collapsing Header on Scroll Down
+    this.setupSmartScrollListener();
+
+    // 6. Setup PWA Install Prompt Listener
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this.deferredPrompt = e;
@@ -47,7 +50,7 @@ class AppState {
       if (installBtn) installBtn.classList.remove('hidden');
     });
 
-    // 6. Network online/offline detection & Auto OTA check
+    // 7. Network online/offline detection & Auto OTA check
     window.addEventListener('online', () => {
       this.showToast('📶 網路已連線 (正在自動檢查雲端更新...)', 'success');
       this.updateNetworkBadge(true);
@@ -65,10 +68,37 @@ class AppState {
     this.updateSoundButtonUI();
     this.switchTab('matrix');
 
-    // Auto check updates on boot if online
-    if (navigator.onLine) {
-      setTimeout(() => this.checkForUpdates(true), 1500);
-    }
+    // Auto check updates and show release notes on launch
+    setTimeout(() => this.checkReleaseNotesOnLaunch(), 1000);
+  }
+
+  // --- Smart Auto-Collapsing Header on Scroll Down ---
+  setupSmartScrollListener() {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          // When scrolling down more than 70px, automatically collapse header
+          if (currentScrollY > 70 && currentScrollY > lastScrollY) {
+            if (!this.isHeaderCollapsed) {
+              this.toggleHeader(false, true);
+            }
+          } 
+          // When scrolling up back to top, reveal header
+          else if (currentScrollY < 15) {
+            if (this.isHeaderCollapsed) {
+              this.toggleHeader(true, true);
+            }
+          }
+          lastScrollY = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
   }
 
   updateNetworkBadge(isOnline) {
@@ -80,7 +110,36 @@ class AppState {
     }
   }
 
-  // --- OTA Live Push Update Engine (連網自動推播更新引擎) ---
+  // --- OTA Live Push Update Engine & Proactive Release Notes ---
+  async checkReleaseNotesOnLaunch() {
+    const lastSeen = localStorage.getItem('classquant_last_seen_version');
+    if (lastSeen !== this.appVersion) {
+      try {
+        const res = await fetch(`./version.json?t=${Date.now()}`);
+        if (res.ok) {
+          const info = await res.json();
+          this.showReleaseNotesModal(info, true);
+          return;
+        }
+      } catch (e) {}
+      // Fallback modal if offline
+      this.showReleaseNotesModal({
+        version: this.appVersion,
+        releaseDate: '2026-08-29',
+        releaseNotes: [
+          "1. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
+          "2. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
+          "3. 精簡移除 NAS 模組，系統運行更加輕快順手",
+          "4. 內建版本更新主動通知，隨時掌握最新功能"
+        ]
+      }, true);
+    } else {
+      if (navigator.onLine) {
+        this.checkForUpdates(true);
+      }
+    }
+  }
+
   async checkForUpdates(silent = true) {
     if (!navigator.onLine) {
       if (!silent) this.showToast('目前處於離線狀態，無法檢查更新', 'info');
@@ -92,7 +151,7 @@ class AppState {
       if (res.ok) {
         const info = await res.json();
         if (info.version && info.version !== this.appVersion) {
-          this.showUpdateModal(info);
+          this.showReleaseNotesModal(info, false);
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
         }
@@ -102,7 +161,7 @@ class AppState {
     }
   }
 
-  showUpdateModal(info) {
+  showReleaseNotesModal(info, isNewVersionNotice = false) {
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
@@ -113,23 +172,29 @@ class AppState {
           <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
         </div>
         <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
-          🎉 發現全新版本 v${info.version}
+          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${info.version}
           <span class="kitty-bow"></span>
         </h3>
-        <p class="text-xs text-slate-600 mb-4 font-medium">發布日期：${info.releaseDate}</p>
+        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-29'}</p>
 
-        <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-1.5 mb-5 font-bold">
-          <div class="text-pink-900 font-black mb-1">【本次更新內容】：</div>
-          ${(info.releaseNotes || []).map(note => `<div>• ${note}</div>`).join('')}
+        <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-2 mb-5 font-bold">
+          <div class="text-pink-900 font-black flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-600"></i>
+            【本次更新重點】：
+          </div>
+          ${(info.releaseNotes || []).map(note => `
+            <div class="flex items-start gap-1.5 leading-relaxed">
+              <span class="text-pink-500 font-black">•</span>
+              <span>${note}</span>
+            </div>
+          `).join('')}
         </div>
 
         <div class="flex items-center justify-center gap-3">
-          <button onclick="appState.applyLiveOTAUpdate()" 
-            class="px-6 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center gap-1.5">
-            <i data-lucide="sparkles" class="w-4 h-4"></i> 立即熱更新 (自動套用)
-          </button>
-          <button onclick="appState.closeModal()" class="px-5 py-2.5 rounded-2xl font-bold border border-pink-300 text-slate-700 hover:bg-pink-50 transition text-sm">
-            稍後再說
+          <button onclick="appState.dismissReleaseNotes('${info.version}')" 
+            class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5">
+            <span class="kitty-bow !w-3.5 !h-3.5"></span>
+            <span>✨ 開始體驗最新功能！</span>
           </button>
         </div>
       </div>
@@ -137,6 +202,12 @@ class AppState {
 
     modal.classList.remove('hidden');
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  dismissReleaseNotes(version) {
+    localStorage.setItem('classquant_last_seen_version', version);
+    this.closeModal();
+    this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
   }
 
   async applyLiveOTAUpdate() {
@@ -158,7 +229,7 @@ class AppState {
     }, 800);
   }
 
-  // --- Web Audio API Native Sound Engine (零依賴原生合成音效) ---
+  // --- Web Audio API Native Sound Engine ---
   getAudioContext() {
     if (!this.audioCtx) {
       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
@@ -203,7 +274,7 @@ class AppState {
     const ctx = this.getAudioContext();
     if (!ctx) return;
     try {
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 (Bright pleasant chime)
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
       notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -257,7 +328,7 @@ class AppState {
     } catch (e) {}
   }
 
-  toggleHeader(forceShow = false) {
+  toggleHeader(forceShow = false, isSilent = false) {
     const header = document.getElementById('global-header');
     const pill = document.getElementById('header-unhide-pill');
     if (!header) return;
@@ -270,7 +341,7 @@ class AppState {
       header.classList.add('header-collapsed');
       if (pill) pill.classList.remove('hidden');
       this.isHeaderCollapsed = true;
-      this.showToast('已隱藏頂部橫幅，點擊上方按鈕可隨時展開 🎀', 'info');
+      if (!isSilent) this.showToast('已收合頂部橫幅，點擊上方按鈕可隨時展開 🎀', 'info');
     }
   }
 
@@ -297,8 +368,8 @@ class AppState {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
       btn.innerHTML = themeName === 'kitty' 
-        ? '<span class="kitty-bow"></span><span class="text-xs font-bold text-pink-600 ml-1">三麗鷗模式</span>' 
-        : '<i data-lucide="moon" class="w-4 h-4 text-blue-400"></i><span class="text-xs font-bold text-slate-300 ml-1">科技深色</span>';
+        ? '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">主題</span>' 
+        : '<i data-lucide="moon" class="w-4 h-4 text-blue-400"></i><span class="text-xs font-bold text-slate-300 ml-0.5 hidden md:inline">深色</span>';
       if (window.lucide) window.lucide.createIcons();
     }
   }
@@ -323,7 +394,6 @@ class AppState {
       'timetable-editor-view',
       'events-log-view',
       'student-dossier-view',
-      'nas-sync-view',
       'ai-hub-view',
       'user-guide-view'
     ];
@@ -341,7 +411,6 @@ class AppState {
       'timetable': 'timetable-editor-view',
       'events': 'events-log-view',
       'student-dossier': 'student-dossier-view',
-      'nas-sync': 'nas-sync-view',
       'ai-hub': 'ai-hub-view',
       'guide': 'user-guide-view'
     };
@@ -367,8 +436,6 @@ class AppState {
       window.eventsLogView.render('events-log-view', this.currentClassId);
     } else if (this.activeTab === 'student-dossier') {
       window.studentDossierView.render('student-dossier-view', this.currentClassId);
-    } else if (this.activeTab === 'nas-sync') {
-      window.nasSyncHub.render('nas-sync-view');
     } else if (this.activeTab === 'ai-hub') {
       window.aiHub.render('ai-hub-view');
     } else if (this.activeTab === 'guide') {
