@@ -124,7 +124,7 @@ class ClassroomMatrix {
             全選
           </button>
           
-          <button onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
+          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
             <i data-lucide="clock" class="w-3.5 h-3.5"></i> 事後補記
           </button>
 
@@ -247,16 +247,17 @@ class ClassroomMatrix {
           ${tagPages.map((pageTags, pageIdx) => `
             <div class="tag-page-slide">
               <div class="grid grid-cols-2 gap-2.5">
-                ${pageTags.map(tag => {
+                ${pageTags.map((tag, tagIdx) => {
                   const isPos = tag.delta > 0;
                   const isZero = tag.delta === 0;
                   
                   const btnClass = isPos ? 'color-rule-pos' : isZero ? 'color-rule-zero' : 'color-rule-neg';
                   const badgeClass = isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge';
+                  const btnId = (pageIdx === 0 && tagIdx === 0) ? 'first-quick-tag-btn' : `quick-tag-btn-${tag.id}`;
 
                   return `
-                    <button onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
-                      class="p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
+                    <button id="${btnId}" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
+                      class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
                       <div class="flex flex-col pr-1 overflow-hidden">
                         <span class="text-xs sm:text-base font-black truncate text-slate-900 leading-tight">${tag.name}</span>
                         <span class="text-[10px] text-slate-500 font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
