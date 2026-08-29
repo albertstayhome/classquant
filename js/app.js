@@ -11,7 +11,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.3.0';
+    this.appVersion = '1.4.0';
     this.init();
   }
 

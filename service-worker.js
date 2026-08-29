@@ -1,8 +1,8 @@
 /**
- * Service Worker for 100% Offline PWA functionality (ClassQuant Hub v5)
+ * Service Worker for 100% Offline PWA functionality (ClassQuant Hub v6)
  */
 
-const CACHE_NAME = 'classquant-hub-v5';
+const CACHE_NAME = 'classquant-hub-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -22,6 +22,7 @@ const ASSETS_TO_CACHE = [
   './js/studentDossier.js',
   './js/timetableEditor.js',
   './js/aiImportExport.js',
+  './js/onboardingWizard.js',
   './js/userGuide.js',
   './js/app.js',
   './assets/images/twin_stars.png',

@@ -84,6 +84,13 @@
           <span>安裝 App</span>
         </button>
 
+        <!-- Onboarding Wizard Button (新手教學引導) -->
+        <button id="onboarding-guide-btn" onclick="onboardingWizard.start(0)" 
+          class="p-1.5 sm:px-2.5 sm:py-1 rounded-xl border-2 border-pink-300 bg-pink-100/80 hover:bg-pink-200 text-pink-800 transition flex items-center gap-1 shadow-sm active:scale-95 animate-pulse" title="第一次使用？點我看 3 分鐘新手教學引導">
+          <span class="text-xs font-black">🌱</span>
+          <span class="text-xs font-black text-pink-800 hidden md:inline">新手引導</span>
+        </button>
+
         <!-- Sound Toggle Button -->
         <button id="sound-toggle-btn" onclick="appState.toggleSound()" 
           class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="操作音效切換">
@@ -238,6 +245,7 @@
   <script src="./js/studentDossier.js"></script>
   <script src="./js/timetableEditor.js"></script>
   <script src="./js/aiImportExport.js"></script>
+  <script src="./js/onboardingWizard.js"></script>
   <script src="./js/userGuide.js"></script>
   <script src="./js/app.js"></script>
 
