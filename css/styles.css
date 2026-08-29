@@ -169,32 +169,25 @@
   animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* --- Clip-Path Dark Spotlight Backdrop Engine (80% Dark + 100% Clear Cutout Hole) --- */
-#tour-backdrop {
+/* --- Indestructible 9999px Box-Shadow Dark Spotlight Engine --- */
+#tour-spotlight-box {
   position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.82) !important;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  z-index: 9998;
-  pointer-events: auto;
-  transition: clip-path 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-#tour-spotlight-ring {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85);
   border: 3.5px solid #f43f5e;
-  box-shadow: 0 0 35px rgba(244, 63, 94, 1), 0 0 10px rgba(255, 255, 255, 0.8);
-  animation: ringGlowPulse 1.6s ease-in-out infinite;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 18px;
+  z-index: 9995;
+  pointer-events: none;
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: spotlightGlowPulse 1.6s ease-in-out infinite;
 }
 
-@keyframes ringGlowPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(244, 63, 94, 0.95), inset 0 0 10px rgba(244, 63, 94, 0.3); }
-  50% { transform: scale(1.02); box-shadow: 0 0 45px rgba(244, 63, 94, 1), 0 0 15px rgba(255, 255, 255, 0.9), inset 0 0 15px rgba(244, 63, 94, 0.5); }
+@keyframes spotlightGlowPulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 25px rgba(244, 63, 94, 0.95); 
+  }
+  50% { 
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 45px rgba(244, 63, 94, 1), 0 0 12px #ffffff; 
+  }
 }
 
 /* Touchmove Scroll Lock during Onboarding Tour */
@@ -207,12 +200,12 @@ html.tour-locked, body.tour-locked {
 /* Directional Bouncing Hand Pointer */
 @keyframes bouncePointingUp {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-10px) scale(1.12); }
+  50% { transform: translateY(-10px) scale(1.15); }
 }
 
 @keyframes bouncePointingDown {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(10px) scale(1.12); }
+  50% { transform: translateY(10px) scale(1.15); }
 }
 
 .tour-pointer-up {

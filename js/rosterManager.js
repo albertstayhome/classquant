@@ -55,7 +55,7 @@ class RosterManager {
           </div>
 
           <div class="flex items-center space-x-2">
-            <button onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-pink-100 text-pink-800 border border-pink-300 text-xs sm:text-sm font-black hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm">
+            <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-pink-100 text-pink-800 border border-pink-300 text-xs sm:text-sm font-black hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm">
               <i data-lucide="clipboard-paste" class="w-4 h-4 text-pink-600"></i> 📋 1秒批次貼上名單
             </button>
             <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs sm:text-sm font-bold hover:bg-slate-200 transition flex items-center gap-1">

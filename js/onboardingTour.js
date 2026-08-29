@@ -1,16 +1,14 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.6)
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.4.7)
  * Core Architecture:
- * 1. Clip-Path Dark Spotlight:
- *    82% dark backdrop covers entire screen, precisely clipped with a hollow transparent hole over target.
- *    Target is 100% naturally bright, stands out clearly, and clicks pass directly through to the button!
- * 2. Absolute TouchMove Scroll Lock (passive: false):
- *    Completely prevents mobile touch dragging/scrolling, 100% stable viewport!
- * 3. Direction-Aware Animated Pointer:
- *    - Targets in top half -> Pointer sits BELOW and points UP (👆 請點上方發光目標)
- *    - Targets in bottom half -> Pointer sits ABOVE and points DOWN (👇 請點下方發光目標)
- * 4. Safe Area Pinned Popover:
- *    Auto-flips to opposite side of screen, 100% inside mobile viewport.
+ * 1. Indestructible 9999px Box-Shadow Dark Spotlight:
+ *    Guarantees 100% full-screen 85% dark slate overlay with a crystal-clear focused cutout!
+ * 2. 8-Step Complete Precision Anchoring:
+ *    - Step 1: Active class switch listener on #global-class-select
+ *    - Step 3: Precise focus on #roster-paste-btn
+ *    - Step 7: Precise focus on #retro-log-top-btn
+ * 3. Direction-Aware Animated Pointer (👆 / 👇) on ALL steps!
+ * 4. Absolute TouchMove Scroll Lock (passive: false) preventing all touch scrolling.
  */
 
 class OnboardingTour {
@@ -25,9 +23,9 @@ class OnboardingTour {
       {
         id: "step-class-select",
         targetSelector: "#global-class-select",
-        title: "1. 認識班級切換",
-        content: "這裡可以隨時切換<strong>「導師本班 (801)」</strong>與<strong>「數學科任班 (803/805)」</strong>。<br>常規與學業解題分班獨立計算！",
-        forceAction: null,
+        title: "1. 認識班級切換 (請切換班級)",
+        content: "請<strong>點擊上方班級選單切換班級</strong>（例如：803 班），體驗導師與科任班獨立記點！",
+        forceAction: "change",
         tab: "matrix"
       },
       {
@@ -40,9 +38,10 @@ class OnboardingTour {
       },
       {
         id: "step-roster-actions",
-        targetSelector: "#roster-manager-view",
-        title: "3. 班級名單與 1 鍵匯入",
-        content: "支援<strong>「1 鍵批次貼上名冊」</strong>！直接從 Excel/Word 複製貼上，系統自動去除贅字與座號雜訊！",
+        targetSelector: "#roster-paste-btn",
+        fallbackSelector: "#roster-manager-view button",
+        title: "3. 1 秒批次貼上名冊",
+        content: "支援<strong>「1 鍵批次貼上名冊」</strong>！直接從 Excel/Word 複製貼上整班名單，系統自動去除座號贅字！",
         forceAction: null,
         tab: "roster"
       },
@@ -101,11 +100,8 @@ class OnboardingTour {
     container.id = 'tour-overlay-container';
     container.className = 'fixed inset-0 pointer-events-none hidden z-[9990]';
     container.innerHTML = `
-      <!-- 82% Dark Fullscreen Backdrop with Dynamic Clip-Path Cutout Hole -->
-      <div id="tour-backdrop"></div>
-
-      <!-- Glowing Pink Ring Border around the Cutout Hole -->
-      <div id="tour-spotlight-ring"></div>
+      <!-- Indestructible 9999px Box-Shadow Dark Spotlight Box -->
+      <div id="tour-spotlight-box"></div>
 
       <!-- Direction-Aware Bouncing Hand Pointer -->
       <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden transition-all duration-200"></div>
@@ -151,8 +147,7 @@ class OnboardingTour {
 
     // 1. Lock touchmove scroll completely on mobile
     this.touchBlocker = (e) => {
-      // Allow interaction with buttons inside popover or target, but cancel all native page scrolling!
-      if (!e.target.closest('#tour-popover')) {
+      if (!e.target.closest('#tour-popover') && !e.target.closest('#global-class-select')) {
         e.preventDefault();
       }
     };
@@ -198,18 +193,17 @@ class OnboardingTour {
         window.scrollTo({ top: targetScrollY, behavior: 'instant' });
       }
 
-      // 2. Position clip-path dark backdrop and direction-aware pointer
+      // 2. Position 9999px Box-Shadow Spotlight and Pointer
       setTimeout(() => {
         this.highlightElement(targetEl, step);
         this.setupEnforcement(targetEl, step);
-      }, 60);
+      }, 80);
 
-    }, 120);
+    }, 150);
   }
 
   highlightElement(el, step) {
-    const backdrop = document.getElementById('tour-backdrop');
-    const ring = document.getElementById('tour-spotlight-ring');
+    const spotlight = document.getElementById('tour-spotlight-box');
     const pointer = document.getElementById('tour-pointer-container');
     const popover = document.getElementById('tour-popover');
     const titleEl = document.getElementById('tour-title');
@@ -217,7 +211,7 @@ class OnboardingTour {
     const badgeEl = document.getElementById('tour-step-badge');
     const actionContainer = document.getElementById('tour-action-container');
 
-    if (!backdrop || !popover || !el) return;
+    if (!spotlight || !popover || !el) return;
 
     const rect = el.getBoundingClientRect();
     const pad = 6;
@@ -225,24 +219,23 @@ class OnboardingTour {
     const left = Math.max(0, rect.left - pad);
     const width = Math.min(window.innerWidth - left, rect.width + pad * 2);
     const height = rect.height + pad * 2;
-    const right = left + width;
     const bottom = top + height;
 
-    // 1. Cutout Hollow Hole in 82% Dark Backdrop using CSS Polygon:
-    backdrop.style.clipPath = `polygon(0% 0%, 0% 100%, ${left}px 100%, ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px 100%, 100% 100%, 100% 0%)`;
+    // 1. Position 9999px Box-Shadow Spotlight Box (100% Dark Screen + 100% Bright Hole):
+    spotlight.style.top = `${top}px`;
+    spotlight.style.left = `${left}px`;
+    spotlight.style.width = `${width}px`;
+    spotlight.style.height = `${height}px`;
 
-    // 2. Position Glowing Ring Border
-    ring.style.top = `${top}px`;
-    ring.style.left = `${left}px`;
-    ring.style.width = `${width}px`;
-    ring.style.height = `${height}px`;
-
-    // 3. Direction-Aware Animated Pointer Logic:
+    // 2. Direction-Aware Animated Pointer Logic:
     const isTargetInTopHalf = (rect.top + (rect.height / 2)) < (window.innerHeight / 2);
 
-    if (pointer && step.forceAction === 'click') {
+    if (pointer) {
       pointer.classList.remove('hidden');
-      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 140, left + (width / 2) - 60));
+      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 150, left + (width / 2) - 65));
+
+      const hintText = (step.forceAction === 'change') ? '請點此切換班級' : 
+                       (step.forceAction === 'click') ? '請點擊此處目標' : '重點功能在此';
 
       if (isTargetInTopHalf) {
         // Target in top half -> Pointer sits BELOW and points UP (👆)
@@ -252,7 +245,7 @@ class OnboardingTour {
         pointer.innerHTML = `
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
-            請點上方發光目標
+            ${hintText}
           </span>
         `;
       } else {
@@ -262,37 +255,33 @@ class OnboardingTour {
         pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center';
         pointer.innerHTML = `
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
-            請點下方發光目標
+            ${hintText}
           </span>
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👇</span>
         `;
       }
-    } else if (pointer) {
-      pointer.classList.add('hidden');
     }
 
-    // 4. Viewport Safe Popover Positioning:
+    // 3. Viewport Safe Popover Positioning:
     if (isTargetInTopHalf) {
-      // Popover stays safely at BOTTOM
       popover.style.top = 'auto';
       popover.style.bottom = 'max(14px, env(safe-area-inset-bottom, 14px))';
     } else {
-      // Popover stays safely at TOP
       popover.style.bottom = 'auto';
       popover.style.top = 'max(14px, env(safe-area-inset-top, 14px))';
     }
 
-    // 5. Populate Text Content:
+    // 4. Populate Text Content:
     badgeEl.innerText = `步驟 ${this.currentStep + 1} / ${this.steps.length}`;
     titleEl.innerHTML = step.title;
     contentEl.innerHTML = step.content;
 
     // Action button area
-    if (step.forceAction === 'click') {
+    if (step.forceAction === 'click' || step.forceAction === 'change') {
       actionContainer.innerHTML = `
         <div class="px-3 py-1.5 rounded-xl bg-pink-100 text-pink-700 text-xs font-black flex items-center gap-1 animate-pulse border border-pink-300">
           <span>👆</span>
-          <span>請在畫面點擊發光目標</span>
+          <span>請操作發光目標</span>
         </div>
       `;
     } else if (this.currentStep === this.steps.length - 1) {
@@ -315,6 +304,7 @@ class OnboardingTour {
   setupEnforcement(targetEl, step) {
     if (this.activeListener && this.lastTargetEl) {
       this.lastTargetEl.removeEventListener('click', this.activeListener);
+      this.lastTargetEl.removeEventListener('change', this.activeListener);
     }
 
     if (step.forceAction === 'click') {
@@ -324,6 +314,15 @@ class OnboardingTour {
       };
 
       targetEl.addEventListener('click', listener, { once: true });
+      this.activeListener = listener;
+      this.lastTargetEl = targetEl;
+    } else if (step.forceAction === 'change') {
+      const listener = (e) => {
+        if (window.appState?.playPop) window.appState.playPop();
+        setTimeout(() => this.nextStep(), 350);
+      };
+
+      targetEl.addEventListener('change', listener, { once: true });
       this.activeListener = listener;
       this.lastTargetEl = targetEl;
     }
@@ -354,6 +353,7 @@ class OnboardingTour {
 
     if (this.activeListener && this.lastTargetEl) {
       this.lastTargetEl.removeEventListener('click', this.activeListener);
+      this.lastTargetEl.removeEventListener('change', this.activeListener);
       this.lastTargetEl = null;
     }
 

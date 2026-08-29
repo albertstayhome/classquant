@@ -1,13 +1,13 @@
 {
-  "version": "1.4.6",
-  "buildNumber": 2026082909,
+  "version": "1.4.7",
+  "buildNumber": 2026082910,
   "releaseDate": "2026-08-29",
   "appName": "ClassQuant Hub",
   "releaseNotes": [
-    "1. 實裝 CSS Polygon Clip-Path 聚光遮罩，全螢幕壓暗 82%，唯獨目標 100% 亮起且四周點擊全阻擋！",
-    "2. 實裝 document touchmove passive:false 全阻斷事件，徹底禁止手機上下滑動，畫面 100% 穩定！",
-    "3. 方向感應指針精準指引：上方目標用 👆 由下往上指，下方目標用 👇 由上往下指！",
-    "4. Safe Area 邊界適配，說明彈窗 100% 完整呈現在任何尺寸手機螢幕內"
+    "1. 實裝 9999px Box-Shadow 暗化聚光燈，100% 保證全螢幕深黑 85%、目標 100% 原始透光高亮！",
+    "2. 全部 8 個教學步驟全面實裝精準功能目標定位與方位跳動箭頭",
+    "3. 步驟 1 換班級實裝切換即時感應、步驟 3 精準指引「📋 批次貼上名冊」、步驟 7 精準指引「⏰ 事後補記」",
+    "4. Touchmove 全阻斷鎖定，手機端徹底禁止上下滑動，畫面 100% 穩固"
   ],
   "minAppVersion": "1.0.0",
   "otaUpdateEnabled": true

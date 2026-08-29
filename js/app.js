@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.4.6';
+    this.appVersion = '1.4.7';
     this.init();
   }
 
@@ -287,18 +287,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.4.6 -->
+          <!-- v1.4.7 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.4.6 (最新版本)
+                v1.4.7 (最新版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 實裝 9999px Box-Shadow 暗化聚光燈，100% 保證全螢幕深黑 85%、目標 100% 原始透光高亮！</li>
+              <li>• 全部 8 個教學步驟全面實裝精準功能目標定位與方位跳動箭頭。</li>
+              <li>• 步驟 1 換班級實裝切換即時感應、步驟 3 精準指引「📋 批次貼上名冊」、步驟 7 精準指引「⏰ 事後補記」。</li>
+            </ul>
+          </div>
+
+          <!-- v1.4.6 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.4.6
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 實裝 CSS Polygon Clip-Path 聚光遮罩，全螢幕壓暗 82%，唯獨目標 100% 亮起且四周點擊全阻擋！</li>
               <li>• 實裝 document touchmove passive:false 全阻斷事件，徹底禁止手機上下滑動，畫面 100% 穩定！</li>
-              <li>• 方向感應指針精準指引：上方目標用 👆 由下往上指，下方目標用 👇 由上往下指！</li>
             </ul>
           </div>
 
