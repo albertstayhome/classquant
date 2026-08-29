@@ -1,7 +1,8 @@
 /**
- * ClassQuant Hub - Main App Controller v1.3.0
+ * ClassQuant Hub - Main App Controller v1.4.0
  * Theme Switcher, Native Web Audio Chime Engine, Smart Auto-Collapsing Header on Scroll,
- * Delightful Micro-Animations, Tab Router, and In-App Live Over-The-Air (OTA) Remote Update Engine.
+ * Delightful Micro-Animations, Tab Router, In-App Live Over-The-Air (OTA) Remote Update Engine,
+ * and System Bulletin / Changelog Center.
  */
 
 class AppState {
@@ -66,10 +67,18 @@ class AppState {
     this.updateHeaderClock();
     this.renderClassDropdown();
     this.updateSoundButtonUI();
+    this.updateHeaderVersionBadge();
     this.switchTab('matrix');
 
-    // Auto check updates and show release notes on launch
+    // Auto check updates and show release notes ONCE on launch
     setTimeout(() => this.checkReleaseNotesOnLaunch(), 1000);
+  }
+
+  updateHeaderVersionBadge() {
+    const badge = document.getElementById('header-version-badge');
+    if (badge) {
+      badge.innerHTML = `<span>v${this.appVersion}</span><span>📢</span>`;
+    }
   }
 
   // --- Smart Auto-Collapsing Header on Scroll Down ---
@@ -110,34 +119,34 @@ class AppState {
     }
   }
 
-  // --- OTA Live Push Update Engine & Proactive Release Notes ---
+  // --- OTA Live Push Update Engine & Proactive Release Notes (Strictly Once per Version) ---
   async checkReleaseNotesOnLaunch() {
     const lastSeen = localStorage.getItem('classquant_last_seen_version');
-    if (lastSeen !== this.appVersion) {
-      try {
-        const res = await fetch(`./version.json?t=${Date.now()}`);
-        if (res.ok) {
-          const info = await res.json();
-          this.showReleaseNotesModal(info, true);
-          return;
-        }
-      } catch (e) {}
-      // Fallback modal if offline
-      this.showReleaseNotesModal({
-        version: this.appVersion,
-        releaseDate: '2026-08-29',
-        releaseNotes: [
-          "1. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
-          "2. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
-          "3. 精簡移除 NAS 模組，系統運行更加輕快順手",
-          "4. 內建版本更新主動通知，隨時掌握最新功能"
-        ]
-      }, true);
-    } else {
-      if (navigator.onLine) {
-        this.checkForUpdates(true);
-      }
+    if (lastSeen === this.appVersion) {
+      // User has already seen this version, do not prompt again!
+      return;
     }
+
+    try {
+      const res = await fetch(`./version.json?t=${Date.now()}`);
+      if (res.ok) {
+        const info = await res.json();
+        this.showReleaseNotesModal(info, true);
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback modal if offline
+    this.showReleaseNotesModal({
+      version: this.appVersion,
+      releaseDate: '2026-08-29',
+      releaseNotes: [
+        "1. 頂部新增「🌱 新手引導」互動教學嚮導，一步步引導建立班級與標籤",
+        "2. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
+        "3. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
+        "4. 精簡移除 NAS 模組，系統運行更加輕快順手"
+      ]
+    }, true);
   }
 
   async checkForUpdates(silent = true) {
@@ -150,7 +159,8 @@ class AppState {
       const res = await fetch(`./version.json?t=${Date.now()}`);
       if (res.ok) {
         const info = await res.json();
-        if (info.version && info.version !== this.appVersion) {
+        const lastSeen = localStorage.getItem('classquant_last_seen_version');
+        if (info.version && info.version !== this.appVersion && lastSeen !== info.version) {
           this.showReleaseNotesModal(info, false);
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
@@ -162,12 +172,15 @@ class AppState {
   }
 
   showReleaseNotesModal(info, isNewVersionNotice = false) {
+    // Immediately mark as seen so it NEVER pops up repeatedly!
+    localStorage.setItem('classquant_last_seen_version', info.version || this.appVersion);
+
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
     modalContent.innerHTML = `
-      <div class="p-6 text-center">
+      <div class="p-6 text-center animate-fade-in-up">
         <div class="flex justify-center mb-3">
           <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
         </div>
@@ -192,7 +205,7 @@ class AppState {
 
         <div class="flex items-center justify-center gap-3">
           <button onclick="appState.dismissReleaseNotes('${info.version}')" 
-            class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5">
+            class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5 active:scale-95">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
             <span>✨ 開始體驗最新功能！</span>
           </button>
@@ -208,6 +221,137 @@ class AppState {
     localStorage.setItem('classquant_last_seen_version', version);
     this.closeModal();
     this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
+  }
+
+  // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
+  openBulletinModal() {
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    modalContent.innerHTML = `
+      <div class="p-5 sm:p-7 max-h-[85vh] overflow-y-auto animate-fade-in-up">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3.5 border-b border-pink-100 mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="sanrio-kitty-badge !w-12 !h-12"></div>
+            <div>
+              <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-1.5">
+                📢 系統公佈欄 & 更新日誌
+                <span class="kitty-bow"></span>
+              </h3>
+              <p class="text-xs text-slate-500 font-bold">當前版本：v${this.appVersion} • 國中導師與數學科任專用</p>
+            </div>
+          </div>
+          <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold flex items-center justify-center transition">
+            ✕
+          </button>
+        </div>
+
+        <!-- Section 1: Active Activities & Teaching Reminders -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-sky-50 border border-pink-200 mb-5 shadow-sm">
+          <div class="flex items-center gap-1.5 text-xs font-black text-pink-900 mb-2">
+            <span class="text-base">📌</span>
+            <span>【當前活動與課堂教學提醒】</span>
+          </div>
+          <div class="space-y-1.5 text-xs text-slate-700 font-medium">
+            <div class="flex items-start gap-1.5">
+              <span class="text-pink-600 font-bold">🎯</span>
+              <span><strong>段考小考量化統計</strong>：利用「統計戰情室」的四象限分析，可即時掌握各班高分低常規或雙低需關懷之學生名單。</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <span class="text-emerald-600 font-bold">⏰</span>
+              <span><strong>課堂事後回憶補記</strong>：課堂現場無法掏手機時，下課或放學回到辦公室點擊頂部「事後補記」，1 秒批次補齊記錄！</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <span class="text-blue-600 font-bold">📶</span>
+              <span><strong>100% 離線支援</strong>：在地下室或無 Wi-Fi 教室操作，所有資料皆自動安全存放於本機，連網時自動背景熱更新。</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Full Changelog History -->
+        <div class="space-y-3.5 mb-5">
+          <div class="text-xs font-black text-slate-800 flex items-center gap-1">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
+            <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.4.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.4.0 (最新版本)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 新增「🌱 新手引導」6 步驟互動教學嚮導，一步步帶領新老師建班與標籤。</li>
+              <li>• 新增「📢 系統公佈欄 & 歷史更新日誌」，永久保存過去版本功能與教學活動。</li>
+              <li>• 修復更新彈窗重複顯示問題，設定為每次發布僅主動提示一次。</li>
+            </ul>
+          </div>
+
+          <!-- v1.3.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.3.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 頂部橫幅隨頁面往下滑動智慧自動收合，往上滑自動還原，極大化座位視野。</li>
+              <li>• 新增全站三麗鷗精緻流暢微動畫（卡片微彈回饋、加分星星/愛心粒子）。</li>
+              <li>• 乾淨移除用不到的 NAS 模組，介面更加輕快。</li>
+            </ul>
+          </div>
+
+          <!-- v1.2.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.2.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 標籤排版重構為 4 大按鈕並直接放置於座位表下方，字體大且絕對不遮字。</li>
+              <li>• 導師班與數學科任班徹底分開，標籤使用頻率各班獨立計算排序。</li>
+              <li>• 新增「⏰ 課堂事後快速補記助手」與「📅 日期時序時間軸 / 👥 多生交叉查詢」。</li>
+            </ul>
+          </div>
+
+          <!-- v1.1.0 & v1.0.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.1.0 ~ v1.0.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-29</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 三階統一色彩規範（🌿加分綠、🌹扣分紅、☁️記事灰）。</li>
+              <li>• 全校多班橫向對比、分層作業建議與因材施教戰術板。</li>
+              <li>• ClassQuant Hub 雙軌課堂量化管理系統正式發布。</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer Action -->
+        <div class="flex items-center justify-between pt-3 border-t border-pink-100">
+          <button onclick="appState.checkForUpdates(false)" class="text-xs text-pink-600 font-black hover:underline flex items-center gap-1">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 手動檢查雲端更新
+          </button>
+          <button onclick="appState.closeModal()" class="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-black text-xs shadow-md transition">
+            關閉公佈欄
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
   }
 
   async applyLiveOTAUpdate() {

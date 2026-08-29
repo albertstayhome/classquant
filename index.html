@@ -60,9 +60,10 @@
               ClassQuant Hub
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
-            <span class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300">
-              v1.3.0
-            </span>
+            <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
+              <span>v1.4.0</span>
+              <span>📢</span>
+            </button>
           </div>
           <div class="flex items-center space-x-1.5 text-[11px] opacity-80">
             <span id="header-live-clock" class="font-mono font-semibold">載入時間...</span>
@@ -165,6 +166,11 @@
       <button onclick="appState.switchTab('ai-hub')" data-tab="ai-hub" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="bot" class="w-3.5 h-3.5 text-purple-500"></i>
         <span>AI 成績匯入</span>
+      </button>
+
+      <button onclick="appState.openBulletinModal()" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 font-black shadow-sm">
+        <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-600"></i>
+        <span>📢 公佈欄 & 更新日誌</span>
       </button>
 
       <button onclick="appState.switchTab('guide')" data-tab="guide" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-pink-700 bg-pink-100 border border-pink-300 font-black">
