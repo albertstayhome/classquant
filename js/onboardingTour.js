@@ -105,8 +105,8 @@ class OnboardingTour {
       },
       {
         id: "step-custom-tags-modal",
-        targetSelector: "#global-modal-container .glass-card",
-        fallbackSelector: "#global-modal-container",
+        targetSelector: "#global-modal-content",
+        fallbackSelector: "#global-modal",
         title: "5. 標籤管理視窗 (自訂分值與名稱)",
         content: "在此您可以<strong>自由新增、刪除或修改</strong>各科專屬標籤與分值。了解後請點擊「下一步」！",
         action: "info",

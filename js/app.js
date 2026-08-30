@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.6.2';
+    this.appVersion = '1.6.3';
     this.init();
   }
 
@@ -364,11 +364,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.6.2 -->
+          <!-- v1.6.3 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.6.2 (雙箭頭終極根除版)
+                v1.6.3 (自訂標籤彈窗完全開放版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底移除彈窗阻斷器】排查並移除了 TagManager 內部舊有的 window.onboardingTour.isActive 阻斷程式碼，現在點擊「⚙️ 自訂」保證 100% 順暢彈出標籤管理中心！</li>
+              <li>• 【修復彈窗聚光燈選取器】校準步驟 5 標籤管理視窗的 CSS 選取器為 #global-modal-content，視窗發光導覽完美貼合。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.2
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
