@@ -291,7 +291,7 @@ class AppState {
           </div>
 
           <!-- v1.5.2 -->
-          <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
                 v1.5.2 (最新實戰導覽版本)
