@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.5';
+    this.appVersion = '1.7.6';
     this.init();
   }
 
@@ -337,11 +337,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.5 -->
+          <!-- v1.7.6 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.5 (全域最高層級渲染與移動端觸控安全版)
+                v1.7.6 (靜態 DOM 實體化與零延遲導覽極速版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【靜態實體 DOM 預先掛載】將新手教學聚光燈與導覽卡片直接實體寫入 HTML 主幹，不再依賴 JavaScript 動態生成節點，點擊瞬間 0 延遲秒開！</li>
+              <li>• 【樣式全面 CSS 靜態編譯】所有動畫、光暈與最高層級（z:99999 / z:100001）直接由 styles.css 解析載入，徹底根除手機動態樣式未編譯盲點。</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.5 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.5
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

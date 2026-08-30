@@ -241,3 +241,112 @@ html.dark .compact-seat-tile.selected {
   background-color: rgba(244, 63, 94, 0.2) !important;
   box-shadow: 0 0 0 3px #f43f5e !important;
 }
+
+/* --- Permanent Onboarding Tour Overlay Styles (Guaranteed Top Z-Index & GPU Accelerated) --- */
+#tour-overlay-container {
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 99999 !important;
+}
+#tour-overlay-path {
+  pointer-events: auto !important;
+}
+#tour-popover {
+  position: fixed !important;
+  z-index: 100001 !important;
+  pointer-events: auto !important;
+  max-width: min(94vw, 420px) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+}
+#tour-pointer-container {
+  position: fixed !important;
+  z-index: 100000 !important;
+  pointer-events: none !important;
+}
+#tour-ghost-cursor {
+  position: fixed !important;
+  z-index: 100002 !important;
+  pointer-events: none !important;
+}
+.tour-gpu-layer {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+@keyframes spotlightGlowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.85)) drop-shadow(0 0 14px rgba(251, 113, 133, 0.5));
+    stroke-opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(244, 63, 94, 1)) drop-shadow(0 0 24px rgba(251, 113, 133, 0.8)) drop-shadow(0 0 3px #ffffff);
+    stroke-opacity: 1;
+  }
+}
+@keyframes tourHaloPulse {
+  0% { opacity: 0.8; stroke-width: 1.5px; stroke: #f43f5e; }
+  50% { opacity: 0.3; stroke-width: 5px; stroke: #fb7185; }
+  100% { opacity: 0; stroke-width: 8px; stroke: #fda4af; }
+}
+.tour-spotlight-pulse {
+  animation: spotlightGlowPulse 1.8s ease-in-out infinite;
+  vector-effect: non-scaling-stroke;
+}
+.tour-pulse-halo {
+  animation: tourHaloPulse 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  vector-effect: non-scaling-stroke;
+}
+.tour-arrow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease-out;
+}
+.tour-arrow-icon.hidden,
+.tour-arrow-lateral.hidden,
+#tour-pointer-container .hidden,
+#tour-ghost-cursor.hidden {
+  display: none !important;
+}
+.tour-bounce-up {
+  animation: pointerBounceUp 1s ease-in-out infinite;
+}
+.tour-bounce-down {
+  animation: pointerBounceDown 1s ease-in-out infinite;
+}
+.tour-bounce-left {
+  animation: pointerBounceLeft 1s ease-in-out infinite;
+}
+.tour-bounce-right {
+  animation: pointerBounceRight 1s ease-in-out infinite;
+}
+@keyframes pointerBounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pointerBounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+@keyframes pointerBounceLeft {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-6px); }
+}
+@keyframes pointerBounceRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+.ghost-cursor-click {
+  animation: ghostClick 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes ghostClick {
+  0% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(244,63,94,0.45)); }
+  45% { transform: scale(0.84) translateY(3px); filter: drop-shadow(0 1px 4px rgba(244,63,94,0.7)); }
+  100% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(244,63,94,0.45)); }
+}
+.tour-simulated-active {
+  transform: scale(0.95) !important;
+  filter: brightness(0.92) drop-shadow(0 0 8px rgba(244, 63, 94, 0.6)) !important;
+  transition: transform 0.15s ease-out, filter 0.15s ease-out !important;
+}
