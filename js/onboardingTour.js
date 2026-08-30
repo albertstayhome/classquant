@@ -1010,6 +1010,28 @@ class OnboardingTour {
         popover.style.bottom = 'max(14px, 14px)';
       }
 
+      // Immediately populate Step 0 text and Next button
+      const step0 = this.steps[this.currentStep];
+      const titleEl = document.getElementById('tour-title');
+      const contentEl = document.getElementById('tour-content');
+      const badgeEl = document.getElementById('tour-step-badge');
+      const actionContainer = document.getElementById('tour-action-container');
+      if (badgeEl) badgeEl.innerText = `步驟 ${this.currentStep + 1} / ${this.steps.length}`;
+      if (titleEl && step0) titleEl.innerHTML = step0.title;
+      if (contentEl && step0) contentEl.innerHTML = step0.content;
+      if (actionContainer) {
+        actionContainer.innerHTML = `
+          <div class="flex items-center gap-2 w-full justify-between pt-1">
+            <div class="px-2.5 py-1 rounded-xl bg-pink-50 text-pink-700 text-[11px] font-bold border border-pink-200 truncate">
+              👆 點發光處或直接點右側 ➔
+            </div>
+            <button onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-lg border-2 border-white transition flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 animate-bounce ring-2 ring-pink-200">
+              <span>下一步 ➔</span>
+            </button>
+          </div>
+        `;
+      }
+
       this.clickBlocker = (e) => {
         if (!this.isActive) return;
         if (this.safeClosest(e.target, '#tour-popover')) return;

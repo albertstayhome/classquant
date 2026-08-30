@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.7';
+    this.appVersion = '1.7.8';
     this.init();
   }
 
@@ -58,6 +58,31 @@ class AppState {
       this.showToast('🟢 目前處於離線模式，所有操作自動存於本機', 'info');
       this.updateNetworkBadge(false);
     });
+
+    this.initPWA();
+    this.initSoundSetting();
+    this.initThemeSetting();
+    this.checkFirstVisit();
+    this.checkForUpdates(true);
+
+    // Auto version sync: detect remote updates and flush stale PWA caches immediately
+    if (typeof fetch === 'function') {
+      fetch('./version.json?nocache=' + Date.now())
+        .then(r => r.json())
+        .then(remote => {
+          if (remote && remote.version && remote.version !== this.appVersion) {
+            console.log('[Version] New version detected:', remote.version, 'Current:', this.appVersion);
+            if ('caches' in window) {
+              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+                window.location.reload(true);
+              });
+            } else {
+              window.location.reload(true);
+            }
+          }
+        })
+        .catch(() => {});
+    }
 
     // Initial render
     this.updateHeaderStatus();
@@ -337,11 +362,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.7 -->
+          <!-- v1.7.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.7 (全面語法除錯與實機無死角暢通版)
+                v1.7.8 (全自動快取清除與導覽直通發射版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【自動快取感應與清除】啟動時自動比對遠端 version.json，若手機端版本過舊則瞬間自動清除所有 caches 並自動重整刷新！</li>
+              <li>• 【0 毫秒極速導覽直通】點擊「🎓 教學」時，立即以最高優先權將第 1 步「班級切換樞紐」文字與「下一步 ➔」發光按鈕直通填入畫面，絕不延遲！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.7 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.7
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
@@ -878,14 +917,31 @@ class AppState {
   startTour() {
     this.playChime();
     this.showToast('🎓 新手教學已就緒！請查看畫面引導與下方說明 🎀', 'info');
-    // Ensure header is expanded so Step 1 (#global-class-select) is visible
     this.toggleHeader(true, true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (window.onboardingTour) {
-      window.onboardingTour.start(0);
-    } else if (window.OnboardingTour) {
-      window.onboardingTour = new window.OnboardingTour();
-      window.onboardingTour.start(0);
+
+    // Show tour container immediately
+    const overlay = document.getElementById('tour-overlay-container');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'block';
+    }
+    const popover = document.getElementById('tour-popover');
+    if (popover) {
+      popover.classList.remove('hidden');
+      popover.style.display = 'block';
+      popover.style.opacity = '1';
+    }
+
+    try {
+      if (!window.onboardingTour && window.OnboardingTour) {
+        window.onboardingTour = new window.OnboardingTour();
+      }
+      if (window.onboardingTour) {
+        window.onboardingTour.start(0);
+      }
+    } catch (e) {
+      console.error('[AppState] startTour error:', e);
     }
   }
 
