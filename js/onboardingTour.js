@@ -966,6 +966,23 @@ class OnboardingTour {
     this.lastEventType = null;
   }
 
+  cleanupListeners() {
+    this.unbindEventListeners();
+    this.cleanupEnforcement();
+    if (this.scrollBlocker) {
+      document.removeEventListener('touchmove', this.scrollBlocker, { capture: true });
+      document.removeEventListener('wheel', this.scrollBlocker, { capture: true });
+      this.scrollBlocker = null;
+    }
+    if (this.clickBlocker) {
+      document.removeEventListener('click', this.clickBlocker, { capture: true });
+      document.removeEventListener('touchstart', this.clickBlocker, { capture: true });
+      document.removeEventListener('pointerdown', this.clickBlocker, { capture: true });
+      document.removeEventListener('mousedown', this.clickBlocker, { capture: true });
+      this.clickBlocker = null;
+    }
+  }
+
   safeClosest(el, selector) {
     if (!el) return null;
     try {
@@ -1358,6 +1375,14 @@ class OnboardingTour {
     this.playAudioFeedback('pop');
     await this.safeDelay(180, session);
     if (ghostBody) ghostBody.classList.remove('ghost-cursor-click');
+  }
+
+  /**
+   * Backwards-compatible alias for ghost cursor animation
+   */
+  playGhostCursor(target) {
+    const el = target || this.currentTargetEl || (this.steps[this.currentStep]?.targetSelector ? document.querySelector(this.steps[this.currentStep].targetSelector) : null) || document.body;
+    return this.flyGhostTo(el, this.currentSessionId);
   }
 
   hideGhost() {
