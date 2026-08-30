@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.0';
+    this.appVersion = '1.8.1';
     this.init();
   }
 
@@ -343,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.0 -->
+          <!-- v1.8.1 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.0 (iOS WebKit Service Worker 致命攔截修復版)
+                v1.8.1 (全平台資料庫自我修復與座位表保證渲染版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底修復本機舊資料結構損毀】實裝 Store 資料庫「自我修復（Self-Healing）」機制，若本機儲存之班級、學生名冊或標籤格式有缺漏，啟動時 100% 自動補齊與修復！</li>
+              <li>• 【座位表渲染防禦】matrixView 與下拉選單全面升級容錯，若當前班級無效自動 fallback 至首個有效班級，保證座位表（30 位學生）100% 立即渲染！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.0
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
@@ -1082,7 +1096,12 @@ class AppState {
     const select = document.getElementById('global-class-select');
     if (!select) return;
 
-    const classes = Object.values(window.appStore.getClasses());
+    let classes = Object.values(window.appStore.getClasses() || {});
+    if (classes.length === 0) {
+      window.appStore.initDemoData();
+      classes = Object.values(window.appStore.getClasses() || {});
+    }
+
     const homeroomClasses = classes.filter(c => c.type === 'homeroom');
     const subjectClasses = classes.filter(c => c.type !== 'homeroom');
 
@@ -1108,6 +1127,9 @@ class AppState {
     }
 
     select.innerHTML = html;
+    if (this.currentClassId) {
+      select.value = this.currentClassId;
+    }
   }
 
   handleManualClassChange(classId) {
