@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.4';
+    this.appVersion = '1.7.5';
     this.init();
   }
 
@@ -337,11 +337,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.4 -->
+          <!-- v1.7.5 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.4 (新手教學全關卡暢通推進版)
+                v1.7.5 (全域最高層級渲染與移動端觸控安全版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【最高 Z-Index 保證】注入原生 CSS 樣式規則，確保新手導覽聚光燈（z:99999）與說明卡片（z:100001）100% 覆蓋所有全域元件之上，絕不被底層元件遮蔽。</li>
+              <li>• 【觸控事件安全隔離】加入 safeClosest 安全選取器，拔除 touch-action: none 與防止預設事件干擾，保證手機瀏覽器秒開秒點！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.4
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

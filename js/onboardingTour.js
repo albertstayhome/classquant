@@ -209,12 +209,31 @@ class OnboardingTour {
     const style = document.createElement('style');
     style.id = 'tour-strict-style';
     style.innerHTML = `
-      body.tour-strict-locked {
-        overflow: hidden !important;
-        touch-action: none !important;
+      #tour-overlay-container {
+        position: fixed !important;
+        inset: 0 !important;
+        pointer-events: none !important;
+        z-index: 99999 !important;
       }
-      html.tour-strict-locked {
-        overflow: hidden !important;
+      #tour-overlay-path {
+        pointer-events: auto !important;
+      }
+      #tour-popover {
+        position: fixed !important;
+        z-index: 100001 !important;
+        pointer-events: auto !important;
+        max-width: min(94vw, 420px) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+      }
+      #tour-pointer-container {
+        position: fixed !important;
+        z-index: 100000 !important;
+        pointer-events: none !important;
+      }
+      #tour-ghost-cursor {
+        position: fixed !important;
+        z-index: 100002 !important;
+        pointer-events: none !important;
       }
       .tour-gpu-layer {
         will-change: transform;
@@ -1222,6 +1241,17 @@ class OnboardingTour {
     this.lastEventType = null;
   }
 
+  safeClosest(el, selector) {
+    if (!el) return null;
+    try {
+      const node = el.nodeType === 3 ? el.parentElement : el;
+      if (node && typeof node.closest === 'function') {
+        return node.closest(selector);
+      }
+    } catch (e) {}
+    return null;
+  }
+
   async start(fromStep = 0) {
     try {
       this.initDOM();
@@ -1240,21 +1270,24 @@ class OnboardingTour {
         window.appState.closeModal();
       }
 
-      document.documentElement.classList.add('tour-strict-locked');
-      document.body.classList.add('tour-strict-locked');
-
-      this.scrollBlocker = (e) => {
-        if (!e.target.closest('#tour-popover')) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      };
-      document.addEventListener('touchmove', this.scrollBlocker, { passive: false, capture: true });
-      document.addEventListener('wheel', this.scrollBlocker, { passive: false, capture: true });
+      // Immediately present the overlay & popover card to guarantee 0ms perceived latency
+      const container = document.getElementById('tour-overlay-container');
+      if (container) {
+        container.classList.remove('hidden');
+        container.style.display = 'block';
+      }
+      const popover = document.getElementById('tour-popover');
+      if (popover) {
+        popover.classList.remove('hidden');
+        popover.style.display = 'block';
+        popover.style.opacity = '1';
+        popover.style.top = 'auto';
+        popover.style.bottom = 'max(14px, 14px)';
+      }
 
       this.clickBlocker = (e) => {
         if (!this.isActive) return;
-        if (e.target.closest('#tour-popover')) return;
+        if (this.safeClosest(e.target, '#tour-popover')) return;
         
         if (this.isAutoPlaying) {
           e.preventDefault();
@@ -1263,13 +1296,9 @@ class OnboardingTour {
         }
 
         const step = this.steps[this.currentStep];
-        if (!step) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
+        if (!step) return;
 
-        if (step.action === 'auto-click' || step.action === 'auto-pilot-paste' || step.action === 'auto-pilot-edit' || step.action === 'info') {
+        if (step.action === 'auto-click' || step.action === 'auto-pilot-paste' || step.action === 'auto-pilot-edit') {
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -1316,22 +1345,16 @@ class OnboardingTour {
       };
 
       document.addEventListener('click', this.clickBlocker, { capture: true });
-      document.addEventListener('touchstart', this.clickBlocker, { capture: true, passive: false });
-      document.addEventListener('pointerdown', this.clickBlocker, { capture: true, passive: false });
-      document.addEventListener('mousedown', this.clickBlocker, { capture: true });
 
       this.bindEventListeners();
-
-      const container = document.getElementById('tour-overlay-container');
-      if (container) container.classList.remove('hidden');
-
       this.playAudioFeedback('chime');
-      
       this.startTracking();
       await this.renderStep();
     } catch (err) {
       console.error('[OnboardingTour] start error:', err);
-      this.endTour();
+      try {
+        await this.renderStep();
+      } catch (e) {}
     }
   }
 
