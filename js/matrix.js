@@ -457,7 +457,9 @@ class ClassroomMatrix {
     const period = activeSlot.period !== null ? activeSlot.period : 1;
 
     let appliedCount = 0;
-    this.selectedSeats.forEach(seatNo => {
+    const seatsToProcess = Array.from(this.selectedSeats);
+
+    seatsToProcess.forEach(seatNo => {
       this.store.addEvent({
         classId,
         seatNo,
@@ -472,6 +474,21 @@ class ClassroomMatrix {
 
       this.showFloatingBubble(seatNo, tag.delta);
       appliedCount++;
+
+      // In-place score update on card
+      const card = document.getElementById(`seat-card-${seatNo}`);
+      if (card) {
+        const profile = this.stats.getStudentProfile(classId, seatNo);
+        if (profile) {
+          const charPts = profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social;
+          const scoreSpans = card.querySelectorAll('div > span');
+          if (scoreSpans.length >= 2) {
+            const ptsSpan = scoreSpans[1];
+            ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
+            ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+          }
+        }
+      }
     });
 
     // Sound effect
@@ -482,8 +499,9 @@ class ClassroomMatrix {
     }
 
     window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+    
+    // Auto-clear selection immediately (restoring familiar behavior)
     this.clearSelection();
-    this.render('classroom-matrix-view', classId);
   }
 
   showFloatingBubble(seatNo, delta) {

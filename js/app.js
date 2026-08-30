@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.4';
+    this.appVersion = '1.8.5';
     this.init();
   }
 
@@ -343,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.4 -->
+          <!-- v1.8.5 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.4 (全面移除觸控攔截限制與自然互動版)
+                v1.8.5 (加分後自動清空選取與極速就緒版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【加分後自動清空選取】點擊快速標籤加扣分後，立即自動取消選取所有學生座位，恢復經典舒適的使用習慣！</li>
+              <li>• 【即時原地刷新】記點飄字動畫（+3）流暢播放，卡片分數與頂部班級數據原地無感更新！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.4
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
