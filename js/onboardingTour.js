@@ -1,6 +1,8 @@
 ﻿/**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.3)
- * Comprehensive Hands-on Educational Tour with Auto-Tracking!
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.4)
+ * - 60FPS sync tracking + CSS Transform Centering (Arrow 100% aligned)
+ * - Global Absolute Interaction Blocker (Only targeted element is clickable)
+ * - Anti-Jump Event Verification
  */
 
 class OnboardingTour {
@@ -9,16 +11,18 @@ class OnboardingTour {
     this.isActive = false;
     this.activeListener = null;
     this.lastTargetEl = null;
+    this.lastEventType = null;
     this.currentTargetEl = null;
     this.trackingFrame = null;
     this.scrollBlocker = null;
+    this.clickBlocker = null;
 
     this.steps = [
       {
         id: "step-class-select",
         targetSelector: "#global-class-select",
         title: "1. 班級切換樞紐 (點擊展開)",
-        content: "這裡是你管理班級的核心！<strong>點擊切換另一個班級</strong>（例如 803 班），教師可將所有分數與名單分流管理！",
+        content: "這裡是你管理班級的核心！<strong>點擊下拉選單切換班級</strong>（例如 803 班），系統會為各班獨立保存分數與名單！",
         forceAction: "change",
         tab: "matrix"
       },
@@ -27,7 +31,7 @@ class OnboardingTour {
         targetSelector: "#seat-card-1",
         fallbackSelector: ".student-seat-card:first-child",
         title: "2. 點選學生座位 (支援多選/快選)",
-        content: "上課中想記點嗎？<strong>請親手點擊 1 號「陳冠宇」</strong>的座位（外框會變粉色），支援多選和男女生快選喔！",
+        content: "上課中想記點嗎？<strong>請親手點擊 1 號學生的座位</strong>（外框會亮起），右側還有全班或男女生快選鍵！",
         forceAction: "click",
         tab: "matrix"
       },
@@ -36,7 +40,7 @@ class OnboardingTour {
         targetSelector: "#first-quick-tag-btn",
         fallbackSelector: ".tag-page-slide button:first-child",
         title: "3. 觸發快速記點與動態加分",
-        content: "選好學生後，<strong>點擊第一個加分項「主動解出難題 (+3)」</strong>，觀察動態加分特效與分數即時跳動！",
+        content: "選好學生後，<strong>點擊第一個加分項「主動解出難題 (+3)」</strong>，觀察專屬彩帶特效與分數即時跳動！",
         forceAction: "click",
         tab: "matrix"
       },
@@ -45,7 +49,7 @@ class OnboardingTour {
         targetSelector: "#custom-tag-open-btn",
         fallbackSelector: ".glass-card button i[data-lucide='settings']",
         title: "4. 自訂班級專屬快速標籤",
-        content: "下方常用按鈕可點擊<strong>「⚙️ 自訂」</strong>，可新增/修改各科專屬加扣分項目與分值，設定一次會自動套用到全班喔！",
+        content: "下方常用按鈕可點擊<strong>「⚙️ 自訂」</strong>，自由新增或修改各科專屬加扣分項目與分值！",
         forceAction: "click",
         tab: "matrix"
       },
@@ -53,16 +57,15 @@ class OnboardingTour {
         id: "step-goto-roster",
         targetSelector: 'button[data-tab="roster"]',
         title: "5. 前往 👥 班級名單中心",
-        content: "<strong>請點擊「👥 班級名單」</strong>進入名單管理與學生資料編輯中心！",
+        content: "接下來設定名單。<strong>請點擊「👥 班級名單」</strong>進入編輯中心！",
         forceAction: "click",
         tab: null
       },
       {
         id: "step-roster-paste",
         targetSelector: "#roster-paste-btn",
-        fallbackSelector: "#roster-manager-view button",
         title: "6. 1 秒批次貼上名冊 (Excel 匯入)",
-        content: "新學期大絕招！<strong>點擊「📋 1秒批次貼上名單」</strong>，系統支援直接從 Excel 整欄貼上，自動為您去數字與排版！",
+        content: "新學期大絕招！<strong>點擊「📋 1秒批次貼上名單」</strong>，系統支援直接從 Excel 整欄貼上，自動為您去除座號等數字雜訊！",
         forceAction: "click",
         tab: "roster"
       },
@@ -71,7 +74,7 @@ class OnboardingTour {
         targetSelector: "#roster-manager-view .grid > div:first-child",
         fallbackSelector: "#roster-class-select",
         title: "7. 學生名冊個別微調 (改名/座號)",
-        content: "在下方列表中，您可以<strong>隨時修改學生姓名與座號</strong>，點擊「➕ 新增單一學生」或「刪除班級(需長按)」都非常方便！",
+        content: "在下方列表中，您可以<strong>隨時點擊修改學生姓名與座號</strong>，或點擊「➕ 新增單一學生」加入轉學生！",
         forceAction: null,
         tab: "roster"
       },
@@ -88,7 +91,7 @@ class OnboardingTour {
         targetSelector: "#retro-odd-btn",
         fallbackSelector: "#retro-submit-btn",
         title: "9. 事後補記實戰 (單號快選 ➔ 評語 ➔ 提交)",
-        content: "<strong>試著點擊「單號(男)」</strong>（可多選學生卡片）快速全選，點擊下方常用評語帶入文字框，最後點擊「✅ 勾選 1 位並提交」！",
+        content: "<strong>試著點擊「單號(男)」</strong>（可多選學生卡片），點擊下方常用評語帶入文字框，最後按下提交！",
         forceAction: "click",
         tab: "retro"
       },
@@ -96,14 +99,13 @@ class OnboardingTour {
         id: "step-goto-dashboard",
         targetSelector: 'button[data-tab="dashboard"]',
         title: "10. 前往 📊 統計戰情室看分析",
-        content: "<strong>請點擊「📊 統計戰情室」</strong>，查看班級整體學業與常規分析！",
+        content: "想看全班大數據？<strong>請點擊「📊 統計戰情室」</strong>！",
         forceAction: "click",
         tab: null
       },
       {
         id: "step-dashboard-charts",
         targetSelector: "#dashboard-view .glass-card:first-child",
-        fallbackSelector: "#dashboard-view",
         title: "11. 四象限拔尖與關懷分析",
         content: "系統自動畫出<strong>「學業均分 ✕ 常規點數」四象限圖表</strong>與拔尖/關懷學生名單，這會是您段考親師座談的最佳利器！",
         forceAction: null,
@@ -113,7 +115,7 @@ class OnboardingTour {
         id: "step-finish",
         targetSelector: "#header-version-badge",
         title: "🎉 恭喜通關！戰力全開！",
-        content: "您已熟悉 ClassQuant Hub 核心操作與進階技巧！隨時可點擊<strong>「📢 公告」</strong>查看更新日誌與詳細說明書！",
+        content: "您已熟悉 ClassQuant Hub 核心操作！隨時可點擊<strong>「📢 頂部版本號」</strong>查看詳細圖文說明書與更新日誌！",
         forceAction: null,
         tab: "matrix"
       }
@@ -137,7 +139,7 @@ class OnboardingTour {
     // Inject strict tour CSS locker
     const style = document.createElement('style');
     style.id = 'tour-strict-style';
-    style.innerHTML = 
+    style.innerHTML = \
       body.tour-strict-locked {
         overflow: hidden !important;
         touch-action: none !important;
@@ -145,21 +147,21 @@ class OnboardingTour {
       html.tour-strict-locked {
         overflow: hidden !important;
       }
-    ;
+    \;
     document.head.appendChild(style);
 
     const container = document.createElement('div');
     container.id = 'tour-overlay-container';
     container.className = 'fixed inset-0 pointer-events-none hidden z-[9990]';
-    container.innerHTML = 
+    container.innerHTML = \
       <!-- Indestructible 9999px Box-Shadow Dark Spotlight Box -->
       <div id="tour-spotlight-box" class="fixed rounded-xl transition-all duration-75 pointer-events-none" style="box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);"></div>
 
-      <!-- Direction-Aware Bouncing Hand Pointer -->
+      <!-- Direction-Aware Bouncing Hand Pointer (Centered with Transform) -->
       <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden transition-all duration-75"></div>
 
       <!-- Viewport-Safe Popover Guidance Card -->
-      <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 w-auto sm:w-[360px] max-w-[94vw] bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-200 z-[10001] animate-fade-in-up">
+      <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[360px] bg-white rounded-3xl p-4 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-200 z-[10001] animate-fade-in-up">
         
         <!-- Header -->
         <div class="flex items-center justify-between pb-2 mb-2 border-b border-pink-100">
@@ -170,7 +172,7 @@ class OnboardingTour {
             </span>
           </div>
           <button onclick="onboardingTour.endTour()" class="text-xs font-bold text-slate-400 hover:text-pink-600 transition" title="結束教學">
-            ✕ 結束教學
+            ✕ 結束
           </button>
         </div>
 
@@ -187,7 +189,7 @@ class OnboardingTour {
         </div>
 
       </div>
-    ;
+    \;
 
     document.body.appendChild(container);
   }
@@ -200,9 +202,8 @@ class OnboardingTour {
       window.appState.toggleHeader(true, true);
     }
 
-    // Strict Global Scroll & Touch Blocker
+    // 1. Strict Global Scroll Blocker
     this.scrollBlocker = (e) => {
-      // Allow scrolling ONLY inside the tour popover itself
       if (!e.target.closest('#tour-popover')) {
         e.preventDefault();
         e.stopPropagation();
@@ -212,6 +213,23 @@ class OnboardingTour {
     document.addEventListener('wheel', this.scrollBlocker, { passive: false, capture: true });
     document.documentElement.classList.add('tour-strict-locked');
     document.body.classList.add('tour-strict-locked');
+
+    // 2. Strict Global Interaction Blocker (Prevents clicking ANYWHERE except target or popover)
+    this.clickBlocker = (e) => {
+      if (!this.isActive) return;
+      const inPopover = e.target.closest('#tour-popover');
+      let inTarget = false;
+      if (this.currentTargetEl && this.currentTargetEl !== document.body) {
+         inTarget = this.currentTargetEl.contains(e.target) || e.target === this.currentTargetEl;
+      }
+      // Allow if clicked on popover OR clicked on the highlighted target element
+      if (!inPopover && !inTarget) {
+         e.preventDefault();
+         e.stopPropagation();
+      }
+    };
+    document.addEventListener('click', this.clickBlocker, { capture: true });
+    document.addEventListener('touchstart', this.clickBlocker, { capture: true, passive: false });
 
     const container = document.getElementById('tour-overlay-container');
     if (container) container.classList.remove('hidden');
@@ -235,7 +253,6 @@ class OnboardingTour {
         const rect = this.currentTargetEl.getBoundingClientRect();
         const rectStr = Math.round(rect.top) + "_" + Math.round(rect.left) + "_" + Math.round(rect.width) + "_" + Math.round(rect.height);
         
-        // Only trigger DOM updates if element visually moved or resized (prevents jitter)
         if (rectStr !== lastRectStr) {
           this.highlightElement(this.currentTargetEl, this.currentStepObj);
           lastRectStr = rectStr;
@@ -246,15 +263,18 @@ class OnboardingTour {
     this.trackingFrame = requestAnimationFrame(loop);
   }
 
-  async waitForElement(primarySelector, fallbackSelector, timeout = 2500) {
+  async waitForElement(primarySelector, fallbackSelector, timeout = 3000) {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       let el = this.safeQuerySelector(primarySelector);
       if (!el && fallbackSelector) el = this.safeQuerySelector(fallbackSelector);
       
-      // Ensure element exists AND is visible (offsetParent is not null, except fixed elements, so we check bounding client rect)
-      if (el && (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0)) {
-        return el;
+      // Ensure element exists AND is visually rendered with dimensions
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          return el;
+        }
       }
       await new Promise(r => setTimeout(r, 50)); // Poll every 50ms
     }
@@ -286,11 +306,12 @@ class OnboardingTour {
 
     // 3. WAIT for element to firmly appear in DOM (fixes "skipping steps")
     let targetEl = await this.waitForElement(step.targetSelector, step.fallbackSelector);
-    if (!targetEl) targetEl = document.getElementById('classroom-matrix-view') || document.body;
+    if (!targetEl || targetEl === document.body) {
+      targetEl = document.getElementById('classroom-matrix-view') || document.body;
+    }
 
     // 4. Force Element into Viewport
     if (targetEl && targetEl !== document.body) {
-      // Horizontal Scroll for Navigation Bar items
       const navEl = targetEl.closest('nav');
       if (navEl) {
         const targetLeft = targetEl.offsetLeft;
@@ -301,7 +322,6 @@ class OnboardingTour {
           behavior: 'instant'
         });
       }
-      // Vertical Scroll into center of viewport
       targetEl.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
     }
 
@@ -366,14 +386,19 @@ class OnboardingTour {
 
     if (pointer) {
       pointer.classList.remove('hidden');
-      const pointerCenterX = Math.max(10, Math.min(window.innerWidth - 150, left + (width / 2) - 65));
-      const hintText = (step.forceAction === 'change') ? '請點此切換班級' : 
-                       (step.forceAction === 'click') ? '請點擊此處目標' : '重點功能在此';
+      
+      // Calculate exact center of the target element on the X axis
+      const targetCenterX = left + (width / 2);
+      
+      const hintText = (step.forceAction === 'change') ? '請點此切換' : 
+                       (step.forceAction === 'click') ? '請點擊此處' : '重點在此';
 
+      // Use transform: translateX(-50%) to guarantee perfect horizontal alignment!
       if (isTargetInTopHalf) {
         pointer.style.top = \\px\;
         pointer.style.left = \\px\;
-        pointer.className = 'tour-pointer-up fixed z-[10000] pointer-events-none flex flex-col items-center';
+        pointer.style.transform = 'translateX(-50%)';
+        pointer.className = 'tour-pointer-up fixed z-[10000] pointer-events-none flex flex-col items-center justify-center';
         pointer.innerHTML = \
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
@@ -383,7 +408,8 @@ class OnboardingTour {
       } else {
         pointer.style.top = \\px\;
         pointer.style.left = \\px\;
-        pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center';
+        pointer.style.transform = 'translateX(-50%)';
+        pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center justify-center';
         pointer.innerHTML = \
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
             \
@@ -403,23 +429,28 @@ class OnboardingTour {
   }
 
   setupEnforcement(targetEl, step) {
-    if (this.activeListener && this.lastTargetEl) {
-      this.lastTargetEl.removeEventListener('click', this.activeListener);
-      this.lastTargetEl.removeEventListener('change', this.activeListener);
+    // Cleanup previous listener
+    if (this.activeListener && this.lastTargetEl && this.lastEventType) {
+      this.lastTargetEl.removeEventListener(this.lastEventType, this.activeListener);
     }
+    this.activeListener = null;
+    this.lastEventType = null;
+    this.lastTargetEl = null;
 
     if (step.forceAction === 'click' || step.forceAction === 'change') {
-      const eventType = step.forceAction;
+      this.lastEventType = step.forceAction;
       const listener = (e) => {
-        // Need to allow the user's action to actually execute in the DOM!
-        // We will momentarily lift the pointer-events strict lock so they can click the actual element.
-        // Wait, the targetEl itself is ALREADY clickable because it's behind the 9999px box-shadow (box-shadow doesn't block clicks).
-        // Since spotlight has pointer-events:none, clicks pass through.
+        if (!e.isTrusted) return; // Prevent bot/script simulated clicks
         if (window.appState?.playPop) window.appState.playPop();
-        setTimeout(() => this.nextStep(), 150); // slight delay to allow UI to react
+        
+        // Remove listener immediately so it doesn't fire twice
+        targetEl.removeEventListener(this.lastEventType, listener);
+        this.activeListener = null;
+
+        setTimeout(() => this.nextStep(), 200); // 200ms delay gives UI time to paint changes
       };
 
-      targetEl.addEventListener(eventType, listener, { once: true });
+      targetEl.addEventListener(this.lastEventType, listener, { once: true });
       this.activeListener = listener;
       this.lastTargetEl = targetEl;
     }
@@ -433,7 +464,7 @@ class OnboardingTour {
     } else {
       this.endTour();
       if (window.appState?.playChime) window.appState.playChime();
-      window.appState.showToast('🎉 恭喜完成實戰教學！ClassQuant Hub 戰情室已完全就緒！🎀', 'success');
+      window.appState.showToast('🎉 恭喜完成實戰教學！', 'success');
     }
   }
 
@@ -448,17 +479,24 @@ class OnboardingTour {
       window.appState.closeModal();
     }
 
+    // Cleanup Blockers
     if (this.scrollBlocker) {
       document.removeEventListener('touchmove', this.scrollBlocker, { capture: true });
       document.removeEventListener('wheel', this.scrollBlocker, { capture: true });
       this.scrollBlocker = null;
     }
+    if (this.clickBlocker) {
+      document.removeEventListener('click', this.clickBlocker, { capture: true });
+      document.removeEventListener('touchstart', this.clickBlocker, { capture: true });
+      this.clickBlocker = null;
+    }
+
     document.documentElement.classList.remove('tour-strict-locked');
     document.body.classList.remove('tour-strict-locked');
 
-    if (this.activeListener && this.lastTargetEl) {
-      this.lastTargetEl.removeEventListener('click', this.activeListener);
-      this.lastTargetEl.removeEventListener('change', this.activeListener);
+    if (this.activeListener && this.lastTargetEl && this.lastEventType) {
+      this.lastTargetEl.removeEventListener(this.lastEventType, this.activeListener);
+      this.activeListener = null;
       this.lastTargetEl = null;
     }
 

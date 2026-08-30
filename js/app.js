@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.5.2';
+    this.appVersion = '1.5.4';
     this.init();
   }
 
@@ -290,11 +290,26 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.5.3 -->
+          <!-- v1.5.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.5.3 (底層引擎重構版)
+                v1.5.4 (幾何級精準對齊版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【指針完美置中】引入 CSS Transform 計算，強迫箭頭絕對置中於目標框正中央，徹底解決箭頭指偏問題。</li>
+              <li>• 【攔截雙擊跳步】實裝底層真實點擊 (isTrusted) 防禦與事件自動銷毀機制，100% 杜絕快速點擊導致的連環跳步。</li>
+              <li>• 【全局全域鎖死】新增 click 與 touchstart 的強制攔截捕捉 (Capture Phase)，教學期間非目標區域將完全處於無效狀態。</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.3
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
