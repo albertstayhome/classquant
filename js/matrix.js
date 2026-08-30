@@ -233,7 +233,7 @@ class ClassroomMatrix {
               ▶
             </button>
 
-            <button onclick="window.tagManager.openTagManagerModal()" class="text-pink-600 font-black hover:underline flex items-center gap-0.5 text-xs ml-1">
+            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="text-pink-600 font-black hover:underline flex items-center gap-0.5 text-xs ml-1">
               <i data-lucide="settings" class="w-3.5 h-3.5"></i> 自訂
             </button>
           </div>

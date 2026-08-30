@@ -1,11 +1,10 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.0)
- * 11-Step Master Guided Journey:
- * 1. Zero Lag: 16ms requestAnimationFrame instant transitions.
- * 2. Zero Modal Collisions: Guarded sub-modals so clicking buttons advances seamlessly.
- * 3. Step 3 & 4 Distinction: Clear education on batch paste + individual student/class edits.
- * 4. Step 9 Promotion: Highlights the new dedicated "⏰ 課堂事後補記" primary tab!
- * 5. Indestructible 9999px Box-Shadow dark spotlight + Direction-Aware Animated Pointers.
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.1)
+ * 100% Crash-Proof, Zero-Lag, 11-Step Master Guided Journey:
+ * 1. Fixed Step 7 -> 8 transition crash caused by invalid pseudo-selectors.
+ * 2. safeQuerySelector wrapper protecting against any DOM query errors.
+ * 3. 100% Valid W3C CSS Selectors for all 11 steps.
+ * 4. 9999px Box-Shadow dark spotlight + Direction-Aware Animated Pointers.
  */
 
 class OnboardingTour {
@@ -71,7 +70,7 @@ class OnboardingTour {
       {
         id: "step-click-tag",
         targetSelector: "#first-quick-tag-btn",
-        fallbackSelector: ".tag-page-slide button:first-child, .quick-tag-button",
+        fallbackSelector: ".tag-page-slide button:first-child",
         title: "7. 課堂快速記點與動態回饋",
         content: "選好學生後，請<strong>親手點擊座位正下方的第一個加分標籤</strong>為他快速記點（觸發彩帶粒子與音效）！",
         forceAction: "click",
@@ -79,8 +78,8 @@ class OnboardingTour {
       },
       {
         id: "step-custom-tags",
-        targetSelector: "button[onclick*='openTagManagerModal'], button:contains('自訂')",
-        fallbackSelector: "#first-quick-tag-btn",
+        targetSelector: "#custom-tag-open-btn",
+        fallbackSelector: ".glass-card button i[data-lucide='settings']",
         title: "8. 自訂班級專屬快速標籤",
         content: "每個班級上課習慣不同！點擊<strong>「⚙️ 自訂」</strong>可自訂加分/扣分項目、分值與分類，常用標籤會智慧自動排在最前頁！",
         forceAction: "click",
@@ -89,7 +88,7 @@ class OnboardingTour {
       {
         id: "step-retro-tab",
         targetSelector: 'button[data-tab="retro"]',
-        fallbackSelector: "button:contains('事後補記')",
+        fallbackSelector: "nav button:nth-child(3)",
         title: "9. 獨立專區：『⏰ 課堂事後補記』",
         content: "全新獨立專區！請<strong>點擊「⏰ 課堂事後補記」</strong>，下課回辦公室 1 秒批次勾選學生補記，並自動生成親師聯絡簿評語！",
         forceAction: "click",
@@ -114,6 +113,16 @@ class OnboardingTour {
     ];
 
     this.initDOM();
+  }
+
+  safeQuerySelector(selector) {
+    if (!selector) return null;
+    try {
+      return document.querySelector(selector);
+    } catch (e) {
+      console.warn('Invalid selector in tour step:', selector, e);
+      return null;
+    }
   }
 
   initDOM() {
@@ -205,9 +214,9 @@ class OnboardingTour {
 
     // Immediate next-frame positioning (zero lag)
     requestAnimationFrame(() => {
-      let targetEl = document.querySelector(step.targetSelector);
+      let targetEl = this.safeQuerySelector(step.targetSelector);
       if (!targetEl && step.fallbackSelector) {
-        targetEl = document.querySelector(step.fallbackSelector);
+        targetEl = this.safeQuerySelector(step.fallbackSelector);
       }
       if (!targetEl) {
         targetEl = document.getElementById('classroom-matrix-view') || document.body;
@@ -333,8 +342,8 @@ class OnboardingTour {
     if (step.forceAction === 'click') {
       const listener = (e) => {
         if (window.appState?.playPop) window.appState.playPop();
-        // Advance in 50ms for instant silky feel
-        setTimeout(() => this.nextStep(), 50);
+        // Advance smoothly in 60ms
+        setTimeout(() => this.nextStep(), 60);
       };
 
       targetEl.addEventListener('click', listener, { once: true });
@@ -343,7 +352,7 @@ class OnboardingTour {
     } else if (step.forceAction === 'change') {
       const listener = (e) => {
         if (window.appState?.playPop) window.appState.playPop();
-        setTimeout(() => this.nextStep(), 50);
+        setTimeout(() => this.nextStep(), 60);
       };
 
       targetEl.addEventListener('change', listener, { once: true });

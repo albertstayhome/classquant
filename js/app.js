@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.5.0';
+    this.appVersion = '1.5.1';
     this.init();
   }
 
@@ -290,19 +290,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.5.0 -->
+          <!-- v1.5.1 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.5.0 (最新重大版本)
+                v1.5.1 (最新修復版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 徹底修復步驟 7 點擊加分標籤後切換至步驟 8 無限卡死的嚴重 Bug！</li>
+              <li>• 實裝 safeQuerySelector 容錯保護層，確保導覽 11 大步驟 100% 絕不崩潰中斷。</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 【獨立專區】新增一級主導航「⏰ 課堂事後補記」專區（支援多生快選、常用評語模組、分值微調與補記歷史流）！</li>
               <li>• 【介面優化】移除新手教學按鈕閃爍動畫，回歸優雅穩重設計。</li>
-              <li>• 【導覽重構】實裝步驟 3「1秒批次貼上名冊」完整教育展示，並直通步驟 4 名冊個別微調，動線極致流暢！</li>
-              <li>• 【零延遲響應】全流程 16ms 毫秒級 requestAnimationFrame 即時定位。</li>
+              <li>• 【導覽重構】實裝步驟 3「1秒批次貼上名冊」完整教育展示，並直通步驟 4 名冊個別微調！</li>
             </ul>
           </div>
 
