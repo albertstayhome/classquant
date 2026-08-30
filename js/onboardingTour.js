@@ -1425,36 +1425,44 @@ class OnboardingTour {
       }
 
       if (actionContainer) {
-        if (step.action === 'manual-click' || step.action === 'manual-change') {
+        if (step.action === 'auto-pilot-paste') {
           actionContainer.innerHTML = `
-            <div class="px-3.5 py-1.5 rounded-2xl bg-pink-100 text-pink-700 text-xs font-black flex items-center gap-1.5 animate-pulse border border-pink-300 shadow-sm">
-              <span>👆</span>
-              <span>請您親自操作發光處</span>
+            <div class="flex items-center gap-2 w-full justify-between pt-1">
+              <button onclick="onboardingTour.executeBatchPasteDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200 cursor-pointer">
+                <span>▶️ 開始自動演示貼上 🪄</span>
+              </button>
+              <button onclick="onboardingTour.nextStep()" class="px-3.5 py-2 rounded-2xl font-bold text-slate-600 hover:text-slate-900 text-xs bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer">
+                下一步 ➔
+              </button>
             </div>
-          `;
-        } else if (step.action === 'auto-pilot-paste') {
-          actionContainer.innerHTML = `
-            <button onclick="onboardingTour.executeBatchPasteDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200">
-              <span>▶️ 開始自動演示貼上 🪄</span>
-            </button>
           `;
         } else if (step.action === 'auto-pilot-edit') {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.executeNameEditDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200">
-              <span>▶️ 開始自動演示改名 🪄</span>
-            </button>
+            <div class="flex items-center gap-2 w-full justify-between pt-1">
+              <button onclick="onboardingTour.executeNameEditDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200 cursor-pointer">
+                <span>▶️ 開始自動演示改名 🪄</span>
+              </button>
+              <button onclick="onboardingTour.nextStep()" class="px-3.5 py-2 rounded-2xl font-bold text-slate-600 hover:text-slate-900 text-xs bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer">
+                下一步 ➔
+              </button>
+            </div>
           `;
         } else if (this.currentStep === this.steps.length - 1) {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.endTour()" class="px-5 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-pink-200">
-              <span>✨ 完成並開始使用！</span>
+            <button onclick="onboardingTour.endTour()" class="w-full py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center justify-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-pink-200 cursor-pointer">
+              <span>✨ 完成新手教學，開始使用！</span>
             </button>
           `;
         } else {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.nextStep()" class="px-5 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-pink-200">
-              <span>下一步 ➔</span>
-            </button>
+            <div class="flex items-center gap-2 w-full justify-between pt-1">
+              <div class="px-2.5 py-1 rounded-xl bg-pink-50 text-pink-700 text-[11px] font-bold border border-pink-200 truncate">
+                ${step.action === 'manual-click' || step.action === 'manual-change' ? '👆 點發光處或直接點右側 ➔' : '💡 點擊右側按鈕繼續'}
+              </div>
+              <button onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-lg border-2 border-white transition flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 animate-bounce ring-2 ring-pink-200">
+                <span>下一步 ➔</span>
+              </button>
+            </div>
           `;
         }
       }

@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.3';
+    this.appVersion = '1.7.4';
     this.init();
   }
 
@@ -337,11 +337,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.3 -->
+          <!-- v1.7.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.3 (無遮擋導覽列整合與介面純淨化版)
+                v1.7.4 (新手教學全關卡暢通推進版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【新手教學全關卡「下一步」按鈕無死角支援】所有步驟（包含班級選單、選取學生等操作關卡）底部皆常駐高對比「下一步 ➔」按鈕與提示標籤，老師可自由選擇親手操作或直接點下一步推進，100% 絕不卡關等待！</li>
+              <li>• 【零等待即時啟動】拔除多餘的等待定時器，點擊「🎓 教學」瞬間展開聚光燈與導覽卡片，給予最清晰的視覺與操作提示。</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.3
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
@@ -821,18 +835,16 @@ class AppState {
 
   startTour() {
     this.playChime();
-    this.showToast('🎓 正在啟動新手教學實戰導覽...', 'info');
+    this.showToast('🎓 新手教學已就緒！請查看畫面引導與下方說明 🎀', 'info');
     // Ensure header is expanded so Step 1 (#global-class-select) is visible
     this.toggleHeader(true, true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => {
-      if (window.onboardingTour) {
-        window.onboardingTour.start(0);
-      } else if (window.OnboardingTour) {
-        window.onboardingTour = new window.OnboardingTour();
-        window.onboardingTour.start(0);
-      }
-    }, 150);
+    if (window.onboardingTour) {
+      window.onboardingTour.start(0);
+    } else if (window.OnboardingTour) {
+      window.onboardingTour = new window.OnboardingTour();
+      window.onboardingTour.start(0);
+    }
   }
 
   toggleHeader(forceShow = false, isSilent = false, fromInit = false) {
