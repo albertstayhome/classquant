@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.1';
+    this.appVersion = '1.7.2';
     this.init();
   }
 
@@ -40,10 +40,7 @@ class AppState {
       this.updateHeaderClock();
     }, 1000);
 
-    // 5. Setup Smart Scroll for Auto-Collapsing Header on Scroll Down
-    this.setupSmartScrollListener();
-
-    // 6. Setup PWA Install Prompt Listener
+    // 5. Setup PWA Install Prompt Listener
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this.deferredPrompt = e;
@@ -340,11 +337,24 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.1 -->
+          <!-- v1.7.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.1 (手動收合狀態持久化與頂部版面優化版)
+                v1.7.2 (系統初始化阻斷修復版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底修復初始化中斷】排查並拔除了建構函式中殘留的 setupSmartScrollListener 舊呼叫，確保 AppState 核心控制器與座位矩陣 100% 順暢渲染！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.1
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
