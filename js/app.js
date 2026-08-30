@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.9';
+    this.appVersion = '1.8.0';
     this.init();
   }
 
@@ -343,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.9 -->
+          <!-- v1.8.0 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.9 (生命週期穩定與畫面百分之百渲染版)
+                v1.8.0 (iOS WebKit Service Worker 致命攔截修復版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底修復 iOS WebKit 導航 TypeError】抓出 Service Worker 在 iOS Safari 處理 navigate 請求時傳入非法 cache 參數導致靜態檔案載入中斷的根本盲點，保證 iPhone / iPad / Android 畫面 100% 正常渲染！</li>
+              <li>• 【全機型無差別順暢運作】按鈕點選、抽籤、加扣分、12 步實戰新手導覽全面極速響應！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.9 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.9
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

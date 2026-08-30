@@ -3,7 +3,7 @@
  * ClassQuant Hub v1.6.0
  */
 
-const CACHE_NAME = 'classquant-hub-v37';
+const CACHE_NAME = 'classquant-hub-v38';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
   if (isAppCode) {
     // Strategy 1: Network-First (with query normalization on fallback)
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetch(event.request)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
