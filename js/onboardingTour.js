@@ -1224,12 +1224,14 @@ class OnboardingTour {
 
   async start(fromStep = 0) {
     try {
-      this.isActive = true;
-      this.isTransitioning = false;
-      this.lastTransitionTime = Date.now();
-      this.cancelAutoPlay();
+      this.initDOM();
+      this.cleanupListeners();
       this.clearAllTimers();
       this.clearAllAnimations();
+      this.isTransitioning = false;
+      this.isActive = true;
+      this.lastTransitionTime = Date.now();
+      this.cancelAutoPlay();
       this.currentStep = Math.max(0, Math.min(this.steps.length - 1, fromStep));
       this.isInitialized = false;
 

@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.0';
+    this.appVersion = '1.7.1';
     this.init();
   }
 
@@ -70,6 +70,14 @@ class AppState {
     this.updateHeaderVersionBadge();
     this.switchTab('matrix');
 
+    // Restore user's header collapse preference from localStorage
+    try {
+      const savedCollapse = localStorage.getItem('classquant_header_collapsed');
+      if (savedCollapse === 'true') {
+        this.toggleHeader(false, true, true);
+      }
+    } catch (e) {}
+
     // Auto check updates and show release notes ONCE on launch
     setTimeout(() => this.checkReleaseNotesOnLaunch(), 1000);
   }
@@ -79,38 +87,6 @@ class AppState {
     if (badge) {
       badge.innerHTML = `<span>v${this.appVersion}</span><span>📢</span>`;
     }
-  }
-
-  // --- Smart Auto-Collapsing Header on Scroll Down ---
-  setupSmartScrollListener() {
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-
-    window.addEventListener('scroll', () => {
-      // If onboarding tour is active, DO NOT AUTO-COLLAPSE HEADER!
-      if (window.onboardingTour && window.onboardingTour.isActive) return;
-
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          // When scrolling down more than 70px, automatically collapse header
-          if (currentScrollY > 70 && currentScrollY > lastScrollY) {
-            if (!this.isHeaderCollapsed) {
-              this.toggleHeader(false, true);
-            }
-          } 
-          // When scrolling up back to top, reveal header
-          else if (currentScrollY < 15) {
-            if (this.isHeaderCollapsed) {
-              this.toggleHeader(true, true);
-            }
-          }
-          lastScrollY = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
   }
 
   updateNetworkBadge(isOnline) {
@@ -364,11 +340,27 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.0 -->
+          <!-- v1.7.1 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.0 (標準化 UI 地圖與深度實戰代操版)
+                v1.7.1 (手動收合狀態持久化與頂部版面優化版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【頂部收合按鈕全螢幕守護】重構頂部控制區排版，班級選單響應式收斂，確保「收合頂部橫幅 (▲)」按鈕 100% 留在螢幕之內，絕不溢出！</li>
+              <li>• 【收合狀態持久化】手動收合橫幅後將永久記錄於本機，除非主動點擊展開，否則重開 App 或重新整理皆保持收合；徹底移除滾動時的自動開合干擾。</li>
+              <li>• 【移除跳動干擾】移除展開按鈕的彈跳跳躍動畫，改為精緻靜態浮動膠囊，優雅不打擾。</li>
+              <li>• 【新手教學可靠性加固】教學啟動器增加乾淨狀態重設機制與雙重實例保護，確保點擊「🎓 教學」保證即刻展開！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.0
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
@@ -802,7 +794,7 @@ class AppState {
     } catch (e) {}
   }
 
-  toggleHeader(forceShow = false, isSilent = false) {
+  toggleHeader(forceShow = false, isSilent = false, fromInit = false) {
     const header = document.getElementById('global-header');
     const pill = document.getElementById('header-unhide-pill');
     if (!header) return;
@@ -811,11 +803,13 @@ class AppState {
       header.classList.remove('header-collapsed');
       if (pill) pill.classList.add('hidden');
       this.isHeaderCollapsed = false;
+      try { localStorage.setItem('classquant_header_collapsed', 'false'); } catch (e) {}
     } else {
       header.classList.add('header-collapsed');
       if (pill) pill.classList.remove('hidden');
       this.isHeaderCollapsed = true;
-      if (!isSilent) this.showToast('已收合頂部橫幅，點擊上方按鈕可隨時展開 🎀', 'info');
+      try { localStorage.setItem('classquant_header_collapsed', 'true'); } catch (e) {}
+      if (!isSilent && !fromInit) this.showToast('已收合頂部橫幅，可隨時點擊上方「展開頂部選單」按鈕 🎀', 'info');
     }
   }
 
