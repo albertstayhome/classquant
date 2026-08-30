@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW" data-theme="kitty">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ClassQuant Hub • 國中導師與數學科任戰情室</title>
+  <title>ClassQuant Hub ???葉撠葦?摮貊?隞餅?恕</title>
   
   <!-- PWA Metadata -->
   <link rel="manifest" href="./manifest.json">
@@ -39,7 +39,7 @@
   <div id="header-unhide-pill" class="hidden fixed top-2 left-1/2 -translate-x-1/2 z-50 animate-bounce">
     <button onclick="appState.toggleHeader(true)" class="px-4 py-1.5 rounded-full bg-white/95 backdrop-blur border-2 border-pink-300 shadow-lg text-xs font-black text-pink-600 hover:bg-pink-50 transition flex items-center gap-1.5 active:scale-95">
       <span class="kitty-bow !w-3 !h-3"></span>
-      <span>▼ 展開頂部選單 (ClassQuant)</span>
+      <span>??撅???詨 (ClassQuant)</span>
     </button>
   </div>
 
@@ -50,8 +50,8 @@
       <!-- Brand with Authentic Hello Kitty & Little Twin Stars Mascots -->
       <div class="flex items-center space-x-2 sm:space-x-3">
         <div class="flex items-center space-x-1 bg-white px-1.5 py-0.5 rounded-2xl shadow-sm border border-pink-200">
-          <div class="kitty-cat-avatar cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('Hello Kitty 陪伴老師一起快樂教學！🎀', 'info')" title="Hello Kitty"></div>
-          <div class="sanrio-twinstars-badge cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('小雙星 Kiki & Lala 守護班級每一顆星星！✨', 'info')" title="Little Twin Stars (Kiki & Lala)"></div>
+          <div class="kitty-cat-avatar cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('Hello Kitty ?芯撈?葦銝韏瑕翰璅?摮賂???', 'info')" title="Hello Kitty"></div>
+          <div class="sanrio-twinstars-badge cursor-pointer !w-8 !h-8 sm:!w-10 sm:!h-10" onclick="appState.showToast('撠???Kiki & Lala 摰風?剔?瘥?憿?????, 'info')" title="Little Twin Stars (Kiki & Lala)"></div>
         </div>
 
         <div>
@@ -60,17 +60,17 @@
               ClassQuant Hub
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
-            <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.5.2</span>
-              <span>📢</span>
+            <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="?亦??砌?甈??湔?亥?">
+              <span>v1.5.3</span>
+              <span>?</span>
             </button>
           </div>
           <div class="flex items-center space-x-1.5 text-[11px] opacity-80">
-            <span id="header-live-clock" class="font-mono font-semibold">載入時間...</span>
-            <span>•</span>
+            <span id="header-live-clock" class="font-mono font-semibold">頛??...</span>
+            <span>??/span>
             <div id="header-schedule-status" class="flex items-center space-x-1">
               <span class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span>
-              <span class="text-emerald-600 font-bold">自動感知中</span>
+              <span class="text-emerald-600 font-bold">?芸??銝?/span>
             </div>
           </div>
         </div>
@@ -82,27 +82,27 @@
         <button id="pwa-install-btn" onclick="appState.installPWA()" 
           class="hidden sm:flex px-2.5 py-1 text-xs font-bold rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-md transition items-center gap-1">
           <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
-          <span>安裝 App</span>
+          <span>摰? App</span>
         </button>
 
-        <!-- Onboarding Tour Button (新手實戰教學) -->
+        <!-- Onboarding Tour Button (?唳?撖行?飛) -->
         <button id="onboarding-guide-btn" onclick="onboardingTour.start(0)" 
-          class="px-2.5 sm:px-3 py-1 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 transition flex items-center gap-1 shadow-sm active:scale-95 shrink-0" title="開啟新手教學">
-          <span class="text-xs font-black">🎓</span>
-          <span class="text-xs font-bold text-pink-700">新手教學</span>
+          class="px-2.5 sm:px-3 py-1 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 transition flex items-center gap-1 shadow-sm active:scale-95 shrink-0" title="???唳??飛">
+          <span class="text-xs font-black">??</span>
+          <span class="text-xs font-bold text-pink-700">?唳??飛</span>
         </button>
 
         <!-- Sound Toggle Button -->
         <button id="sound-toggle-btn" onclick="appState.toggleSound()" 
-          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="操作音效切換">
+          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="???單???">
           <i data-lucide="volume-2" class="w-4 h-4 text-pink-600"></i>
         </button>
 
         <!-- Theme Switcher Button -->
         <button id="theme-toggle-btn" onclick="appState.toggleTheme()" 
-          class="p-1.5 sm:px-2.5 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="切換主題">
+          class="p-1.5 sm:px-2.5 sm:py-1 rounded-xl border border-pink-300 hover:bg-pink-50 transition flex items-center gap-1 shadow-sm bg-white" title="??銝駁?">
           <span class="kitty-bow !w-3.5 !h-3.5"></span>
-          <span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">主題</span>
+          <span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">銝駁?</span>
         </button>
 
 
@@ -117,7 +117,7 @@
 
         <!-- 1-Tap Header Collapse Button -->
         <button onclick="appState.toggleHeader()" 
-          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold text-xs transition flex items-center gap-1 shadow-sm" title="收合頂部橫幅">
+          class="p-1.5 sm:px-2 sm:py-1 rounded-xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold text-xs transition flex items-center gap-1 shadow-sm" title="?嗅??璈怠?">
           <i data-lucide="chevron-up" class="w-4 h-4"></i>
         </button>
       </div>
@@ -130,52 +130,52 @@
     <div class="max-w-7xl mx-auto flex items-center space-x-1 sm:space-x-2 py-1">
       <button onclick="appState.switchTab('matrix')" data-tab="matrix" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-pink-500"></i>
-        <span>課堂點記板</span>
+        <span>隤脣?暺???/span>
       </button>
 
       <button onclick="appState.switchTab('roster')" data-tab="roster" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-pink-700 bg-pink-50/50">
         <i data-lucide="user-plus" class="w-3.5 h-3.5 text-pink-600"></i>
-        <span>👥 班級名單</span>
+        <span>? ?剔??</span>
       </button>
 
       <button onclick="appState.switchTab('retro')" data-tab="retro" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-amber-800 bg-amber-50/60 border border-amber-200">
         <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
-        <span>⏰ 課堂事後補記</span>
+        <span>??隤脣?鈭?鋆?</span>
       </button>
 
       <button onclick="appState.switchTab('dashboard')" data-tab="dashboard" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-500"></i>
-        <span>統計戰情室</span>
+        <span>蝯梯??唳?摰?/span>
       </button>
 
       <button onclick="appState.switchTab('timetable')" data-tab="timetable" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-500"></i>
-        <span>課表排程</span>
+        <span>隤脰”??</span>
       </button>
 
       <button onclick="appState.switchTab('events')" data-tab="events" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-500"></i>
-        <span>學生記事檢索</span>
+        <span>摮貊?閮?瑼Ｙ揣</span>
       </button>
 
       <button onclick="appState.switchTab('student-dossier')" data-tab="student-dossier" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="user-check" class="w-3.5 h-3.5 text-amber-500"></i>
-        <span>檔案 & 晤談</span>
+        <span>瑼? & ?方?</span>
       </button>
 
       <button onclick="appState.switchTab('ai-hub')" data-tab="ai-hub" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
         <i data-lucide="bot" class="w-3.5 h-3.5 text-purple-500"></i>
-        <span>AI 成績匯入</span>
+        <span>AI ?蜀?臬</span>
       </button>
 
       <button onclick="appState.openBulletinModal()" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 font-black shadow-sm">
         <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-600"></i>
-        <span>📢 公佈欄 & 更新日誌</span>
+        <span>? ?砌?甈?& ?湔?亥?</span>
       </button>
 
       <button onclick="appState.switchTab('guide')" data-tab="guide" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap text-pink-700 bg-pink-100 border border-pink-300 font-black">
         <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-600"></i>
-        <span>📖 圖文說明書</span>
+        <span>?? ??隤芣???/span>
       </button>
     </div>
   </nav>
@@ -213,7 +213,7 @@
   <!-- Floating Quick Guide Button on Bottom-Left (Hidden on small mobile) -->
   <button onclick="appState.switchTab('guide')" class="hidden sm:flex floating-guide-btn px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-xs shadow-xl transition items-center gap-2">
     <span class="kitty-bow"></span>
-    <span>💡 點我看圖文說明書</span>
+    <span>? 暺????牧?</span>
   </button>
 
   <!-- Global Footer -->
@@ -221,14 +221,14 @@
     <div class="flex items-center space-x-2">
       <span class="kitty-cat-mini"></span>
       <span class="font-black text-pink-600">ClassQuant Hub v1.3.0</span>
-      <span class="text-slate-500">| 三麗鷗家族陪伴國中教師因材施教</span>
+      <span class="text-slate-500">| 銝?曋振?隡游?銝剜?撣怠????/span>
     </div>
     <div class="flex items-center space-x-2">
       <button onclick="appState.checkForUpdates(false)" class="text-pink-600 hover:underline font-bold flex items-center gap-1">
-        <i data-lucide="refresh-cw" class="w-3 h-3"></i> 檢查更新
+        <i data-lucide="refresh-cw" class="w-3 h-3"></i> 瑼Ｘ?湔
       </button>
-      <span class="text-slate-300">•</span>
-      <span class="text-slate-500">已部署至 GitHub Pages</span>
+      <span class="text-slate-300">??/span>
+      <span class="text-slate-500">撌脤蝵脰 GitHub Pages</span>
     </div>
   </footer>
 
@@ -243,22 +243,22 @@
   <div id="global-toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none"></div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/store.js?v=1.5.2"></script>
-  <script src="./js/timetable.js?v=1.5.2"></script>
-  <script src="./js/statistics.js?v=1.5.2"></script>
-  <script src="./js/charts.js?v=1.5.2"></script>
-  <script src="./js/tagManager.js?v=1.5.2"></script>
-  <script src="./js/matrix.js?v=1.5.2"></script>
-  <script src="./js/rosterManager.js?v=1.5.2"></script>
-  <script src="./js/retroLogView.js?v=1.5.2"></script>
-  <script src="./js/eventsLog.js?v=1.5.2"></script>
-  <script src="./js/studentDossier.js?v=1.5.2"></script>
-  <script src="./js/timetableEditor.js?v=1.5.2"></script>
-  <script src="./js/aiImportExport.js?v=1.5.2"></script>
-  <script src="./js/onboardingTour.js?v=1.5.2"></script>
-  <script src="./js/onboardingWizard.js?v=1.5.2"></script>
-  <script src="./js/userGuide.js?v=1.5.2"></script>
-  <script src="./js/app.js?v=1.5.2"></script>
+  <script src="./js/store.js?v=1.5.3"></script>
+  <script src="./js/timetable.js?v=1.5.3"></script>
+  <script src="./js/statistics.js?v=1.5.3"></script>
+  <script src="./js/charts.js?v=1.5.3"></script>
+  <script src="./js/tagManager.js?v=1.5.3"></script>
+  <script src="./js/matrix.js?v=1.5.3"></script>
+  <script src="./js/rosterManager.js?v=1.5.3"></script>
+  <script src="./js/retroLogView.js?v=1.5.3"></script>
+  <script src="./js/eventsLog.js?v=1.5.3"></script>
+  <script src="./js/studentDossier.js?v=1.5.3"></script>
+  <script src="./js/timetableEditor.js?v=1.5.3"></script>
+  <script src="./js/aiImportExport.js?v=1.5.3"></script>
+  <script src="./js/onboardingTour.js?v=1.5.3"></script>
+  <script src="./js/onboardingWizard.js?v=1.5.3"></script>
+  <script src="./js/userGuide.js?v=1.5.3"></script>
+  <script src="./js/app.js?v=1.5.3"></script>
 
   <!-- Register Service Worker for 100% Offline PWA functionality -->
   <script>
