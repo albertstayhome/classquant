@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.2';
+    this.appVersion = '1.7.3';
     this.init();
   }
 
@@ -337,11 +337,26 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.2 -->
+          <!-- v1.7.3 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.2 (系統初始化阻斷修復版)
+                v1.7.3 (無遮擋導覽列整合與介面純淨化版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【展開按鈕完美整合導覽列】徹底拔除漂浮於畫面正上方的懸浮膠囊，將「▼ 展開選單」按鈕無縫收斂進黏性導覽列（Navbar）內部，零遮擋任何分頁或操作內容！</li>
+              <li>• 【點記板功能純淨化】從「課堂點記板」頂部工具列移除重複多餘的「事後補記」按鈕，讓課堂點記與課後補記分工更加純粹直覺。</li>
+              <li>• 【新手教學即時感應啟動】加固教學啟動器，點擊瞬間發出清脆音效、即刻展開頂部並平滑滾動至起始位置，解決點擊沒反應之疑惑。</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.2
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
@@ -804,22 +819,41 @@ class AppState {
     } catch (e) {}
   }
 
+  startTour() {
+    this.playChime();
+    this.showToast('🎓 正在啟動新手教學實戰導覽...', 'info');
+    // Ensure header is expanded so Step 1 (#global-class-select) is visible
+    this.toggleHeader(true, true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      if (window.onboardingTour) {
+        window.onboardingTour.start(0);
+      } else if (window.OnboardingTour) {
+        window.onboardingTour = new window.OnboardingTour();
+        window.onboardingTour.start(0);
+      }
+    }, 150);
+  }
+
   toggleHeader(forceShow = false, isSilent = false, fromInit = false) {
     const header = document.getElementById('global-header');
+    const navUnhide = document.getElementById('nav-unhide-container');
     const pill = document.getElementById('header-unhide-pill');
     if (!header) return;
 
     if (forceShow || header.classList.contains('header-collapsed')) {
       header.classList.remove('header-collapsed');
+      if (navUnhide) navUnhide.classList.add('hidden');
       if (pill) pill.classList.add('hidden');
       this.isHeaderCollapsed = false;
       try { localStorage.setItem('classquant_header_collapsed', 'false'); } catch (e) {}
     } else {
       header.classList.add('header-collapsed');
+      if (navUnhide) navUnhide.classList.remove('hidden');
       if (pill) pill.classList.remove('hidden');
       this.isHeaderCollapsed = true;
       try { localStorage.setItem('classquant_header_collapsed', 'true'); } catch (e) {}
-      if (!isSilent && !fromInit) this.showToast('已收合頂部橫幅，可隨時點擊上方「展開頂部選單」按鈕 🎀', 'info');
+      if (!isSilent && !fromInit) this.showToast('已收合頂部橫幅，可隨時點擊導覽列右側「▼ 展開頂部選單」🎀', 'info');
     }
   }
 

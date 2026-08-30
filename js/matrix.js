@@ -123,10 +123,6 @@ class ClassroomMatrix {
           <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold bg-white border border-pink-300 rounded-xl hover:bg-pink-50 text-slate-800 shadow-sm">
             全選
           </button>
-          
-          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
-            <i data-lucide="clock" class="w-3.5 h-3.5"></i> 事後補記
-          </button>
 
           <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-pink-500 text-white rounded-xl shadow-sm">
             抽籤
