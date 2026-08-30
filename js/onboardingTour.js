@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.4)
  * - 60FPS sync tracking + CSS Transform Centering (Arrow 100% aligned)
  * - Global Absolute Interaction Blocker (Only targeted element is clickable)
@@ -139,7 +139,7 @@ class OnboardingTour {
     // Inject strict tour CSS locker
     const style = document.createElement('style');
     style.id = 'tour-strict-style';
-    style.innerHTML = \
+    style.innerHTML = `
       body.tour-strict-locked {
         overflow: hidden !important;
         touch-action: none !important;
@@ -147,13 +147,13 @@ class OnboardingTour {
       html.tour-strict-locked {
         overflow: hidden !important;
       }
-    \;
+    `;
     document.head.appendChild(style);
 
     const container = document.createElement('div');
     container.id = 'tour-overlay-container';
     container.className = 'fixed inset-0 pointer-events-none hidden z-[9990]';
-    container.innerHTML = \
+    container.innerHTML = `
       <!-- Indestructible 9999px Box-Shadow Dark Spotlight Box -->
       <div id="tour-spotlight-box" class="fixed rounded-xl transition-all duration-75 pointer-events-none" style="box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);"></div>
 
@@ -189,7 +189,7 @@ class OnboardingTour {
         </div>
 
       </div>
-    \;
+    `;
 
     document.body.appendChild(container);
   }
@@ -335,29 +335,29 @@ class OnboardingTour {
     const badgeEl = document.getElementById('tour-step-badge');
     const actionContainer = document.getElementById('tour-action-container');
 
-    badgeEl.innerText = \步驟 \ / \\;
+    badgeEl.innerText = `步驟 ${this.currentStep + 1} / ${this.steps.length}`;
     titleEl.innerHTML = step.title;
     contentEl.innerHTML = step.content;
 
     if (step.forceAction === 'click' || step.forceAction === 'change') {
-      actionContainer.innerHTML = \
+      actionContainer.innerHTML = `
         <div class="px-3 py-1.5 rounded-xl bg-pink-100 text-pink-700 text-xs font-black flex items-center gap-1 animate-pulse border border-pink-300">
           <span>👆</span>
           <span>請點擊發光目標</span>
         </div>
-      \;
+      `;
     } else if (this.currentStep === this.steps.length - 1) {
-      actionContainer.innerHTML = \
+      actionContainer.innerHTML = `
         <button onclick="onboardingTour.endTour()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
           <span>✨ 完成並開始使用！</span>
         </button>
-      \;
+      `;
     } else {
-      actionContainer.innerHTML = \
+      actionContainer.innerHTML = `
         <button onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
           <span>下一步 ➔</span>
         </button>
-      \;
+      `;
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -377,10 +377,10 @@ class OnboardingTour {
     const height = rect.height + pad * 2;
     const bottom = top + height;
 
-    spotlight.style.top = \\px\;
-    spotlight.style.left = \\px\;
-    spotlight.style.width = \\px\;
-    spotlight.style.height = \\px\;
+    spotlight.style.top = `${top}px`;
+    spotlight.style.left = `${left}px`;
+    spotlight.style.width = `${width}px`;
+    spotlight.style.height = `${height}px`;
 
     const isTargetInTopHalf = (rect.top + (rect.height / 2)) < (window.innerHeight / 2);
 
@@ -395,27 +395,27 @@ class OnboardingTour {
 
       // Use transform: translateX(-50%) to guarantee perfect horizontal alignment!
       if (isTargetInTopHalf) {
-        pointer.style.top = \\px\;
-        pointer.style.left = \\px\;
+        pointer.style.top = `${bottom + 8}px`;
+        pointer.style.left = `${targetCenterX}px`;
         pointer.style.transform = 'translateX(-50%)';
         pointer.className = 'tour-pointer-up fixed z-[10000] pointer-events-none flex flex-col items-center justify-center';
-        pointer.innerHTML = \
+        pointer.innerHTML = `
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</span>
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mt-0.5">
-            \
+            ${hintText}
           </span>
-        \;
+        `;
       } else {
-        pointer.style.top = \\px\;
-        pointer.style.left = \\px\;
+        pointer.style.top = `${Math.max(10, top - 68)}px`;
+        pointer.style.left = `${targetCenterX}px`;
         pointer.style.transform = 'translateX(-50%)';
         pointer.className = 'tour-pointer-down fixed z-[10000] pointer-events-none flex flex-col items-center justify-center';
-        pointer.innerHTML = \
+        pointer.innerHTML = `
           <span class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-xl border border-white whitespace-nowrap mb-0.5">
-            \
+            ${hintText}
           </span>
           <span class="text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👇</span>
-        \;
+        `;
       }
     }
 
