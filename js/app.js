@@ -1,5 +1,5 @@
 /**
- * ClassQuant Hub - Main App Controller v1.4.0
+ * ClassQuant Hub - Main App Controller v1.6.0
  * Theme Switcher, Native Web Audio Chime Engine, Smart Auto-Collapsing Header on Scroll,
  * Delightful Micro-Animations, Tab Router, In-App Live Over-The-Air (OTA) Remote Update Engine,
  * and System Bulletin / Changelog Center.
@@ -122,11 +122,34 @@ class AppState {
     }
   }
 
+  /**
+   * Compares two semantic version strings (e.g. "1.6.0" vs "1.5.2").
+   * Supports optional leading 'v' or 'V' (e.g. "v1.6.0").
+   * @param {string} v1
+   * @param {string} v2
+   * @returns {number} 1 if v1 > v2, -1 if v1 < v2, 0 if v1 === v2
+   */
+  compareVersions(v1, v2) {
+    if (!v1 || !v2) return 0;
+    const parse = (v) => String(v).replace(/^[vV]/, '').trim().split('.').map(n => parseInt(n, 10) || 0);
+    const p1 = parse(v1);
+    const p2 = parse(v2);
+    const len = Math.max(p1.length, p2.length);
+    for (let i = 0; i < len; i++) {
+      const a = p1[i] || 0;
+      const b = p2[i] || 0;
+      if (a > b) return 1;
+      if (a < b) return -1;
+    }
+    return 0;
+  }
+
   // --- OTA Live Push Update Engine & Proactive Release Notes (Strictly Once per Version) ---
   async checkReleaseNotesOnLaunch() {
     const lastSeen = localStorage.getItem('classquant_last_seen_version');
-    if (lastSeen === this.appVersion) {
-      // User has already seen this version, do not prompt again!
+    
+    // If the user has already seen this version (or a newer version), do not prompt again!
+    if (lastSeen && this.compareVersions(lastSeen, this.appVersion) >= 0) {
       return;
     }
 
@@ -134,20 +157,31 @@ class AppState {
       const res = await fetch(`./version.json?t=${Date.now()}`);
       if (res.ok) {
         const info = await res.json();
-        this.showReleaseNotesModal(info, true);
-        return;
+        // If remote version is strictly newer than current running app, prompt update
+        if (info.version && this.compareVersions(info.version, this.appVersion) > 0) {
+          this.showReleaseNotesModal(info, false);
+          return;
+        }
+        // If remote version matches current running app, show release notes
+        if (info.version && this.compareVersions(info.version, this.appVersion) === 0) {
+          this.showReleaseNotesModal(info, true);
+          return;
+        }
+        // If remote version is older (server lagging or stale), fall back to built-in current notes
       }
-    } catch (e) {}
+    } catch (e) {
+      // Offline or network error -> proceed to built-in fallback
+    }
 
-    // Fallback modal if offline
+    // Built-in fallback release notes for current running appVersion (v1.6.0)
     this.showReleaseNotesModal({
       version: this.appVersion,
-      releaseDate: '2026-08-29',
+      releaseDate: '2026-08-30',
       releaseNotes: [
-        "1. 頂部新增「🌱 新手引導」互動教學嚮導，一步步引導建立班級與標籤",
-        "2. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
-        "3. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
-        "4. 精簡移除 NAS 模組，系統運行更加輕快順手"
+        "1. 【新手導覽全方位升級】全新 12 步引導式動態教學，具備高精準度 SVG 圓角聚光燈與方位指示指針！",
+        "2. 【全自動模擬手勢巡航】流暢貝茲曲線自動導航，視圖平滑轉場無縫銜接！",
+        "3. 【防連點防跳步狀態鎖】全面強化互動生命週期與事件隔離，杜絕誤觸跳步與滾動死鎖！",
+        "4. 【PWA 離線快取同步】全新 Service Worker 智能快取與版本原子化同步，杜絕舊版閃爍回退！"
       ]
     }, true);
   }
@@ -163,11 +197,17 @@ class AppState {
       if (res.ok) {
         const info = await res.json();
         const lastSeen = localStorage.getItem('classquant_last_seen_version');
-        if (info.version && info.version !== this.appVersion && lastSeen !== info.version) {
-          this.showReleaseNotesModal(info, false);
+        const isNewer = info.version && this.compareVersions(info.version, this.appVersion) > 0;
+        
+        if (isNewer) {
+          if (!silent || lastSeen !== info.version) {
+            this.showReleaseNotesModal(info, false);
+          }
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
         }
+      } else {
+        if (!silent) this.showToast('無法取得更新資訊，請稍後再試', 'warning');
       }
     } catch (e) {
       if (!silent) this.showToast('無法取得更新資訊，請檢查網路連線', 'warning');
@@ -176,7 +216,8 @@ class AppState {
 
   showReleaseNotesModal(info, isNewVersionNotice = false) {
     // Immediately mark as seen so it NEVER pops up repeatedly!
-    localStorage.setItem('classquant_last_seen_version', info.version || this.appVersion);
+    const modalVersion = info.version || this.appVersion;
+    localStorage.setItem('classquant_last_seen_version', modalVersion);
 
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
@@ -188,10 +229,10 @@ class AppState {
           <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
         </div>
         <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
-          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${info.version}
+          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${modalVersion}
           <span class="kitty-bow"></span>
         </h3>
-        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-29'}</p>
+        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-30'}</p>
 
         <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-2 mb-5 font-bold">
           <div class="text-pink-900 font-black flex items-center gap-1">
@@ -207,10 +248,10 @@ class AppState {
         </div>
 
         <div class="flex items-center justify-center gap-3">
-          <button onclick="appState.dismissReleaseNotes('${info.version}')" 
+          <button onclick="appState.dismissReleaseNotes('${modalVersion}')" 
             class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5 active:scale-95">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span>✨ 開始體驗最新功能！</span>
+            <span>${isNewVersionNotice ? '✨ 開始體驗！' : '🔄 立即套用更新'}</span>
           </button>
         </div>
       </div>
@@ -221,19 +262,52 @@ class AppState {
   }
 
   async dismissReleaseNotes(version) {
-    localStorage.setItem('classquant_last_seen_version', version);
+    const targetVersion = version || this.appVersion;
+    localStorage.setItem('classquant_last_seen_version', targetVersion);
     this.closeModal();
-    this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
-    // If the currently loaded DOM does not have the latest elements, clear cache and hard reload
-    if (this.appVersion !== version || !document.getElementById('onboarding-guide-btn')) {
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        for (let k of keys) {
-          await caches.delete(k);
-        }
+
+    // If dismissing an update for a strictly newer version, trigger Service Worker update & reload
+    if (this.compareVersions(targetVersion, this.appVersion) > 0) {
+      this.showToast(`正在更新至 v${targetVersion}...🎀`, 'info');
+      if ('serviceWorker' in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg) {
+            await reg.update();
+            if (reg.waiting) {
+              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          }
+        } catch (e) {}
       }
-      setTimeout(() => location.reload(true), 300);
+      setTimeout(() => location.reload(), 400);
+    } else {
+      this.showToast(`已就緒 v${this.appVersion} 功能！🎀`, 'success');
     }
+  }
+
+  showSWUpdateBanner(reg) {
+    const existing = document.getElementById('pwa-update-banner');
+    if (existing) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-update-banner';
+    banner.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/95 text-white border border-pink-400 shadow-2xl backdrop-blur-md flex items-center gap-3 text-xs font-bold animate-fade-in-up';
+    banner.innerHTML = `
+      <span>🎉 發現新版本 ClassQuant Hub！</span>
+      <button id="pwa-reload-btn" class="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl text-white font-black hover:brightness-110 active:scale-95 transition">立即更新</button>
+      <button id="pwa-dismiss-btn" class="px-2 py-1 text-slate-400 hover:text-white transition">稍後</button>
+    `;
+    document.body.appendChild(banner);
+    document.getElementById('pwa-reload-btn').addEventListener('click', () => {
+      if (reg && reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        window.location.reload();
+      }
+    });
+    document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+      banner.remove();
+    });
   }
 
   // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
@@ -290,15 +364,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.5.2 -->
+          <!-- v1.6.0 -->
           <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.5.2 (最新實戰導覽版本)
+                v1.6.0 (最新旗艦發布版)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【新手導覽全方位升級】全新 12 步引導式動態教學，具備高精準度 SVG 圓角聚光燈與方位指示指針！</li>
+              <li>• 【全自動模擬手勢巡航】流暢貝茲曲線自動導航，視圖平滑轉場無縫銜接！</li>
+              <li>• 【防連點防跳步狀態鎖】全面強化互動生命週期與事件隔離，杜絕誤觸跳步與滾動死鎖！</li>
+              <li>• 【PWA 離線快取同步】全新 Service Worker 智能快取與版本原子化同步，杜絕舊版閃爍回退！</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.2
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 【實戰級動態教學】升級 12 大沉浸式操作關卡（點選座位、課堂加分動效、自訂標籤、Excel 批次貼上、名冊細項改名調座號、事後補記勾選評語提交、四象限戰情解讀）！</li>
               <li>• 【手機導航水平自動置中】徹底解決手機螢幕狹窄時導航欄後方按鈕在畫面外導致指針指歪的座標跑位問題！</li>
             </ul>

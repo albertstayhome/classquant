@@ -1,8 +1,9 @@
-﻿/**
- * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
+/**
+ * Service Worker for 100% Offline PWA functionality with Resilient Cache Query Normalization
+ * ClassQuant Hub v1.6.0
  */
 
-const CACHE_NAME = 'classquant-hub-v19';
+const CACHE_NAME = 'classquant-hub-v20';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,23 +32,26 @@ const ASSETS_TO_CACHE = [
   './使用指南_圖文說明書.html'
 ];
 
-// Install: Cache core assets and immediately activate
+// Install: Cache all core assets and skip waiting immediately
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
+    }).catch((err) => {
+      console.error('[SW] Precaching failed during install:', err);
     })
   );
 });
 
-// Activate: Delete all old caches and claim all clients immediately
+// Activate: Delete outdated caches and claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[SW] Deleting stale cache:', key);
             return caches.delete(key);
           }
         })
@@ -56,44 +60,81 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Strategy: Network-First for HTML/JSON (Instant OTA), Stale-While-Revalidate for CSS/JS
+// Fetch Routing:
+// 1. App Shell & Code Assets (.html, .json, .js, .css, navigation requests):
+//    Network-First with instant offline Cache fallback ({ ignoreSearch: true })
+//    Prevents stale-code rollback flashes when new versions are deployed.
+// 2. Static Media & External CDNs (images, fonts, vendor scripts):
+//    Cache-First with network fallback ({ ignoreSearch: true })
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  const isHtmlOrJson = url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname.endsWith('/');
+  if (!event.request.url.startsWith('http')) return;
 
-  if (isHtmlOrJson) {
-    // Network-First: Always fetch latest from server when online
+  const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+
+  // Identify first-party application code and entry documents
+  const isAppCode = isSameOrigin && (
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('/') ||
+    url.pathname === '' ||
+    event.request.mode === 'navigate'
+  );
+
+  if (isAppCode) {
+    // Strategy 1: Network-First (with query normalization on fallback)
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request).then(res => res || caches.match('./index.html')))
+        .catch(() => {
+          // Offline Fallback: match with ignoreSearch: true to handle ?v=1.6.0 queries
+          return caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+            // If navigation request fails to match specific path, fallback to cached index.html
+            if (event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+              return caches.match('./index.html', { ignoreSearch: true });
+            }
+            return null;
+          });
+        })
     );
   } else {
-    // Stale-While-Revalidate: Return cache immediately, fetch fresh copy in background
+    // Strategy 2: Cache-First for static media / external CDNs
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
+      caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
             const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
           return networkResponse;
-        }).catch(() => null);
-
-        return cachedResponse || fetchPromise;
+        }).catch((err) => {
+          console.warn('[SW] Fetch failed for asset:', event.request.url, err);
+          return null;
+        });
       })
     );
   }
 });
 
+// Handle explicit SKIP_WAITING message
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') {
+  if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
     self.skipWaiting();
   }
 });

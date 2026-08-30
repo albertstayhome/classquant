@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="kitty">
+<head>
+  <meta charset="UTF-8">
+  <title>ClassQuant Hub — Interactive Tour Empirical Stress Test Suite</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .pass { color: #16a34a; font-weight: bold; }
+    .fail { color: #dc2626; font-weight: bold; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Minimal App DOM required by OnboardingTour & 12 Steps -->
+  <header id="global-header" style="height: 60px; position: sticky; top: 0;">
+    <button id="header-version-badge">v1.6.0 📢</button>
+    <button id="onboarding-guide-btn">🎓 新手教學</button>
+    <button id="sound-toggle-btn">🔊</button>
+    <button id="theme-toggle-btn">🎀 主題</button>
+    <select id="global-class-select">
+      <option value="301" selected>3年1班 (數學)</option>
+      <option value="302">3年2班 (數學)</option>
+      <option value="303">3年3班 (導師班)</option>
+    </select>
+  </header>
+
+  <nav style="display: flex; gap: 8px; overflow-x: auto;">
+    <button data-tab="matrix">課堂點記板</button>
+    <button data-tab="roster">👥 班級名單</button>
+    <button data-tab="retro">⏰ 課堂事後補記</button>
+    <button data-tab="dashboard">統計戰情室</button>
+  </nav>
+
+  <main>
+    <section id="classroom-matrix-view">
+      <div id="seat-card-1" class="student-seat-card" style="width: 120px; height: 80px; margin: 10px;">1號 王小明</div>
+      <div id="seat-card-2" class="student-seat-card" style="width: 120px; height: 80px; margin: 10px;">2號 李小美</div>
+      <div class="tag-page-slide">
+        <button id="first-quick-tag-btn" style="padding: 10px;">主動解出難題 (+3)</button>
+      </div>
+      <div class="glass-card">
+        <button id="custom-tag-open-btn">⚙️ 自訂標籤</button>
+      </div>
+    </section>
+
+    <section id="roster-manager-view" class="hidden">
+      <button id="roster-paste-btn">📋 1秒批次貼上名單</button>
+      <div class="grid">
+        <div style="padding: 10px;">學生名單列表 1</div>
+      </div>
+    </section>
+
+    <section id="retro-log-view" class="hidden">
+      <button id="retro-odd-btn">單號(男)</button>
+      <button id="retro-submit-btn">批次提交</button>
+    </section>
+
+    <section id="dashboard-view" class="hidden">
+      <div class="glass-card" style="width: 300px; height: 200px;">四象限圖表</div>
+    </section>
+  </main>
+
+  <div id="test-output" style="margin-top: 30px; border-top: 2px solid #ccc; padding-top: 20px;">
+    <h2>Stress Test Execution Log</h2>
+    <div id="status">Executing stress tests...</div>
+    <pre id="summary-json" style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-family: monospace;"></pre>
+  </div>
+
+  <!-- Mock App State -->
+  <script>
+    window.appState = {
+      activeTab: 'matrix',
+      isSoundEnabled: () => true,
+      playPop: () => {},
+      playChime: () => {},
+      showToast: (msg) => {},
+      closeModal: () => {},
+      toggleHeader: () => {},
+      switchTab: (tab) => {
+        window.appState.activeTab = tab;
+        document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+        if (tab === 'matrix') document.getElementById('classroom-matrix-view')?.classList.remove('hidden');
+        if (tab === 'roster') document.getElementById('roster-manager-view')?.classList.remove('hidden');
+        if (tab === 'retro') document.getElementById('retro-log-view')?.classList.remove('hidden');
+        if (tab === 'dashboard') document.getElementById('dashboard-view')?.classList.remove('hidden');
+      },
+      handleManualClassChange: (val) => {}
+    };
+  </script>
+
+  <!-- Load Tour Engine -->
+  <script src="../js/onboardingTour.js"></script>
+
+  <!-- Load Stress Test Runner -->
+  <script src="stress_tour_browser_runner.js"></script>
+</body>
+</html>
