@@ -1049,66 +1049,7 @@ class OnboardingTour {
         `;
       }
 
-      this.clickBlocker = (e) => {
-        if (!this.isActive) return;
-        if (this.safeClosest(e.target, '#tour-popover')) return;
-        
-        if (this.isAutoPlaying) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-
-        const step = this.steps[this.currentStep];
-        if (!step) return;
-
-        if (step.action === 'auto-click' || step.action === 'auto-pilot-paste' || step.action === 'auto-pilot-edit') {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-
-        if (step.action === 'manual-click' || step.action === 'manual-change') {
-          let isInsideSpotlight = false;
-          const targetEl = this.currentTargetEl;
-
-          if (targetEl && targetEl !== document.body) {
-            if (e.target === targetEl || targetEl.contains(e.target)) {
-              isInsideSpotlight = true;
-            } else {
-              const rect = targetEl.getBoundingClientRect();
-              const pad = (typeof step.pad === 'number') ? step.pad : 6;
-              const minX = rect.left - pad;
-              const minY = rect.top - pad;
-              const maxX = rect.right + pad;
-              const maxY = rect.bottom + pad;
-
-              let clientX = e.clientX;
-              let clientY = e.clientY;
-              if (typeof clientX !== 'number' && e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-              } else if (typeof clientX !== 'number' && e.changedTouches && e.changedTouches.length > 0) {
-                clientX = e.changedTouches[0].clientX;
-                clientY = e.changedTouches[0].clientY;
-              }
-
-              if (typeof clientX === 'number' && typeof clientY === 'number') {
-                if (clientX >= minX && clientX <= maxX && clientY >= minY && clientY <= maxY) {
-                  isInsideSpotlight = true;
-                }
-              }
-            }
-          }
-
-          if (!isInsideSpotlight) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }
-      };
-
-      document.addEventListener('click', this.clickBlocker, { capture: true });
+      this.clickBlocker = null;
 
       this.bindEventListeners();
       this.playAudioFeedback('chime');

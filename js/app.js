@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.3';
+    this.appVersion = '1.8.4';
     this.init();
   }
 
@@ -343,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.3 -->
+          <!-- v1.8.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.3 (全靜態座位預渲染與零等待導覽版)
+                v1.8.4 (全面移除觸控攔截限制與自然互動版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底移除觸控攔截】全面移除所有全域 capture 點擊攔截器，不再限制點擊位置，所有按鈕與學生座位卡 100% 隨點隨應！</li>
+              <li>• 【導覽極速前進】導覽卡片右下角隨時可點「下一步 ➔」或「✕ 結束」，完全不鎖定或中斷使用者操作！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.3
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
