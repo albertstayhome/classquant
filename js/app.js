@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.8';
+    this.appVersion = '1.7.9';
     this.init();
   }
 
@@ -64,25 +64,6 @@ class AppState {
     this.initThemeSetting();
     this.checkFirstVisit();
     this.checkForUpdates(true);
-
-    // Auto version sync: detect remote updates and flush stale PWA caches immediately
-    if (typeof fetch === 'function') {
-      fetch('./version.json?nocache=' + Date.now())
-        .then(r => r.json())
-        .then(remote => {
-          if (remote && remote.version && remote.version !== this.appVersion) {
-            console.log('[Version] New version detected:', remote.version, 'Current:', this.appVersion);
-            if ('caches' in window) {
-              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
-                window.location.reload(true);
-              });
-            } else {
-              window.location.reload(true);
-            }
-          }
-        })
-        .catch(() => {});
-    }
 
     // Initial render
     this.updateHeaderStatus();
@@ -362,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.8 -->
+          <!-- v1.7.9 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.8 (全自動快取清除與導覽直通發射版)
+                v1.7.9 (生命週期穩定與畫面百分之百渲染版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底移除啟動期重整干擾】移除在 App 初始化階段的非同步 location.reload()，保證座位表（30 位學生）與下方快速標籤區 100% 穩定呈現！</li>
+              <li>• 【新手教學無縫啟動】點擊「🎓 教學」瞬間直接喚醒實體預載之導覽彈窗，絕不卡死、絕不空白！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.8 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.7.8
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
