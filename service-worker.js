@@ -1,8 +1,8 @@
-﻿/**
+/**
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v21';
+const CACHE_NAME = 'classquant-hub-v19';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -28,7 +28,7 @@ const ASSETS_TO_CACHE = [
   './js/userGuide.js',
   './js/app.js',
   './assets/images/twin_stars.png',
-  './雿輻??_??隤芣???html'
+  './使用指南_圖文說明書.html'
 ];
 
 // Install: Cache core assets and immediately activate

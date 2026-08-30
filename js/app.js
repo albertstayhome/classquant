@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.5.4';
+    this.appVersion = '1.5.2';
     this.init();
   }
 
@@ -290,46 +290,16 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.5.4 -->
+          <!-- v1.5.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.5.4 (幾何級精準對齊版)
+                v1.5.2 (最新實戰導覽版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【指針完美置中】引入 CSS Transform 計算，強迫箭頭絕對置中於目標框正中央，徹底解決箭頭指偏問題。</li>
-              <li>• 【攔截雙擊跳步】實裝底層真實點擊 (isTrusted) 防禦與事件自動銷毀機制，100% 杜絕快速點擊導致的連環跳步。</li>
-              <li>• 【全局全域鎖死】新增 click 與 touchstart 的強制攔截捕捉 (Capture Phase)，教學期間非目標區域將完全處於無效狀態。</li>
-            </ul>
-          </div>
-
-          <!-- v1.5.3 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.5.3
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【動態對齊引擎】重構教學底層，導入 60FPS 畫面偵測迴圈，無懼任何排版位移，箭頭 100% 絕對吸附！</li>
-              <li>• 【強制禁止滑動】在教學期間強制鎖定全局滑動，確保專注力完全聚焦於發光目標！</li>
-              <li>• 【防跳步輪詢機制】導入 DOM 異步偵測，徹底杜絕因為畫面尚未渲染完成而導致的跳步問題。</li>
-            </ul>
-          </div>
-
-          <!-- v1.5.2 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.5.2
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
-              <li>• 【實戰級動態教學】升級 12 大沉浸式操作關卡（點選座位、課堂加分動效、自訂標籤、Excel 批次貼上、事後補記、四象限戰情解讀）！</li>
+              <li>• 【實戰級動態教學】升級 12 大沉浸式操作關卡（點選座位、課堂加分動效、自訂標籤、Excel 批次貼上、名冊細項改名調座號、事後補記勾選評語提交、四象限戰情解讀）！</li>
               <li>• 【手機導航水平自動置中】徹底解決手機螢幕狹窄時導航欄後方按鈕在畫面外導致指針指歪的座標跑位問題！</li>
             </ul>
           </div>
