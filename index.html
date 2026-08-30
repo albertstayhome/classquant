@@ -53,7 +53,7 @@
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
             <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.8.2</span>
+              <span>v1.8.3</span>
               <span>📢</span>
             </button>
           </div>
@@ -101,7 +101,13 @@
           <i data-lucide="users" class="w-3.5 h-3.5 text-pink-500 shrink-0"></i>
           <select id="global-class-select" onchange="appState.handleManualClassChange(this.value)" 
             class="bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1 text-slate-800 max-w-[115px] sm:max-w-[160px] truncate">
-            <!-- Populated via JS -->
+            <optgroup label="🎀 導師本班 (常規與生活)">
+              <option value="801" selected>801 班 (導師本班)</option>
+            </optgroup>
+            <optgroup label="📘 數學科任班 (解題與作業)">
+              <option value="803">803 班 (數學科任)</option>
+              <option value="805">805 班 (數學科任)</option>
+            </optgroup>
           </select>
         </div>
 
@@ -119,7 +125,7 @@
   <nav class="glass-card border-b px-2 sm:px-6 sticky top-0 z-30 overflow-x-auto no-scrollbar">
     <div class="max-w-7xl mx-auto flex items-center justify-between py-1">
       <div class="flex items-center space-x-1 sm:space-x-2">
-        <button onclick="appState.switchTab('matrix')" data-tab="matrix" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap">
+        <button onclick="appState.switchTab('matrix')" data-tab="matrix" class="nav-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap tab-active">
           <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-pink-500"></i>
           <span>課堂點記板</span>
         </button>
@@ -183,7 +189,265 @@
   <!-- Main Content Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-6">
     <!-- Tab 1: Classroom Matrix View -->
-    <section id="classroom-matrix-view" class="tab-panel animate-fade-in-up"></section>
+    <section id="classroom-matrix-view" class="tab-panel animate-fade-in-up">
+      <!-- Top Slim Header -->
+      <div class="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-pink-200 shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <!-- Class Meta Badge -->
+        <div class="flex items-center space-x-2">
+          <div class="kitty-cat-mini"></div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base sm:text-xl font-black text-pink-600 tracking-wide">801 班</h2>
+              <span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300">
+                🎀 導師本班 (30人)
+              </span>
+            </div>
+            <div class="text-[10px] sm:text-xs text-slate-600 font-bold">
+              學業均分: <strong class="text-blue-700">76.8</strong> • 常規: <strong class="text-emerald-700">+8</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Top Action Buttons -->
+        <div class="flex flex-wrap items-center space-x-1.5">
+          <div id="selection-status-badge" class="text-xs px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-300 font-bold text-slate-800 flex items-center gap-1">
+            <span>已選: <strong id="selected-count" class="text-pink-600 font-black text-sm">0</strong></span>
+            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="hidden text-rose-600 underline font-bold text-xs ml-0.5">清空</button>
+          </div>
+
+          <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold bg-pink-50 text-pink-800 border border-pink-300 rounded-xl hover:bg-pink-100 shadow-sm transition flex items-center gap-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
+          </button>
+
+          <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold bg-white border border-pink-300 rounded-xl hover:bg-pink-50 text-slate-800 shadow-sm">
+            全選
+          </button>
+
+          <button onclick="matrixView.openRandomPickerModal('801')" class="px-2.5 py-1 text-xs font-black bg-pink-500 text-white rounded-xl shadow-sm">
+            抽籤
+          </button>
+
+          <button onclick="matrixView.openConflictModal('801')" class="px-2.5 py-1 text-xs font-black bg-rose-600 text-white rounded-xl shadow-sm">
+            事件
+          </button>
+        </div>
+      </div>
+
+      <!-- Zero-Scroll 5-Column Student Grid -->
+      <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 gap-1.5 sm:gap-2.5 mb-4" id="seat-grid-container">
+        <!-- 30 Students Pre-Rendered -->
+        <div id="seat-card-1" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(1, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">01</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">陳冠宇</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘78</span><span class="text-emerald-700">+3</span></div>
+        </div>
+        <div id="seat-card-2" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(2, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">02</span><div class="sanrio-twinstars-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">林子涵</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘85</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-3" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(3, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">03</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">黃柏翔</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘72</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-4" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(4, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">04</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">張雅晴</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘80</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-5" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(5, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">05</span><div class="sanrio-kuromi-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">李承翰</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘58</span><span class="text-rose-700">-2</span></div>
+        </div>
+        <div id="seat-card-6" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(6, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">06</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">王品妍</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘84</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-7" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(7, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">07</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">吳廷軒</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘76</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-8" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(8, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">08</span><div class="sanrio-kuromi-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">蔡詠晴</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘52</span><span class="text-rose-700">-1</span></div>
+        </div>
+        <div id="seat-card-9" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(9, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">09</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">許志豪</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘79</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-10" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(10, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">10</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">鄭羽彤</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘81</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-11" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(11, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">11</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">郭俊廷</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘75</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-12" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(12, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">12</span><div class="sanrio-twinstars-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">謝欣潔</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘96</span><span class="text-emerald-700">+5</span></div>
+        </div>
+        <div id="seat-card-13" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(13, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">13</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">曾郁翔</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘73</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-14" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(14, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">14</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">洪若涵</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘82</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-15" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(15, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">15</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">邱冠宏</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘77</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-16" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(16, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">16</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">賴思妤</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘83</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-17" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(17, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">17</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">周聖文</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘74</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-18" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(18, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">18</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">葉佩珊</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘79</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-19" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(19, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">19</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">莊凱翔</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘76</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-20" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(20, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">20</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">江詩婷</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘81</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-21" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(21, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">21</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">劉宗憲</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘78</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-22" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(22, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">22</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">呂佩真</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘80</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-23" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(23, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">23</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">潘宥安</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘77</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-24" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(24, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">24</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">顏子淇</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘82</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-25" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(25, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">25</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">鍾建宇</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘75</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-26" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(26, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">26</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">蕭曼婷</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘79</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-27" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(27, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">27</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">彭子豪</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘76</span><span class="text-slate-500">0</span></div>
+        </div>
+        <div id="seat-card-28" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(28, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">28</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">方宣瑜</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘84</span><span class="text-emerald-700">+2</span></div>
+        </div>
+        <div id="seat-card-29" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(29, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">29</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">蘇家緯</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘78</span><span class="text-emerald-700">+1</span></div>
+        </div>
+        <div id="seat-card-30" class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300" onclick="matrixView.toggleSeatSelection(30, '801')">
+          <div class="flex items-center justify-between mb-0.5"><span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">30</span><div class="sanrio-kitty-badge !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0"></div></div>
+          <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">戴綺芸</div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none"><span class="text-blue-700">📘85</span><span class="text-emerald-700">+3</span></div>
+        </div>
+      </div>
+
+      <!-- IN-FLOW SPACIOUS 4-TAG PAGED DOCK -->
+      <div class="glass-card rounded-3xl p-3 sm:p-4 border-2 border-pink-300 bg-white/95 shadow-md mb-6">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2 px-1">
+          <div class="flex items-center gap-1.5">
+            <span class="kitty-bow !w-3.5 !h-3.5"></span>
+            <span class="font-black text-slate-900 text-xs sm:text-sm">課堂快速標籤</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-medium hidden sm:inline">（依 801 班 使用頻率排序）</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="上一頁">◀</button>
+            <div class="flex items-center space-x-1.5 px-1" id="tag-page-dots">
+              <button onclick="matrixView.scrollToTagPage(0)" class="h-2.5 rounded-full transition-all bg-pink-600 w-5"></button>
+              <button onclick="matrixView.scrollToTagPage(1)" class="h-2.5 rounded-full transition-all bg-pink-200 w-2.5"></button>
+            </div>
+            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="下一頁">▶</button>
+            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="text-pink-600 font-black hover:underline flex items-center gap-0.5 text-xs ml-1">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i> 自訂
+            </button>
+          </div>
+        </div>
+
+        <div class="tag-pager-container no-scrollbar" id="tag-pager-scroll-box"
+             ontouchstart="matrixView.handleTouchStart(event)"
+             ontouchend="matrixView.handleTouchEnd(event)"
+             onscroll="matrixView.handleTagPagerScroll(this)">
+          <div class="tag-page-slide">
+            <div class="grid grid-cols-2 gap-2.5">
+              <button id="first-quick-tag-btn" onclick="matrixView.applyTagToSelected('801', 'math_breakthrough')" class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] color-rule-pos">
+                <div class="flex flex-col pr-1 overflow-hidden">
+                  <span class="font-black text-xs sm:text-sm text-slate-900 truncate">主動解出難題</span>
+                  <span class="text-[10px] text-slate-500 font-medium truncate">數學學業</span>
+                </div>
+                <span class="px-2 py-1 rounded-xl text-xs sm:text-sm font-black color-rule-pos-badge shrink-0 border">+3</span>
+              </button>
+              <button id="quick-tag-btn-math_board" onclick="matrixView.applyTagToSelected('801', 'math_board')" class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] color-rule-pos">
+                <div class="flex flex-col pr-1 overflow-hidden">
+                  <span class="font-black text-xs sm:text-sm text-slate-900 truncate">上台板書解題</span>
+                  <span class="text-[10px] text-slate-500 font-medium truncate">數學學業</span>
+                </div>
+                <span class="px-2 py-1 rounded-xl text-xs sm:text-sm font-black color-rule-pos-badge shrink-0 border">+2</span>
+              </button>
+              <button id="quick-tag-btn-math_ask" onclick="matrixView.applyTagToSelected('801', 'math_ask')" class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] color-rule-pos">
+                <div class="flex flex-col pr-1 overflow-hidden">
+                  <span class="font-black text-xs sm:text-sm text-slate-900 truncate">課堂提問具啟發性</span>
+                  <span class="text-[10px] text-slate-500 font-medium truncate">數學學業</span>
+                </div>
+                <span class="px-2 py-1 rounded-xl text-xs sm:text-sm font-black color-rule-pos-badge shrink-0 border">+1</span>
+              </button>
+              <button id="quick-tag-btn-math_hw_missing" onclick="matrixView.applyTagToSelected('801', 'math_hw_missing')" class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] color-rule-neg">
+                <div class="flex flex-col pr-1 overflow-hidden">
+                  <span class="font-black text-xs sm:text-sm text-slate-900 truncate">數學作業缺交</span>
+                  <span class="text-[10px] text-slate-500 font-medium truncate">數學學業</span>
+                </div>
+                <span class="px-2 py-1 rounded-xl text-xs sm:text-sm font-black color-rule-neg-badge shrink-0 border">-2</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Tab 2: Class & Student Roster Manager View -->
     <section id="roster-manager-view" class="tab-panel hidden animate-fade-in-up"></section>
@@ -326,23 +590,23 @@
   </div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/uiMap.js?v=1.8.2"></script>
-  <script src="./js/store.js?v=1.8.2"></script>
-  <script src="./js/timetable.js?v=1.8.2"></script>
-  <script src="./js/statistics.js?v=1.8.2"></script>
-  <script src="./js/charts.js?v=1.8.2"></script>
-  <script src="./js/tagManager.js?v=1.8.2"></script>
-  <script src="./js/matrix.js?v=1.8.2"></script>
-  <script src="./js/rosterManager.js?v=1.8.2"></script>
-  <script src="./js/retroLogView.js?v=1.8.2"></script>
-  <script src="./js/eventsLog.js?v=1.8.2"></script>
-  <script src="./js/studentDossier.js?v=1.8.2"></script>
-  <script src="./js/timetableEditor.js?v=1.8.2"></script>
-  <script src="./js/aiImportExport.js?v=1.8.2"></script>
-  <script src="./js/onboardingTour.js?v=1.8.2"></script>
-  <script src="./js/onboardingWizard.js?v=1.8.2"></script>
-  <script src="./js/userGuide.js?v=1.8.2"></script>
-  <script src="./js/app.js?v=1.8.2"></script>
+  <script src="./js/uiMap.js?v=1.8.3"></script>
+  <script src="./js/store.js?v=1.8.3"></script>
+  <script src="./js/timetable.js?v=1.8.3"></script>
+  <script src="./js/statistics.js?v=1.8.3"></script>
+  <script src="./js/charts.js?v=1.8.3"></script>
+  <script src="./js/tagManager.js?v=1.8.3"></script>
+  <script src="./js/matrix.js?v=1.8.3"></script>
+  <script src="./js/rosterManager.js?v=1.8.3"></script>
+  <script src="./js/retroLogView.js?v=1.8.3"></script>
+  <script src="./js/eventsLog.js?v=1.8.3"></script>
+  <script src="./js/studentDossier.js?v=1.8.3"></script>
+  <script src="./js/timetableEditor.js?v=1.8.3"></script>
+  <script src="./js/aiImportExport.js?v=1.8.3"></script>
+  <script src="./js/onboardingTour.js?v=1.8.3"></script>
+  <script src="./js/onboardingWizard.js?v=1.8.3"></script>
+  <script src="./js/userGuide.js?v=1.8.3"></script>
+  <script src="./js/app.js?v=1.8.3"></script>
 
   <!-- Register Service Worker for 100% Offline PWA functionality & Update Detection -->
   <script>

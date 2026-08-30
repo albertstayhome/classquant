@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.2';
+    this.appVersion = '1.8.3';
     this.init();
   }
 
@@ -343,11 +343,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.2 -->
+          <!-- v1.8.3 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.2 (手機端窄螢幕自適應與視圖自動置中版)
+                v1.8.3 (全靜態座位預渲染與零等待導覽版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【全靜態座位預渲染】將 801 導師本班 30 位學生座位卡與 4 大快速標籤直寫進靜態 HTML，首屏秒開 100% 保證可見，杜絕任何空白畫面！</li>
+              <li>• 【教學步驟零死鎖】全面優化第 1 步導覽互動判定，支援直接點選或點按「下一步 ➔」瞬間推進，消除任何卡頓等待！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.2
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

@@ -64,8 +64,8 @@ class OnboardingTour {
         id: "step-class-select",
         targetSelector: "#global-class-select",
         title: "1. 班級切換樞紐 (點擊展開)",
-        content: "這裡是你管理班級的核心！<strong>請點擊下拉選單</strong>，看看裡面為各班獨立保存的分數與名單。",
-        action: "manual-change",
+        content: "這裡是你管理班級的核心！<strong>請點擊下拉選單</strong>切換班級，或直接點右下角「下一步 ➔」！",
+        action: "manual-click",
         tab: "matrix",
         pad: 6,
         radius: 12

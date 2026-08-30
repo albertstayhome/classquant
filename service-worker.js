@@ -3,7 +3,7 @@
  * ClassQuant Hub v1.6.0
  */
 
-const CACHE_NAME = 'classquant-hub-v40';
+const CACHE_NAME = 'classquant-hub-v41';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
