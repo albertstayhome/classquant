@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.6.1';
+    this.appVersion = '1.6.2';
     this.init();
   }
 
@@ -364,11 +364,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.6.1 -->
+          <!-- v1.6.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.6.1 (指針與實戰互動修復版)
+                v1.6.2 (雙箭頭終極根除版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【CSS 層疊覆蓋修復】徹底修復 .tour-arrow-icon 的 display 屬性覆蓋 .hidden 的 CSS 權重問題，同時注入 inline display: none，100% 根除雙箭頭殘影！</li>
+              <li>• 【自訂標籤實戰流程】步驟 4 正式支援點擊「⚙️ 自訂」，並自動銜接至標籤管理視窗導覽。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.1
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

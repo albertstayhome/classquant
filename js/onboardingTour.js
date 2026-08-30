@@ -295,6 +295,12 @@ class OnboardingTour {
         justify-content: center;
         transition: transform 0.15s ease-out;
       }
+      .tour-arrow-icon.hidden,
+      .tour-arrow-lateral.hidden,
+      #tour-pointer-container .hidden,
+      #tour-ghost-cursor.hidden {
+        display: none !important;
+      }
       .tour-bounce-up {
         animation: pointerBounceUp 1s ease-in-out infinite;
       }
@@ -425,17 +431,17 @@ class OnboardingTour {
       <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden will-change-transform tour-gpu-layer" style="top: 0; left: 0; transform: translate3d(0, 0, 0);">
         <div id="tour-pointer-inner" class="flex flex-col items-center justify-center pointer-events-none">
           <!-- Top Arrow (Active when orientation is 'below', pointing UP) -->
-          <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden">👆</div>
+          <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👆</div>
           
           <!-- Tooltip Badge Pill -->
           <div id="tour-pointer-badge" class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3.5 py-1 rounded-full shadow-2xl border-1.5 border-white whitespace-nowrap flex items-center gap-1">
-            <span id="tour-arrow-left" class="tour-arrow-lateral hidden text-sm">👈</span>
+            <span id="tour-arrow-left" class="tour-arrow-lateral hidden text-sm" style="display: none;">👈</span>
             <span id="tour-pointer-text">請點擊此處</span>
-            <span id="tour-arrow-right" class="tour-arrow-lateral hidden text-sm">👉</span>
+            <span id="tour-arrow-right" class="tour-arrow-lateral hidden text-sm" style="display: none;">👉</span>
           </div>
 
           <!-- Bottom Arrow (Active when orientation is 'above', pointing DOWN) -->
-          <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden">👇</div>
+          <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👇</div>
         </div>
       </div>
 
@@ -838,43 +844,91 @@ class OnboardingTour {
     const arrowRight = this.domArrowRight || document.getElementById('tour-arrow-right');
 
     if (orientation === 'below') {
-      arrowUp?.classList.remove('hidden');
-      arrowUp?.classList.add('tour-bounce-up');
-      arrowDown?.classList.add('hidden');
-      arrowDown?.classList.remove('tour-bounce-down');
-      arrowLeft?.classList.add('hidden');
-      arrowLeft?.classList.remove('tour-bounce-left');
-      arrowRight?.classList.add('hidden');
-      arrowRight?.classList.remove('tour-bounce-right');
-      if (arrowUp) arrowUp.style.transform = `translateX(${layout.arrowOffsetX}px)`;
+      if (arrowUp) {
+        arrowUp.classList.remove('hidden');
+        arrowUp.classList.add('tour-bounce-up');
+        arrowUp.style.display = 'flex';
+        arrowUp.style.transform = `translateX(${layout.arrowOffsetX}px)`;
+      }
+      if (arrowDown) {
+        arrowDown.classList.add('hidden');
+        arrowDown.classList.remove('tour-bounce-down');
+        arrowDown.style.display = 'none';
+      }
+      if (arrowLeft) {
+        arrowLeft.classList.add('hidden');
+        arrowLeft.classList.remove('tour-bounce-left');
+        arrowLeft.style.display = 'none';
+      }
+      if (arrowRight) {
+        arrowRight.classList.add('hidden');
+        arrowRight.classList.remove('tour-bounce-right');
+        arrowRight.style.display = 'none';
+      }
     } else if (orientation === 'above') {
-      arrowUp?.classList.add('hidden');
-      arrowUp?.classList.remove('tour-bounce-up');
-      arrowDown?.classList.remove('hidden');
-      arrowDown?.classList.add('tour-bounce-down');
-      arrowLeft?.classList.add('hidden');
-      arrowLeft?.classList.remove('tour-bounce-left');
-      arrowRight?.classList.add('hidden');
-      arrowRight?.classList.remove('tour-bounce-right');
-      if (arrowDown) arrowDown.style.transform = `translateX(${layout.arrowOffsetX}px)`;
+      if (arrowUp) {
+        arrowUp.classList.add('hidden');
+        arrowUp.classList.remove('tour-bounce-up');
+        arrowUp.style.display = 'none';
+      }
+      if (arrowDown) {
+        arrowDown.classList.remove('hidden');
+        arrowDown.classList.add('tour-bounce-down');
+        arrowDown.style.display = 'flex';
+        arrowDown.style.transform = `translateX(${layout.arrowOffsetX}px)`;
+      }
+      if (arrowLeft) {
+        arrowLeft.classList.add('hidden');
+        arrowLeft.classList.remove('tour-bounce-left');
+        arrowLeft.style.display = 'none';
+      }
+      if (arrowRight) {
+        arrowRight.classList.add('hidden');
+        arrowRight.classList.remove('tour-bounce-right');
+        arrowRight.style.display = 'none';
+      }
     } else if (orientation === 'right') {
-      arrowUp?.classList.add('hidden');
-      arrowUp?.classList.remove('tour-bounce-up');
-      arrowDown?.classList.add('hidden');
-      arrowDown?.classList.remove('tour-bounce-down');
-      arrowLeft?.classList.remove('hidden');
-      arrowLeft?.classList.add('tour-bounce-left');
-      arrowRight?.classList.add('hidden');
-      arrowRight?.classList.remove('tour-bounce-right');
+      if (arrowUp) {
+        arrowUp.classList.add('hidden');
+        arrowUp.classList.remove('tour-bounce-up');
+        arrowUp.style.display = 'none';
+      }
+      if (arrowDown) {
+        arrowDown.classList.add('hidden');
+        arrowDown.classList.remove('tour-bounce-down');
+        arrowDown.style.display = 'none';
+      }
+      if (arrowLeft) {
+        arrowLeft.classList.remove('hidden');
+        arrowLeft.classList.add('tour-bounce-left');
+        arrowLeft.style.display = 'inline-block';
+      }
+      if (arrowRight) {
+        arrowRight.classList.add('hidden');
+        arrowRight.classList.remove('tour-bounce-right');
+        arrowRight.style.display = 'none';
+      }
     } else if (orientation === 'left') {
-      arrowUp?.classList.add('hidden');
-      arrowUp?.classList.remove('tour-bounce-up');
-      arrowDown?.classList.add('hidden');
-      arrowDown?.classList.remove('tour-bounce-down');
-      arrowLeft?.classList.add('hidden');
-      arrowLeft?.classList.remove('tour-bounce-left');
-      arrowRight?.classList.remove('hidden');
-      arrowRight?.classList.add('tour-bounce-right');
+      if (arrowUp) {
+        arrowUp.classList.add('hidden');
+        arrowUp.classList.remove('tour-bounce-up');
+        arrowUp.style.display = 'none';
+      }
+      if (arrowDown) {
+        arrowDown.classList.add('hidden');
+        arrowDown.classList.remove('tour-bounce-down');
+        arrowDown.style.display = 'none';
+      }
+      if (arrowLeft) {
+        arrowLeft.classList.add('hidden');
+        arrowLeft.classList.remove('tour-bounce-left');
+        arrowLeft.style.display = 'none';
+      }
+      if (arrowRight) {
+        arrowRight.classList.remove('hidden');
+        arrowRight.classList.add('tour-bounce-right');
+        arrowRight.style.display = 'inline-block';
+      }
     }
 
     // 7. Apply GPU translate3d (Zero CSS transition delay)
