@@ -1443,65 +1443,6 @@ class OnboardingTour {
     this.nextStep();
   }
 
-    if (!this.isActive || this.currentSessionId !== session) {
-      this.isAutoPlaying = false;
-      return;
-    }
-
-    // 6. Arrival & Press Interaction Feedback
-    if (ghostBody) ghostBody.classList.add('ghost-cursor-click');
-    if (ripple) {
-      ripple.classList.remove('hidden');
-      ripple.classList.add('ghost-cursor-ripple');
-    }
-    target.classList.add('tour-simulated-active');
-    this.playAudioFeedback('pop');
-
-    // Dwell at press state before firing synthetic click (80ms)
-    const dwellOk1 = await this.safeDelay(80, session);
-    if (!dwellOk1 || !this.isActive || this.currentSessionId !== session) {
-      target.classList.remove('tour-simulated-active');
-      this.isAutoPlaying = false;
-      return;
-    }
-
-    // Trigger synthetic click on underlying tab button / element
-    try {
-      target.click();
-    } catch (e) {}
-
-    if (typeof callback === 'function') {
-      try {
-        callback(target);
-      } catch (e) {}
-    }
-
-    // Release simulated active state
-    const dwellOk2 = await this.safeDelay(180, session);
-    target.classList.remove('tour-simulated-active');
-
-    if (!dwellOk2 || !this.isActive || this.currentSessionId !== session) {
-      this.isAutoPlaying = false;
-      return;
-    }
-
-    // Dwell for ripple / feedback completion before advancing (160ms)
-    const dwellOk3 = await this.safeDelay(160, session);
-    if (!dwellOk3 || !this.isActive || this.currentSessionId !== session) {
-      this.isAutoPlaying = false;
-      return;
-    }
-
-    // Fade out ghost cursor
-    ghost.style.opacity = '0';
-    this.isAutoPlaying = false;
-
-    // If no custom callback handled navigation, advance step
-    if (!callback) {
-      this.nextStep();
-    }
-  }
-
   setupEnforcement(targetEl, step) {
     this.cleanupEnforcement();
 
