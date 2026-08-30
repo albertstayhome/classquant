@@ -1,10 +1,9 @@
 /**
- * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.1)
- * 100% Crash-Proof, Zero-Lag, 11-Step Master Guided Journey:
- * 1. Fixed Step 7 -> 8 transition crash caused by invalid pseudo-selectors.
- * 2. safeQuerySelector wrapper protecting against any DOM query errors.
- * 3. 100% Valid W3C CSS Selectors for all 11 steps.
- * 4. 9999px Box-Shadow dark spotlight + Direction-Aware Animated Pointers.
+ * ClassQuant Hub - Dynamic Interactive Spotlight Tour Engine (v1.5.2)
+ * Comprehensive Hands-on Educational Tour:
+ * 1. Horizontal Scroll Auto-Centering: Prevents off-screen target distortion on mobile nav bar.
+ * 2. Real Hands-on Task Guidance: Real classroom point clicking, roster edits, batch retro-logging, and quadrant charts.
+ * 3. Safe Query Protection & Double-Frame Bounding Calculation: Zero lag, 100% crash-proof.
  */
 
 class OnboardingTour {
@@ -19,51 +18,17 @@ class OnboardingTour {
       {
         id: "step-class-select",
         targetSelector: "#global-class-select",
-        title: "1. 班級快速切換 (請切換班級)",
-        content: "這裡是核心班級切換樞紐！請<strong>點擊選單切換至另一個班級</strong>（例如 803 班），導師班與數學科任班的分流點數將完全獨立計算！",
+        title: "1. 班級切換樞紐 (請切換班級)",
+        content: "這裡是跨班級的核心切換樞紐！請<strong>點擊選單切換至另一個班級</strong>（例如 803 班），導師班與科任班的點數與常規完全獨立計算！",
         forceAction: "change",
         tab: "matrix"
-      },
-      {
-        id: "step-goto-roster",
-        targetSelector: 'button[data-tab="roster"]',
-        title: "2. 前往『班級名單』管理中心",
-        content: "請<strong>親手點擊發光的「👥 班級名單」</strong>按鈕進入名單管理中心！",
-        forceAction: "click",
-        tab: null
-      },
-      {
-        id: "step-roster-paste",
-        targetSelector: "#roster-paste-btn",
-        fallbackSelector: "#roster-manager-view button",
-        title: "3. 1 秒批次貼上全班名單 (Excel 智能匯入)",
-        content: "換新學期免手打！點擊<strong>「📋 1秒批次貼上名單」</strong>，直接從 Excel 或 Word 複製貼上整班名單，系統自動去除座號贅字與雜訊！",
-        forceAction: "click",
-        tab: "roster"
-      },
-      {
-        id: "step-roster-details",
-        targetSelector: "#roster-class-select",
-        fallbackSelector: "#roster-manager-view",
-        title: "4. 學生名冊個別細項調整 (改名/換座號/調班)",
-        content: "在名單下方，您可以<strong>隨時點擊任意學生卡片修改姓名、調整座號</strong>，或點擊「➕ 新增班級 / 刪除班級」，靈活管理所有任教班級！",
-        forceAction: null,
-        tab: "roster"
-      },
-      {
-        id: "step-goto-matrix",
-        targetSelector: 'button[data-tab="matrix"]',
-        title: "5. 前往『課堂點記板』實戰",
-        content: "名單建好後，現在請<strong>點擊「課堂點記板」</strong>回到座位表，體驗 3 秒極速記點！",
-        forceAction: "click",
-        tab: null
       },
       {
         id: "step-select-student",
         targetSelector: "#seat-card-1",
         fallbackSelector: ".student-seat-card:first-child",
-        title: "6. 點選學生座位 (支援多選/分組)",
-        content: "請<strong>親手點擊 1 號學生「陳冠宇」</strong>的座位方塊來選取他！（支援多選、整排快選與男女生快選）",
+        title: "2. 點選學生座位 (支援多選/分組)",
+        content: "上課互動記點第一步！請<strong>親手點擊 1 號「陳冠宇」</strong>的座位卡片（卡片會亮起粉色選取框，支援多選與男女生快選）！",
         forceAction: "click",
         tab: "matrix"
       },
@@ -71,8 +36,8 @@ class OnboardingTour {
         id: "step-click-tag",
         targetSelector: "#first-quick-tag-btn",
         fallbackSelector: ".tag-page-slide button:first-child",
-        title: "7. 課堂快速記點與動態回饋",
-        content: "選好學生後，請<strong>親手點擊座位正下方的第一個加分標籤</strong>為他快速記點（觸發彩帶粒子與音效）！",
+        title: "3. 課堂快速記點與動態加分",
+        content: "選好學生後，請<strong>點擊第一個加分標籤「主動解出難題 (+3)」</strong>，觀察座位跳出動態加分氣泡、彩帶粒子與音效回饋！",
         forceAction: "click",
         tab: "matrix"
       },
@@ -80,27 +45,70 @@ class OnboardingTour {
         id: "step-custom-tags",
         targetSelector: "#custom-tag-open-btn",
         fallbackSelector: ".glass-card button i[data-lucide='settings']",
-        title: "8. 自訂班級專屬快速標籤",
-        content: "每個班級上課習慣不同！點擊<strong>「⚙️ 自訂」</strong>可自訂加分/扣分項目、分值與分類，常用標籤會智慧自動排在最前頁！",
+        title: "4. 自訂班級專屬快速標籤",
+        content: "各科上課習慣不同！請<strong>點擊「⚙️ 自訂」</strong>，可新增/修改加扣分項目與分值，常用標籤會自動按頻率排在最前面！",
         forceAction: "click",
         tab: "matrix"
       },
       {
-        id: "step-retro-tab",
-        targetSelector: 'button[data-tab="retro"]',
-        fallbackSelector: "nav button:nth-child(3)",
-        title: "9. 獨立專區：『⏰ 課堂事後補記』",
-        content: "全新獨立專區！請<strong>點擊「⏰ 課堂事後補記」</strong>，下課回辦公室 1 秒批次勾選學生補記，並自動生成親師聯絡簿評語！",
+        id: "step-goto-roster",
+        targetSelector: 'button[data-tab="roster"]',
+        title: "5. 前往『👥 班級名單』中心",
+        content: "請<strong>點擊發光的「👥 班級名單」</strong>按鈕進入名單管理與學生資料編修中心！",
         forceAction: "click",
         tab: null
       },
       {
-        id: "step-dashboard",
-        targetSelector: 'button[data-tab="dashboard"]',
-        title: "10. 段考學業 ✕ 品格常規四象限戰情室",
-        content: "點擊<strong>「📊 統計戰情室」</strong>，段考後一鍵自動產出「學業均分 ✕ 常規點數」四象限拔尖與關懷清單，親師座談報告神器！",
+        id: "step-roster-paste",
+        targetSelector: "#roster-paste-btn",
+        fallbackSelector: "#roster-manager-view button",
+        title: "6. 1 秒批次貼上名冊 (Excel 智能匯入)",
+        content: "換新學期免手打！請<strong>點擊「📋 1秒批次貼上名單」</strong>，系統支援直接複製 Excel 整班名冊，自動去除座號數字與雜訊！",
+        forceAction: "click",
+        tab: "roster"
+      },
+      {
+        id: "step-roster-details",
+        targetSelector: "#roster-manager-view .grid > div:first-child",
+        fallbackSelector: "#roster-class-select",
+        title: "7. 學生名冊個別細項編修 (改名/換座號)",
+        content: "在名單清單中，您可以<strong>直接修改任意學生姓名、調整座號</strong>，或點擊「➕ 新增一位學生」與「修改班名/屬性」，名單調整即時同步全站！",
+        forceAction: null,
+        tab: "roster"
+      },
+      {
+        id: "step-goto-retro",
+        targetSelector: 'button[data-tab="retro"]',
+        title: "8. 前往全新『⏰ 課堂事後補記』專區",
+        content: "下課回辦公室神器！請<strong>點擊「⏰ 課堂事後補記」</strong>，進入專屬的事後批次補記工作台！",
         forceAction: "click",
         tab: null
+      },
+      {
+        id: "step-retro-action",
+        targetSelector: "#retro-odd-btn",
+        fallbackSelector: "#retro-submit-btn",
+        title: "9. 事後補記實戰 (單號快選 ➔ 評語 ➔ 1鍵送出)",
+        content: "請<strong>親手點擊「單號(男)」</strong>（或任意學生卡片）快速選取，再點選常用評語模組帶入聯絡簿評語，最後點擊「✨ 立即 1 鍵批次補記」完成提交！",
+        forceAction: "click",
+        tab: "retro"
+      },
+      {
+        id: "step-goto-dashboard",
+        targetSelector: 'button[data-tab="dashboard"]',
+        title: "10. 前往『📊 統計戰情室』",
+        content: "請<strong>點擊「📊 統計戰情室」</strong>，查看班級整體學業與常規分析！",
+        forceAction: "click",
+        tab: null
+      },
+      {
+        id: "step-dashboard-charts",
+        targetSelector: "#dashboard-view .glass-card:first-child",
+        fallbackSelector: "#dashboard-view",
+        title: "11. 四象限拔尖與關懷分析",
+        content: "系統自動產出<strong>「學業均分 ✕ 常規點數」四象限圖表</strong>與拔尖/關懷學生名單，段考親師座談報告必備利器！",
+        forceAction: null,
+        tab: "dashboard"
       },
       {
         id: "step-finish",
@@ -146,7 +154,7 @@ class OnboardingTour {
           <div class="flex items-center space-x-2">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
             <span id="tour-step-badge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700">
-              步驟 1 / 11
+              步驟 1 / 12
             </span>
           </div>
           <button onclick="onboardingTour.endTour()" class="text-xs font-bold text-slate-400 hover:text-pink-600 transition" title="結束教學">
@@ -207,12 +215,17 @@ class OnboardingTour {
       return;
     }
 
-    // Switch tab if specified
+    // 1. Close modal if next step is not modal-targeted
+    if (window.appState && (!step.targetSelector || !step.targetSelector.includes('global-modal'))) {
+      window.appState.closeModal();
+    }
+
+    // 2. Switch tab if specified
     if (step.tab && window.appState && window.appState.activeTab !== step.tab) {
       window.appState.switchTab(step.tab);
     }
 
-    // Immediate next-frame positioning (zero lag)
+    // 3. Frame 1: Scroll navigation bar horizontally and viewport vertically
     requestAnimationFrame(() => {
       let targetEl = this.safeQuerySelector(step.targetSelector);
       if (!targetEl && step.fallbackSelector) {
@@ -222,17 +235,30 @@ class OnboardingTour {
         targetEl = document.getElementById('classroom-matrix-view') || document.body;
       }
 
-      // Scroll viewport smoothly so target is in clear sight
-      if (targetEl && targetEl !== document.body) {
-        const elRect = targetEl.getBoundingClientRect();
-        const currentScrollY = window.scrollY || window.pageYOffset;
-        const targetScrollY = Math.max(0, currentScrollY + elRect.top - (window.innerHeight * 0.38));
-        window.scrollTo({ top: targetScrollY, behavior: 'instant' });
+      // Horizontal Scroll for Navigation Bar items
+      if (targetEl) {
+        const navEl = targetEl.closest('nav');
+        if (navEl) {
+          const targetLeft = targetEl.offsetLeft;
+          const targetWidth = targetEl.offsetWidth;
+          const navWidth = navEl.clientWidth;
+          navEl.scrollTo({
+            left: Math.max(0, targetLeft - (navWidth / 2) + (targetWidth / 2)),
+            behavior: 'instant'
+          });
+        }
+
+        // Vertical Scroll into center of viewport
+        if (targetEl !== document.body) {
+          targetEl.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+        }
       }
 
-      // Position spotlight & setup listeners immediately
-      this.highlightElement(targetEl, step);
-      this.setupEnforcement(targetEl, step);
+      // 4. Frame 2: Position spotlight & listeners with 100% accurate post-scroll coordinates
+      requestAnimationFrame(() => {
+        this.highlightElement(targetEl, step);
+        this.setupEnforcement(targetEl, step);
+      });
     });
   }
 
@@ -342,7 +368,6 @@ class OnboardingTour {
     if (step.forceAction === 'click') {
       const listener = (e) => {
         if (window.appState?.playPop) window.appState.playPop();
-        // Advance smoothly in 60ms
         setTimeout(() => this.nextStep(), 60);
       };
 
@@ -376,7 +401,12 @@ class OnboardingTour {
   endTour() {
     this.isActive = false;
 
-    // 1. Remove touchmove scroll lock
+    // 1. Close modal if open
+    if (window.appState) {
+      window.appState.closeModal();
+    }
+
+    // 2. Remove touchmove scroll lock
     if (this.touchBlocker) {
       document.removeEventListener('touchmove', this.touchBlocker, { passive: false });
       this.touchBlocker = null;

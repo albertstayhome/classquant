@@ -116,7 +116,7 @@ class RetroLogView {
                   <button onclick="retroLogView.selectNone()" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-black transition border border-slate-300">
                     清除
                   </button>
-                  <button onclick="retroLogView.selectOdd()" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-[11px] font-black transition border border-sky-200">
+                  <button id="retro-odd-btn" onclick="retroLogView.selectOdd()" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-[11px] font-black transition border border-sky-200">
                     單號(男)
                   </button>
                   <button onclick="retroLogView.selectEven()" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[11px] font-black transition border border-rose-200">
@@ -130,7 +130,7 @@ class RetroLogView {
                 ${students.map(s => {
                   const isSelected = this.selectedSeats.has(s.seatNo);
                   return `
-                    <div onclick="retroLogView.toggleSeat(${s.seatNo})" 
+                    <div id="retro-student-${s.seatNo}" onclick="retroLogView.toggleSeat(${s.seatNo})" 
                       class="cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 ${
                         isSelected 
                           ? 'bg-pink-500 text-white border-pink-600 shadow-md transform scale-[1.02] font-black' 
@@ -199,7 +199,7 @@ class RetroLogView {
 
                 <!-- Quick Templates -->
                 <div class="flex flex-wrap gap-1 mt-1.5">
-                  <button type="button" onclick="retroLogView.applyTemplate('今日上課主動上台解題，思維清晰')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                  <button id="retro-first-tpl-btn" type="button" onclick="retroLogView.applyTemplate('今日上課主動上台解題，思維清晰')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
                     + 主動解題
                   </button>
                   <button type="button" onclick="retroLogView.applyTemplate('課堂學習專注，認真筆記')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
@@ -215,7 +215,7 @@ class RetroLogView {
               </div>
 
               <!-- 4. 1-Click Batch Submit Button -->
-              <button onclick="retroLogView.submitBatch()" 
+              <button id="retro-submit-btn" onclick="retroLogView.submitBatch()" 
                 class="w-full py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-amber-500 via-pink-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-2 active:scale-95">
                 <span class="kitty-bow !w-4 !h-4"></span>
                 <span>✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)</span>
