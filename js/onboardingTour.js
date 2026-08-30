@@ -74,7 +74,7 @@ class OnboardingTour {
         id: "step-select-student",
         targetSelector: "#seat-card-1",
         fallbackSelector: ".student-seat-card:first-child",
-        title: "2. 點選學生座位",
+        title: "2. 點選學生座位 (親手實戰)",
         content: "上課中想記點嗎？<strong>請親手點擊 1 號學生的座位</strong>，外框會亮起準備記點！",
         action: "manual-click",
         tab: "matrix",
@@ -97,59 +97,50 @@ class OnboardingTour {
         targetSelector: "#custom-tag-open-btn",
         fallbackSelector: ".glass-card button i[data-lucide='settings']",
         title: "4. 自訂班級專屬快速標籤",
-        content: "想要自訂各科專屬加扣分項目嗎？<strong>請點擊「⚙️ 自訂」</strong>進入標籤管理視窗！",
-        action: "manual-click",
+        content: "除了預設標籤，點擊<strong>「⚙️ 自訂」</strong>可自由新增各科專屬加扣分項目與調整分值！",
+        action: "info",
         tab: "matrix",
         pad: 6,
         radius: 12
       },
       {
-        id: "step-custom-tags-modal",
-        targetSelector: "#global-modal-content",
-        fallbackSelector: "#global-modal",
-        title: "5. 標籤管理視窗 (自訂分值與名稱)",
-        content: "在此您可以<strong>自由新增、刪除或修改</strong>各科專屬標籤與分值。了解後請點擊「下一步」！",
-        action: "info",
-        tab: "matrix",
-        pad: 8,
-        radius: 20
-      },
-      {
         id: "step-goto-roster",
         targetSelector: 'button[data-tab="roster"]',
-        title: "6. 前往 👥 班級名單中心",
-        content: "接下來設定名單。請看系統<strong>自動為您切換</strong>到「👥 班級名單」！",
-        action: "auto-click",
+        title: "5. 前往 👥 班級名單中心",
+        content: "接下來帶您匯入名單。<strong>請親手點擊下方導覽列的「👥 班級名單」</strong>！",
+        action: "manual-click",
+        tab: "matrix",
         pad: 6,
         radius: 14
       },
       {
         id: "step-roster-paste",
         targetSelector: "#roster-paste-btn",
-        title: "7. 1 秒批次貼上名冊 (Excel 匯入)",
-        content: "新學期大絕招！<strong>點擊「📋 1秒批次貼上名單」</strong>，系統支援從 Excel 整欄貼上，自動去除數字雜訊！",
-        action: "manual-click",
+        title: "6. 1 秒批次貼上名冊 (系統演示)",
+        content: "新學期大絕招！點擊下方紫色按鈕，看系統為您<strong>自動打開視窗並模擬打字匯入名單</strong>！",
+        action: "auto-pilot-paste",
         tab: "roster",
         pad: 8,
         radius: 14
       },
       {
         id: "step-roster-details",
-        targetSelector: "#roster-manager-view .grid > div:first-child",
-        fallbackSelector: "#roster-class-select",
-        title: "8. 學生名冊個別微調 (改名/座號)",
-        content: "您可以隨時點擊修改學生姓名與座號。請點擊「下一步」。",
-        action: "info",
+        targetSelector: "#roster-student-name-input-1",
+        fallbackSelector: "#roster-student-card-1",
+        title: "7. 學生名冊個別微調 (系統演示)",
+        content: "姓名打錯或要加幹部備註？請看系統<strong>自動示範如何修改學生姓名與座號</strong>！",
+        action: "auto-pilot-edit",
         tab: "roster",
-        pad: 8,
-        radius: 16
+        pad: 6,
+        radius: 12
       },
       {
         id: "step-goto-retro",
         targetSelector: 'button[data-tab="retro"]',
-        title: "9. 前往 ⏰ 課堂事後補記專區",
-        content: "下課回到辦公室！系統將為您切換至<strong>「⏰ 課堂事後補記」</strong>。",
-        action: "auto-click",
+        title: "8. 前往 ⏰ 課堂事後補記專區",
+        content: "下課回到辦公室！<strong>請點擊下方導覽列的「⏰ 課堂事後補記」</strong>切換分頁。",
+        action: "manual-click",
+        tab: "roster",
         pad: 6,
         radius: 14
       },
@@ -157,7 +148,7 @@ class OnboardingTour {
         id: "step-retro-action",
         targetSelector: "#retro-odd-btn",
         fallbackSelector: "#retro-submit-btn",
-        title: "10. 事後補記實戰 (單號快選)",
+        title: "9. 事後補記實戰 (單號快選)",
         content: "<strong>試著點擊「單號(男)」</strong>快速選取學生，接著您可以帶入常用評語並提交！",
         action: "manual-click",
         tab: "retro",
@@ -167,17 +158,18 @@ class OnboardingTour {
       {
         id: "step-goto-dashboard",
         targetSelector: 'button[data-tab="dashboard"]',
-        title: "11. 前往 📊 統計戰情室看分析",
-        content: "想看全班大數據？我們為您自動切換至<strong>「📊 統計戰情室」</strong>！",
-        action: "auto-click",
+        title: "10. 前往 📊 統計戰情室看分析",
+        content: "想看全班大數據？<strong>請點擊下方導覽列的「📊 統計戰情室」</strong>！",
+        action: "manual-click",
+        tab: "retro",
         pad: 6,
         radius: 14
       },
       {
         id: "step-dashboard-charts",
         targetSelector: "#dashboard-view .glass-card:first-child",
-        title: "12. 四象限拔尖與關懷分析",
-        content: "系統自動畫出「學業 ✕ 常規」四象限圖表，是您段考親師座談的最佳利器！點擊「下一步」。",
+        title: "11. 四象限拔尖與關懷分析",
+        content: "系統自動畫出「學業 ✕ 常規」四象限圖表，是您段考親師座談的最佳利器！",
         action: "info",
         tab: "dashboard",
         pad: 10,
@@ -187,7 +179,7 @@ class OnboardingTour {
         id: "step-finish",
         targetSelector: "#header-version-badge",
         title: "🎉 恭喜通關！戰力全開！",
-        content: "您已熟悉核心操作！隨時可點擊<strong>「📢 頂部版本號」</strong>查看詳細圖文說明書與更新日誌！",
+        content: "您已掌握 ClassQuant Hub 核心操作！隨時可點擊<strong>「📢 頂部版本號」</strong>查看詳細圖文手冊！",
         action: "info",
         tab: "dashboard",
         pad: 6,
@@ -1275,7 +1267,7 @@ class OnboardingTour {
           return;
         }
 
-        if (step.action === 'auto-click' || step.action === 'info') {
+        if (step.action === 'auto-click' || step.action === 'auto-pilot-paste' || step.action === 'auto-pilot-edit' || step.action === 'info') {
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -1415,31 +1407,50 @@ class OnboardingTour {
 
       if (badgeEl) badgeEl.innerText = `步驟 ${this.currentStep + 1} / ${this.steps.length}`;
       if (titleEl) titleEl.innerHTML = step.title;
-      if (contentEl) contentEl.innerHTML = step.content;
+      if (step.action === 'info') {
+        contentEl.innerHTML = `
+          <div class="px-3 py-2 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 font-black text-xs flex items-center justify-between shadow-sm animate-pulse mb-3">
+            <span class="flex items-center gap-1.5">
+              <span>💡</span>
+              <span>此步驟為功能介紹，請點擊下方按鈕繼續</span>
+            </span>
+            <span class="text-sm">👇</span>
+          </div>
+          ${step.content}
+        `;
+      } else {
+        contentEl.innerHTML = step.content;
+      }
 
       if (actionContainer) {
         if (step.action === 'manual-click' || step.action === 'manual-change') {
           actionContainer.innerHTML = `
-            <div class="px-3 py-1.5 rounded-xl bg-pink-100 text-pink-700 text-xs font-black flex items-center gap-1 animate-pulse border border-pink-300">
+            <div class="px-3.5 py-1.5 rounded-2xl bg-pink-100 text-pink-700 text-xs font-black flex items-center gap-1.5 animate-pulse border border-pink-300 shadow-sm">
               <span>👆</span>
               <span>請您親自操作發光處</span>
             </div>
           `;
-        } else if (step.action === 'auto-click') {
+        } else if (step.action === 'auto-pilot-paste') {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.playGhostCursor()" class="px-4 py-2 rounded-xl font-black text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95 animate-bounce">
-              <span>讓系統代為操作 🪄</span>
+            <button onclick="onboardingTour.executeBatchPasteDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200">
+              <span>▶️ 開始自動演示貼上 🪄</span>
+            </button>
+          `;
+        } else if (step.action === 'auto-pilot-edit') {
+          actionContainer.innerHTML = `
+            <button onclick="onboardingTour.executeNameEditDemo()" class="px-4 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-purple-200">
+              <span>▶️ 開始自動演示改名 🪄</span>
             </button>
           `;
         } else if (this.currentStep === this.steps.length - 1) {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.endTour()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
+            <button onclick="onboardingTour.endTour()" class="px-5 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-pink-200">
               <span>✨ 完成並開始使用！</span>
             </button>
           `;
         } else {
           actionContainer.innerHTML = `
-            <button onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs shadow-md transition flex items-center gap-1 active:scale-95">
+            <button onclick="onboardingTour.nextStep()" class="px-5 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-xl border-2 border-white transition flex items-center gap-1.5 active:scale-95 animate-bounce ring-4 ring-pink-200">
               <span>下一步 ➔</span>
             </button>
           `;
@@ -1466,49 +1477,41 @@ class OnboardingTour {
   }
 
   /**
-   * Human-like Curved Bezier Trajectory Kinematics Auto-Pilot
+   * High-Precision Bezier Flight Kinematics
    */
-  async playGhostCursor(targetEl = null, callback = null) {
-    if (this.isAutoPlaying) return;
-    if (!this.isActive) return;
-
-    const target = targetEl || this.currentTargetEl;
+  async flyGhostTo(target, session) {
     if (!target) return;
-
-    this.isAutoPlaying = true;
-    const session = ++this.currentSessionId;
-
     const ghost = document.getElementById('tour-ghost-cursor');
     const ghostBody = document.getElementById('tour-ghost-cursor-body');
     const ripple = document.getElementById('tour-ghost-ripple');
-    const popoverBtn = document.querySelector('#tour-action-container button');
+    if (!ghost) return;
 
-    if (!ghost) {
-      this.isAutoPlaying = false;
-      return;
-    }
-
-    // Hotspot offset: Index fingertip is at (14, 2.5) relative to ghost cursor container
     const hx = 14;
     const hy = 2.5;
 
-    // 1. Determine start position (popover button or screen center)
     let startX, startY;
-    if (popoverBtn) {
-      const btnRect = popoverBtn.getBoundingClientRect();
-      startX = btnRect.left + btnRect.width / 2;
-      startY = btnRect.top + btnRect.height / 2;
+    const ghostRect = ghost.getBoundingClientRect();
+    if (ghostRect.width > 0 && ghost.style.opacity === '1') {
+      startX = ghostRect.left + hx;
+      startY = ghostRect.top + hy;
     } else {
-      startX = (typeof window !== 'undefined' ? window.innerWidth : 1024) / 2;
-      startY = (typeof window !== 'undefined' ? window.innerHeight : 768) * 0.75;
+      const popover = document.getElementById('tour-popover');
+      if (popover) {
+        const pRect = popover.getBoundingClientRect();
+        startX = pRect.left + pRect.width / 2;
+        startY = pRect.top + pRect.height / 2;
+      } else {
+        startX = (typeof window !== 'undefined' ? window.innerWidth : 1024) / 2;
+        startY = (typeof window !== 'undefined' ? window.innerHeight : 768) * 0.75;
+      }
     }
 
-    // 2. Determine target position
     const targetRect = target.getBoundingClientRect();
     const destX = targetRect.left + targetRect.width / 2;
     const destY = targetRect.top + targetRect.height / 2;
 
-    // 3. Reset cursor styling & show at start position
+    ghost.classList.remove('hidden');
+    ghost.style.display = 'block';
     ghost.style.transition = 'none';
     ghost.style.transform = `translate3d(${startX - hx}px, ${startY - hy}px, 0)`;
     ghost.style.opacity = '1';
@@ -1517,33 +1520,20 @@ class OnboardingTour {
       ripple.classList.remove('ghost-cursor-ripple');
       ripple.classList.add('hidden');
     }
-
-    // Force reflow
     ghost.offsetHeight;
 
-    // 4. Calculate Quadratic Bezier Control Point
     const dx = destX - startX;
     const dy = destY - startY;
     const dist = Math.hypot(dx, dy);
-
     const mx = (startX + destX) / 2;
     const my = (startY + destY) / 2;
-
-    // Upward arc curvature based on travel distance
-    const arcElevation = Math.max(35, Math.min(130, dist * 0.28));
-    const angle = Math.atan2(dy, dx);
-    const lateralArc = Math.sin(angle) * 15;
-
-    const cpX = mx + lateralArc;
+    const arcElevation = Math.max(30, Math.min(110, dist * 0.25));
+    const cpX = mx;
     const cpY = my - arcElevation;
-
-    // 5. Kinematic Flight Animation via requestAnimationFrame
-    const duration = Math.max(700, Math.min(950, 600 + dist * 0.35));
+    const duration = Math.max(500, Math.min(800, 450 + dist * 0.3));
     const startTime = performance.now();
 
-    const easeInOutCubic = (p) => {
-      return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-    };
+    const easeInOutCubic = (p) => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 
     await new Promise((resolve) => {
       const animateFrame = (now) => {
@@ -1552,23 +1542,18 @@ class OnboardingTour {
           resolve(false);
           return;
         }
-
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / duration);
         const t = easeInOutCubic(progress);
 
-        // Sample live target rect in case of layout shifts
         const liveTargetRect = target.getBoundingClientRect();
         const liveDestX = liveTargetRect.left + liveTargetRect.width / 2;
         const liveDestY = liveTargetRect.top + liveTargetRect.height / 2;
 
-        // Quadratic Bezier formula
         const oneMinusT = 1 - t;
         const curX = oneMinusT * oneMinusT * startX + 2 * oneMinusT * t * cpX + t * t * liveDestX;
         const curY = oneMinusT * oneMinusT * startY + 2 * oneMinusT * t * cpY + t * t * liveDestY;
-
-        // Natural tilt during flight
-        const tilt = Math.sin(progress * Math.PI) * (dx < 0 ? -6 : 6);
+        const tilt = Math.sin(progress * Math.PI) * (dx < 0 ? -5 : 5);
 
         ghost.style.transform = `translate3d(${curX - hx}px, ${curY - hy}px, 0) rotate(${tilt}deg)`;
 
@@ -1580,9 +1565,125 @@ class OnboardingTour {
           resolve(true);
         }
       };
-
       this.ghostAnimId = requestAnimationFrame(animateFrame);
     });
+
+    if (!this.isActive || this.currentSessionId !== session) return;
+
+    if (ghostBody) ghostBody.classList.add('ghost-cursor-click');
+    if (ripple) {
+      ripple.classList.remove('hidden');
+      ripple.classList.add('ghost-cursor-ripple');
+    }
+    this.playAudioFeedback('pop');
+    await this.safeDelay(180, session);
+    if (ghostBody) ghostBody.classList.remove('ghost-cursor-click');
+  }
+
+  hideGhost() {
+    const ghost = document.getElementById('tour-ghost-cursor');
+    if (ghost) {
+      ghost.style.opacity = '0';
+      setTimeout(() => {
+        if (!this.isAutoPlaying) {
+          ghost.classList.add('hidden');
+          ghost.style.display = 'none';
+        }
+      }, 200);
+    }
+  }
+
+  /**
+   * Deep Auto-Pilot Demo: 1-Click Batch Paste with Simulated Typing
+   */
+  async executeBatchPasteDemo() {
+    if (this.isAutoPlaying) return;
+    this.isAutoPlaying = true;
+    const session = ++this.currentSessionId;
+
+    const pasteBtn = document.getElementById('roster-paste-btn');
+    if (!pasteBtn) {
+      this.isAutoPlaying = false;
+      return;
+    }
+
+    // 1. Fly to #roster-paste-btn and click it
+    await this.flyGhostTo(pasteBtn, session);
+    if (!this.isActive || this.currentSessionId !== session) return;
+
+    pasteBtn.click();
+    await this.safeDelay(500, session);
+
+    // 2. Fly to textarea inside modal
+    const textarea = document.getElementById('batch-roster-textarea');
+    if (textarea) {
+      await this.flyGhostTo(textarea, session);
+      if (!this.isActive || this.currentSessionId !== session) return;
+      textarea.focus();
+
+      const sampleRoster = "1 王小明\n2 李小華\n3 陳美麗\n4 張建國\n5 林佩佩";
+      textarea.value = "";
+      for (let i = 0; i < sampleRoster.length; i++) {
+        if (!this.isActive || this.currentSessionId !== session) return;
+        textarea.value += sampleRoster[i];
+        if (i % 3 === 0) this.playAudioFeedback('pop');
+        await this.safeDelay(25, session);
+      }
+    }
+
+    await this.safeDelay(350, session);
+
+    // 3. Fly to submit button and click it
+    const submitBtn = document.getElementById('batch-roster-submit-btn');
+    if (submitBtn) {
+      await this.flyGhostTo(submitBtn, session);
+      if (!this.isActive || this.currentSessionId !== session) return;
+      submitBtn.click();
+    }
+
+    await this.safeDelay(500, session);
+    this.hideGhost();
+    this.isAutoPlaying = false;
+    this.nextStep();
+  }
+
+  /**
+   * Deep Auto-Pilot Demo: Live Student Name Modification
+   */
+  async executeNameEditDemo() {
+    if (this.isAutoPlaying) return;
+    this.isAutoPlaying = true;
+    const session = ++this.currentSessionId;
+
+    const input = document.getElementById('roster-student-name-input-1') || document.querySelector('#roster-manager-view input');
+    if (!input) {
+      this.isAutoPlaying = false;
+      return;
+    }
+
+    await this.flyGhostTo(input, session);
+    if (!this.isActive || this.currentSessionId !== session) return;
+
+    input.focus();
+    input.select();
+    await this.safeDelay(250, session);
+
+    const newName = "王小明 (幹部)";
+    input.value = "";
+    for (let i = 0; i < newName.length; i++) {
+      if (!this.isActive || this.currentSessionId !== session) return;
+      input.value += newName[i];
+      this.playAudioFeedback('pop');
+      await this.safeDelay(40, session);
+    }
+
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await this.safeDelay(600, session);
+
+    this.hideGhost();
+    this.isAutoPlaying = false;
+    this.nextStep();
+  }
 
     if (!this.isActive || this.currentSessionId !== session) {
       this.isAutoPlaying = false;

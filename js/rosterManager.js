@@ -35,7 +35,7 @@ class RosterManager {
           </div>
 
           <div class="flex items-center space-x-2">
-            <button onclick="rosterManager.openNewClassModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
+            <button id="roster-add-class-btn" onclick="rosterManager.openNewClassModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
               <i data-lucide="plus" class="w-4 h-4"></i> ➕ 新增班級
             </button>
           </div>
@@ -58,10 +58,10 @@ class RosterManager {
             <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-pink-100 text-pink-800 border border-pink-300 text-xs sm:text-sm font-black hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm">
               <i data-lucide="clipboard-paste" class="w-4 h-4 text-pink-600"></i> 📋 1秒批次貼上名單
             </button>
-            <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs sm:text-sm font-bold hover:bg-slate-200 transition flex items-center gap-1">
+            <button id="roster-edit-class-btn" onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs sm:text-sm font-bold hover:bg-slate-200 transition flex items-center gap-1">
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> 修改班名/屬性
             </button>
-            <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1">
+            <button id="roster-delete-class-btn" onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 刪除班級
             </button>
           </div>
@@ -74,25 +74,25 @@ class RosterManager {
               <span>${currentClass ? currentClass.name : ''} 學生名冊清單</span>
               <span class="text-xs px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 font-bold">共 ${students.length} 位學生</span>
             </h3>
-            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition flex items-center gap-1">
+            <button id="roster-add-student-btn" onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition flex items-center gap-1">
               <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
             </button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[550px] overflow-y-auto pr-1">
             ${students.map(s => `
-              <div class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
+              <div id="roster-student-card-${s.seatNo}" class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
                 <div class="flex items-center space-x-2.5">
                   <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner">
                     ${String(s.seatNo).padStart(2, '0')}
                   </span>
-                  <input type="text" value="${s.name}" 
+                  <input id="roster-student-name-input-${s.seatNo}" type="text" value="${s.name}" 
                     onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
                     class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-28 bg-white">
                 </div>
                 
                 <div class="flex items-center space-x-1">
-                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
+                  <button id="roster-student-delete-${s.seatNo}" onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
@@ -143,10 +143,10 @@ class RosterManager {
         </div>
 
         <div class="flex items-center justify-end space-x-3">
-          <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+          <button id="batch-roster-cancel-btn" type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition">
             取消
           </button>
-          <button type="button" onclick="rosterManager.applyBatchPaste('${classId}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+          <button id="batch-roster-submit-btn" type="button" onclick="rosterManager.applyBatchPaste('${classId}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
             <i data-lucide="check" class="w-4 h-4"></i> 一鍵覆蓋並儲存名冊
           </button>
         </div>

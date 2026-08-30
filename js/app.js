@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.6.3';
+    this.appVersion = '1.7.0';
     this.init();
   }
 
@@ -364,11 +364,26 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.6.3 -->
+          <!-- v1.7.0 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.6.3 (自訂標籤彈窗完全開放版)
+                v1.7.0 (標準化 UI 地圖與深度實戰代操版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【標準化全域 UI 地圖】建立 window.AppUIMap 與 APP_SPEC_ARCHITECTURE.md 規格書，為全系統每一個分頁、按鈕與輸入框提供統一標準化選擇器。</li>
+              <li>• 【深度實戰代操演示】升級新手教學：將切換分頁交由老師親自操作，複雜的「Excel 批次貼上名冊」與「個別改名」則由系統自動模擬打字與點擊演示！</li>
+              <li>• 【功能介紹醒目指引】純展示型關卡加入高對比醒目提示橫幅與發光呼吸按鈕，清楚指引點擊下一步。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.3
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
