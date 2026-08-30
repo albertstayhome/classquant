@@ -97,16 +97,27 @@ class OnboardingTour {
         targetSelector: "#custom-tag-open-btn",
         fallbackSelector: ".glass-card button i[data-lucide='settings']",
         title: "4. 自訂班級專屬快速標籤",
-        content: "您未來可以點擊<strong>「⚙️ 自訂」</strong>，自由新增各科專屬加扣分項目。這個步驟看看就好，請點擊「下一步」。",
-        action: "info",
+        content: "想要自訂各科專屬加扣分項目嗎？<strong>請點擊「⚙️ 自訂」</strong>進入標籤管理視窗！",
+        action: "manual-click",
         tab: "matrix",
         pad: 6,
         radius: 12
       },
       {
+        id: "step-custom-tags-modal",
+        targetSelector: "#global-modal-container .glass-card",
+        fallbackSelector: "#global-modal-container",
+        title: "5. 標籤管理視窗 (自訂分值與名稱)",
+        content: "在此您可以<strong>自由新增、刪除或修改</strong>各科專屬標籤與分值。了解後請點擊「下一步」！",
+        action: "info",
+        tab: "matrix",
+        pad: 8,
+        radius: 20
+      },
+      {
         id: "step-goto-roster",
         targetSelector: 'button[data-tab="roster"]',
-        title: "5. 前往 👥 班級名單中心",
+        title: "6. 前往 👥 班級名單中心",
         content: "接下來設定名單。請看系統<strong>自動為您切換</strong>到「👥 班級名單」！",
         action: "auto-click",
         pad: 6,
@@ -115,7 +126,7 @@ class OnboardingTour {
       {
         id: "step-roster-paste",
         targetSelector: "#roster-paste-btn",
-        title: "6. 1 秒批次貼上名冊 (Excel 匯入)",
+        title: "7. 1 秒批次貼上名冊 (Excel 匯入)",
         content: "新學期大絕招！<strong>點擊「📋 1秒批次貼上名單」</strong>，系統支援從 Excel 整欄貼上，自動去除數字雜訊！",
         action: "manual-click",
         tab: "roster",
@@ -126,7 +137,7 @@ class OnboardingTour {
         id: "step-roster-details",
         targetSelector: "#roster-manager-view .grid > div:first-child",
         fallbackSelector: "#roster-class-select",
-        title: "7. 學生名冊個別微調 (改名/座號)",
+        title: "8. 學生名冊個別微調 (改名/座號)",
         content: "您可以隨時點擊修改學生姓名與座號。請點擊「下一步」。",
         action: "info",
         tab: "roster",
@@ -136,7 +147,7 @@ class OnboardingTour {
       {
         id: "step-goto-retro",
         targetSelector: 'button[data-tab="retro"]',
-        title: "8. 前往 ⏰ 課堂事後補記專區",
+        title: "9. 前往 ⏰ 課堂事後補記專區",
         content: "下課回到辦公室！系統將為您切換至<strong>「⏰ 課堂事後補記」</strong>。",
         action: "auto-click",
         pad: 6,
@@ -146,7 +157,7 @@ class OnboardingTour {
         id: "step-retro-action",
         targetSelector: "#retro-odd-btn",
         fallbackSelector: "#retro-submit-btn",
-        title: "9. 事後補記實戰 (單號快選)",
+        title: "10. 事後補記實戰 (單號快選)",
         content: "<strong>試著點擊「單號(男)」</strong>快速選取學生，接著您可以帶入常用評語並提交！",
         action: "manual-click",
         tab: "retro",
@@ -156,7 +167,7 @@ class OnboardingTour {
       {
         id: "step-goto-dashboard",
         targetSelector: 'button[data-tab="dashboard"]',
-        title: "10. 前往 📊 統計戰情室看分析",
+        title: "11. 前往 📊 統計戰情室看分析",
         content: "想看全班大數據？我們為您自動切換至<strong>「📊 統計戰情室」</strong>！",
         action: "auto-click",
         pad: 6,
@@ -165,7 +176,7 @@ class OnboardingTour {
       {
         id: "step-dashboard-charts",
         targetSelector: "#dashboard-view .glass-card:first-child",
-        title: "11. 四象限拔尖與關懷分析",
+        title: "12. 四象限拔尖與關懷分析",
         content: "系統自動畫出「學業 ✕ 常規」四象限圖表，是您段考親師座談的最佳利器！點擊「下一步」。",
         action: "info",
         tab: "dashboard",
@@ -389,7 +400,7 @@ class OnboardingTour {
       </svg>
 
       <!-- Calibrated Vector SVG Ghost Cursor Layer (Kinematic Bezier Auto-Pilot) -->
-      <div id="tour-ghost-cursor" class="fixed pointer-events-none z-[10002] will-change-transform opacity-0" style="top: 0; left: 0; transform: translate3d(0, 0, 0); transition: opacity 0.2s ease-out;">
+      <div id="tour-ghost-cursor" class="fixed pointer-events-none z-[10002] will-change-transform opacity-0 hidden" style="top: 0; left: 0; transform: translate3d(0, 0, 0); transition: opacity 0.2s ease-out;">
         <div id="tour-ghost-cursor-body" class="relative pointer-events-none flex items-center justify-center" style="width: 40px; height: 42px; transform-origin: 14px 2.5px;">
           <!-- Precision SVG Pointing Hand (Fingertip Hotspot at (14, 2.5)) -->
           <svg id="tour-ghost-svg" width="40" height="42" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" class="filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.45)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
@@ -414,7 +425,7 @@ class OnboardingTour {
       <div id="tour-pointer-container" class="fixed pointer-events-none z-[10000] hidden will-change-transform tour-gpu-layer" style="top: 0; left: 0; transform: translate3d(0, 0, 0);">
         <div id="tour-pointer-inner" class="flex flex-col items-center justify-center pointer-events-none">
           <!-- Top Arrow (Active when orientation is 'below', pointing UP) -->
-          <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👆</div>
+          <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden">👆</div>
           
           <!-- Tooltip Badge Pill -->
           <div id="tour-pointer-badge" class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3.5 py-1 rounded-full shadow-2xl border-1.5 border-white whitespace-nowrap flex items-center gap-1">
@@ -424,7 +435,7 @@ class OnboardingTour {
           </div>
 
           <!-- Bottom Arrow (Active when orientation is 'above', pointing DOWN) -->
-          <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)]">👇</div>
+          <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden">👇</div>
         </div>
       </div>
 
@@ -830,26 +841,38 @@ class OnboardingTour {
       arrowUp?.classList.remove('hidden');
       arrowUp?.classList.add('tour-bounce-up');
       arrowDown?.classList.add('hidden');
+      arrowDown?.classList.remove('tour-bounce-down');
       arrowLeft?.classList.add('hidden');
+      arrowLeft?.classList.remove('tour-bounce-left');
       arrowRight?.classList.add('hidden');
+      arrowRight?.classList.remove('tour-bounce-right');
       if (arrowUp) arrowUp.style.transform = `translateX(${layout.arrowOffsetX}px)`;
     } else if (orientation === 'above') {
       arrowUp?.classList.add('hidden');
+      arrowUp?.classList.remove('tour-bounce-up');
       arrowDown?.classList.remove('hidden');
       arrowDown?.classList.add('tour-bounce-down');
       arrowLeft?.classList.add('hidden');
+      arrowLeft?.classList.remove('tour-bounce-left');
       arrowRight?.classList.add('hidden');
+      arrowRight?.classList.remove('tour-bounce-right');
       if (arrowDown) arrowDown.style.transform = `translateX(${layout.arrowOffsetX}px)`;
     } else if (orientation === 'right') {
       arrowUp?.classList.add('hidden');
+      arrowUp?.classList.remove('tour-bounce-up');
       arrowDown?.classList.add('hidden');
+      arrowDown?.classList.remove('tour-bounce-down');
       arrowLeft?.classList.remove('hidden');
       arrowLeft?.classList.add('tour-bounce-left');
       arrowRight?.classList.add('hidden');
+      arrowRight?.classList.remove('tour-bounce-right');
     } else if (orientation === 'left') {
       arrowUp?.classList.add('hidden');
+      arrowUp?.classList.remove('tour-bounce-up');
       arrowDown?.classList.add('hidden');
+      arrowDown?.classList.remove('tour-bounce-down');
       arrowLeft?.classList.add('hidden');
+      arrowLeft?.classList.remove('tour-bounce-left');
       arrowRight?.classList.remove('hidden');
       arrowRight?.classList.add('tour-bounce-right');
     }

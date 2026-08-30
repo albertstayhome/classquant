@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.6.0';
+    this.appVersion = '1.6.1';
     this.init();
   }
 
@@ -362,6 +362,21 @@ class AppState {
           <div class="text-xs font-black text-slate-800 flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.6.1 -->
+          <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.6.1 (指針與實戰互動修復版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【修正雙箭頭異常】徹底消除步驟一、二指針同時顯示上下雙箭頭的殘影問題，方向 100% 單一精準。</li>
+              <li>• 【修復自訂標籤可點擊】將教學步驟 4 正式改為「親手點擊」實戰關卡，點擊「⚙️ 自訂」即可順暢開啟標籤管理視窗進行體驗！</li>
+              <li>• 【幽靈游標預設隱藏】修復虛擬代操手指在初始階段的陰影殘留問題，確保畫面乾淨俐落。</li>
+            </ul>
           </div>
 
           <!-- v1.6.0 -->
