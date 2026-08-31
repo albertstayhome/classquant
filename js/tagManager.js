@@ -194,18 +194,22 @@ class TagManager {
       const rect = originalCard.getBoundingClientRect();
       this.tagCardRect = rect;
 
-      originalCard.classList.add('is-dragging', 'seating-drop-slot');
-
+      // 1. Clone clean ghost FIRST
       const ghost = originalCard.cloneNode(true);
       ghost.id = 'ios-drag-floating-ghost';
+      ghost.classList.remove('is-dragging', 'seating-drop-slot');
+      ghost.classList.add('ios-ghost-card');
       ghost.style.width = `${rect.width}px`;
       ghost.style.height = `${rect.height}px`;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.03)';
+      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.04)';
       ghost.style.transformOrigin = 'center center';
       document.body.appendChild(ghost);
       this.tagDragGhost = ghost;
+
+      // 2. Add slot silhouette style to original card in list
+      originalCard.classList.add('is-dragging', 'seating-drop-slot');
     }
 
     const list = document.getElementById('tag-manager-drag-list');

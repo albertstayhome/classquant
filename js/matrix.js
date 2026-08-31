@@ -88,19 +88,22 @@ class ClassroomMatrix {
       const rect = originalCard.getBoundingClientRect();
       this.dragCardRect = rect;
 
-      originalCard.classList.add('is-dragging', 'seating-drop-slot');
-
-      // Create floating ghost exactly at originalCard coordinates with 100% precision
+      // 1. Clone CLEAN card FIRST (before modifying original card)
       const ghost = originalCard.cloneNode(true);
       ghost.id = 'ios-drag-floating-ghost';
+      ghost.classList.remove('is-dragging', 'seating-drop-slot');
+      ghost.classList.add('ios-ghost-card');
       ghost.style.width = `${rect.width}px`;
       ghost.style.height = `${rect.height}px`;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.05)';
+      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.08)';
       ghost.style.transformOrigin = 'center center';
       document.body.appendChild(ghost);
       this.dragGhost = ghost;
+
+      // 2. Turn original card on the board into the landing slot silhouette
+      originalCard.classList.add('is-dragging', 'seating-drop-slot');
     }
 
     const gridContainer = document.getElementById('seat-grid-container');

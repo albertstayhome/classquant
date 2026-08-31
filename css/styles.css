@@ -289,14 +289,16 @@ html.dark .compact-seat-tile.selected {
   will-change: transform;
 }
 
-#ios-drag-floating-ghost {
-  position: fixed;
-  pointer-events: none;
-  z-index: 999999;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.35), 0 0 0 3px #ec4899;
-  opacity: 0.98;
-  border-radius: 1rem;
-  background: white;
+#ios-drag-floating-ghost,
+.ios-ghost-card {
+  position: fixed !important;
+  pointer-events: none !important;
+  z-index: 999999 !important;
+  box-shadow: 0 24px 45px -5px rgba(0, 0, 0, 0.35), 0 0 0 3px #ec4899 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 8px 16px rgba(236, 72, 153, 0.25)) !important;
+  border-radius: 1rem !important;
+  background: #ffffff !important;
   margin: 0 !important;
   transition: none !important;
   will-change: transform;
