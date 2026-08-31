@@ -195,20 +195,20 @@ class TagManager {
     if (!listEl || typeof Sortable === 'undefined') return;
 
     this.sortableInstance = new Sortable(listEl, {
-      animation: 250,
-      easing: 'cubic-bezier(0.2, 1, 0.1, 1)',
+      animation: 140,
+      easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
       ghostClass: 'sortable-ghost-slot',
       chosenClass: 'sortable-chosen-item',
       dragClass: 'sortable-drag-bubble',
       fallbackClass: 'sortable-fallback-ghost',
       forceFallback: true,
       fallbackOnBody: true,
-      fallbackTolerance: 3,
-      swapThreshold: 0.65,
-      invertSwap: true,
-      delay: 150,
+      fallbackTolerance: 0,
+      swapThreshold: 0.5,
+      invertSwap: false,
+      delay: 100,
       delayOnTouchOnly: true,
-      touchStartThreshold: 4,
+      touchStartThreshold: 2,
       onStart: (evt) => {
         if (navigator.vibrate) navigator.vibrate([35, 25, 35]);
         if (window.appState?.playPop) window.appState.playPop();

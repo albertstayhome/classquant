@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.1';
+    this.appVersion = '1.8.2';
     this.init();
   }
 
@@ -289,19 +289,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.1 -->
+          <!-- v1.8.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.1 (SortableJS FLIP 流體擠開動效 • 國際業界標準氣泡拖曳版)
+                v1.8.2 (極速 0 延遲指尖追蹤 • 輕快 140ms 氣泡擠開版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【業界權威 SortableJS FLIP 流體擠開】正式引進國際標準 SortableJS 引擎，實裝真 DOM FLIP 位移動畫，拖曳時相鄰標籤如水中氣泡般 100% 零卡頓、零漂移流暢擠開讓位！</li>
-              <li>• 【100% 離線支援 (Zero Network Latency)】完整封裝 minified 核心於本機 Service Worker，無網路環境亦能順暢拖曳！</li>
+              <li>• 【極速 0 延遲指尖追蹤 (Zero Latency Finger Tracking)】徹底解除拖曳縮影的 CSS 過渡限制，指尖拖動即時同步、120fps/60fps 敏捷流暢！</li>
+              <li>• 【輕快 140ms 氣泡擠開動態 (Snappy 140ms FLIP Parting)】縮短位移補間至 140ms 彈性物理曲線，推開與塞入如絲般輕快順暢！</li>
               <li>• 【各班級快速標籤 100% 獨立管理】每個班級（導師班、任教各科任班）擁有專屬自訂標籤庫與獨立排序順序，互不干擾！</li>
               <li>• 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.1
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【業界標準 SortableJS FLIP 流體擠開】正式引進國際標準 SortableJS 引擎！</li>
             </ul>
           </div>
 

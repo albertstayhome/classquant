@@ -309,10 +309,11 @@ html.dark .compact-seat-tile.selected {
   box-shadow: 0 25px 48px -5px rgba(236, 72, 153, 0.45), 0 0 25px rgba(244, 114, 182, 0.35), 0 0 0 3px #ec4899 !important;
   border-radius: 1rem !important;
   background: #ffffff !important;
-  transform: scale(1.06) rotate(1.5deg) !important;
   pointer-events: none !important;
   z-index: 999999 !important;
   cursor: grabbing !important;
+  transition: none !important; /* Zero latency finger tracking */
+  will-change: transform;
 }
 
 #ios-drag-floating-ghost,
