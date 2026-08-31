@@ -1,13 +1,14 @@
 {
-  "version": "1.8.3",
-  "buildNumber": 2026083195,
+  "version": "1.8.4",
+  "buildNumber": 2026083198,
   "releaseDate": "2026-08-31",
   "appName": "ClassQuant Hub",
   "releaseNotes": [
-    "1. 【1:1 指尖真硬體鎖定 (1:1 Hardware Direct Finger Lock)】徹底捨棄函式庫預設內建定速滾動，直接以硬體級原生 Touch 座標渲染，手指滑多快卡片就以 120fps/60fps 絕對等速同步跟隨！",
-    "2. 【瞬時流體推開讓位 (Real-Time Fluid Parting)】相鄰標籤以 120ms 輕快彈簧曲線即時推開讓位，鬆手平滑塞入目標位置！",
-    "3. 【各班級快速標籤 100% 獨立管理】每個班級（導師班、任教各科任班）擁有專屬自訂標籤庫與獨立排序順序，互不干擾！",
-    "4. 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！"
+    "1. 【觸控滑動智慧防誤觸 (Smart Scroll vs Drag Disambiguation)】手指滑動頁面時即時取消長按判定，滑動頁面絲滑順暢，絕不誤觸拖曳！",
+    "2. 【長按 300ms 專注拖曳模式】僅在手指按住同一卡片不動 300ms 後才進入拖曳排序，震動提示明確、操作穩定！",
+    "3. 【1:1 指尖真硬體鎖定 (1:1 Hardware Direct Finger Lock)】徹底捨棄函式庫預設內建定速滾動，手指滑多快卡片就以 120fps/60fps 絕對等速同步跟隨！",
+    "4. 【各班級快速標籤 100% 獨立管理】每個班級擁有專屬自訂標籤庫與獨立排序順序，互不干擾！",
+    "5. 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！"
   ],
   "minAppVersion": "1.0.0",
   "otaUpdateEnabled": true

@@ -200,9 +200,44 @@ class TagManager {
     this.startTouchY = touch.clientY;
 
     clearTimeout(this.longPressTimer);
+
+    // Cancel drag immediately if user is scrolling (> 6px movement)
+    const cancelIfMoved = (moveEvent) => {
+      const t = moveEvent.touches ? moveEvent.touches[0] : moveEvent;
+      const dx = Math.abs(t.clientX - this.startTouchX);
+      const dy = Math.abs(t.clientY - this.startTouchY);
+      if (dx > 6 || dy > 6) {
+        clearTimeout(this.longPressTimer);
+        this.longPressTimer = null;
+        cleanupPreDrag();
+      }
+    };
+
+    const cancelOnRelease = () => {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+      cleanupPreDrag();
+    };
+
+    const cleanupPreDrag = () => {
+      window.removeEventListener('touchmove', cancelIfMoved);
+      window.removeEventListener('mousemove', cancelIfMoved);
+      window.removeEventListener('touchend', cancelOnRelease);
+      window.removeEventListener('mouseup', cancelOnRelease);
+      window.removeEventListener('touchcancel', cancelOnRelease);
+    };
+
+    window.addEventListener('touchmove', cancelIfMoved, { passive: true });
+    window.addEventListener('mousemove', cancelIfMoved, { passive: true });
+    window.addEventListener('touchend', cancelOnRelease, { passive: true });
+    window.addEventListener('mouseup', cancelOnRelease, { passive: true });
+    window.addEventListener('touchcancel', cancelOnRelease, { passive: true });
+
+    // Activate drag ONLY if finger stays still for 300ms
     this.longPressTimer = setTimeout(() => {
+      cleanupPreDrag();
       this.startDirectDrag(touch, tagId);
-    }, 160);
+    }, 300);
   }
 
   startDirectDrag(touch, tagId) {
