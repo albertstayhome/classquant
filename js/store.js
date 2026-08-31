@@ -62,42 +62,22 @@ const DEFAULT_WEEKLY_SCHEDULE = {
 class Store {
   constructor() {
     this.data = this.loadFromStorage();
-    if (!this.data || typeof this.data !== 'object' || !this.data.classes || Object.keys(this.data.classes).length === 0 || !this.data.students) {
+    if (!this.data || !this.data.classes || Object.keys(this.data.classes).length === 0) {
       this.initDemoData();
     } else {
-      // Ensure all fields are fully populated and resilient
-      if (!this.data.classes) this.data.classes = {};
-      if (!this.data.students) this.data.students = {};
-      if (!this.data.assessments) this.data.assessments = {};
-      if (!this.data.events) this.data.events = [];
-      if (!this.data.retroLogs) this.data.retroLogs = [];
-      if (!this.data.tags || this.data.tags.length === 0) this.data.tags = DEFAULT_TAGS;
-      if (!this.data.timetablePeriods) this.data.timetablePeriods = DEFAULT_TIMETABLE_PERIODS;
-      if (!this.data.weeklySchedule) this.data.weeklySchedule = DEFAULT_WEEKLY_SCHEDULE;
+      // Ensure settings & tags format compatibility
+      if (!this.data.tags) this.data.tags = DEFAULT_TAGS;
       if (!this.data.settings) this.data.settings = {};
       if (!this.data.settings.theme) this.data.settings.theme = 'kitty';
-
-      // Self-healing: validate every class has a student array
-      const studentNames = [
-        '陳冠宇', '林子涵', '黃柏翔', '張雅晴', '李承翰', '王品妍', '吳廷軒', '蔡詠晴', '許志豪', '鄭羽彤',
-        '郭俊廷', '謝欣潔', '曾郁翔', '洪若涵', '邱冠宏', '賴思妤', '周聖文', '葉佩珊', '莊凱翔', '江詩婷',
-        '劉宗憲', '呂佩真', '潘宥安', '顏子淇', '鍾建宇', '蕭曼婷', '彭子豪', '方宣瑜', '蘇家緯', '戴綺芸'
-      ];
-      Object.values(this.data.classes).forEach(cls => {
-        if (!this.data.students[cls.id] || !Array.isArray(this.data.students[cls.id]) || this.data.students[cls.id].length === 0) {
-          this.data.students[cls.id] = [];
-          for (let seat = 1; seat <= (cls.studentCount || 30); seat++) {
-            this.data.students[cls.id].push({
-              seatNo: seat,
-              name: cls.type === 'homeroom' ? studentNames[seat - 1] || `座號 ${seat}` : `座號 ${seat} (${studentNames[seat - 1]?.[0] || '生'}生)`,
-              gender: seat % 2 === 1 ? 'M' : 'F',
-              baselineAbility: 60 + Math.floor(Math.random() * 35),
-              notes: ''
-            });
-          }
-        }
-      });
-      this.saveToStorage();
+      if (!this.data.settings.nasSettings) {
+        this.data.settings.nasSettings = {
+          serverUrl: 'http://192.168.1.100:5005',
+          username: '',
+          password: '',
+          remotePath: '/ClassData/class_data_sync.json',
+          lastSyncTime: null
+        };
+      }
     }
   }
 
@@ -495,16 +475,14 @@ class Store {
 
   // --- Queries & Events ---
   getClasses() {
-    return this.data?.classes || {};
+    return this.data.classes;
   }
 
   getClass(classId) {
-    if (!this.data || !this.data.classes) return null;
-    return this.data.classes[classId] || Object.values(this.data.classes)[0] || null;
+    return this.data.classes[classId] || null;
   }
 
   getStudents(classId) {
-    if (!this.data || !this.data.students) return [];
     return this.data.students[classId] || [];
   }
 
@@ -514,13 +492,11 @@ class Store {
   }
 
   getEvents(classId = null) {
-    if (!this.data || !this.data.events) return [];
     if (!classId) return this.data.events;
-    return this.data.events.filter(e => e && e.classId === classId);
+    return this.data.events.filter(e => e.classId === classId);
   }
 
   getAssessments(classId) {
-    if (!this.data || !this.data.assessments) return [];
     return this.data.assessments[classId] || [];
   }
 

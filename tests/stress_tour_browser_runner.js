@@ -174,8 +174,7 @@
       // Test 2.2: Skip step (nextStep) mid-flight at 300ms during Bezier flight
       await tour.start(4); // Step 5: step-goto-roster (auto-click)
       await delay(350);
-      const targetBtn2 = document.querySelector('button[data-tab="roster"]');
-      const ghostPromise2 = tour.playGhostCursor(targetBtn2);
+      const ghostPromise2 = tour.playGhostCursor();
       await delay(300);
       // User presses "Skip" or nextStep() while cursor is traveling
       await tour.nextStep();

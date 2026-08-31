@@ -60,39 +60,16 @@ class ClassroomMatrix {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    try {
-      let cls = this.store.getClass(currentClassId);
-      if (!cls) {
-        const allClasses = Object.values(this.store.getClasses() || {});
-        if (allClasses.length > 0) {
-          cls = allClasses[0];
-          currentClassId = cls.id;
-          if (window.appState) {
-            window.appState.currentClassId = cls.id;
-            window.appState.renderClassDropdown();
-          }
-        }
-      }
-
-      if (!cls) {
-        this.store.initDemoData();
-        cls = this.store.getClass('801');
-        currentClassId = '801';
-        if (window.appState) {
-          window.appState.currentClassId = '801';
-          window.appState.renderClassDropdown();
-        }
-      }
-
-      if (!cls) {
-        container.innerHTML = `
-          <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">
-            <div class="sanrio-sticker-twinstars mb-3"></div>
-            <div class="text-base font-bold text-slate-700">正在為您重新載入班級資料...</div>
-          </div>
-        `;
-        return;
-      }
+    const cls = this.store.getClass(currentClassId);
+    if (!cls) {
+      container.innerHTML = `
+        <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">
+          <div class="sanrio-sticker-twinstars mb-3"></div>
+          <div class="text-base font-bold text-slate-700">尚未選擇班級或查無班級資料</div>
+        </div>
+      `;
+      return;
+    }
 
     const students = this.store.getStudents(currentClassId);
     const overview = this.stats.getClassOverview(currentClassId);
@@ -145,6 +122,10 @@ class ClassroomMatrix {
 
           <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold bg-white border border-pink-300 rounded-xl hover:bg-pink-50 text-slate-800 shadow-sm">
             全選
+          </button>
+          
+          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i> 事後補記
           </button>
 
           <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-pink-500 text-white rounded-xl shadow-sm">
@@ -304,21 +285,7 @@ class ClassroomMatrix {
     if (window.lucide) {
       window.lucide.createIcons();
     }
-  } catch (err) {
-    console.error('[ClassroomMatrix] render error:', err);
-    if (container) {
-      container.innerHTML = `
-        <div class="p-8 text-center text-slate-600 glass-card rounded-3xl">
-          <div class="sanrio-sticker-twinstars mb-3"></div>
-          <div class="text-sm font-bold text-slate-800 mb-2">資料已自動修復完成</div>
-          <button onclick="appState.refreshActiveTab()" class="px-4 py-2 bg-pink-600 text-white rounded-xl text-xs font-black shadow-md">
-            點此立即刷新座位表
-          </button>
-        </div>
-      `;
-    }
   }
-}
 
   handleTouchStart(e) {
     if (e.touches && e.touches.length > 0) {
@@ -391,8 +358,7 @@ class ClassroomMatrix {
   }
 
   toggleSeatSelection(seatNo, classId) {
-    const isSelected = this.selectedSeats.has(seatNo);
-    if (isSelected) {
+    if (this.selectedSeats.has(seatNo)) {
       this.selectedSeats.delete(seatNo);
     } else {
       this.selectedSeats.add(seatNo);
@@ -401,32 +367,7 @@ class ClassroomMatrix {
         try { navigator.vibrate(15); } catch(e) {}
       }
     }
-
-    // Direct O(1) in-place card class update
-    const card = document.getElementById(`seat-card-${seatNo}`);
-    if (card) {
-      card.classList.toggle('selected', !isSelected);
-    }
-
-    // Update selection count badge
-    const countElem = document.getElementById('selected-count');
-    if (countElem) countElem.innerText = this.selectedSeats.size;
-
-    // Update clear button visibility
-    const clearBtn = document.getElementById('clear-sel-btn');
-    if (clearBtn) {
-      if (this.selectedSeats.size > 0) {
-        clearBtn.classList.remove('hidden');
-        clearBtn.classList.add('inline-block');
-      } else {
-        clearBtn.classList.add('hidden');
-        clearBtn.classList.remove('inline-block');
-      }
-    }
-  }
-
-  toggleSeat(seatNo, classId) {
-    return this.toggleSeatSelection(seatNo, classId);
+    this.updateSelectionUI(classId);
   }
 
   selectAll() {
@@ -437,10 +378,9 @@ class ClassroomMatrix {
     this.updateSelectionUI(currentClassId);
   }
 
-  clearSelection(classId) {
-    const targetClassId = classId || window.appState?.currentClassId || '801';
+  clearSelection() {
     this.selectedSeats.clear();
-    this.updateSelectionUI(targetClassId);
+    this.updateSelectionUI(window.appState.currentClassId);
   }
 
   updateSelectionUI(classId) {
@@ -473,70 +413,44 @@ class ClassroomMatrix {
 
   applyTagToSelected(classId, tagId) {
     if (this.selectedSeats.size === 0) {
-      window.appState?.showToast('請先點選學生座號（點一下即可）', 'warning');
+      window.appState.showToast('請先點選學生座號（點一下即可）', 'warning');
       return;
     }
 
     const tag = this.store.getTags().find(t => t.id === tagId);
     if (!tag) return;
 
-    try {
-      const activeSlot = this.timetable.detectActiveSlot();
-      const period = activeSlot.period !== null ? activeSlot.period : 1;
+    const activeSlot = this.timetable.detectActiveSlot();
+    const period = activeSlot.period !== null ? activeSlot.period : 1;
 
-      let appliedCount = 0;
-      const seatsToProcess = Array.from(this.selectedSeats);
-
-      seatsToProcess.forEach(seatNo => {
-        this.store.addEvent({
-          classId,
-          seatNo,
-          period,
-          tagId: tag.id,
-          tagName: tag.name,
-          category: tag.category,
-          delta: tag.delta,
-          severity: tag.severity,
-          note: `課堂記點：${tag.name}`
-        });
-
-        this.showFloatingBubble(seatNo, tag.delta);
-        appliedCount++;
-
-        // In-place score update on card targeting character score span (index 2)
-        const card = document.getElementById(`seat-card-${seatNo}`);
-        if (card) {
-          const profile = this.stats.getStudentProfile(classId, seatNo);
-          if (profile) {
-            const charPts = profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social;
-            const scoreSpans = card.querySelectorAll('div > span');
-            if (scoreSpans.length >= 3) {
-              const ptsSpan = scoreSpans[2];
-              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
-              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
-            } else if (scoreSpans.length >= 2) {
-              const ptsSpan = scoreSpans[1];
-              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
-              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
-            }
-          }
-        }
+    let appliedCount = 0;
+    this.selectedSeats.forEach(seatNo => {
+      this.store.addEvent({
+        classId,
+        seatNo,
+        period,
+        tagId: tag.id,
+        tagName: tag.name,
+        category: tag.category,
+        delta: tag.delta,
+        severity: tag.severity,
+        note: `課堂記點：${tag.name}`
       });
 
-      // Sound effect
-      if (tag.delta > 0 && window.appState?.playChime) {
-        window.appState.playChime();
-      } else if (tag.delta < 0 && window.appState?.playWarning) {
-        window.appState.playWarning();
-      }
+      this.showFloatingBubble(seatNo, tag.delta);
+      appliedCount++;
+    });
 
-      window.appState?.showToast(`✨ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
-    } catch (err) {
-      console.error('[ClassroomMatrix] applyTagToSelected error:', err);
-    } finally {
-      // Auto-clear selection reliably with explicit classId under all execution paths
-      this.clearSelection(classId);
+    // Sound effect
+    if (tag.delta > 0 && window.appState?.playChime) {
+      window.appState.playChime();
+    } else if (tag.delta < 0 && window.appState?.playWarning) {
+      window.appState.playWarning();
     }
+
+    window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+    this.clearSelection();
+    this.render('classroom-matrix-view', classId);
   }
 
   showFloatingBubble(seatNo, delta) {
@@ -545,7 +459,6 @@ class ClassroomMatrix {
 
     const bubble = document.createElement('div');
     bubble.className = `point-bubble ${delta > 0 ? 'text-emerald-600' : 'text-rose-600'} kitty-stamp-effect`;
-    bubble.style.pointerEvents = 'none';
     bubble.innerText = `${delta > 0 ? '✨ +' : ''}${delta}`;
     card.appendChild(bubble);
 
@@ -556,6 +469,10 @@ class ClassroomMatrix {
 
   // --- Post-Class Retro-Logging & Recall Assistant (⏰ 課堂事後快速補記助手) ---
   openRetroLogModal(classId) {
+    if (window.onboardingTour && window.onboardingTour.isActive) {
+      window.onboardingTour.nextStep();
+      return;
+    }
     const students = this.store.getStudents(classId);
     const tags = this.store.getTagsSortedByClassFrequency(classId);
     const modal = document.getElementById('global-modal');

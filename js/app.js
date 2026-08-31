@@ -1,5 +1,5 @@
 /**
- * ClassQuant Hub - Main App Controller v1.6.0
+ * ClassQuant Hub - Main App Controller v1.4.0
  * Theme Switcher, Native Web Audio Chime Engine, Smart Auto-Collapsing Header on Scroll,
  * Delightful Micro-Animations, Tab Router, In-App Live Over-The-Air (OTA) Remote Update Engine,
  * and System Bulletin / Changelog Center.
@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.9';
+    this.appVersion = '1.7.0';
     this.init();
   }
 
@@ -40,7 +40,10 @@ class AppState {
       this.updateHeaderClock();
     }, 1000);
 
-    // 5. Setup PWA Install Prompt Listener
+    // 5. Setup Smart Scroll for Auto-Collapsing Header on Scroll Down
+    this.setupSmartScrollListener();
+
+    // 6. Setup PWA Install Prompt Listener
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this.deferredPrompt = e;
@@ -59,12 +62,6 @@ class AppState {
       this.updateNetworkBadge(false);
     });
 
-    this.initPWA();
-    this.initSoundSetting();
-    this.initThemeSetting();
-    this.checkFirstVisit();
-    this.checkForUpdates(true);
-
     // Initial render
     this.updateHeaderStatus();
     this.updateHeaderClock();
@@ -72,14 +69,6 @@ class AppState {
     this.updateSoundButtonUI();
     this.updateHeaderVersionBadge();
     this.switchTab('matrix');
-
-    // Restore user's header collapse preference from localStorage
-    try {
-      const savedCollapse = localStorage.getItem('classquant_header_collapsed');
-      if (savedCollapse === 'true') {
-        this.toggleHeader(false, true, true);
-      }
-    } catch (e) {}
 
     // Auto check updates and show release notes ONCE on launch
     setTimeout(() => this.checkReleaseNotesOnLaunch(), 1000);
@@ -92,6 +81,38 @@ class AppState {
     }
   }
 
+  // --- Smart Auto-Collapsing Header on Scroll Down ---
+  setupSmartScrollListener() {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+      // If onboarding tour is active, DO NOT AUTO-COLLAPSE HEADER!
+      if (window.onboardingTour && window.onboardingTour.isActive) return;
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          // When scrolling down more than 70px, automatically collapse header
+          if (currentScrollY > 70 && currentScrollY > lastScrollY) {
+            if (!this.isHeaderCollapsed) {
+              this.toggleHeader(false, true);
+            }
+          } 
+          // When scrolling up back to top, reveal header
+          else if (currentScrollY < 15) {
+            if (this.isHeaderCollapsed) {
+              this.toggleHeader(true, true);
+            }
+          }
+          lastScrollY = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
   updateNetworkBadge(isOnline) {
     const badge = document.getElementById('header-offline-status');
     if (badge) {
@@ -101,34 +122,11 @@ class AppState {
     }
   }
 
-  /**
-   * Compares two semantic version strings (e.g. "1.6.0" vs "1.5.2").
-   * Supports optional leading 'v' or 'V' (e.g. "v1.6.0").
-   * @param {string} v1
-   * @param {string} v2
-   * @returns {number} 1 if v1 > v2, -1 if v1 < v2, 0 if v1 === v2
-   */
-  compareVersions(v1, v2) {
-    if (!v1 || !v2) return 0;
-    const parse = (v) => String(v).replace(/^[vV]/, '').trim().split('.').map(n => parseInt(n, 10) || 0);
-    const p1 = parse(v1);
-    const p2 = parse(v2);
-    const len = Math.max(p1.length, p2.length);
-    for (let i = 0; i < len; i++) {
-      const a = p1[i] || 0;
-      const b = p2[i] || 0;
-      if (a > b) return 1;
-      if (a < b) return -1;
-    }
-    return 0;
-  }
-
   // --- OTA Live Push Update Engine & Proactive Release Notes (Strictly Once per Version) ---
   async checkReleaseNotesOnLaunch() {
     const lastSeen = localStorage.getItem('classquant_last_seen_version');
-    
-    // If the user has already seen this version (or a newer version), do not prompt again!
-    if (lastSeen && this.compareVersions(lastSeen, this.appVersion) >= 0) {
+    if (lastSeen === this.appVersion) {
+      // User has already seen this version, do not prompt again!
       return;
     }
 
@@ -136,31 +134,20 @@ class AppState {
       const res = await fetch(`./version.json?t=${Date.now()}`);
       if (res.ok) {
         const info = await res.json();
-        // If remote version is strictly newer than current running app, prompt update
-        if (info.version && this.compareVersions(info.version, this.appVersion) > 0) {
-          this.showReleaseNotesModal(info, false);
-          return;
-        }
-        // If remote version matches current running app, show release notes
-        if (info.version && this.compareVersions(info.version, this.appVersion) === 0) {
-          this.showReleaseNotesModal(info, true);
-          return;
-        }
-        // If remote version is older (server lagging or stale), fall back to built-in current notes
+        this.showReleaseNotesModal(info, true);
+        return;
       }
-    } catch (e) {
-      // Offline or network error -> proceed to built-in fallback
-    }
+    } catch (e) {}
 
-    // Built-in fallback release notes for current running appVersion (v1.6.0)
+    // Fallback modal if offline
     this.showReleaseNotesModal({
       version: this.appVersion,
-      releaseDate: '2026-08-30',
+      releaseDate: '2026-08-29',
       releaseNotes: [
-        "1. 【新手導覽全方位升級】全新 12 步引導式動態教學，具備高精準度 SVG 圓角聚光燈與方位指示指針！",
-        "2. 【全自動模擬手勢巡航】流暢貝茲曲線自動導航，視圖平滑轉場無縫銜接！",
-        "3. 【防連點防跳步狀態鎖】全面強化互動生命週期與事件隔離，杜絕誤觸跳步與滾動死鎖！",
-        "4. 【PWA 離線快取同步】全新 Service Worker 智能快取與版本原子化同步，杜絕舊版閃爍回退！"
+        "1. 頂部新增「🌱 新手引導」互動教學嚮導，一步步引導建立班級與標籤",
+        "2. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
+        "3. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
+        "4. 精簡移除 NAS 模組，系統運行更加輕快順手"
       ]
     }, true);
   }
@@ -176,17 +163,11 @@ class AppState {
       if (res.ok) {
         const info = await res.json();
         const lastSeen = localStorage.getItem('classquant_last_seen_version');
-        const isNewer = info.version && this.compareVersions(info.version, this.appVersion) > 0;
-        
-        if (isNewer) {
-          if (!silent || lastSeen !== info.version) {
-            this.showReleaseNotesModal(info, false);
-          }
+        if (info.version && info.version !== this.appVersion && lastSeen !== info.version) {
+          this.showReleaseNotesModal(info, false);
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
         }
-      } else {
-        if (!silent) this.showToast('無法取得更新資訊，請稍後再試', 'warning');
       }
     } catch (e) {
       if (!silent) this.showToast('無法取得更新資訊，請檢查網路連線', 'warning');
@@ -195,8 +176,7 @@ class AppState {
 
   showReleaseNotesModal(info, isNewVersionNotice = false) {
     // Immediately mark as seen so it NEVER pops up repeatedly!
-    const modalVersion = info.version || this.appVersion;
-    localStorage.setItem('classquant_last_seen_version', modalVersion);
+    localStorage.setItem('classquant_last_seen_version', info.version || this.appVersion);
 
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
@@ -208,10 +188,10 @@ class AppState {
           <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
         </div>
         <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
-          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${modalVersion}
+          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${info.version}
           <span class="kitty-bow"></span>
         </h3>
-        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-30'}</p>
+        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-29'}</p>
 
         <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-2 mb-5 font-bold">
           <div class="text-pink-900 font-black flex items-center gap-1">
@@ -227,10 +207,10 @@ class AppState {
         </div>
 
         <div class="flex items-center justify-center gap-3">
-          <button onclick="appState.dismissReleaseNotes('${modalVersion}')" 
+          <button onclick="appState.dismissReleaseNotes('${info.version}')" 
             class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5 active:scale-95">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span>${isNewVersionNotice ? '✨ 開始體驗！' : '🔄 立即套用更新'}</span>
+            <span>✨ 開始體驗最新功能！</span>
           </button>
         </div>
       </div>
@@ -241,73 +221,19 @@ class AppState {
   }
 
   async dismissReleaseNotes(version) {
-    const targetVersion = version || this.appVersion;
-    localStorage.setItem('classquant_last_seen_version', targetVersion);
+    localStorage.setItem('classquant_last_seen_version', version);
     this.closeModal();
-
-    // If dismissing an update for a strictly newer version, trigger Service Worker update & reload
-    if (this.compareVersions(targetVersion, this.appVersion) > 0) {
-      this.showToast(`正在更新至 v${targetVersion}...🎀`, 'info');
-      if ('serviceWorker' in navigator) {
-        try {
-          const reg = await navigator.serviceWorker.getRegistration();
-          if (reg) {
-            await reg.update();
-            if (reg.waiting) {
-              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-          }
-        } catch (e) {}
-      }
-      setTimeout(() => location.reload(), 400);
-    } else {
-      this.showToast(`已就緒 v${this.appVersion} 功能！🎀`, 'success');
-    }
-  }
-
-  showSWUpdateBanner(reg) {
-    const existing = document.getElementById('pwa-update-banner');
-    if (existing) return;
-    const banner = document.createElement('div');
-    banner.id = 'pwa-update-banner';
-    banner.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/95 text-white border border-pink-400 shadow-2xl backdrop-blur-md flex items-center gap-3 text-xs font-bold animate-fade-in-up';
-    banner.innerHTML = `
-      <span>🎉 發現新版本 ClassQuant Hub！</span>
-      <button id="pwa-reload-btn" class="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl text-white font-black hover:brightness-110 active:scale-95 transition">立即更新</button>
-      <button id="pwa-dismiss-btn" class="px-2 py-1 text-slate-400 hover:text-white transition">稍後</button>
-    `;
-    document.body.appendChild(banner);
-    document.getElementById('pwa-reload-btn').addEventListener('click', () => {
-      if (reg && reg.waiting) {
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      } else {
-        window.location.reload();
-      }
-    });
-    document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
-      banner.remove();
-    });
-  }
-
-  async hardResetCacheAndReload() {
-    this.showToast('🔄 正在徹底清除快取並重新載入最新版本...', 'info');
-    try {
+    this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
+    // If the currently loaded DOM does not have the latest elements, clear cache and hard reload
+    if (this.appVersion !== version || !document.getElementById('onboarding-guide-btn')) {
       if ('caches' in window) {
         const keys = await caches.keys();
-        await Promise.all(keys.map(k => caches.delete(k)));
+        for (let k of keys) {
+          await caches.delete(k);
+        }
       }
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-      }
-      localStorage.removeItem('classquant_tour_completed');
-      localStorage.removeItem('classquant_onboarding_completed');
-    } catch (e) {
-      console.error(e);
+      setTimeout(() => location.reload(true), 300);
     }
-    setTimeout(() => {
-      window.location.href = window.location.origin + window.location.pathname + '?nocache=' + Date.now();
-    }, 300);
   }
 
   // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
@@ -332,17 +258,6 @@ class AppState {
           </div>
           <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold flex items-center justify-center transition">
             ✕
-          </button>
-        </div>
-
-        <!-- Urgent Cache Refresh Action -->
-        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 mb-4 flex items-center justify-between gap-2 shadow-sm">
-          <div class="text-xs text-amber-900 font-bold">
-            <span>手機若畫面異常或舊版卡住？</span>
-            <span class="block text-[11px] text-amber-700 font-medium">點擊右側按鈕可徹底清除舊快取並強制載入最新版！</span>
-          </div>
-          <button onclick="appState.hardResetCacheAndReload()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white rounded-xl text-xs font-black shadow transition active:scale-95 shrink-0">
-            🔄 強制修復
           </button>
         </div>
 
@@ -375,358 +290,15 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.9 -->
+          <!-- v1.5.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.9 (課表排程高對比主題修復 • 經典 DOM 純淨版)
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【課表排程全面重構】徹底修復課表管理在淺色主題下的文字對比與樣式相容性，清晰呈現每週節次！</li>
-              <li>• 【終止所有子代理程序】徹底關閉所有背景子代理，回歸最高效能與乾淨架構！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.8 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.8
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底移除靜態遮罩 DOM】自 HTML 根除硬編碼的靜態遮罩與 path，教學引導改回純動態生命週期，平常頁面 0 覆蓋層、0 死鎖！</li>
-              <li>• 【還原經典輕量導覽引擎】回歸 1.5.2 簡潔純淨架構，每一步均有清晰的「下一步 ➔」與「✕ 結束」，永不卡死！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.7 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.7
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【強制穿透舊快取】加入 HTTP No-Cache 檔頭與 Service Worker 自動強制跳過等待（Auto Skip Waiting），杜絕手機瀏覽器鎖死於舊版！</li>
-              <li>• 【一鍵強制修復】公佈欄頂部新增「🔄 強制修復」按鈕，可一鍵徹底清除手機本機快取並重新載入最新功能！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.6 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.6
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【名冊即時過濾與批次管理】班級名單新增座號與姓名即時搜尋引擎，搜尋結果與學生列表秒級流暢響應！</li>
-              <li>• 【事後補記原地高亮與即時記點】課堂事後補記支援原地單選/多選切換與批次提交，100% 杜絕 DOM 抖動！</li>
-              <li>• 【182 項自動化測試全數通過】經多 Agent 對抗審計（M1~M4），觸控選取、加扣分自動清空、全分頁路由與 12 步教學全面通過實機驗證！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.5 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.5
+                v1.5.2 (最新實戰導覽版本)
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>
             <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【加分後自動清空選取】點擊快速標籤加扣分後，立即自動取消選取所有學生座位，恢復經典舒適的使用習慣！</li>
-              <li>• 【即時原地刷新】記點飄字動畫（+3）流暢播放，卡片分數與頂部班級數據原地無感更新！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.4 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.4
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底移除觸控攔截】全面移除所有全域 capture 點擊攔截器，不再限制點擊位置，所有按鈕與學生座位卡 100% 隨點隨應！</li>
-              <li>• 【導覽極速前進】導覽卡片右下角隨時可點「下一步 ➔」或「✕ 結束」，完全不鎖定或中斷使用者操作！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.3 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.3
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【全靜態座位預渲染】將 801 導師本班 30 位學生座位卡與 4 大快速標籤直寫進靜態 HTML，首屏秒開 100% 保證可見，杜絕任何空白畫面！</li>
-              <li>• 【教學步驟零死鎖】全面優化第 1 步導覽互動判定，支援直接點選或點按「下一步 ➔」瞬間推進，消除任何卡頓等待！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.2 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.2
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【手機端高度防溢出】放寬頂部橫幅 max-height 為 240px，防止在極窄手機視口下產生溢出遮擋！</li>
-              <li>• 【導覽列切換自動置中】點擊分頁或開機時自動捲動當前選中之導覽按鈕至視線中央，不再滑出螢幕左側！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.1 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.1
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底修復本機舊資料結構損毀】實裝 Store 資料庫「自我修復（Self-Healing）」機制，若本機儲存之班級、學生名冊或標籤格式有缺漏，啟動時 100% 自動補齊與修復！</li>
-              <li>• 【座位表渲染防禦】matrixView 與下拉選單全面升級容錯，若當前班級無效自動 fallback 至首個有效班級，保證座位表（30 位學生）100% 立即渲染！</li>
-            </ul>
-          </div>
-
-          <!-- v1.8.0 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.8.0
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底修復 iOS WebKit 導航 TypeError】抓出 Service Worker 在 iOS Safari 處理 navigate 請求時傳入非法 cache 參數導致靜態檔案載入中斷的根本盲點，保證 iPhone / iPad / Android 畫面 100% 正常渲染！</li>
-              <li>• 【全機型無差別順暢運作】按鈕點選、抽籤、加扣分、12 步實戰新手導覽全面極速響應！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.9 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.9
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底移除啟動期重整干擾】移除在 App 初始化階段的非同步 location.reload()，保證座位表（30 位學生）與下方快速標籤區 100% 穩定呈現！</li>
-              <li>• 【新手教學無縫啟動】點擊「🎓 教學」瞬間直接喚醒實體預載之導覽彈窗，絕不卡死、絕不空白！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.8 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.8
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【自動快取感應與清除】啟動時自動比對遠端 version.json，若手機端版本過舊則瞬間自動清除所有 caches 並自動重整刷新！</li>
-              <li>• 【0 毫秒極速導覽直通】點擊「🎓 教學」時，立即以最高優先權將第 1 步「班級切換樞紐」文字與「下一步 ➔」發光按鈕直通填入畫面，絕不延遲！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.7 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.7
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底修復孤立語法錯誤】抓出 onboardingTour.js 舊函式殘留的孤立代碼區塊（SyntaxError），確保腳本 100% 成功解析掛載至 window 物件！</li>
-              <li>• 【端對端 CDP 實測驗證】以真實 Chrome 模擬點擊 1~3 步連續推進測試通過，保證手機點擊教學瞬間展開聚光燈與說明卡片！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.6 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.6
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【靜態實體 DOM 預先掛載】將新手教學聚光燈與導覽卡片直接實體寫入 HTML 主幹，不再依賴 JavaScript 動態生成節點，點擊瞬間 0 延遲秒開！</li>
-              <li>• 【樣式全面 CSS 靜態編譯】所有動畫、光暈與最高層級（z:99999 / z:100001）直接由 styles.css 解析載入，徹底根除手機動態樣式未編譯盲點。</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.5 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.5
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【最高 Z-Index 保證】注入原生 CSS 樣式規則，確保新手導覽聚光燈（z:99999）與說明卡片（z:100001）100% 覆蓋所有全域元件之上，絕不被底層元件遮蔽。</li>
-              <li>• 【觸控事件安全隔離】加入 safeClosest 安全選取器，拔除 touch-action: none 與防止預設事件干擾，保證手機瀏覽器秒開秒點！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.4 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.4
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【新手教學全關卡「下一步」按鈕無死角支援】所有步驟（包含班級選單、選取學生等操作關卡）底部皆常駐高對比「下一步 ➔」按鈕與提示標籤，老師可自由選擇親手操作或直接點下一步推進，100% 絕不卡關等待！</li>
-              <li>• 【零等待即時啟動】拔除多餘的等待定時器，點擊「🎓 教學」瞬間展開聚光燈與導覽卡片，給予最清晰的視覺與操作提示。</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.3 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.3
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【展開按鈕完美整合導覽列】徹底拔除漂浮於畫面正上方的懸浮膠囊，將「▼ 展開選單」按鈕無縫收斂進黏性導覽列（Navbar）內部，零遮擋任何分頁或操作內容！</li>
-              <li>• 【點記板功能純淨化】從「課堂點記板」頂部工具列移除重複多餘的「事後補記」按鈕，讓課堂點記與課後補記分工更加純粹直覺。</li>
-              <li>• 【新手教學即時感應啟動】加固教學啟動器，點擊瞬間發出清脆音效、即刻展開頂部並平滑滾動至起始位置，解決點擊沒反應之疑惑。</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.2 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.2
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底修復初始化中斷】排查並拔除了建構函式中殘留的 setupSmartScrollListener 舊呼叫，確保 AppState 核心控制器與座位矩陣 100% 順暢渲染！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.1 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.1
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【頂部收合按鈕全螢幕守護】重構頂部控制區排版，班級選單響應式收斂，確保「收合頂部橫幅 (▲)」按鈕 100% 留在螢幕之內，絕不溢出！</li>
-              <li>• 【收合狀態持久化】手動收合橫幅後將永久記錄於本機，除非主動點擊展開，否則重開 App 或重新整理皆保持收合；徹底移除滾動時的自動開合干擾。</li>
-              <li>• 【移除跳動干擾】移除展開按鈕的彈跳跳躍動畫，改為精緻靜態浮動膠囊，優雅不打擾。</li>
-              <li>• 【新手教學可靠性加固】教學啟動器增加乾淨狀態重設機制與雙重實例保護，確保點擊「🎓 教學」保證即刻展開！</li>
-            </ul>
-          </div>
-
-          <!-- v1.7.0 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.7.0
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【標準化全域 UI 地圖】建立 window.AppUIMap 與 APP_SPEC_ARCHITECTURE.md 規格書，為全系統每一個分頁、按鈕與輸入框提供統一標準化選擇器。</li>
-              <li>• 【深度實戰代操演示】升級新手教學：將切換分頁交由老師親自操作，複雜的「Excel 批次貼上名冊」與「個別改名」則由系統自動模擬打字與點擊演示！</li>
-              <li>• 【功能介紹醒目指引】純展示型關卡加入高對比醒目提示橫幅與發光呼吸按鈕，清楚指引點擊下一步。</li>
-            </ul>
-          </div>
-
-          <!-- v1.6.3 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.6.3
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【徹底移除彈窗阻斷器】排查並移除了 TagManager 內部舊有的 window.onboardingTour.isActive 阻斷程式碼，現在點擊「⚙️ 自訂」保證 100% 順暢彈出標籤管理中心！</li>
-              <li>• 【修復彈窗聚光燈選取器】校準步驟 5 標籤管理視窗的 CSS 選取器為 #global-modal-content，視窗發光導覽完美貼合。</li>
-            </ul>
-          </div>
-
-          <!-- v1.6.2 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.6.2
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【CSS 層疊覆蓋修復】徹底修復 .tour-arrow-icon 的 display 屬性覆蓋 .hidden 的 CSS 權重問題，同時注入 inline display: none，100% 根除雙箭頭殘影！</li>
-              <li>• 【自訂標籤實戰流程】步驟 4 正式支援點擊「⚙️ 自訂」，並自動銜接至標籤管理視窗導覽。</li>
-            </ul>
-          </div>
-
-          <!-- v1.6.1 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.6.1
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【修正雙箭頭異常】徹底消除步驟一、二指針同時顯示上下雙箭頭的殘影問題，方向 100% 單一精準。</li>
-              <li>• 【修復自訂標籤可點擊】將教學步驟 4 正式改為「親手點擊」實戰關卡，點擊「⚙️ 自訂」即可順暢開啟標籤管理視窗進行體驗！</li>
-              <li>• 【幽靈游標預設隱藏】修復虛擬代操手指在初始階段的陰影殘留問題，確保畫面乾淨俐落。</li>
-            </ul>
-          </div>
-
-          <!-- v1.6.0 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.6.0 (最新旗艦發布版)
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【新手導覽全方位升級】全新 12 步引導式動態教學，具備高精準度 SVG 圓角聚光燈與方位指示指針！</li>
-              <li>• 【全自動模擬手勢巡航】流暢貝茲曲線自動導航，視圖平滑轉場無縫銜接！</li>
-              <li>• 【防連點防跳步狀態鎖】全面強化互動生命週期與事件隔離，杜絕誤觸跳步與滾動死鎖！</li>
-              <li>• 【PWA 離線快取同步】全新 Service Worker 智能快取與版本原子化同步，杜絕舊版閃爍回退！</li>
-            </ul>
-          </div>
-
-          <!-- v1.5.2 -->
-          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
-                v1.5.2
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
-            </div>
-            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
               <li>• 【實戰級動態教學】升級 12 大沉浸式操作關卡（點選座位、課堂加分動效、自訂標籤、Excel 批次貼上、名冊細項改名調座號、事後補記勾選評語提交、四象限戰情解讀）！</li>
               <li>• 【手機導航水平自動置中】徹底解決手機螢幕狹窄時導航欄後方按鈕在畫面外導致指針指歪的座標跑位問題！</li>
             </ul>
@@ -1082,56 +654,20 @@ class AppState {
     } catch (e) {}
   }
 
-  startTour() {
-    this.playChime();
-    this.showToast('🎓 新手教學已就緒！請查看畫面引導與下方說明 🎀', 'info');
-    this.toggleHeader(true, true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Show tour container immediately
-    const overlay = document.getElementById('tour-overlay-container');
-    if (overlay) {
-      overlay.classList.remove('hidden');
-      overlay.style.display = 'block';
-    }
-    const popover = document.getElementById('tour-popover');
-    if (popover) {
-      popover.classList.remove('hidden');
-      popover.style.display = 'block';
-      popover.style.opacity = '1';
-    }
-
-    try {
-      if (!window.onboardingTour && window.OnboardingTour) {
-        window.onboardingTour = new window.OnboardingTour();
-      }
-      if (window.onboardingTour) {
-        window.onboardingTour.start(0);
-      }
-    } catch (e) {
-      console.error('[AppState] startTour error:', e);
-    }
-  }
-
-  toggleHeader(forceShow = false, isSilent = false, fromInit = false) {
+  toggleHeader(forceShow = false, isSilent = false) {
     const header = document.getElementById('global-header');
-    const navUnhide = document.getElementById('nav-unhide-container');
     const pill = document.getElementById('header-unhide-pill');
     if (!header) return;
 
     if (forceShow || header.classList.contains('header-collapsed')) {
       header.classList.remove('header-collapsed');
-      if (navUnhide) navUnhide.classList.add('hidden');
       if (pill) pill.classList.add('hidden');
       this.isHeaderCollapsed = false;
-      try { localStorage.setItem('classquant_header_collapsed', 'false'); } catch (e) {}
     } else {
       header.classList.add('header-collapsed');
-      if (navUnhide) navUnhide.classList.remove('hidden');
       if (pill) pill.classList.remove('hidden');
       this.isHeaderCollapsed = true;
-      try { localStorage.setItem('classquant_header_collapsed', 'true'); } catch (e) {}
-      if (!isSilent && !fromInit) this.showToast('已收合頂部橫幅，可隨時點擊導覽列右側「▼ 展開頂部選單」🎀', 'info');
+      if (!isSilent) this.showToast('已收合頂部橫幅，點擊上方按鈕可隨時展開 🎀', 'info');
     }
   }
 
@@ -1171,9 +707,6 @@ class AppState {
     document.querySelectorAll('.nav-tab-btn').forEach(btn => {
       if (btn.getAttribute('data-tab') === tabId) {
         btn.classList.add('tab-active');
-        try {
-          btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        } catch (e) {}
       } else {
         btn.classList.remove('tab-active');
       }
@@ -1244,12 +777,7 @@ class AppState {
     const select = document.getElementById('global-class-select');
     if (!select) return;
 
-    let classes = Object.values(window.appStore.getClasses() || {});
-    if (classes.length === 0) {
-      window.appStore.initDemoData();
-      classes = Object.values(window.appStore.getClasses() || {});
-    }
-
+    const classes = Object.values(window.appStore.getClasses());
     const homeroomClasses = classes.filter(c => c.type === 'homeroom');
     const subjectClasses = classes.filter(c => c.type !== 'homeroom');
 
@@ -1275,9 +803,6 @@ class AppState {
     }
 
     select.innerHTML = html;
-    if (this.currentClassId) {
-      select.value = this.currentClassId;
-    }
   }
 
   handleManualClassChange(classId) {

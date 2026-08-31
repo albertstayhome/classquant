@@ -103,7 +103,7 @@ class RetroLogView {
               <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5 border-b border-pink-100">
                 <div class="flex items-center space-x-2">
                   <span class="text-xs sm:text-sm font-black text-slate-900">👥 選取補記學生</span>
-                  <span id="retro-selected-badge" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-300">
+                  <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-300">
                     已選取 ${this.selectedSeats.size} 人
                   </span>
                 </div>
@@ -218,7 +218,7 @@ class RetroLogView {
               <button id="retro-submit-btn" onclick="retroLogView.submitBatch()" 
                 class="w-full py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-amber-500 via-pink-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-2 active:scale-95">
                 <span class="kitty-bow !w-4 !h-4"></span>
-                <span id="retro-submit-btn-text">✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)</span>
+                <span>✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)</span>
               </button>
 
             </div>
@@ -290,37 +290,13 @@ class RetroLogView {
   }
 
   toggleSeat(seatNo) {
-    const isSelected = this.selectedSeats.has(seatNo);
-    if (isSelected) {
+    if (this.selectedSeats.has(seatNo)) {
       this.selectedSeats.delete(seatNo);
     } else {
       this.selectedSeats.add(seatNo);
     }
     if (window.appState?.playPop) window.appState.playPop();
-
-    // In-place element update to prevent scroll jump and DOM reconstruction
-    const card = document.getElementById(`retro-student-${seatNo}`);
-    if (card) {
-      if (!isSelected) {
-        card.className = 'cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 bg-pink-500 text-white border-pink-600 shadow-md transform scale-[1.02] font-black';
-        const subtext = card.querySelector('.font-mono:last-child');
-        if (subtext) subtext.className = 'text-[10px] mt-1 font-mono text-pink-100';
-      } else {
-        card.className = 'cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 bg-white hover:bg-pink-50/60 border-pink-200 text-slate-800 font-bold';
-        const subtext = card.querySelector('.font-mono:last-child');
-        if (subtext) subtext.className = 'text-[10px] mt-1 font-mono text-slate-500';
-      }
-    }
-
-    const badge = document.getElementById('retro-selected-badge');
-    if (badge) {
-      badge.innerText = `已選取 ${this.selectedSeats.size} 人`;
-    }
-
-    const btnText = document.getElementById('retro-submit-btn-text');
-    if (btnText) {
-      btnText.innerText = `✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)`;
-    }
+    this.render('retro-log-view');
   }
 
   selectAll() {

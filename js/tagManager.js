@@ -10,6 +10,10 @@ class TagManager {
   }
 
   openTagManagerModal() {
+    if (window.onboardingTour && window.onboardingTour.isActive) {
+      window.onboardingTour.nextStep();
+      return;
+    }
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;

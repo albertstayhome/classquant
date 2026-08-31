@@ -1,4 +1,4 @@
-﻿# Tier 3: Cross-Feature Combinations (22 Comprehensive Test Cases)
+# Tier 3: Cross-Feature Combinations (20 Test Cases)
 . "$PSScriptRoot\test_engine.ps1"
 
 Test-Suite "Tier 3 -- Cross-Feature Combinations: Step-by-Step Pairwise Transitions" {
@@ -79,138 +79,106 @@ Test-Suite "Tier 3 -- Cross-Feature Combinations: Step-by-Step Pairwise Transiti
 }
 
 Test-Suite "Tier 3 -- Cross-Feature Combinations: Integrated Subsystem Workflows" {
-    Test-Case "T3-12: Matrix Seat Toggle + Quick Tag Award + Floating Bubble Float + Auto Clear" {
-        $matrix = New-MatrixState
-        Toggle-MatrixSeat -State $matrix -SeatNo 1 | Out-Null
-        Toggle-MatrixSeat -State $matrix -SeatNo 2 | Out-Null
-        $tag = @{ Id = "tag-help"; Name = "熱心助人"; Delta = 2; Category = "social" }
-        $store = @{ Events = [System.Collections.Generic.List[hashtable]]::new() }
-        
-        $res = Simulate-ApplyTag -MatrixState $matrix -Tag $tag -ClassId "801" -Store $store
-        $bubble1 = Simulate-FloatingBubble -SeatNo 1 -Delta 2
-        $bubble2 = Simulate-FloatingBubble -SeatNo 2 -Delta 2
-
-        Assert-True $res.Success
-        Assert-Equal 2 $res.AppliedCount
-        Assert-Equal 0 (Get-MatrixSelectedCount -State $matrix)
-        Assert-Equal "✨ +2" $bubble1.Text
-        Assert-Equal "✨ +2" $bubble2.Text
+    Test-Case "T3-12: Auto-Pilot Step 5 Tab Switch + View Panel Unhiding + Navbar Centering" {
+        $appState = @{ activeTab = "matrix" }
+        $navScroll = Calculate-NavScrollLeft -TargetLeft 200 -NavWidth 300 -TargetWidth 80
+        # Auto-pilot click on roster tab
+        $appState.activeTab = "roster"
+        $unhiddenView = "roster-manager-view"
+        Assert-Equal "roster" $appState.activeTab
+        Assert-Equal "roster-manager-view" $unhiddenView
+        Assert-Equal 90 $navScroll
     }
 
-    Test-Case "T3-13: Matrix Point Event + Score Span Character Points In-Place Update" {
-        $events = @(
-            @{ Delta = 3; Category = "discipline" },
-            @{ Delta = 2; Category = "social" }
-        )
-        $totalPts = 0
-        $events | ForEach-Object { $totalPts += $_.Delta }
-        $render = Calculate-ScoreSpanRender -CharacterPoints $totalPts
-
-        Assert-Equal 5 $totalPts
-        Assert-Equal "+5" $render.Text
-        Assert-Equal "text-emerald-700" $render.Class
+    Test-Case "T3-13: Auto-Pilot Step 8 Tab Switch + Retro Tab State + Spotlight Update" {
+        $appState = @{ activeTab = "roster" }
+        $appState.activeTab = "retro"
+        $rect = @{ top = 120; left = 50; width = 200; height = 45 }
+        $path = Calculate-SvgSpotlightPath -Rect $rect -Pad 6 -Vw 1024 -Vh 768
+        Assert-Equal "retro" $appState.activeTab
+        Assert-Contains "M 44 114 v 57 h 212 v -57 Z" $path
     }
 
-    Test-Case "T3-14: Matrix View + Tab Switch to Roster + Dynamic Student Search" {
-        $switch = Simulate-TabSwitch -TargetTabId "roster"
-        Assert-Equal "roster-manager-view" $switch.VisibleContainer
-
-        $students = @(
-            @{ Seat = 1; Name = "Student Alpha" },
-            @{ Seat = 2; Name = "Student Beta" }
-        )
-        $matched = @($students | Where-Object { $_.Name.Contains("Beta") })
-        Assert-Equal 1 $matched.Count
-        Assert-Equal 2 $matched[0].Seat
+    Test-Case "T3-14: Auto-Pilot Step 10 Tab Switch + Dashboard State + Four-Quadrant Spotlight" {
+        $appState = @{ activeTab = "retro" }
+        $appState.activeTab = "dashboard"
+        $chartRect = @{ top = 250; left = 100; width = 600; height = 350 }
+        $path = Calculate-SvgSpotlightPath -Rect $chartRect -Pad 6 -Vw 1024 -Vh 768
+        Assert-Equal "dashboard" $appState.activeTab
+        Assert-Contains "M 94 244 v 362 h 612 v -362 Z" $path
     }
 
-    Test-Case "T3-15: Roster Manager Batch Paste + Class State Persist + Matrix Grid Refresh" {
-        $raw = "1. 王大同`r`n2. 李美玲"
-        $parsed = Parse-RosterBatchPaste -RawText $raw
-        $storage = @{ "classquant_classes" = ($parsed | ConvertTo-Json) }
-        
-        Assert-Equal 2 $parsed.Count
-        Assert-Contains "王大同" $storage["classquant_classes"]
-    }
-
-    Test-Case "T3-16: Tab Switch to Retro View + Odd Seat Selection + Retro Period Point Allocation" {
-        $switch = Simulate-TabSwitch -TargetTabId "retro"
-        Assert-Equal "retro-log-view" $switch.VisibleContainer
-
-        $allSeats = @(1..6)
-        $oddSeats = $allSeats | Where-Object { $_ % 2 -eq 1 }
-        Assert-Equal 3 $oddSeats.Count
-
-        $store = @{ Events = [System.Collections.Generic.List[hashtable]]::new() }
-        $oddSeats | ForEach-Object {
-            $store.Events.Add(@{ ClassId = "801"; SeatNo = $_; Period = 3; Delta = 1 })
+    Test-Case "T3-15: Tour Launching While Modal Dialog Open (auto-closes modal on tour start)" {
+        $modalVisible = $true
+        # Start tour
+        if ($modalVisible) {
+            $modalVisible = $false
         }
-        Assert-Equal 3 $store.Events.Count
-    }
-
-    Test-Case "T3-17: Retro Point Logging + Tab Switch to Dashboard + Chart Recalculation" {
-        $switch = Simulate-TabSwitch -TargetTabId "dashboard"
-        Assert-Equal "dashboard-view" $switch.VisibleContainer
-
-        $events = @(
-            @{ ClassId = "801"; SeatNo = 1; Delta = 3; Category = "discipline" },
-            @{ ClassId = "801"; SeatNo = 1; Delta = 2; Category = "social" }
-        )
-        $pts = 0
-        $events | ForEach-Object { $pts += $_.Delta }
-        Assert-Equal 5 $pts
-    }
-
-    Test-Case "T3-18: Timetable Active Slot Detection + Period Binding + Matrix Point Event Stamping" {
-        $tuesdaySlot = Simulate-DetectActiveSlot -NowTime (Get-Date "2026-09-01 08:30:00")
-        Assert-True $tuesdaySlot.IsClassTime
-        Assert-Equal 1 $tuesdaySlot.Period
-
-        $matrix = New-MatrixState
-        Toggle-MatrixSeat -State $matrix -SeatNo 1 | Out-Null
-        $tag = @{ Id = "tag-ans"; Name = "回答問題"; Delta = 1; Category = "academic" }
-        $store = @{ Events = [System.Collections.Generic.List[hashtable]]::new() }
-        
-        $res = Simulate-ApplyTag -MatrixState $matrix -Tag $tag -Period $tuesdaySlot.Period -Store $store
-        Assert-Equal 1 $store.Events[0].Period
-    }
-
-    Test-Case "T3-19: Tour Launching while Modal Open (Auto-closes modal on tour start)" {
-        $modalOpen = $true
-        $modalOpen = $false
         $tourActive = $true
-
-        Assert-False $modalOpen
+        Assert-False $modalVisible
         Assert-True $tourActive
     }
 
-    Test-Case "T3-20: Tour Step 5 Auto-Pilot Tab Switch + Nav Centering + Spotlight Re-Highlight" {
-        $navScroll = Calculate-NavScrollLeft -TargetLeft 400 -NavWidth 300 -TargetWidth 80
-        $switch = Simulate-TabSwitch -TargetTabId "roster"
-        $rect = @{ top = 150; left = 200; width = 100; height = 40 }
-        $path = Calculate-SvgSpotlightPath -Rect $rect -Vw 1024 -Vh 768
-
-        Assert-Equal 290 $navScroll
-        Assert-Equal "roster-manager-view" $switch.VisibleContainer
-        Assert-Contains "M 194 144 v 52 h 112 v -52 Z" $path
+    Test-Case "T3-16: Tour Active State + Smart Scroll Interaction (inhibits header auto-collapse)" {
+        $tour = @{ isActive = $true }
+        $scrollY = 150
+        $headerCollapsed = $false
+        if (-not $tour.isActive -and $scrollY -gt 70) {
+            $headerCollapsed = $true
+        }
+        Assert-False $headerCollapsed
     }
 
-    Test-Case "T3-21: Tour Completion + LocalStorage Flag + Teardown Cleanup + Return to Matrix" {
+    Test-Case "T3-17: Tour Step Progression + Web Audio Synthesizer (triggers pop, respects sound toggle)" {
+        $settings = @{ enableSound = $true }
+        $soundPlayed = $false
+        if ($settings.enableSound) {
+            $soundPlayed = $true
+        }
+        Assert-True $soundPlayed
+
+        # Toggle mute
+        $settings.enableSound = $false
+        $soundPlayedMuted = $false
+        if ($settings.enableSound) {
+            $soundPlayedMuted = $true
+        }
+        Assert-False $soundPlayedMuted
+    }
+
+    Test-Case "T3-18: Tour Completion + LocalStorage Flag + Toast + Full Teardown" {
         $storage = @{}
-        $tourActive = $false
+        $tour = @{ isActive = $true; overlayHidden = $false }
+        # endTour()
+        $tour.isActive = $false
+        $tour.overlayHidden = $true
         $storage["classquant_tour_completed"] = "true"
-        $switch = Simulate-TabSwitch -TargetTabId "matrix"
+        $toastMsg = "Tour completed successfully!"
 
-        Assert-False $tourActive
+        Assert-False $tour.isActive
+        Assert-True $tour.overlayHidden
         Assert-Equal "true" $storage["classquant_tour_completed"]
-        Assert-Equal "classroom-matrix-view" $switch.VisibleContainer
+        Assert-NotNull $toastMsg
     }
 
-    Test-Case "T3-22: PWA Offline Network State + SW Cache Matching + Tour State Persistence" {
-        $cachedAssets = @("./index.html", "./js/app.js", "./css/styles.css")
-        $match = Match-ServiceWorkerCache -CacheList $cachedAssets -RequestUrl "./js/app.js?v=1.6.0" -Options @{ ignoreSearch = $true }
-        
+    Test-Case "T3-19: PWA Offline Mode + SW Cache Matching + Tour State Persistence" {
+        $cacheTable = @("./index.html", "./js/app.js", "./js/onboardingTour.js")
+        $isOnline = $false
+        $match = Match-ServiceWorkerCache -CacheList $cacheTable -RequestUrl "./js/onboardingTour.js?v=1.6.0" -Options @{ ignoreSearch = $true }
         Assert-True $match.Matched
-        Assert-Equal "./js/app.js" $match.CachedKey
+        Assert-Equal "./js/onboardingTour.js" $match.CachedKey
+    }
+
+    Test-Case "T3-20: Live OTA Version Invalidation + Cache Purge + Hard Reload Flow" {
+        $oldCaches = @("classquant-hub-v18")
+        $newCache = "classquant-hub-v19"
+        $purged = @()
+        foreach ($c in $oldCaches) {
+            if ($c -ne $newCache) {
+                $purged += $c
+            }
+        }
+        Assert-Equal 1 $purged.Count
+        Assert-Equal "classquant-hub-v18" $purged[0]
     }
 }

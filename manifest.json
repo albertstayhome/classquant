@@ -1,9 +1,7 @@
 {
-  "id": "com.classquant.hub",
   "name": "ClassQuant Hub • 班級量化統計與記事戰情室",
   "short_name": "ClassQuant",
   "description": "專屬國中導師與數學科任之班級量化統計、事件記事與因材施教戰情室",
-  "version": "1.6.0",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fff1f2",
