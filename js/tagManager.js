@@ -1,7 +1,7 @@
 /**
  * Tag Management Module
  * Allows teacher to add custom tags, edit point values, delete unwanted tags, and restore defaults.
- * Supports 100% per-class independent tags & ordering, sticky header with permanent close X, and precision push-aside FLIP animation.
+ * Supports 100% per-class independent tags & ordering, sticky header with permanent close X, and liquid bubble spring FLIP animation.
  */
 
 class TagManager {
@@ -18,6 +18,9 @@ class TagManager {
     this.dragStartCoords = null;
     this.lastModalScrollTop = 0;
     this.stepHeight = 60;
+    this.lastTouchX = null;
+    this.boundGlobalMove = null;
+    this.boundGlobalEnd = null;
   }
 
   openTagManagerModal() {
@@ -52,7 +55,7 @@ class TagManager {
                 【${className}】快速標籤管理
                 <span class="kitty-bow !w-3 !h-3"></span>
               </h3>
-              <p class="text-[11px] text-pink-700 font-bold">班級專屬自訂順序 • 長按拖曳擠開排序</p>
+              <p class="text-[11px] text-pink-700 font-bold">班級專屬自訂順序 • 長按拖曳氣泡擠開排序</p>
             </div>
           </div>
           <!-- Permanently pinned close X button that never scrolls away -->
@@ -116,9 +119,7 @@ class TagManager {
               </div>
             </div>
 
-            <div class="space-y-2 pr-1" id="tag-manager-drag-list"
-                 onmousemove="tagManager.handleTagTouchMove(event)"
-                 onmouseup="tagManager.handleTagTouchEnd(event)">
+            <div class="space-y-2 pr-1" id="tag-manager-drag-list">
               ${tags.map((tag, idx) => {
                 const isPos = tag.delta > 0;
                 const isZero = tag.delta === 0;
@@ -128,10 +129,8 @@ class TagManager {
                 return `
                   <div id="tag-item-${tag.id}"
                        data-tag-id="${tag.id}"
-                       class="tag-sort-card flex items-center justify-between p-2.5 rounded-xl bg-white border ${isTop4 ? 'border-pink-300 shadow-sm ring-1 ring-pink-200' : 'border-pink-100'} hover:border-pink-300 transition text-xs select-none cursor-grab active:cursor-grabbing"
+                       class="tag-sort-card flex items-center justify-between p-2.5 rounded-xl bg-white border ${isTop4 ? 'border-pink-300 shadow-sm ring-1 ring-pink-200' : 'border-pink-100'} hover:border-pink-300 text-xs select-none cursor-grab active:cursor-grabbing"
                        ontouchstart="tagManager.handleTagTouchStart(event, '${tag.id}')"
-                       ontouchmove="tagManager.handleTagTouchMove(event)"
-                       ontouchend="tagManager.handleTagTouchEnd(event)"
                        onmousedown="tagManager.handleTagTouchStart(event, '${tag.id}')">
                     <div class="flex items-center space-x-2.5 pointer-events-none">
                       <!-- Order Badge & Up/Down Arrows -->
@@ -201,15 +200,16 @@ class TagManager {
     clearTimeout(this.longPressTimer);
     this.longPressTimer = setTimeout(() => {
       this.startTagDrag(touch, tagId);
-    }, 280);
+    }, 240);
   }
 
   startTagDrag(touch, tagId) {
     this.isDraggingTag = true;
     this.draggedTagId = tagId;
     this.tagDragStartTouch = { x: touch.clientX, y: touch.clientY };
+    this.lastTouchX = touch.clientX;
 
-    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    if (navigator.vibrate) navigator.vibrate([35, 25, 35]);
     if (window.appState?.playPop) window.appState.playPop();
 
     const listEl = document.getElementById('tag-manager-drag-list');
@@ -232,7 +232,7 @@ class TagManager {
     this.currentHoverIndex = this.draggedIndex;
 
     const sampleHeight = this.cardSnapshots[0]?.height || 52;
-    this.stepHeight = sampleHeight + 8; // 8px Tailwind gap
+    this.stepHeight = sampleHeight + 8; // 8px Tailwind space-y-2 gap
 
     const originalCard = document.getElementById(`tag-item-${tagId}`);
     if (originalCard) {
@@ -248,7 +248,7 @@ class TagManager {
       ghost.style.height = `${rect.height}px`;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.05)';
+      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.06)';
       ghost.style.transformOrigin = 'center center';
       document.body.appendChild(ghost);
       this.tagDragGhost = ghost;
@@ -258,6 +258,14 @@ class TagManager {
     }
 
     if (listEl) listEl.classList.add('ios-jiggle-active');
+
+    // Bind global window events so touch is NEVER lost even during rapid dragging
+    this.boundGlobalMove = (e) => this.handleTagTouchMove(e);
+    this.boundGlobalEnd = (e) => this.handleTagTouchEnd(e);
+    window.addEventListener('touchmove', this.boundGlobalMove, { passive: false });
+    window.addEventListener('touchend', this.boundGlobalEnd);
+    window.addEventListener('mousemove', this.boundGlobalMove);
+    window.addEventListener('mouseup', this.boundGlobalEnd);
   }
 
   handleTagTouchMove(e) {
@@ -266,11 +274,16 @@ class TagManager {
     if (this.isDraggingTag) {
       if (e.preventDefault) e.preventDefault();
 
+      // Dynamic tilt based on velocity like a fluid bubble
+      const vx = touch.clientX - (this.lastTouchX || touch.clientX);
+      this.lastTouchX = touch.clientX;
+      const tilt = Math.max(-6, Math.min(6, vx * 0.4));
+
       // 1. Move floating ghost directly with finger
       if (this.tagDragGhost && this.tagDragStartTouch && this.tagCardRect) {
         const dx = touch.clientX - this.tagDragStartTouch.x;
         const dy = touch.clientY - this.tagDragStartTouch.y;
-        this.tagDragGhost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.05)`;
+        this.tagDragGhost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.06) rotate(${tilt}deg)`;
       }
 
       // 2. Pure mathematical hit detection based on touch.clientY
@@ -285,7 +298,7 @@ class TagManager {
       if (targetIndex !== this.currentHoverIndex) {
         this.currentHoverIndex = targetIndex;
         this.applyListDisplacement(this.draggedIndex, targetIndex);
-        if (navigator.vibrate) navigator.vibrate(12);
+        if (navigator.vibrate) navigator.vibrate(15);
       }
     } else if (this.dragStartCoords) {
       const dx = Math.abs(touch.clientX - this.dragStartCoords.x);
@@ -305,12 +318,11 @@ class TagManager {
       if (!card) return;
 
       if (idx === fromIdx) {
-        // Dragged source slot moves to the target gap position
+        // Dragged source slot glides with liquid spring to target gap position
         const offset = (toIdx - fromIdx) * step;
-        card.style.transform = `translate3d(0, ${offset}px, 0) scale(0.96)`;
-        card.classList.add('seating-drop-slot');
+        card.style.transform = `translate3d(0, ${offset}px, 0) scale(0.95)`;
       } else {
-        // Dynamic insertion parting (擠開、塞入讓位動效)
+        // Liquid bubble parting (向上下滑溜擠開動效)
         let offset = 0;
         if (fromIdx < toIdx && idx > fromIdx && idx <= toIdx) {
           // Dragging downwards: items between fromIdx and toIdx glide UP by 1 slot
@@ -321,9 +333,11 @@ class TagManager {
         }
 
         if (offset !== 0) {
-          card.style.transform = `translate3d(0, ${offset}px, 0)`;
+          card.style.transform = `translate3d(0, ${offset}px, 0) scale(0.99)`;
+          card.classList.add('bubble-displaced');
         } else {
           card.style.transform = '';
+          card.classList.remove('bubble-displaced');
         }
       }
     });
@@ -335,6 +349,7 @@ class TagManager {
       const card = document.getElementById(`tag-item-${tag.id}`);
       if (card) {
         card.style.transform = '';
+        card.classList.remove('bubble-displaced');
       }
     });
     this.currentHoverIndex = null;
@@ -351,7 +366,7 @@ class TagManager {
         this.store.reorderTagsByIndex(fromIdx, toIdx, this.currentClassId);
         if (window.appState?.playChime) window.appState.playChime();
         if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
-        window.appState.showToast('✨ 標籤已平滑塞入目標位置！', 'success');
+        window.appState.showToast('✨ 標籤已像水漾氣泡般平滑塞入！', 'success');
       }
 
       this.stopTagDrag();
@@ -360,6 +375,19 @@ class TagManager {
 
   stopTagDrag() {
     this.isDraggingTag = false;
+
+    // Clean up global listeners
+    if (this.boundGlobalMove) {
+      window.removeEventListener('touchmove', this.boundGlobalMove);
+      window.removeEventListener('mousemove', this.boundGlobalMove);
+      this.boundGlobalMove = null;
+    }
+    if (this.boundGlobalEnd) {
+      window.removeEventListener('touchend', this.boundGlobalEnd);
+      window.removeEventListener('mouseup', this.boundGlobalEnd);
+      this.boundGlobalEnd = null;
+    }
+
     this.clearTagHoverTarget();
     if (this.tagDragGhost) {
       this.tagDragGhost.remove();
