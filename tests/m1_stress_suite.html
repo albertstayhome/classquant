@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="kitty">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <title>ClassQuant Hub — M1 Native Touch & Selection Behavior Stress Suite</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; margin: 0; background: #fff5f7; }
+    .test-log { font-family: monospace; font-size: 11px; background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 8px; max-height: 250px; overflow-y: auto; margin-top: 15px; }
+    .test-pass { color: #4ade80; font-weight: bold; }
+    .test-fail { color: #f87171; font-weight: bold; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="test-header" style="margin-bottom: 10px;">
+    <h2 style="font-size: 16px; margin: 0 0 4px 0; color: #be185d;">ClassQuant Hub — M1 Native Touch & Selection Adversarial Stress Harness</h2>
+    <div id="test-status" style="font-size: 13px; font-weight: bold; color: #475569;">Initializing test environment...</div>
+  </div>
+
+  <!-- App Mount Container -->
+  <div id="app" style="background: #fff; padding: 10px; border-radius: 16px; border: 1px solid #fbcfe8;">
+    <div id="classroom-matrix-view"></div>
+    <div id="retro-log-view" class="hidden"></div>
+  </div>
+
+  <!-- Toast & Modal Stubs -->
+  <div id="global-toast" class="hidden"></div>
+  <div id="global-modal" class="hidden"></div>
+
+  <div class="test-log" id="test-log"></div>
+
+  <!-- Core Subsystem Scripts -->
+  <script src="../js/uiMap.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/timetable.js"></script>
+  <script src="../js/statistics.js"></script>
+  <script src="../js/tagManager.js"></script>
+  <script src="../js/matrix.js"></script>
+  <script src="../js/retroLogView.js"></script>
+
+  <!-- Stress Test Logic -->
+  <script src="./m1_stress_suite.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.5';
+    this.appVersion = '1.8.6';
     this.init();
   }
 
@@ -343,11 +343,26 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.5 -->
+          <!-- v1.8.6 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.5 (加分後自動清空選取與極速就緒版)
+                v1.8.6 (多 Agent 協同架構全系統驗證通過版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【名冊即時過濾與批次管理】班級名單新增座號與姓名即時搜尋引擎，搜尋結果與學生列表秒級流暢響應！</li>
+              <li>• 【事後補記原地高亮與即時記點】課堂事後補記支援原地單選/多選切換與批次提交，100% 杜絕 DOM 抖動！</li>
+              <li>• 【182 項自動化測試全數通過】經多 Agent 對抗審計（M1~M4），觸控選取、加扣分自動清空、全分頁路由與 12 步教學全面通過實機驗證！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.5 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.5
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

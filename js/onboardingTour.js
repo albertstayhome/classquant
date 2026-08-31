@@ -725,6 +725,61 @@ class OnboardingTour {
       window.visualViewport.addEventListener('scroll', this.onVisualViewportHandler, { passive: true });
     }
 
+    if (!this.clickBlocker) {
+      this.clickBlocker = (e) => {
+        if (!this.isActive) return;
+        const target = e.target;
+        if (!target) return;
+
+        // Allow clicks on tour popover and its children
+        const popover = document.getElementById('tour-popover');
+        if (popover && (popover === target || popover.contains(target))) {
+          return;
+        }
+
+        // Allow clicks on tour guide launch button
+        if (target.id === 'onboarding-guide-btn' || (target.closest && target.closest('#onboarding-guide-btn'))) {
+          return;
+        }
+
+        // Allow clicks inside a visible modal (like global-modal during auto-pilot demos)
+        const modal = document.getElementById('global-modal');
+        if (modal && !modal.classList.contains('hidden') && (modal === target || modal.contains(target))) {
+          return;
+        }
+
+        // Allow clicks on current target element and its children
+        const currentTarget = this.currentTargetEl;
+        if (currentTarget && (currentTarget === target || currentTarget.contains(target))) {
+          return;
+        }
+
+        // Allow clicks inside the spotlight bounding box
+        if (this.currentBox && this.currentBox.w > 0 && this.currentBox.h > 0) {
+          const cx = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : null);
+          const cy = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : null);
+          if (cx !== null && cy !== null && !isNaN(cx) && !isNaN(cy)) {
+            if (cx >= this.currentBox.x && cx <= this.currentBox.x + this.currentBox.w &&
+                cy >= this.currentBox.y && cy <= this.currentBox.y + this.currentBox.h) {
+              return;
+            }
+          }
+        }
+
+        // Touch gating: intercept off-spotlight background interactions
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') {
+          e.stopImmediatePropagation();
+        }
+        e.preventDefault();
+      };
+
+      document.addEventListener('click', this.clickBlocker, { capture: true });
+      document.addEventListener('touchstart', this.clickBlocker, { capture: true, passive: false });
+      document.addEventListener('pointerdown', this.clickBlocker, { capture: true });
+      document.addEventListener('mousedown', this.clickBlocker, { capture: true });
+    }
+
     this.cachedViewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
     this.cachedViewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768;
   }
@@ -743,6 +798,13 @@ class OnboardingTour {
       window.visualViewport.removeEventListener('resize', this.onVisualViewportHandler);
       window.visualViewport.removeEventListener('scroll', this.onVisualViewportHandler);
       this.onVisualViewportHandler = null;
+    }
+    if (this.clickBlocker) {
+      document.removeEventListener('click', this.clickBlocker, { capture: true });
+      document.removeEventListener('touchstart', this.clickBlocker, { capture: true });
+      document.removeEventListener('pointerdown', this.clickBlocker, { capture: true });
+      document.removeEventListener('mousedown', this.clickBlocker, { capture: true });
+      this.clickBlocker = null;
     }
   }
 

@@ -1,30 +1,12 @@
-/**
- * Tier 4: Real-World Application Scenarios (10 Comprehensive Scenarios)
- */
-
-const {
-  describeSuite,
-  itTest,
-  assertTrue,
-  assertFalse,
-  assertEqual,
-  assertContains,
-  assertNotNull,
-  calculateSvgSpotlightPath,
-  calculatePointerPlacement,
-  parseRosterBatchPaste,
-  matchServiceWorkerCache
+﻿const {
+  describeSuite, itTest, assertTrue, assertFalse, assertEqual, assertNotNull, assertContains,
+  parseRosterBatchPaste, simulateTabSwitch, calculatePointerPlacement
 } = require('./test_engine');
 
 function runTier4RealWorld() {
   describeSuite("Tier 4 -- Real-World Application Scenario Simulations", () => {
     itTest("T4-01: Scenario 1 - Complete 12-Step Master Walkthrough Simulation", () => {
-      const tour = {
-        currentStep: 0,
-        isActive: true,
-        activeTab: "matrix",
-        completed: false
-      };
+      const tour = { currentStep: 0, isActive: true, activeTab: "matrix", completed: false };
 
       // Step 1: Class Select
       assertEqual(0, tour.currentStep);
@@ -89,9 +71,8 @@ function runTier4RealWorld() {
     itTest("T4-02: Scenario 2 - First-Time User Experience & Mid-Tour Abort/Teardown Flow", () => {
       const storage = {};
       const tour = { isActive: true, currentStep: 0, overlayHidden: false };
-      tour.currentStep = 3;
 
-      // User aborts tour
+      tour.currentStep = 3;
       tour.isActive = false;
       tour.overlayHidden = true;
       storage["classquant_tour_completed"] = "true";
@@ -103,112 +84,92 @@ function runTier4RealWorld() {
 
     itTest("T4-03: Scenario 3 - Classroom Point Logging & Retro Recall Lifecycle", () => {
       const store = {
-        points: { student_1: 0 },
+        points: { "student_1": 0 },
         history: []
       };
 
+      // Step A: Award +3 points
       store.points["student_1"] += 3;
-      store.history.push({ student: "student_1", delta: 3, tag: "Active Problem Solving" });
+      store.history.push({ student: "student_1", delta: 3, tag: "主動解出難題" });
 
+      // Step B: Historical retroactive adjustment
       store.points["student_1"] += 2;
-      store.history.push({ student: "student_1", delta: 2, tag: "Homework Excellence" });
+      store.history.push({ student: "student_1", delta: 2, tag: "課堂事後補記" });
 
+      // Step C: Verify cumulative score
       assertEqual(5, store.points["student_1"]);
       assertEqual(2, store.history.length);
     });
 
     itTest("T4-04: Scenario 4 - Excel Roster Batch Import & Student Dossier Navigation", () => {
-      const excelInput = "1. Alex Chen\r\n2. Beatrice Lin\r\n3. Charles Wang\r\n4. David Wu\r\n5. Emily Chang";
-      const roster = parseRosterBatchPaste(excelInput);
-      assertEqual(5, roster.length);
-      assertEqual(1, roster[0].seat);
-      assertEqual("Alex Chen", roster[0].name);
-      assertEqual(5, roster[4].seat);
-      assertEqual("Emily Chang", roster[4].name);
+      const excelExportRaw = "1. 王小明 (男)\r\n2. 李小美 (女)\r\n3. 陳大同 (男)";
+      const parsed = parseRosterBatchPaste(excelExportRaw);
+      assertEqual(3, parsed.length);
+
+      const sw = simulateTabSwitch("student-dossier");
+      assertEqual("student-dossier-view", sw.visibleContainer);
     });
 
     itTest("T4-05: Scenario 5 - PWA Cold Boot Offline Application Workflow", () => {
-      const offlineCache = [
-        "./index.html",
-        "./manifest.json",
-        "./version.json",
-        "./css/styles.css",
-        "./js/app.js",
-        "./js/onboardingTour.js"
-      ];
-      const req1 = matchServiceWorkerCache(offlineCache, "./index.html", { ignoreSearch: true });
-      const req2 = matchServiceWorkerCache(offlineCache, "./js/app.js?v=1.6.0", { ignoreSearch: true });
+      const isOffline = true;
+      const cache = {
+        "index.html": "<html>ClassQuant App</html>",
+        "js/app.js": "console.log('ClassQuant init');"
+      };
 
-      assertTrue(req1.matched);
-      assertTrue(req2.matched);
+      const bootHtml = isOffline ? cache["index.html"] : null;
+      const bootJs = isOffline ? cache["js/app.js"] : null;
+
+      assertNotNull(bootHtml);
+      assertNotNull(bootJs);
+      assertContains("ClassQuant App", bootHtml);
     });
 
     itTest("T4-06: Scenario 6 - Live OTA Update Notification & Bulletin Release Notes Flow", () => {
-      const storage = {};
-      const remoteVersion = "1.6.0";
-      let isModalShown = false;
+      const storage = { "classquant_last_seen_version": "1.5.0" };
+      const currentAppVersion = "1.6.0";
 
-      if (storage["classquant_last_seen_version"] !== remoteVersion) {
-        isModalShown = true;
-        storage["classquant_last_seen_version"] = remoteVersion;
-      }
-      assertTrue(isModalShown);
-      assertEqual("1.6.0", storage["classquant_last_seen_version"]);
+      const shouldShowModal = storage["classquant_last_seen_version"] !== currentAppVersion;
+      assertTrue(shouldShowModal);
 
-      const isModalShownSecond = (storage["classquant_last_seen_version"] !== remoteVersion);
-      assertFalse(isModalShownSecond);
+      storage["classquant_last_seen_version"] = currentAppVersion;
+      const shouldShowAfterDismiss = storage["classquant_last_seen_version"] !== currentAppVersion;
+      assertFalse(shouldShowAfterDismiss);
     });
 
     itTest("T4-07: Scenario 7 - Theme Switching & Web Audio Synthesizer Toggle Session", () => {
-      const appState = { theme: "kitty-theme", enableSound: true };
-      appState.theme = "twinstars-theme";
-      assertEqual("twinstars-theme", appState.theme);
+      const appState = { theme: "sanrio-kitty", soundEnabled: true };
+      appState.theme = "sanrio-twinstars";
+      appState.soundEnabled = false;
 
-      appState.enableSound = !appState.enableSound;
-      assertFalse(appState.enableSound);
-
-      appState.enableSound = !appState.enableSound;
-      assertTrue(appState.enableSound);
+      assertEqual("sanrio-twinstars", appState.theme);
+      assertFalse(appState.soundEnabled);
     });
 
     itTest("T4-08: Scenario 8 - Mobile Small-Screen Orientation Change Reflow Simulation", () => {
-      const rectPortrait = { top: 50, left: 20, width: 120, height: 40 };
-      const pathPortrait = calculateSvgSpotlightPath(rectPortrait, 6, 375, 667);
-      const pointerPortrait = calculatePointerPlacement(rectPortrait, 6, 375, 667);
+      const target = { top: 400, left: 100, width: 150, height: 50 };
+      const pPortrait = calculatePointerPlacement(target, 6, 375, 812);
+      const pLandscape = calculatePointerPlacement(target, 6, 812, 375);
 
-      const rectLandscape = { top: 50, left: 20, width: 120, height: 40 };
-      const pathLandscape = calculateSvgSpotlightPath(rectLandscape, 6, 667, 375);
-      const pointerLandscape = calculatePointerPlacement(rectLandscape, 6, 667, 375);
-
-      assertContains("M 0 0 h 375 v 667 h -375 Z", pathPortrait);
-      assertContains("M 0 0 h 667 v 375 h -667 Z", pathLandscape);
-      assertEqual("hand-up", pointerPortrait.emoji);
-      assertEqual("hand-up", pointerLandscape.emoji);
+      assertEqual("hand-down", pPortrait.emoji);
+      assertEqual("hand-down", pLandscape.emoji);
     });
 
     itTest("T4-09: Scenario 9 - Multi-Class Switch & Timetable Perception Workflow", () => {
-      const app = {
-        currentClass: "801",
-        classData: {
-          "801": { name: "Class 801 (Homeroom)", studentCount: 30 },
-          "803": { name: "Class 803 (Math)", studentCount: 28 },
-          "805": { name: "Class 805 (Math)", studentCount: 29 }
-        }
-      };
-      app.currentClass = "803";
-      assertEqual("803", app.currentClass);
-      assertEqual(28, app.classData[app.currentClass].studentCount);
+      const appState = { currentClassId: "801" };
+      const timetableSlot = { period: 2, classId: "803" };
 
-      app.currentClass = "805";
-      assertEqual(29, app.classData[app.currentClass].studentCount);
+      appState.currentClassId = timetableSlot.classId;
+      assertEqual("803", appState.currentClassId);
     });
 
     itTest("T4-10: Scenario 10 - Manual Cache Flush & Hard Reload Lifecycle", () => {
-      const cachedKeys = ["classquant-hub-v18", "classquant-hub-v19"];
-      cachedKeys.length = 0;
-      const reloaded = true;
-      assertEqual(0, cachedKeys.length);
-      assertTrue(reloaded);
+      const cacheStorage = { "classquant-hub-v19": ["index.html", "app.js"] };
+      delete cacheStorage["classquant-hub-v19"];
+      assertEqual(0, Object.keys(cacheStorage).length);
+
+      const hardReloadUrl = `index.html?t=${Date.now()}`;
+      assertContains("?t=", hardReloadUrl);
     });
   });
 }

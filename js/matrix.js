@@ -391,7 +391,8 @@ class ClassroomMatrix {
   }
 
   toggleSeatSelection(seatNo, classId) {
-    if (this.selectedSeats.has(seatNo)) {
+    const isSelected = this.selectedSeats.has(seatNo);
+    if (isSelected) {
       this.selectedSeats.delete(seatNo);
     } else {
       this.selectedSeats.add(seatNo);
@@ -400,7 +401,32 @@ class ClassroomMatrix {
         try { navigator.vibrate(15); } catch(e) {}
       }
     }
-    this.updateSelectionUI(classId);
+
+    // Direct O(1) in-place card class update
+    const card = document.getElementById(`seat-card-${seatNo}`);
+    if (card) {
+      card.classList.toggle('selected', !isSelected);
+    }
+
+    // Update selection count badge
+    const countElem = document.getElementById('selected-count');
+    if (countElem) countElem.innerText = this.selectedSeats.size;
+
+    // Update clear button visibility
+    const clearBtn = document.getElementById('clear-sel-btn');
+    if (clearBtn) {
+      if (this.selectedSeats.size > 0) {
+        clearBtn.classList.remove('hidden');
+        clearBtn.classList.add('inline-block');
+      } else {
+        clearBtn.classList.add('hidden');
+        clearBtn.classList.remove('inline-block');
+      }
+    }
+  }
+
+  toggleSeat(seatNo, classId) {
+    return this.toggleSeatSelection(seatNo, classId);
   }
 
   selectAll() {
@@ -411,9 +437,10 @@ class ClassroomMatrix {
     this.updateSelectionUI(currentClassId);
   }
 
-  clearSelection() {
+  clearSelection(classId) {
+    const targetClassId = classId || window.appState?.currentClassId || '801';
     this.selectedSeats.clear();
-    this.updateSelectionUI(window.appState.currentClassId);
+    this.updateSelectionUI(targetClassId);
   }
 
   updateSelectionUI(classId) {
@@ -446,62 +473,70 @@ class ClassroomMatrix {
 
   applyTagToSelected(classId, tagId) {
     if (this.selectedSeats.size === 0) {
-      window.appState.showToast('請先點選學生座號（點一下即可）', 'warning');
+      window.appState?.showToast('請先點選學生座號（點一下即可）', 'warning');
       return;
     }
 
     const tag = this.store.getTags().find(t => t.id === tagId);
     if (!tag) return;
 
-    const activeSlot = this.timetable.detectActiveSlot();
-    const period = activeSlot.period !== null ? activeSlot.period : 1;
+    try {
+      const activeSlot = this.timetable.detectActiveSlot();
+      const period = activeSlot.period !== null ? activeSlot.period : 1;
 
-    let appliedCount = 0;
-    const seatsToProcess = Array.from(this.selectedSeats);
+      let appliedCount = 0;
+      const seatsToProcess = Array.from(this.selectedSeats);
 
-    seatsToProcess.forEach(seatNo => {
-      this.store.addEvent({
-        classId,
-        seatNo,
-        period,
-        tagId: tag.id,
-        tagName: tag.name,
-        category: tag.category,
-        delta: tag.delta,
-        severity: tag.severity,
-        note: `課堂記點：${tag.name}`
-      });
+      seatsToProcess.forEach(seatNo => {
+        this.store.addEvent({
+          classId,
+          seatNo,
+          period,
+          tagId: tag.id,
+          tagName: tag.name,
+          category: tag.category,
+          delta: tag.delta,
+          severity: tag.severity,
+          note: `課堂記點：${tag.name}`
+        });
 
-      this.showFloatingBubble(seatNo, tag.delta);
-      appliedCount++;
+        this.showFloatingBubble(seatNo, tag.delta);
+        appliedCount++;
 
-      // In-place score update on card
-      const card = document.getElementById(`seat-card-${seatNo}`);
-      if (card) {
-        const profile = this.stats.getStudentProfile(classId, seatNo);
-        if (profile) {
-          const charPts = profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social;
-          const scoreSpans = card.querySelectorAll('div > span');
-          if (scoreSpans.length >= 2) {
-            const ptsSpan = scoreSpans[1];
-            ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
-            ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+        // In-place score update on card targeting character score span (index 2)
+        const card = document.getElementById(`seat-card-${seatNo}`);
+        if (card) {
+          const profile = this.stats.getStudentProfile(classId, seatNo);
+          if (profile) {
+            const charPts = profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social;
+            const scoreSpans = card.querySelectorAll('div > span');
+            if (scoreSpans.length >= 3) {
+              const ptsSpan = scoreSpans[2];
+              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
+              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+            } else if (scoreSpans.length >= 2) {
+              const ptsSpan = scoreSpans[1];
+              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
+              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+            }
           }
         }
+      });
+
+      // Sound effect
+      if (tag.delta > 0 && window.appState?.playChime) {
+        window.appState.playChime();
+      } else if (tag.delta < 0 && window.appState?.playWarning) {
+        window.appState.playWarning();
       }
-    });
 
-    // Sound effect
-    if (tag.delta > 0 && window.appState?.playChime) {
-      window.appState.playChime();
-    } else if (tag.delta < 0 && window.appState?.playWarning) {
-      window.appState.playWarning();
+      window.appState?.showToast(`✨ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+    } catch (err) {
+      console.error('[ClassroomMatrix] applyTagToSelected error:', err);
+    } finally {
+      // Auto-clear selection reliably with explicit classId under all execution paths
+      this.clearSelection(classId);
     }
-
-    window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
-    
-    // Auto-clear selection immediately (restoring familiar behavior)
-    this.clearSelection();
   }
 
   showFloatingBubble(seatNo, delta) {
@@ -510,6 +545,7 @@ class ClassroomMatrix {
 
     const bubble = document.createElement('div');
     bubble.className = `point-bubble ${delta > 0 ? 'text-emerald-600' : 'text-rose-600'} kitty-stamp-effect`;
+    bubble.style.pointerEvents = 'none';
     bubble.innerText = `${delta > 0 ? '✨ +' : ''}${delta}`;
     card.appendChild(bubble);
 

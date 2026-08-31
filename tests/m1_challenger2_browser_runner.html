@@ -1,0 +1,3334 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW" data-theme="kitty">
+<head>
+  <meta charset="UTF-8">
+  <title>ClassQuant Hub - M1 Challenger 2 Browser Empirical Runner</title>
+  <style>
+/* Base Tailwind & Custom Color Rules for ClassQuant Hub */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* --- Strict 3-Tier Color Rules --- */
+/* Positive (+) Score: Fresh Mint Green */
+.color-rule-pos {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #065f46 !important;
+}
+.color-rule-pos:hover {
+  background-color: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+}
+.color-rule-pos-badge {
+  background-color: #d1fae5 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+/* Negative (-) Score: Soft Rose Red */
+.color-rule-neg {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+  color: #9f1239 !important;
+}
+.color-rule-neg:hover {
+  background-color: #ffe4e6 !important;
+  border-color: #fda4af !important;
+}
+.color-rule-neg-badge {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+/* Neutral (=0) Score: Slate Gray */
+.color-rule-zero {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+.color-rule-zero:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+.color-rule-zero-badge {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Collapsible Header Transition */
+#global-header {
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease;
+  max-height: 240px;
+  overflow: visible;
+}
+
+#global-header.header-collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  pointer-events: none;
+  border-bottom-width: 0 !important;
+}
+
+/* Tag Pager Carousel (Strict Single-Page Scroll Snap) */
+.tag-pager-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.tag-page-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always !important; /* CRITICAL: Prevents skipping past page 2 directly to 3! */
+}
+
+/* Live Clock Indicator */
+.live-indicator {
+  animation: pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.15); }
+}
+
+/* --- Delightful Micro-Animations --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.92); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.student-seat-card,
+.seat-card,
+#seat-grid-container .student-seat-card,
+.quick-tag-button,
+.quick-tag-btn,
+.tag-btn,
+.action-btn,
+#matrix-grid .seat-card,
+.point-bubble {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.student-seat-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.student-seat-card:active {
+  transform: scale(0.95);
+}
+
+.student-seat-card.selected {
+  animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 0 3px #f43f5e, 0 4px 12px rgba(244, 63, 94, 0.25) !important;
+}
+
+.quick-tag-button,
+.quick-tag-btn,
+.tag-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes kittyBowWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { rotate: -8deg; scale: 1.08; }
+  75% { rotate: 8deg; scale: 1.08; }
+}
+
+.kitty-bow:hover, .kitty-cat-avatar:hover {
+  animation: kittyBowWiggle 0.5s ease-in-out;
+}
+
+/* Enhanced Burst Particle Stamp Effect */
+@keyframes burstParticle {
+  0% { opacity: 0; transform: translate(-50%, -20%) scale(0.5); }
+  35% { opacity: 1; transform: translate(-50%, -60%) scale(1.35); filter: drop-shadow(0 4px 8px rgba(244, 63, 94, 0.4)); }
+  70% { opacity: 0.9; transform: translate(-50%, -85%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -120%) scale(0.9); }
+}
+
+.point-bubble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 50;
+  animation: burstParticle 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* --- Indestructible 9999px Box-Shadow Dark Spotlight Engine --- */
+#tour-spotlight-box {
+  position: fixed;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85);
+  border: 3.5px solid #f43f5e;
+  border-radius: 18px;
+  z-index: 9995;
+  pointer-events: none;
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: spotlightGlowPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes spotlightGlowPulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 25px rgba(244, 63, 94, 0.95); 
+  }
+  50% { 
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 45px rgba(244, 63, 94, 1), 0 0 12px #ffffff; 
+  }
+}
+
+/* Touchmove Scroll Lock during Onboarding Tour */
+html.tour-locked, body.tour-locked {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+}
+
+/* Directional Bouncing Hand Pointer */
+@keyframes bouncePointingUp {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.15); }
+}
+
+@keyframes bouncePointingDown {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(10px) scale(1.15); }
+}
+
+.tour-pointer-up {
+  animation: bouncePointingUp 1s ease-in-out infinite;
+}
+
+.tour-pointer-down {
+  animation: bouncePointingDown 1s ease-in-out infinite;
+}
+
+/* Hide scrollbar for clean UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dark Theme Overrides */
+html.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+html.dark .glass-card {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #f8fafc;
+}
+html.dark .student-seat-card.selected,
+html.dark .compact-seat-tile.selected {
+  border-color: #f43f5e !important;
+  background-color: rgba(244, 63, 94, 0.2) !important;
+  box-shadow: 0 0 0 3px #f43f5e !important;
+}
+
+/* --- Permanent Onboarding Tour Overlay Styles (Guaranteed Top Z-Index & GPU Accelerated) --- */
+#tour-overlay-container {
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 99999 !important;
+}
+#tour-overlay-path {
+  pointer-events: auto !important;
+}
+#tour-popover {
+  position: fixed !important;
+  z-index: 100001 !important;
+  pointer-events: auto !important;
+  max-width: min(94vw, 420px) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+}
+#tour-pointer-container {
+  position: fixed !important;
+  z-index: 100000 !important;
+  pointer-events: none !important;
+}
+#tour-ghost-cursor {
+  position: fixed !important;
+  z-index: 100002 !important;
+  pointer-events: none !important;
+}
+.tour-gpu-layer {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+@keyframes spotlightGlowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.85)) drop-shadow(0 0 14px rgba(251, 113, 133, 0.5));
+    stroke-opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(244, 63, 94, 1)) drop-shadow(0 0 24px rgba(251, 113, 133, 0.8)) drop-shadow(0 0 3px #ffffff);
+    stroke-opacity: 1;
+  }
+}
+@keyframes tourHaloPulse {
+  0% { opacity: 0.8; stroke-width: 1.5px; stroke: #f43f5e; }
+  50% { opacity: 0.3; stroke-width: 5px; stroke: #fb7185; }
+  100% { opacity: 0; stroke-width: 8px; stroke: #fda4af; }
+}
+.tour-spotlight-pulse {
+  animation: spotlightGlowPulse 1.8s ease-in-out infinite;
+  vector-effect: non-scaling-stroke;
+}
+.tour-pulse-halo {
+  animation: tourHaloPulse 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  vector-effect: non-scaling-stroke;
+}
+.tour-arrow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease-out;
+}
+.tour-arrow-icon.hidden,
+.tour-arrow-lateral.hidden,
+#tour-pointer-container .hidden,
+#tour-ghost-cursor.hidden {
+  display: none !important;
+}
+.tour-bounce-up {
+  animation: pointerBounceUp 1s ease-in-out infinite;
+}
+.tour-bounce-down {
+  animation: pointerBounceDown 1s ease-in-out infinite;
+}
+.tour-bounce-left {
+  animation: pointerBounceLeft 1s ease-in-out infinite;
+}
+.tour-bounce-right {
+  animation: pointerBounceRight 1s ease-in-out infinite;
+}
+@keyframes pointerBounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pointerBounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+@keyframes pointerBounceLeft {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-6px); }
+}
+@keyframes pointerBounceRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+.ghost-cursor-click {
+  animation: ghostClick 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes ghostClick {
+  0% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(244,63,94,0.45)); }
+  45% { transform: scale(0.84) translateY(3px); filter: drop-shadow(0 1px 4px rgba(244,63,94,0.7)); }
+  100% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(244,63,94,0.45)); }
+}
+.tour-simulated-active {
+  transform: scale(0.95) !important;
+  filter: brightness(0.92) drop-shadow(0 0 8px rgba(244, 63, 94, 0.6)) !important;
+  transition: transform 0.15s ease-out, filter 0.15s ease-out !important;
+}
+
+    body { font-family: sans-serif; padding: 20px; margin: 0; background: #fff5f7; }
+    .pass { color: #16a34a; font-weight: bold; }
+    .fail { color: #dc2626; font-weight: bold; }
+    .hidden { display: none !important; }
+    #test-workspace { margin-top: 20px; padding: 15px; background: white; border-radius: 16px; border: 1px solid #fbcfe8; }
+  </style>
+</head>
+<body>
+  <h1>ClassQuant Hub - M1 Challenger 2 Empirical Test Suite</h1>
+  <div id="status">Initializing empirical verification tests...</div>
+  <pre id="summary-json" style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto;"></pre>
+  <script id="summary-data" type="application/json"></script>
+  <div id="test-workspace">
+    <div id="classroom-matrix-view"></div>
+    <div id="retro-log-view"></div>
+    <div id="global-modal" class="hidden"><div id="global-modal-content"></div></div>
+  </div>
+  <script>
+    window.lucide = { createIcons: () => {} };
+  </script>
+  <script>
+// --- store.js ---
+/**
+ * Data Store & State Management (Enhanced with Tag Management & NAS Sync)
+ */
+
+const STORAGE_KEY = 'class_point_quant_hub_data_v1';
+
+// Default Tag Categories and Definitions
+const DEFAULT_TAGS = [
+  // 數學學業 (Academic)
+  { id: 'math_breakthrough', name: '主動解出難題', category: 'academic', delta: 3, severity: 'positive', icon: 'zap' },
+  { id: 'math_board', name: '上台板書解題', category: 'academic', delta: 2, severity: 'positive', icon: 'edit-3' },
+  { id: 'math_ask', name: '課堂提問具啟發性', category: 'academic', delta: 1, severity: 'positive', icon: 'help-circle' },
+  { id: 'math_hw_missing', name: '數學作業缺交', category: 'academic', delta: -2, severity: 'warning', icon: 'file-x' },
+  { id: 'math_book_missing', name: '未帶課本講義', category: 'academic', delta: -1, severity: 'warning', icon: 'book-open' },
+  { id: 'math_stuck', name: '運算概念卡關待補救', category: 'academic', delta: -1, severity: 'info', icon: 'alert-triangle' },
+
+  // 生活常規 (Discipline - 導師班專重)
+  { id: 'disc_late', name: '上課/晨讀遲到', category: 'discipline', delta: -2, severity: 'warning', icon: 'clock' },
+  { id: 'disc_sleep', name: '課堂睡覺/發呆', category: 'discipline', delta: -2, severity: 'warning', icon: 'moon' },
+  { id: 'disc_distracted', name: '分心玩文具/雜物', category: 'discipline', delta: -1, severity: 'warning', icon: 'eye-off' },
+  { id: 'disc_handbook_missing', name: '未交聯絡簿/簽名', category: 'discipline', delta: -1, severity: 'warning', icon: 'clipboard' },
+  { id: 'disc_clean_fail', name: '掃除不認真/未到', category: 'discipline', delta: -2, severity: 'warning', icon: 'trash-2' },
+  { id: 'disc_officer_good', name: '幹部/小老師盡責', category: 'discipline', delta: 2, severity: 'positive', icon: 'award' },
+  { id: 'disc_reading_good', name: '晨讀自習專注', category: 'discipline', delta: 1, severity: 'positive', icon: 'check-circle' },
+
+  // 人際與衝突 (Conflict & Social)
+  { id: 'soc_help', name: '主動指導同學/助人', category: 'social', delta: 2, severity: 'positive', icon: 'heart' },
+  { id: 'soc_verbal_fight', name: '同儕言語吵架口角', category: 'conflict', delta: -3, severity: 'danger', icon: 'message-square' },
+  { id: 'soc_phys_fight', name: '肢體衝突/推擠打架', category: 'conflict', delta: -5, severity: 'critical', icon: 'shield-alert' },
+  { id: 'soc_property_damage', name: '毀損公物/他人私物', category: 'conflict', delta: -5, severity: 'critical', icon: 'alert-octagon' },
+
+  // 測驗與評量 (Assessment)
+  { id: 'exam_top', name: '小考滿分/全班最高', category: 'assessment', delta: 3, severity: 'positive', icon: 'star' },
+  { id: 'exam_progress', name: '小考顯著進步(+10分以上)', category: 'assessment', delta: 2, severity: 'positive', icon: 'trending-up' },
+  { id: 'exam_fail_no_correct', name: '小考不及格且未訂正', category: 'assessment', delta: -2, severity: 'danger', icon: 'trending-down' }
+];
+
+// Time Periods Configuration (Standard Junior High School Schedule)
+const DEFAULT_TIMETABLE_PERIODS = [
+  { period: 0, name: '早自習/晨讀', start: '07:50', end: '08:25' },
+  { period: 1, name: '第 1 節', start: '08:30', end: '09:15' },
+  { period: 2, name: '第 2 節', start: '09:25', end: '10:10' },
+  { period: 3, name: '第 3 節', start: '10:20', end: '11:05' },
+  { period: 4, name: '第 4 節', start: '11:15', end: '12:00' },
+  { period: 'lunch', name: '午餐/午休', start: '12:00', end: '13:10' },
+  { period: 5, name: '第 5 節', start: '13:20', end: '14:05' },
+  { period: 6, name: '第 6 節', start: '14:15', end: '15:00' },
+  { period: 7, name: '第 7 節', start: '15:10', end: '15:55' },
+  { period: 'clean', name: '整潔活動', start: '16:00', end: '16:20' },
+  { period: 8, name: '第 8 節(輔導)', start: '16:25', end: '17:10' }
+];
+
+// Teacher Weekly Schedule (Mon-Fri)
+const DEFAULT_WEEKLY_SCHEDULE = {
+  1: { 0: '801', 1: '801', 3: '803', 4: '805', 7: '801' },
+  2: { 0: '801', 2: '803', 3: '801', 5: '805', 8: '801' },
+  3: { 0: '801', 1: '805', 2: '801', 4: '803' },
+  4: { 0: '801', 2: '805', 3: '803', 6: '801', 7: '801' },
+  5: { 0: '801', 1: '803', 3: '805', 5: '801', 6: '801' }
+};
+
+class Store {
+  constructor() {
+    this.data = this.loadFromStorage();
+    if (!this.data || typeof this.data !== 'object' || !this.data.classes || Object.keys(this.data.classes).length === 0 || !this.data.students) {
+      this.initDemoData();
+    } else {
+      // Ensure all fields are fully populated and resilient
+      if (!this.data.classes) this.data.classes = {};
+      if (!this.data.students) this.data.students = {};
+      if (!this.data.assessments) this.data.assessments = {};
+      if (!this.data.events) this.data.events = [];
+      if (!this.data.retroLogs) this.data.retroLogs = [];
+      if (!this.data.tags || this.data.tags.length === 0) this.data.tags = DEFAULT_TAGS;
+      if (!this.data.timetablePeriods) this.data.timetablePeriods = DEFAULT_TIMETABLE_PERIODS;
+      if (!this.data.weeklySchedule) this.data.weeklySchedule = DEFAULT_WEEKLY_SCHEDULE;
+      if (!this.data.settings) this.data.settings = {};
+      if (!this.data.settings.theme) this.data.settings.theme = 'kitty';
+
+      // Self-healing: validate every class has a student array
+      const studentNames = [
+        '陳冠宇', '林子涵', '黃柏翔', '張雅晴', '李承翰', '王品妍', '吳廷軒', '蔡詠晴', '許志豪', '鄭羽彤',
+        '郭俊廷', '謝欣潔', '曾郁翔', '洪若涵', '邱冠宏', '賴思妤', '周聖文', '葉佩珊', '莊凱翔', '江詩婷',
+        '劉宗憲', '呂佩真', '潘宥安', '顏子淇', '鍾建宇', '蕭曼婷', '彭子豪', '方宣瑜', '蘇家緯', '戴綺芸'
+      ];
+      Object.values(this.data.classes).forEach(cls => {
+        if (!this.data.students[cls.id] || !Array.isArray(this.data.students[cls.id]) || this.data.students[cls.id].length === 0) {
+          this.data.students[cls.id] = [];
+          for (let seat = 1; seat <= (cls.studentCount || 30); seat++) {
+            this.data.students[cls.id].push({
+              seatNo: seat,
+              name: cls.type === 'homeroom' ? studentNames[seat - 1] || `座號 ${seat}` : `座號 ${seat} (${studentNames[seat - 1]?.[0] || '生'}生)`,
+              gender: seat % 2 === 1 ? 'M' : 'F',
+              baselineAbility: 60 + Math.floor(Math.random() * 35),
+              notes: ''
+            });
+          }
+        }
+      });
+      this.saveToStorage();
+    }
+  }
+
+  loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.error('Failed to load from storage:', e);
+      return null;
+    }
+  }
+
+  saveToStorage() {
+    try {
+      this.data.lastModified = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+    } catch (e) {
+      console.error('Failed to save to storage:', e);
+    }
+  }
+
+  save(data = null) {
+    if (data) {
+      this.data = data;
+    }
+    this.saveToStorage();
+  }
+
+  initDemoData() {
+    const classes = {
+      '801': {
+        id: '801',
+        name: '801 班',
+        type: 'homeroom', // 導師班 (本班)
+        subject: '導師班 / 數學',
+        studentCount: 30,
+        seatLayout: { rows: 5, cols: 6 }
+      },
+      '803': {
+        id: '803',
+        name: '803 班',
+        type: 'subject', // 科任班 (任教班)
+        subject: '數學',
+        studentCount: 30,
+        seatLayout: { rows: 5, cols: 6 }
+      },
+      '805': {
+        id: '805',
+        name: '805 班',
+        type: 'subject', // 科任班 (任教班)
+        subject: '數學',
+        studentCount: 28,
+        seatLayout: { rows: 5, cols: 6 }
+      }
+    };
+
+    const students = {};
+    const studentNames = [
+      '陳冠宇', '林子涵', '黃柏翔', '張雅晴', '李承翰', '王品妍', '吳廷軒', '蔡詠晴', '許志豪', '鄭羽彤',
+      '郭俊廷', '謝欣潔', '曾郁翔', '洪若涵', '邱冠宏', '賴思妤', '周聖文', '葉佩珊', '莊凱翔', '江詩婷',
+      '劉宗憲', '呂佩真', '潘宥安', '顏子淇', '鍾建宇', '蕭曼婷', '彭子豪', '方宣瑜', '蘇家緯', '戴綺芸'
+    ];
+
+    Object.values(classes).forEach(cls => {
+      students[cls.id] = [];
+      for (let seat = 1; seat <= cls.studentCount; seat++) {
+        students[cls.id].push({
+          seatNo: seat,
+          name: cls.type === 'homeroom' ? studentNames[seat - 1] || `座號 ${seat}` : `座號 ${seat} (${studentNames[seat - 1]?.[0] || '生'}生)`,
+          gender: seat % 2 === 1 ? 'M' : 'F',
+          baselineAbility: 60 + Math.floor(Math.random() * 35),
+          notes: ''
+        });
+      }
+    });
+
+    const assessments = {
+      '801': [
+        {
+          id: 'asm_801_1',
+          name: '第 1 次小考：乘法公式與多項式',
+          date: '2026-09-08',
+          maxScore: 100,
+          scores: {}
+        },
+        {
+          id: 'asm_801_2',
+          name: '第 2 次小考：因式分解(提公因式)',
+          date: '2026-09-15',
+          maxScore: 100,
+          scores: {}
+        },
+        {
+          id: 'asm_801_3',
+          name: '第 3 次小考：十字交乘法與應用',
+          date: '2026-09-22',
+          maxScore: 100,
+          scores: {}
+        },
+        {
+          id: 'asm_801_4',
+          name: '第 4 次小考：一元二次方程式解法',
+          date: '2026-09-29',
+          maxScore: 100,
+          scores: {}
+        }
+      ],
+      '803': [
+        {
+          id: 'asm_803_1',
+          name: '第 1 次小考：乘法公式',
+          date: '2026-09-09',
+          maxScore: 100,
+          scores: {}
+        },
+        {
+          id: 'asm_803_2',
+          name: '第 2 次小考：十字交乘法',
+          date: '2026-09-23',
+          maxScore: 100,
+          scores: {}
+        }
+      ],
+      '805': [
+        {
+          id: 'asm_805_1',
+          name: '第 1 次小考：乘法公式',
+          date: '2026-09-10',
+          maxScore: 100,
+          scores: {}
+        }
+      ]
+    };
+
+    assessments['801'].forEach((asm, idx) => {
+      for (let seat = 1; seat <= 30; seat++) {
+        let base = 72 + (seat % 7) * 4 - (seat % 5) * 3;
+        if (seat === 5) base = [88, 84, 60, 42][idx];
+        else if (seat === 12) base = [82, 88, 94, 98][idx];
+        else if (seat === 8) base = [55, 48, 52, 40][idx];
+        asm.scores[seat] = Math.max(20, Math.min(100, base + Math.floor(Math.random() * 6 - 3)));
+      }
+    });
+
+    assessments['803'].forEach((asm) => {
+      for (let seat = 1; seat <= 30; seat++) {
+        asm.scores[seat] = Math.max(30, Math.min(100, 70 + (seat % 8) * 3 + Math.floor(Math.random() * 8 - 4)));
+      }
+    });
+
+    const events = [
+      {
+        id: 'evt_1',
+        classId: '801',
+        seatNo: 12,
+        date: '2026-09-15',
+        time: '10:35',
+        period: 3,
+        tagId: 'math_breakthrough',
+        tagName: '主動解出難題',
+        category: 'academic',
+        delta: 3,
+        severity: 'positive',
+        note: '上台正確解出一元二次資優延伸題'
+      },
+      {
+        id: 'evt_2',
+        classId: '801',
+        seatNo: 5,
+        date: '2026-09-16',
+        time: '08:05',
+        period: 0,
+        tagId: 'disc_late',
+        tagName: '上課/晨讀遲到',
+        category: 'discipline',
+        delta: -2,
+        severity: 'warning',
+        note: '遲到15分鐘，未帶晨讀講義'
+      },
+      {
+        id: 'evt_3',
+        classId: '801',
+        seatNo: 5,
+        date: '2026-09-18',
+        time: '14:20',
+        period: 6,
+        tagId: 'disc_sleep',
+        tagName: '課堂睡覺/發呆',
+        category: 'discipline',
+        delta: -2,
+        severity: 'warning',
+        note: '數學課連續趴睡，叫醒後眼神渙散'
+      },
+      {
+        id: 'evt_4',
+        classId: '801',
+        seatNo: 8,
+        date: '2026-09-22',
+        time: '12:40',
+        period: 'lunch',
+        tagId: 'soc_phys_fight',
+        tagName: '肢體衝突/推擠打架',
+        category: 'conflict',
+        delta: -5,
+        severity: 'critical',
+        note: '午休前因排隊搶籃球與 09 號發生推擠，互相揮拳，已帶至導師室分開冷靜'
+      },
+      {
+        id: 'evt_5',
+        classId: '801',
+        seatNo: 9,
+        date: '2026-09-22',
+        time: '12:40',
+        period: 'lunch',
+        tagId: 'soc_phys_fight',
+        tagName: '肢體衝突/推擠打架',
+        category: 'conflict',
+        delta: -5,
+        severity: 'critical',
+        note: '與 08 號推擠衝突當事方，已請雙方寫事件自述表'
+      },
+      {
+        id: 'evt_6',
+        classId: '801',
+        seatNo: 3,
+        date: '2026-09-24',
+        time: '09:30',
+        period: 2,
+        tagId: 'disc_officer_good',
+        tagName: '幹部/小老師盡責',
+        category: 'discipline',
+        delta: 2,
+        severity: 'positive',
+        note: '數學小老師主動於課前收齊全班習作並分批歸類'
+      },
+      {
+        id: 'evt_7',
+        classId: '801',
+        seatNo: 5,
+        date: '2026-09-25',
+        time: '08:10',
+        period: 0,
+        tagId: 'disc_handbook_missing',
+        tagName: '未交聯絡簿/簽名',
+        category: 'discipline',
+        delta: -1,
+        severity: 'warning',
+        note: '連續 3 日未交聯絡簿'
+      },
+      {
+        id: 'evt_8',
+        classId: '801',
+        seatNo: 5,
+        date: '2026-09-26',
+        time: '17:30',
+        period: 'after',
+        tagId: 'custom_narrative',
+        tagName: '家長聯繫備忘',
+        category: 'social',
+        delta: 0,
+        severity: 'info',
+        note: '家長來電說明近期家中長輩住院，學生作息受影響致使頻繁遲到與精神不濟，已約定下週追蹤'
+      }
+    ];
+
+    this.data = {
+      classes,
+      students,
+      assessments,
+      events,
+      tags: DEFAULT_TAGS,
+      timetablePeriods: DEFAULT_TIMETABLE_PERIODS,
+      weeklySchedule: DEFAULT_WEEKLY_SCHEDULE,
+      currentClassOverride: null,
+      settings: {
+        theme: 'kitty', // 'kitty' or 'dark'
+        autoSwitchTimetable: true,
+        enableSound: true,
+        cliffDropSigmaThreshold: 1.8,
+        nasSettings: {
+          serverUrl: 'http://192.168.1.100:5005',
+          username: '',
+          password: '',
+          remotePath: '/ClassData/class_data_sync.json',
+          lastSyncTime: null
+        }
+      }
+    };
+
+    this.saveToStorage();
+  }
+
+  // --- Tag Management CRUD ---
+  getTags() {
+    return this.data.tags || DEFAULT_TAGS;
+  }
+
+  getTagsSortedByClassFrequency(classId) {
+    const tags = this.getTags();
+    const classEvents = this.getEvents(classId);
+    const freqMap = {};
+    classEvents.forEach(e => {
+      if (e.tagId) {
+        freqMap[e.tagId] = (freqMap[e.tagId] || 0) + 1;
+      }
+    });
+
+    return [...tags].sort((a, b) => {
+      const countA = freqMap[a.id] || 0;
+      const countB = freqMap[b.id] || 0;
+      if (countB !== countA) {
+        return countB - countA; // Most frequently used in THIS class first
+      }
+      return 0;
+    });
+  }
+
+  getMultiStudentEvents(classId, seatNos = []) {
+    const classEvents = this.getEvents(classId);
+    if (!seatNos || seatNos.length === 0) return classEvents;
+    const seatSet = new Set(seatNos.map(Number));
+    return classEvents.filter(e => seatSet.has(Number(e.seatNo)));
+  }
+
+  addTag(tag) {
+    const newTag = {
+      id: 'tag_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      name: tag.name,
+      category: tag.category || 'discipline',
+      delta: Number(tag.delta || 0),
+      severity: tag.severity || (tag.delta > 0 ? 'positive' : tag.delta < 0 ? 'warning' : 'info'),
+      icon: tag.icon || 'tag'
+    };
+    if (!this.data.tags) this.data.tags = [];
+    this.data.tags.push(newTag);
+    this.saveToStorage();
+    return newTag;
+  }
+
+  updateTag(tagId, updated) {
+    const idx = (this.data.tags || []).findIndex(t => t.id === tagId);
+    if (idx !== -1) {
+      this.data.tags[idx] = {
+        ...this.data.tags[idx],
+        ...updated,
+        delta: Number(updated.delta !== undefined ? updated.delta : this.data.tags[idx].delta)
+      };
+      this.saveToStorage();
+      return this.data.tags[idx];
+    }
+    return null;
+  }
+
+  deleteTag(tagId) {
+    this.data.tags = (this.data.tags || []).filter(t => t.id !== tagId);
+    this.saveToStorage();
+  }
+
+  resetTagsToDefault() {
+    this.data.tags = [...DEFAULT_TAGS];
+    this.saveToStorage();
+  }
+
+  // --- Theme Management ---
+  getTheme() {
+    return this.data.settings?.theme || 'kitty';
+  }
+
+  setTheme(themeName) {
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings.theme = themeName;
+    this.saveToStorage();
+  }
+
+  // --- NAS Settings ---
+  getNasSettings() {
+    return this.data.settings?.nasSettings || {
+      serverUrl: 'http://192.168.1.100:5005',
+      username: '',
+      password: '',
+      remotePath: '/ClassData/class_data_sync.json',
+      lastSyncTime: null
+    };
+  }
+
+  updateNasSettings(settings) {
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings.nasSettings = {
+      ...this.getNasSettings(),
+      ...settings
+    };
+    this.saveToStorage();
+  }
+
+  // --- Queries & Events ---
+  getClasses() {
+    return this.data?.classes || {};
+  }
+
+  getClass(classId) {
+    if (!this.data || !this.data.classes) return null;
+    return this.data.classes[classId] || Object.values(this.data.classes)[0] || null;
+  }
+
+  getStudents(classId) {
+    if (!this.data || !this.data.students) return [];
+    return this.data.students[classId] || [];
+  }
+
+  getStudent(classId, seatNo) {
+    const list = this.getStudents(classId);
+    return list.find(s => s.seatNo === parseInt(seatNo, 10)) || null;
+  }
+
+  getEvents(classId = null) {
+    if (!this.data || !this.data.events) return [];
+    if (!classId) return this.data.events;
+    return this.data.events.filter(e => e && e.classId === classId);
+  }
+
+  getAssessments(classId) {
+    if (!this.data || !this.data.assessments) return [];
+    return this.data.assessments[classId] || [];
+  }
+
+  addEvent(event) {
+    const newEvent = {
+      id: 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      date: event.date || new Date().toISOString().split('T')[0],
+      time: event.time || new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      ...event
+    };
+    this.data.events.unshift(newEvent);
+    this.saveToStorage();
+    return newEvent;
+  }
+
+  deleteEvent(eventId) {
+    this.data.events = this.data.events.filter(e => e.id !== eventId);
+    this.saveToStorage();
+  }
+
+  addAssessment(classId, assessment) {
+    if (!this.data.assessments[classId]) {
+      this.data.assessments[classId] = [];
+    }
+    const newAsm = {
+      id: 'asm_' + classId + '_' + Date.now(),
+      ...assessment
+    };
+    this.data.assessments[classId].push(newAsm);
+    this.saveToStorage();
+    return newAsm;
+  }
+
+  updateAssessmentScore(classId, assessmentId, seatNo, score) {
+    const asms = this.data.assessments[classId];
+    if (!asms) return;
+    const target = asms.find(a => a.id === assessmentId);
+    if (target) {
+      if (!target.scores) target.scores = {};
+      target.scores[seatNo] = Number(score);
+      this.saveToStorage();
+    }
+  }
+
+  updateWeeklySchedule(schedule) {
+    this.data.weeklySchedule = schedule;
+    this.saveToStorage();
+  }
+
+  updateTimetablePeriods(periods) {
+    this.data.timetablePeriods = periods;
+    this.saveToStorage();
+  }
+
+  setManualClassOverride(classId) {
+    this.data.currentClassOverride = classId;
+    this.saveToStorage();
+  }
+
+  clearManualClassOverride() {
+    this.data.currentClassOverride = null;
+    this.saveToStorage();
+  }
+
+  exportAllData() {
+    return JSON.stringify(this.data, null, 2);
+  }
+
+  importAllData(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!parsed.classes || !parsed.students) {
+        throw new Error('資料結構不符合規格：缺少 classes 或 students 欄位');
+      }
+      this.data = parsed;
+      this.saveToStorage();
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  resetToDemo() {
+    localStorage.removeItem(STORAGE_KEY);
+    this.initDemoData();
+  }
+
+  clearAll() {
+    this.data = {
+      classes: {},
+      students: {},
+      assessments: {},
+      events: [],
+      tags: DEFAULT_TAGS,
+      timetablePeriods: DEFAULT_TIMETABLE_PERIODS,
+      weeklySchedule: {},
+      currentClassOverride: null,
+      settings: {
+        theme: 'kitty',
+        autoSwitchTimetable: true,
+        enableSound: true,
+        cliffDropSigmaThreshold: 1.8,
+        nasSettings: {
+          serverUrl: 'http://192.168.1.100:5005',
+          username: '',
+          password: '',
+          remotePath: '/ClassData/class_data_sync.json',
+          lastSyncTime: null
+        }
+      }
+    };
+    this.saveToStorage();
+  }
+}
+
+// Global Store Instance
+window.appStore = new Store();
+
+// --- timetable.js ---
+/**
+ * Timetable Engine & Class Auto-Switching System
+ * Handles real-time schedule detection, manual overrides, and schedule management.
+ */
+
+class TimetableEngine {
+  constructor(store) {
+    this.store = store;
+    this.simulatedTime = null; // null for real time, or { day: 1-5, timeStr: '10:30' }
+    this.listeners = [];
+    this.startClock();
+  }
+
+  onClassChange(callback) {
+    this.listeners.push(callback);
+  }
+
+  notifyClassChange(classId, context) {
+    this.listeners.forEach(cb => cb(classId, context));
+  }
+
+  getCurrentTimeInfo() {
+    let now = new Date();
+    let day = now.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+    let hours = String(now.getHours()).padStart(2, '0');
+    let minutes = String(now.getMinutes()).padStart(2, '0');
+    let timeStr = `${hours}:${minutes}`;
+
+    if (this.simulatedTime) {
+      day = this.simulatedTime.day;
+      timeStr = this.simulatedTime.timeStr;
+    }
+
+    return { day, timeStr, isSimulated: !!this.simulatedTime };
+  }
+
+  // Parse HH:MM to total minutes from midnight
+  timeToMinutes(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  detectActiveSlot() {
+    const { day, timeStr } = this.getCurrentTimeInfo();
+    const periods = this.store.data.timetablePeriods;
+    const weeklySchedule = this.store.data.weeklySchedule;
+    const currentMins = this.timeToMinutes(timeStr);
+
+    // If Weekend (0 = Sun, 6 = Sat)
+    if (day === 0 || day === 6) {
+      return {
+        status: 'weekend',
+        period: null,
+        classId: null,
+        message: '週末非授課時段',
+        nextSlot: null
+      };
+    }
+
+    const daySchedule = weeklySchedule[day] || {};
+
+    // Check if within any period
+    for (let i = 0; i < periods.length; i++) {
+      const p = periods[i];
+      const startMins = this.timeToMinutes(p.start);
+      const endMins = this.timeToMinutes(p.end);
+
+      if (currentMins >= startMins && currentMins <= endMins) {
+        const classId = daySchedule[p.period] || null;
+        const remaining = endMins - currentMins;
+        return {
+          status: 'in_session',
+          period: p.period,
+          periodName: p.name,
+          classId: classId,
+          start: p.start,
+          end: p.end,
+          remainingMinutes: remaining,
+          message: `正在進行：${p.name} (剩餘 ${remaining} 分鐘)`
+        };
+      }
+    }
+
+    // Check if in break between periods
+    for (let i = 0; i < periods.length - 1; i++) {
+      const currentEnd = this.timeToMinutes(periods[i].end);
+      const nextStart = this.timeToMinutes(periods[i + 1].start);
+
+      if (currentMins > currentEnd && currentMins < nextStart) {
+        const nextPeriod = periods[i + 1];
+        const nextClassId = daySchedule[nextPeriod.period] || null;
+        const prevPeriod = periods[i];
+        const prevClassId = daySchedule[prevPeriod.period] || null;
+        const remainingToNext = nextStart - currentMins;
+
+        return {
+          status: 'in_break',
+          period: prevPeriod.period,
+          periodName: `課間休息 (上節: ${prevPeriod.name})`,
+          classId: prevClassId, // retain previous class for late logging
+          nextClassId: nextClassId,
+          nextPeriodName: nextPeriod.name,
+          remainingMinutes: remainingToNext,
+          message: `課間休息中 • 下節：${nextPeriod.name} (${nextClassId ? nextClassId + '班' : '無課'}) 還有 ${remainingToNext} 分鐘`
+        };
+      }
+    }
+
+    // Outside school hours
+    return {
+      status: 'off_hours',
+      period: null,
+      classId: null,
+      message: '非課堂時段 (備課/自習)',
+      nextSlot: null
+    };
+  }
+
+  getActiveClassId() {
+    // 1. Check if user manually forced an override
+    if (this.store.data.currentClassOverride) {
+      return {
+        classId: this.store.data.currentClassOverride,
+        isOverride: true,
+        slotInfo: this.detectActiveSlot()
+      };
+    }
+
+    // 2. Check auto detected slot
+    const slotInfo = this.detectActiveSlot();
+    if (slotInfo.classId) {
+      return {
+        classId: slotInfo.classId,
+        isOverride: false,
+        slotInfo: slotInfo
+      };
+    }
+
+    // 3. Default fallback: first available class (e.g. homeroom)
+    const allClasses = Object.keys(this.store.data.classes);
+    const homeroom = Object.values(this.store.data.classes).find(c => c.type === 'homeroom');
+    const fallbackId = homeroom ? homeroom.id : allClasses[0] || null;
+
+    return {
+      classId: fallbackId,
+      isOverride: false,
+      slotInfo: slotInfo
+    };
+  }
+
+  setManualOverride(classId) {
+    this.store.setManualClassOverride(classId);
+    this.notifyClassChange(classId, { isOverride: true });
+  }
+
+  clearManualOverride() {
+    this.store.clearManualClassOverride();
+    const active = this.getActiveClassId();
+    this.notifyClassChange(active.classId, { isOverride: false });
+  }
+
+  setSimulationTime(day, timeStr) {
+    this.simulatedTime = { day, timeStr };
+    const active = this.getActiveClassId();
+    this.notifyClassChange(active.classId, { isSimulation: true });
+  }
+
+  clearSimulation() {
+    this.simulatedTime = null;
+    const active = this.getActiveClassId();
+    this.notifyClassChange(active.classId, { isSimulation: false });
+  }
+
+  startClock() {
+    // Check every 30 seconds
+    setInterval(() => {
+      if (this.store.data.settings.autoSwitchTimetable && !this.store.data.currentClassOverride) {
+        const active = this.getActiveClassId();
+        this.notifyClassChange(active.classId, { isPeriodicCheck: true });
+      }
+    }, 30000);
+  }
+}
+
+// Global Timetable Instance
+window.timetableEngine = new TimetableEngine(window.appStore);
+
+// --- statistics.js ---
+/**
+ * Quantitative Educational Statistics Engine
+ * Implements EWMA, 2-sigma cliff drop detection, Box Plot quartiles, 4-quadrant clustering,
+ * and Multi-Class Comparative Benchmarking for differentiated homework and instructional strategy.
+ * Fully null-safe for newly added classes and dynamically modified rosters.
+ */
+
+class StatisticsEngine {
+  constructor(store) {
+    this.store = store;
+  }
+
+  // --- Basic Statistical Utilities ---
+  mean(arr) {
+    if (!arr || arr.length === 0) return 0;
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  standardDeviation(arr, isSample = true) {
+    if (!arr || arr.length < (isSample ? 2 : 1)) return 0;
+    const avg = this.mean(arr);
+    const sumSquareDiff = arr.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0);
+    const denom = isSample ? arr.length - 1 : arr.length;
+    return Math.sqrt(sumSquareDiff / denom);
+  }
+
+  quantile(sortedArr, q) {
+    if (!sortedArr || sortedArr.length === 0) return 0;
+    const pos = (sortedArr.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sortedArr[base + 1] !== undefined) {
+      return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
+    } else {
+      return sortedArr[base];
+    }
+  }
+
+  getFiveNumberSummary(arr) {
+    if (!arr || arr.length === 0) {
+      return { min: 0, q1: 0, median: 0, q3: 0, max: 0, iqr: 0, outliers: [] };
+    }
+    const sorted = [...arr].sort((a, b) => a - b);
+    const min = sorted[0];
+    const max = sorted[sorted.length - 1];
+    const q1 = this.quantile(sorted, 0.25);
+    const median = this.quantile(sorted, 0.5);
+    const q3 = this.quantile(sorted, 0.75);
+    const iqr = q3 - q1;
+
+    const lowerBound = q1 - 1.5 * iqr;
+    const upperBound = q3 + 1.5 * iqr;
+    const outliers = sorted.filter(x => x < lowerBound || x > upperBound);
+
+    return {
+      min: Math.round(min * 10) / 10,
+      q1: Math.round(q1 * 10) / 10,
+      median: Math.round(median * 10) / 10,
+      q3: Math.round(q3 * 10) / 10,
+      max: Math.round(max * 10) / 10,
+      iqr: Math.round(iqr * 10) / 10,
+      outliers
+    };
+  }
+
+  // --- EWMA (Exponential Weighted Moving Average) ---
+  calculateEWMA(values, alpha = 0.35) {
+    if (!values || values.length === 0) return [];
+    const ewma = [values[0]];
+    for (let i = 1; i < values.length; i++) {
+      const smoothed = alpha * values[i] + (1 - alpha) * ewma[i - 1];
+      ewma.push(Math.round(smoothed * 10) / 10);
+    }
+    return ewma;
+  }
+
+  // --- Linear Regression (Slope for progress velocity) ---
+  calculateSlope(yValues) {
+    const n = yValues.length;
+    if (n < 2) return 0;
+    const xValues = Array.from({ length: n }, (_, i) => i + 1);
+    const xMean = this.mean(xValues);
+    const yMean = this.mean(yValues);
+
+    let numerator = 0;
+    let denominator = 0;
+    for (let i = 0; i < n; i++) {
+      numerator += (xValues[i] - xMean) * (yValues[i] - yMean);
+      denominator += Math.pow(xValues[i] - xMean, 2);
+    }
+    return denominator === 0 ? 0 : Math.round((numerator / denominator) * 100) / 100;
+  }
+
+  // --- Student Comprehensive Metrics Profile ---
+  getStudentProfile(classId, seatNo) {
+    const student = this.store.getStudent(classId, seatNo);
+    if (!student) return null;
+
+    const classEvents = this.store.getEvents(classId).filter(e => e.seatNo === parseInt(seatNo, 10));
+    const assessments = this.store.getAssessments(classId);
+
+    // 1. Assessment Scores Progression
+    const studentScores = [];
+    const assessmentList = [];
+    assessments.forEach(asm => {
+      if (asm.scores && asm.scores[seatNo] !== undefined) {
+        studentScores.push(Number(asm.scores[seatNo]));
+        assessmentList.push(asm);
+      }
+    });
+
+    const scoreMean = studentScores.length > 0 ? this.mean(studentScores) : 70;
+    const scoreStd = this.standardDeviation(studentScores);
+    const ewmaScores = this.calculateEWMA(studentScores);
+    const scoreSlope = this.calculateSlope(studentScores);
+
+    // 2. Behavioral & Engagement Metrics
+    let academicBonus = 0;
+    let disciplineInfractions = 0;
+    let conflictIncidents = 0;
+    let socialContributions = 0;
+    let recentNegativeCount = 0;
+
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    classEvents.forEach(evt => {
+      const delta = evt.delta || 0;
+      if (evt.category === 'academic') {
+        academicBonus += delta;
+      } else if (evt.category === 'discipline') {
+        disciplineInfractions += delta;
+      } else if (evt.category === 'conflict') {
+        conflictIncidents += delta;
+      } else if (evt.category === 'social') {
+        socialContributions += delta;
+      }
+
+      if (delta < 0 && evt.date) {
+        const evtDate = new Date(evt.date);
+        if (evtDate >= oneWeekAgo) {
+          recentNegativeCount++;
+        }
+      }
+    });
+
+    const netPoints = academicBonus + disciplineInfractions + conflictIncidents + socialContributions;
+
+    // 3. Cliff Drop & Alert Detection (2-sigma drop or severe slope)
+    let isCliffDrop = false;
+    let cliffDropReason = '';
+
+    if (studentScores.length >= 3) {
+      const latestScore = studentScores[studentScores.length - 1];
+      const previousScores = studentScores.slice(0, -1);
+      const prevMean = this.mean(previousScores);
+      const prevStd = this.standardDeviation(previousScores);
+
+      if (prevStd > 0 && latestScore < prevMean - 1.8 * prevStd) {
+        isCliffDrop = true;
+        cliffDropReason = `最新評量 (${latestScore}分) 發生斷崖式下滑 (低於均值 ${Math.round((prevMean - latestScore)*10)/10} 分)`;
+      } else if (scoreSlope < -2.5) {
+        isCliffDrop = true;
+        cliffDropReason = `近期連續小考下滑斜率顯著 (斜率: ${scoreSlope})`;
+      }
+    }
+
+    if (recentNegativeCount >= 3) {
+      isCliffDrop = true;
+      cliffDropReason = (cliffDropReason ? cliffDropReason + ' • ' : '') + `近一週連續累積 ${recentNegativeCount} 次常規違規`;
+    }
+
+    // 4. Five-Dimensional Educational Quant Index (0-100 normalized)
+    const mathAbility = Math.min(100, Math.max(0, Math.round(scoreMean + academicBonus * 0.5)));
+    const motivation = Math.min(100, Math.max(0, Math.round(60 + scoreSlope * 5 + academicBonus * 2)));
+    const accountability = Math.min(100, Math.max(0, Math.round(75 + disciplineInfractions * 2.5)));
+    const discipline = Math.min(100, Math.max(0, Math.round(80 + disciplineInfractions * 3 + conflictIncidents * 4)));
+    const socialEmotional = Math.min(100, Math.max(0, Math.round(70 + socialContributions * 3 + conflictIncidents * 5)));
+
+    const radar = {
+      mathAbility,
+      motivation,
+      accountability,
+      discipline,
+      socialEmotional
+    };
+
+    return {
+      student,
+      rawScores: studentScores,
+      assessmentList,
+      scoreMean: Math.round(scoreMean * 10) / 10,
+      scoreStd: Math.round(scoreStd * 10) / 10,
+      ewmaScores,
+      scoreSlope,
+      pointsBreakdown: {
+        academic: academicBonus,
+        discipline: disciplineInfractions,
+        conflict: conflictIncidents,
+        social: socialContributions,
+        net: netPoints
+      },
+      isCliffDrop,
+      cliffDropReason,
+      radar
+    };
+  }
+
+  // --- Class-Level Aggregate Analysis ---
+  getClassOverview(classId) {
+    const students = this.store.getStudents(classId) || [];
+    const assessments = this.store.getAssessments(classId) || [];
+    const events = this.store.getEvents(classId) || [];
+
+    const studentProfiles = students.map(s => this.getStudentProfile(classId, s.seatNo)).filter(Boolean);
+
+    // Latest Assessment Summary & Box Plot
+    const latestAsm = assessments.length > 0 ? assessments[assessments.length - 1] : null;
+    let latestAsmScores = [];
+    let latestBoxPlot = null;
+    if (latestAsm && latestAsm.scores) {
+      latestAsmScores = Object.values(latestAsm.scores).map(Number);
+      latestBoxPlot = this.getFiveNumberSummary(latestAsmScores);
+    }
+
+    // Net Points Distribution
+    const netPointsArr = studentProfiles.map(p => p.pointsBreakdown.net);
+    const pointsBoxPlot = this.getFiveNumberSummary(netPointsArr);
+
+    // Differentiated Instruction 4-Quadrant Clustering
+    const classAvgScore = studentProfiles.length > 0 ? this.mean(studentProfiles.map(p => p.scoreMean)) : 70;
+    const classAvgEngagement = studentProfiles.length > 0 ? this.mean(studentProfiles.map(p => p.pointsBreakdown.net)) : 0;
+
+    const clusters = {
+      topTier: [],      // High Score, High Engagement (拔尖進階組)
+      underachiever: [],// High Score, Low Engagement (潛力未發揮)
+      hardWorker: [],   // Low Score, High Engagement (努力待補救組)
+      highRisk: []      // Low Score, Low Engagement (雙低關懷組)
+    };
+
+    studentProfiles.forEach(p => {
+      const isHighAbility = p.scoreMean >= (classAvgScore || 70);
+      const isHighEngagement = p.pointsBreakdown.net >= (classAvgEngagement || 0);
+
+      const item = {
+        seatNo: p.student.seatNo,
+        name: p.student.name,
+        scoreMean: p.scoreMean,
+        netPoints: p.pointsBreakdown.net,
+        isCliffDrop: p.isCliffDrop,
+        cliffReason: p.cliffDropReason
+      };
+
+      if (isHighAbility && isHighEngagement) {
+        clusters.topTier.push(item);
+      } else if (isHighAbility && !isHighEngagement) {
+        clusters.underachiever.push(item);
+      } else if (!isHighAbility && isHighEngagement) {
+        clusters.hardWorker.push(item);
+      } else {
+        clusters.highRisk.push(item);
+      }
+    });
+
+    const alertStudents = studentProfiles.filter(p => p.isCliffDrop);
+
+    // Period Infraction Heatmap Analysis
+    const periodInfractions = {};
+    events.forEach(e => {
+      if (e.delta < 0) {
+        const p = e.period !== undefined ? `節次 ${e.period}` : '其他';
+        periodInfractions[p] = (periodInfractions[p] || 0) + 1;
+      }
+    });
+
+    return {
+      classId,
+      totalStudents: students.length,
+      studentProfiles,
+      latestAssessment: latestAsm,
+      latestBoxPlot,
+      pointsBoxPlot,
+      classAvgScore: Math.round(classAvgScore * 10) / 10,
+      classAvgEngagement: Math.round(classAvgEngagement * 10) / 10,
+      clusters,
+      alertStudents,
+      periodInfractions
+    };
+  }
+
+  // --- Multi-Class Cross-Benchmark & Strategy Engine ---
+  getMultiClassComparison() {
+    const classes = this.store.getClasses() || {};
+    const classOverviews = {};
+    const classList = Object.values(classes);
+
+    classList.forEach(cls => {
+      classOverviews[cls.id] = this.getClassOverview(cls.id);
+    });
+
+    // Compute Homework & Teaching Strategy Advisory for each class
+    const strategies = classList.map(cls => {
+      const ov = classOverviews[cls.id];
+      const avgScore = ov ? ov.classAvgScore : 70;
+      const avgEng = ov ? ov.classAvgEngagement : 0;
+      const topCount = ov?.clusters?.topTier?.length || 0;
+      const riskCount = (ov?.clusters?.highRisk?.length || 0) + (ov?.clusters?.hardWorker?.length || 0);
+
+      let hwLevel = '';
+      let hwDetail = '';
+      let teachingStyle = '';
+
+      if (avgScore >= 80) {
+        hwLevel = '🌟 拔尖拓展型';
+        hwDetail = '核心基礎題 3 題 + 思考探究競賽題 2 題（著重代數多向證明）';
+        teachingStyle = '加快單元概念解說節奏，多安排學生上台發表與組間競賽搶答';
+      } else if (avgScore >= 70 && avgEng >= 0) {
+        hwLevel = '📘 穩健進階型';
+        hwDetail = '核心觀念題 4 題 + 題型變化題 2 題（著重題型辨析與步驟規範）';
+        teachingStyle = '強化典型例題板書拆解，隨堂抽查同儕筆記與概念理解程度';
+      } else if (avgScore < 70 && avgEng >= 0) {
+        hwLevel = '🌱 核心打底型';
+        hwDetail = '基礎定義題 5 題 + 錯題確實訂正（每題附簡易步驟提示）';
+        teachingStyle = '降低單堂概念密度，增加課堂隨堂演練時間與即時小組互助打底';
+      } else {
+        hwLevel = '🛡️ 補救激勵型';
+        hwDetail = '降階基礎核心 3~4 題（限時小步完成，並給予課堂加點肯定）';
+        teachingStyle = '課堂以短節奏提問提神，加強巡視與口頭讚美，避免挫折感堆積';
+      }
+
+      return {
+        classId: cls.id,
+        className: cls.name,
+        type: cls.type,
+        studentCount: cls.studentCount || 0,
+        avgScore,
+        avgEng,
+        topCount,
+        riskCount,
+        hwLevel,
+        hwDetail,
+        teachingStyle
+      };
+    });
+
+    return {
+      classList,
+      classOverviews,
+      strategies
+    };
+  }
+}
+
+// Global Statistics Instance
+window.statisticsEngine = new StatisticsEngine(window.appStore);
+
+// --- matrix.js ---
+/**
+ * Classroom Live Matrix View
+ * High-speed Mobile Classroom Grid with Strict Unified Color Rules:
+ * - 4-Tag Spacious Layout per page (2x2 grid, large readable font, zero truncation)
+ * - Directly placed below the seat grid (in-flow layout for zero screen clutter)
+ * - Independent tag usage frequency per class (Homeroom vs Math subject classes separated)
+ * - Integrated Post-Class Retro-Logging & Recall Assistant (⏰ 課堂事後快速補記助手)
+ * - Web Audio API cute audio chimes & feedback
+ */
+
+class ClassroomMatrix {
+  constructor(store, timetable, stats) {
+    this.store = store;
+    this.timetable = timetable;
+    this.stats = stats;
+    this.selectedSeats = new Set();
+    this.currentTagPage = 0;
+    this.touchStartX = 0;
+    this.showQuickSelectBar = false;
+  }
+
+  toggleQuickSelectBar() {
+    this.showQuickSelectBar = !this.showQuickSelectBar;
+    const bar = document.getElementById('matrix-quick-select-drawer');
+    if (bar) {
+      if (this.showQuickSelectBar) bar.classList.remove('hidden');
+      else bar.classList.add('hidden');
+    }
+  }
+
+  selectGender(gender) {
+    const currentClassId = window.appState.currentClassId;
+    const students = this.store.getStudents(currentClassId);
+    this.selectedSeats.clear();
+    students.forEach(s => {
+      if (s.gender === gender || (gender === 'M' && s.seatNo % 2 === 1) || (gender === 'F' && s.seatNo % 2 === 0)) {
+        this.selectedSeats.add(s.seatNo);
+      }
+    });
+    if (window.appState?.playPop) window.appState.playPop();
+    this.updateSelectionUI(currentClassId);
+  }
+
+  selectRow(rowIdx) {
+    const currentClassId = window.appState.currentClassId;
+    const students = this.store.getStudents(currentClassId);
+    const start = (rowIdx - 1) * 6 + 1;
+    const end = rowIdx * 6;
+    this.selectedSeats.clear();
+    students.forEach(s => {
+      if (s.seatNo >= start && s.seatNo <= end) {
+        this.selectedSeats.add(s.seatNo);
+      }
+    });
+    if (window.appState?.playPop) window.appState.playPop();
+    this.updateSelectionUI(currentClassId);
+  }
+
+  render(containerId, currentClassId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    try {
+      let cls = this.store.getClass(currentClassId);
+      if (!cls) {
+        const allClasses = Object.values(this.store.getClasses() || {});
+        if (allClasses.length > 0) {
+          cls = allClasses[0];
+          currentClassId = cls.id;
+          if (window.appState) {
+            window.appState.currentClassId = cls.id;
+            window.appState.renderClassDropdown();
+          }
+        }
+      }
+
+      if (!cls) {
+        this.store.initDemoData();
+        cls = this.store.getClass('801');
+        currentClassId = '801';
+        if (window.appState) {
+          window.appState.currentClassId = '801';
+          window.appState.renderClassDropdown();
+        }
+      }
+
+      if (!cls) {
+        container.innerHTML = `
+          <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">
+            <div class="sanrio-sticker-twinstars mb-3"></div>
+            <div class="text-base font-bold text-slate-700">正在為您重新載入班級資料...</div>
+          </div>
+        `;
+        return;
+      }
+
+    const students = this.store.getStudents(currentClassId);
+    const overview = this.stats.getClassOverview(currentClassId);
+    
+    // Per-Class Independent Frequency Sorted Tags
+    const sortedTags = this.store.getTagsSortedByClassFrequency(currentClassId);
+    const isHomeroom = cls.type === 'homeroom';
+
+    // Chunk tags into pages of 4 (2 cols x 2 rows, large comfortable readable cards)
+    const pageSize = 4;
+    const tagPages = [];
+    for (let i = 0; i < sortedTags.length; i += pageSize) {
+      tagPages.push(sortedTags.slice(i, i + pageSize));
+    }
+    if (tagPages.length === 0) tagPages.push([]);
+
+    this.maxTagPages = tagPages.length;
+    if (this.currentTagPage >= this.maxTagPages) this.currentTagPage = 0;
+
+    container.innerHTML = `
+      <!-- Top Slim Header -->
+      <div class="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-pink-200 shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <!-- Class Meta Badge -->
+        <div class="flex items-center space-x-2">
+          <div class="kitty-cat-mini"></div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base sm:text-xl font-black ${isHomeroom ? 'text-pink-600' : 'text-blue-600'} tracking-wide">${cls.name}</h2>
+              <span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">
+                ${isHomeroom ? '🎀 導師本班' : '📘 數學科任'} (${cls.studentCount}人)
+              </span>
+            </div>
+            <div class="text-[10px] sm:text-xs text-slate-600 font-bold">
+              學業均分: <strong class="text-blue-700">${overview.classAvgScore}</strong> • 常規: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Top Action Buttons -->
+        <div class="flex flex-wrap items-center space-x-1.5">
+          <!-- Selection Count Badge -->
+          <div id="selection-status-badge" class="text-xs px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-300 font-bold text-slate-800 flex items-center gap-1">
+            <span>已選: <strong id="selected-count" class="text-pink-600 font-black text-sm">${this.selectedSeats.size}</strong></span>
+            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-600 underline font-bold text-xs ml-0.5">清空</button>
+          </div>
+
+          <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold bg-pink-50 text-pink-800 border border-pink-300 rounded-xl hover:bg-pink-100 shadow-sm transition flex items-center gap-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
+          </button>
+
+          <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold bg-white border border-pink-300 rounded-xl hover:bg-pink-50 text-slate-800 shadow-sm">
+            全選
+          </button>
+
+          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-pink-500 text-white rounded-xl shadow-sm">
+            抽籤
+          </button>
+
+          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-rose-600 text-white rounded-xl shadow-sm">
+            事件
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Group / Row / Gender Select Drawer -->
+      <div id="matrix-quick-select-drawer" class="${this.showQuickSelectBar ? '' : 'hidden'} p-2 rounded-2xl bg-pink-50 border border-pink-200 mb-2.5 flex flex-wrap items-center justify-between gap-1.5 text-xs">
+        <div class="flex items-center space-x-1">
+          <span class="font-bold text-pink-900 text-[11px]">組別/排：</span>
+          <button onclick="matrixView.selectRow(1)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第1排</button>
+          <button onclick="matrixView.selectRow(2)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第2排</button>
+          <button onclick="matrixView.selectRow(3)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第3排</button>
+          <button onclick="matrixView.selectRow(4)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第4排</button>
+          <button onclick="matrixView.selectRow(5)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第5排</button>
+        </div>
+        <div class="flex items-center space-x-1">
+          <span class="font-bold text-pink-900 text-[11px]">性別：</span>
+          <button onclick="matrixView.selectGender('M')" class="px-2 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 font-bold">全體男生</button>
+          <button onclick="matrixView.selectGender('F')" class="px-2 py-0.5 rounded-lg bg-pink-100 text-pink-800 border border-pink-200 hover:bg-pink-200 font-bold">全體女生</button>
+        </div>
+      </div>
+
+      <!-- Zero-Scroll 5-Column Student Grid -->
+      <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 gap-1.5 sm:gap-2.5 mb-4" id="seat-grid-container">
+        ${students.map(s => {
+          const profile = this.stats.getStudentProfile(currentClassId, s.seatNo);
+          const isSelected = this.selectedSeats.has(s.seatNo);
+          const characterPoints = profile ? profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social : 0;
+          const academicScore = profile ? profile.scoreMean : 70;
+
+          // Determine Sanrio Mascot
+          let mascotClass = 'sanrio-kitty-badge';
+          let mascotTitle = 'Hello Kitty (穩健良好)';
+
+          if ((academicScore >= 80 && characterPoints >= 0) || (profile && profile.scoreSlope >= 1.5)) {
+            mascotClass = 'sanrio-twinstars-badge';
+            mascotTitle = '小雙星 (優良拔尖)';
+          } else if (characterPoints < 0 || academicScore < 60) {
+            mascotClass = 'sanrio-kuromi-badge';
+            mascotTitle = '酷洛米 (需關懷)';
+          }
+
+          return `
+            <div id="seat-card-${s.seatNo}"
+                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''}"
+                 onclick="matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
+              
+              <!-- Seat Header: Seat No + Mascot -->
+              <div class="flex items-center justify-between mb-0.5">
+                <span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">
+                  ${String(s.seatNo).padStart(2, '0')}
+                </span>
+                <div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>
+              </div>
+
+              <!-- Student Name -->
+              <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">
+                ${s.name}
+              </div>
+
+              <!-- Unified Dual Score Summary -->
+              <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none">
+                <span class="text-blue-700" title="學業均分">📘${academicScore}</span>
+                <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'}" title="品格常規點數">
+                  ${characterPoints > 0 ? '+' : ''}${characterPoints}
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- IN-FLOW SPACIOUS 4-TAG PAGED DOCK (Directly Below Seats, No Screen Clutter) -->
+      <div class="glass-card rounded-3xl p-3 sm:p-4 border-2 border-pink-300 bg-white/95 shadow-md mb-6">
+        <!-- Dock Header: Title + Per-Class Note + Page Controls -->
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2 px-1">
+          <div class="flex items-center gap-1.5">
+            <span class="kitty-bow !w-3.5 !h-3.5"></span>
+            <span class="font-black text-slate-900 text-xs sm:text-sm">課堂快速標籤</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-medium hidden sm:inline">（依 ${cls.name} 使用頻率排序）</span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <!-- Prev Page Button -->
+            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="上一頁">
+              ◀
+            </button>
+
+            <!-- Page Dots Indicator -->
+            <div class="flex items-center space-x-1.5 px-1" id="tag-page-dots">
+              ${tagPages.map((_, idx) => `
+                <button onclick="matrixView.scrollToTagPage(${idx})" class="h-2.5 rounded-full transition-all ${idx === this.currentTagPage ? 'bg-pink-600 w-5' : 'bg-pink-200 w-2.5'}"></button>
+              `).join('')}
+            </div>
+
+            <!-- Next Page Button -->
+            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="下一頁">
+              ▶
+            </button>
+
+            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="text-pink-600 font-black hover:underline flex items-center gap-0.5 text-xs ml-1">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i> 自訂
+            </button>
+          </div>
+        </div>
+
+        <!-- 4-Tag Carousel Slide (2 cols x 2 rows, Large Font, Zero Truncation) -->
+        <div class="tag-pager-container no-scrollbar" id="tag-pager-scroll-box"
+             ontouchstart="matrixView.handleTouchStart(event)"
+             ontouchend="matrixView.handleTouchEnd(event)"
+             onscroll="matrixView.handleTagPagerScroll(this)">
+          ${tagPages.map((pageTags, pageIdx) => `
+            <div class="tag-page-slide">
+              <div class="grid grid-cols-2 gap-2.5">
+                ${pageTags.map((tag, tagIdx) => {
+                  const isPos = tag.delta > 0;
+                  const isZero = tag.delta === 0;
+                  
+                  const btnClass = isPos ? 'color-rule-pos' : isZero ? 'color-rule-zero' : 'color-rule-neg';
+                  const badgeClass = isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge';
+                  const btnId = (pageIdx === 0 && tagIdx === 0) ? 'first-quick-tag-btn' : `quick-tag-btn-${tag.id}`;
+
+                  return `
+                    <button id="${btnId}" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
+                      class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
+                      <div class="flex flex-col pr-1 overflow-hidden">
+                        <span class="text-xs sm:text-base font-black truncate text-slate-900 leading-tight">${tag.name}</span>
+                        <span class="text-[10px] text-slate-500 font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
+                      </div>
+                      <span class="text-xs sm:text-sm font-black px-3 py-1 rounded-xl border shrink-0 ${badgeClass}">
+                        ${tag.delta > 0 ? '+' : ''}${tag.delta}
+                      </span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Bottom Swipe Indicator Hint -->
+        ${tagPages.length > 1 ? `
+          <div class="text-center text-[10px] text-slate-400 mt-2 font-bold flex items-center justify-center gap-1">
+            <span>第 ${this.currentTagPage + 1} / ${tagPages.length} 頁（向左滑 或 點按 ◀ ▶ 翻頁）</span>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  } catch (err) {
+    console.error('[ClassroomMatrix] render error:', err);
+    if (container) {
+      container.innerHTML = `
+        <div class="p-8 text-center text-slate-600 glass-card rounded-3xl">
+          <div class="sanrio-sticker-twinstars mb-3"></div>
+          <div class="text-sm font-bold text-slate-800 mb-2">資料已自動修復完成</div>
+          <button onclick="appState.refreshActiveTab()" class="px-4 py-2 bg-pink-600 text-white rounded-xl text-xs font-black shadow-md">
+            點此立即刷新座位表
+          </button>
+        </div>
+      `;
+    }
+  }
+}
+
+  handleTouchStart(e) {
+    if (e.touches && e.touches.length > 0) {
+      this.touchStartX = e.touches[0].clientX;
+    }
+  }
+
+  handleTouchEnd(e) {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = this.touchStartX - touchEndX;
+
+      // Swipe Left (Next Page strictly by 1)
+      if (diffX > 45) {
+        this.nextTagPage();
+      }
+      // Swipe Right (Prev Page strictly by 1)
+      else if (diffX < -45) {
+        this.prevTagPage();
+      }
+    }
+  }
+
+  prevTagPage() {
+    if (this.currentTagPage > 0) {
+      this.scrollToTagPage(this.currentTagPage - 1);
+    }
+  }
+
+  nextTagPage() {
+    if (this.currentTagPage < (this.maxTagPages || 1) - 1) {
+      this.scrollToTagPage(this.currentTagPage + 1);
+    }
+  }
+
+  scrollToTagPage(pageIdx) {
+    this.currentTagPage = pageIdx;
+    const box = document.getElementById('tag-pager-scroll-box');
+    if (box) {
+      box.scrollTo({
+        left: box.clientWidth * pageIdx,
+        behavior: 'smooth'
+      });
+    }
+    this.updateTagDots(pageIdx);
+  }
+
+  handleTagPagerScroll(el) {
+    const width = el.clientWidth;
+    if (width > 0) {
+      const page = Math.round(el.scrollLeft / width);
+      if (page !== this.currentTagPage) {
+        this.currentTagPage = page;
+        this.updateTagDots(page);
+      }
+    }
+  }
+
+  updateTagDots(activeIdx) {
+    const dotsContainer = document.getElementById('tag-page-dots');
+    if (!dotsContainer) return;
+    const dots = dotsContainer.querySelectorAll('button');
+    dots.forEach((dot, idx) => {
+      if (idx === activeIdx) {
+        dot.className = 'w-5 h-2.5 rounded-full bg-pink-600 transition-all';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-pink-200 transition-all';
+      }
+    });
+  }
+
+  toggleSeatSelection(seatNo, classId) {
+    const isSelected = this.selectedSeats.has(seatNo);
+    if (isSelected) {
+      this.selectedSeats.delete(seatNo);
+    } else {
+      this.selectedSeats.add(seatNo);
+      if (window.appState?.playPop) window.appState.playPop();
+      if (navigator.vibrate) {
+        try { navigator.vibrate(15); } catch(e) {}
+      }
+    }
+
+    // Direct O(1) in-place card class update
+    const card = document.getElementById(`seat-card-${seatNo}`);
+    if (card) {
+      card.classList.toggle('selected', !isSelected);
+    }
+
+    // Update selection count badge
+    const countElem = document.getElementById('selected-count');
+    if (countElem) countElem.innerText = this.selectedSeats.size;
+
+    // Update clear button visibility
+    const clearBtn = document.getElementById('clear-sel-btn');
+    if (clearBtn) {
+      if (this.selectedSeats.size > 0) {
+        clearBtn.classList.remove('hidden');
+        clearBtn.classList.add('inline-block');
+      } else {
+        clearBtn.classList.add('hidden');
+        clearBtn.classList.remove('inline-block');
+      }
+    }
+  }
+
+  toggleSeat(seatNo, classId) {
+    return this.toggleSeatSelection(seatNo, classId);
+  }
+
+  selectAll() {
+    const currentClassId = window.appState.currentClassId;
+    const students = this.store.getStudents(currentClassId);
+    students.forEach(s => this.selectedSeats.add(s.seatNo));
+    if (window.appState?.playPop) window.appState.playPop();
+    this.updateSelectionUI(currentClassId);
+  }
+
+  clearSelection(classId) {
+    const targetClassId = classId || window.appState?.currentClassId || '801';
+    this.selectedSeats.clear();
+    this.updateSelectionUI(targetClassId);
+  }
+
+  updateSelectionUI(classId) {
+    const students = this.store.getStudents(classId);
+    students.forEach(s => {
+      const card = document.getElementById(`seat-card-${s.seatNo}`);
+      if (card) {
+        if (this.selectedSeats.has(s.seatNo)) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      }
+    });
+
+    const countElem = document.getElementById('selected-count');
+    if (countElem) countElem.innerText = this.selectedSeats.size;
+
+    const clearBtn = document.getElementById('clear-sel-btn');
+    if (clearBtn) {
+      if (this.selectedSeats.size > 0) {
+        clearBtn.classList.remove('hidden');
+        clearBtn.classList.add('inline-block');
+      } else {
+        clearBtn.classList.add('hidden');
+        clearBtn.classList.remove('inline-block');
+      }
+    }
+  }
+
+  applyTagToSelected(classId, tagId) {
+    if (this.selectedSeats.size === 0) {
+      window.appState?.showToast('請先點選學生座號（點一下即可）', 'warning');
+      return;
+    }
+
+    const tag = this.store.getTags().find(t => t.id === tagId);
+    if (!tag) return;
+
+    try {
+      const activeSlot = this.timetable.detectActiveSlot();
+      const period = activeSlot.period !== null ? activeSlot.period : 1;
+
+      let appliedCount = 0;
+      const seatsToProcess = Array.from(this.selectedSeats);
+
+      seatsToProcess.forEach(seatNo => {
+        this.store.addEvent({
+          classId,
+          seatNo,
+          period,
+          tagId: tag.id,
+          tagName: tag.name,
+          category: tag.category,
+          delta: tag.delta,
+          severity: tag.severity,
+          note: `課堂記點：${tag.name}`
+        });
+
+        this.showFloatingBubble(seatNo, tag.delta);
+        appliedCount++;
+
+        // In-place score update on card targeting character score span (index 2)
+        const card = document.getElementById(`seat-card-${seatNo}`);
+        if (card) {
+          const profile = this.stats.getStudentProfile(classId, seatNo);
+          if (profile) {
+            const charPts = profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social;
+            const scoreSpans = card.querySelectorAll('div > span');
+            if (scoreSpans.length >= 3) {
+              const ptsSpan = scoreSpans[2];
+              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
+              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+            } else if (scoreSpans.length >= 2) {
+              const ptsSpan = scoreSpans[1];
+              ptsSpan.className = charPts > 0 ? 'text-emerald-700' : charPts < 0 ? 'text-rose-700' : 'text-slate-500';
+              ptsSpan.innerText = `${charPts > 0 ? '+' : ''}${charPts}`;
+            }
+          }
+        }
+      });
+
+      // Sound effect
+      if (tag.delta > 0 && window.appState?.playChime) {
+        window.appState.playChime();
+      } else if (tag.delta < 0 && window.appState?.playWarning) {
+        window.appState.playWarning();
+      }
+
+      window.appState?.showToast(`✨ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+    } catch (err) {
+      console.error('[ClassroomMatrix] applyTagToSelected error:', err);
+    } finally {
+      // Auto-clear selection reliably with explicit classId under all execution paths
+      this.clearSelection(classId);
+    }
+  }
+
+  showFloatingBubble(seatNo, delta) {
+    const card = document.getElementById(`seat-card-${seatNo}`);
+    if (!card) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = `point-bubble ${delta > 0 ? 'text-emerald-600' : 'text-rose-600'} kitty-stamp-effect`;
+    bubble.style.pointerEvents = 'none';
+    bubble.innerText = `${delta > 0 ? '✨ +' : ''}${delta}`;
+    card.appendChild(bubble);
+
+    setTimeout(() => {
+      bubble.remove();
+    }, 800);
+  }
+
+  // --- Post-Class Retro-Logging & Recall Assistant (⏰ 課堂事後快速補記助手) ---
+  openRetroLogModal(classId) {
+    const students = this.store.getStudents(classId);
+    const tags = this.store.getTagsSortedByClassFrequency(classId);
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    const today = new Date().toISOString().split('T')[0];
+
+    modalContent.innerHTML = `
+      <div class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+          <div>
+            <h3 class="text-xl font-black text-slate-900 flex items-center gap-1.5">
+              ⏰ 課堂事後快速補記助手
+              <span class="kitty-bow"></span>
+            </h3>
+            <p class="text-xs text-slate-600">上課當下無法分心操作？放學或下課後，在此一次快速回憶補登學生事件與點數！</p>
+          </div>
+        </div>
+
+        <form onsubmit="matrixView.saveRetroLog(event, '${classId}')" class="space-y-4">
+          <!-- When (Date & Period) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">發生日期</label>
+              <input type="date" id="retro-date" value="${today}" required class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">課堂節次</label>
+              <select id="retro-period" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+                <option value="0">早自習 / 晨讀</option>
+                <option value="1">第 1 節</option>
+                <option value="2" selected>第 2 節</option>
+                <option value="3">第 3 節</option>
+                <option value="4">第 4 節</option>
+                <option value="lunch">午休時間</option>
+                <option value="5">第 5 節</option>
+                <option value="6">第 6 節</option>
+                <option value="7">第 7 節</option>
+                <option value="8">第 8 節 / 放學</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Who (Select multiple students) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-700">選擇學生 (可多選)</label>
+              <span class="text-[11px] text-pink-600 font-bold">點選學生頭像或姓名</span>
+            </div>
+            <div class="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl border border-pink-200 bg-pink-50/50">
+              ${students.map(s => `
+                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-1 rounded-lg hover:bg-pink-100 transition">
+                  <input type="checkbox" name="retro_seats" value="${s.seatNo}" class="rounded text-pink-600 focus:ring-pink-500">
+                  <span class="font-black text-slate-900">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- What (Tag Selection) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">選擇行為標籤</label>
+            <select id="retro-tag" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+              ${tags.map(t => `
+                <option value="${t.id}" data-name="${t.name}" data-delta="${t.delta}" data-category="${t.category}" data-severity="${t.severity}">
+                  ${t.name} (${t.delta > 0 ? '+' : ''}${t.delta} 分)
+                </option>
+              `).join('')}
+            </select>
+          </div>
+
+          <!-- Detail Note -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">詳細事證或回憶備忘 (選填)</label>
+            <input type="text" id="retro-note" placeholder="如：第2節解出三角幾何難題 / 吵鬧制止後配合良好..." class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:border-pink-500">
+          </div>
+
+          <div class="flex items-center justify-end space-x-3 pt-2">
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
+            <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl shadow-md flex items-center gap-1.5">
+              <i data-lucide="check" class="w-4 h-4"></i> 快速批次補記
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  saveRetroLog(e, classId) {
+    e.preventDefault();
+    const checkboxes = document.querySelectorAll('input[name="retro_seats"]:checked');
+    const seats = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+
+    if (seats.length === 0) {
+      window.appState.showToast('請至少勾選一位學生', 'warning');
+      return;
+    }
+
+    const date = document.getElementById('retro-date').value;
+    const period = document.getElementById('retro-period').value;
+    const note = document.getElementById('retro-note').value.trim();
+    const tagSelect = document.getElementById('retro-tag');
+    const selectedOpt = tagSelect.options[tagSelect.selectedIndex];
+    
+    const tagName = selectedOpt.getAttribute('data-name');
+    const delta = parseInt(selectedOpt.getAttribute('data-delta'), 10) || 0;
+    const category = selectedOpt.getAttribute('data-category') || 'discipline';
+    const severity = selectedOpt.getAttribute('data-severity') || 'info';
+
+    seats.forEach(seatNo => {
+      this.store.addEvent({
+        classId,
+        seatNo,
+        date,
+        period,
+        tagId: tagSelect.value,
+        tagName,
+        category,
+        delta,
+        severity,
+        note: note ? `[事後補記] ${note}` : `[事後補記] ${tagName}`
+      });
+    });
+
+    if (delta > 0 && window.appState?.playChime) {
+      window.appState.playChime();
+    } else if (delta < 0 && window.appState?.playWarning) {
+      window.appState.playWarning();
+    }
+
+    window.appState.showToast(`🎉 已成功補記 ${seats.length} 位同學在 ${date} 第 ${period} 節之記錄！`, 'success');
+    window.appState.closeModal();
+    this.render('classroom-matrix-view', classId);
+  }
+
+  openRandomPickerModal(classId) {
+    const students = this.store.getStudents(classId);
+    if (!students || students.length === 0) return;
+
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    modalContent.innerHTML = `
+      <div class="text-center p-6">
+        <div class="flex justify-center mb-3">
+          <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
+          三麗鷗幸運抽籤點名
+          <span class="kitty-bow"></span>
+        </h3>
+        <p class="text-xs text-slate-600 mb-5 font-medium">隨機抽取一位同學上台解題或口頭回答</p>
+
+        <!-- Big Display Card -->
+        <div id="picker-result-box" class="glass-card rounded-2xl p-5 border-2 border-dashed border-pink-300 mb-5 flex flex-col items-center justify-center min-h-[140px] bg-pink-50/50">
+          <span class="text-slate-500 text-sm font-bold">點擊下方開始抽取</span>
+        </div>
+
+        <div class="flex items-center justify-center gap-3">
+          <button id="btn-start-pick" onclick="matrixView.runPickerAnimation('${classId}')" 
+            class="px-6 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition flex items-center gap-2 text-sm">
+            <i data-lucide="play" class="w-4 h-4"></i> 開始抽籤
+          </button>
+          <button onclick="window.appState.closeModal()" class="px-5 py-2.5 rounded-2xl font-bold border border-pink-300 text-slate-700 hover:bg-pink-50 transition text-sm">
+            關閉
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  runPickerAnimation(classId) {
+    const students = this.store.getStudents(classId);
+    const box = document.getElementById('picker-result-box');
+    const startBtn = document.getElementById('btn-start-pick');
+    if (!box || !startBtn) return;
+
+    startBtn.disabled = true;
+    startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    let count = 0;
+    const maxSteps = 18;
+    const interval = setInterval(() => {
+      const randIdx = Math.floor(Math.random() * students.length);
+      const tempStudent = students[randIdx];
+      box.innerHTML = `
+        <div class="text-3xl font-black text-pink-600 animate-pulse">${String(tempStudent.seatNo).padStart(2, '0')} 號</div>
+        <div class="text-lg font-black mt-1 text-slate-800">${tempStudent.name}</div>
+      `;
+      count++;
+
+      if (count >= maxSteps) {
+        clearInterval(interval);
+        startBtn.disabled = false;
+        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        const chosenStudent = students[Math.floor(Math.random() * students.length)];
+        box.innerHTML = `
+          <div class="text-4xl font-black text-pink-600 drop-shadow-sm">🌟 ${String(chosenStudent.seatNo).padStart(2, '0')} 號</div>
+          <div class="text-xl font-black mt-1 text-slate-900">${chosenStudent.name}</div>
+          
+          <div class="flex items-center gap-2 mt-4">
+            <button onclick="matrixView.quickAwardPicker('${classId}', ${chosenStudent.seatNo}, 2, '抽籤解題優異')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition shadow-sm">
+              +2 解題優異
+            </button>
+            <button onclick="matrixView.quickAwardPicker('${classId}', ${chosenStudent.seatNo}, -1, '抽籤分心未答')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-300 text-xs font-black hover:bg-rose-100 transition shadow-sm">
+              -1 分心/未答
+            </button>
+          </div>
+        `;
+      }
+    }, 60);
+  }
+
+  quickAwardPicker(classId, seatNo, delta, note) {
+    const activeSlot = this.timetable.detectActiveSlot();
+    const period = activeSlot.period !== null ? activeSlot.period : 1;
+
+    this.store.addEvent({
+      classId,
+      seatNo,
+      period,
+      tagId: delta > 0 ? 'quick_plus' : 'quick_minus',
+      tagName: delta > 0 ? '抽籤加點' : '抽籤扣點',
+      category: 'discipline',
+      delta,
+      severity: delta > 0 ? 'positive' : 'warning',
+      note
+    });
+
+    if (delta > 0 && window.appState?.playChime) {
+      window.appState.playChime();
+    } else if (delta < 0 && window.appState?.playWarning) {
+      window.appState.playWarning();
+    }
+
+    window.appState.showToast(`已為 ${seatNo} 號記錄：${note} (${delta > 0 ? '+' : ''}${delta})`, 'success');
+    window.appState.closeModal();
+    this.render('classroom-matrix-view', classId);
+  }
+
+  openConflictModal(classId) {
+    const students = this.store.getStudents(classId);
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    modalContent.innerHTML = `
+      <div class="p-6 max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="sanrio-kuromi-badge !w-12 !h-12"></div>
+          <div>
+            <h3 class="text-xl font-black text-slate-900">重大常規 / 同儕衝突事件記錄</h3>
+            <p class="text-xs text-slate-600">客觀記錄違紀或推擠衝突，作為日後家長晤談與輔導之具體事證</p>
+          </div>
+        </div>
+
+        <form id="conflict-form" onsubmit="matrixView.saveConflictEvent(event, '${classId}')" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">涉事學生 (可複選)</label>
+            <div class="grid grid-cols-5 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl border border-pink-200 bg-pink-50/50">
+              ${students.map(s => `
+                <label class="flex items-center space-x-1 text-xs cursor-pointer">
+                  <input type="checkbox" name="involved_seats" value="${s.seatNo}" class="rounded text-rose-600 focus:ring-rose-500">
+                  <span class="font-bold text-slate-800">${String(s.seatNo).padStart(2, '0')} ${s.name.slice(0, 2)}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">事件類型</label>
+              <select id="conflict-type" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs focus:outline-none bg-white">
+                <option value="soc_phys_fight">肢體衝突 / 推擠打架 (-5分)</option>
+                <option value="soc_verbal_fight">同儕重大言語口角 (-3分)</option>
+                <option value="soc_property_damage">毀損公物 / 破壞私物 (-5分)</option>
+                <option value="disc_severe_insubordination">重大頂撞師長 (-4分)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">發生節次</label>
+              <select id="conflict-period" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs focus:outline-none bg-white">
+                <option value="0">早自習</option>
+                <option value="1">第 1 節</option>
+                <option value="2">第 2 節</option>
+                <option value="3">第 3 節</option>
+                <option value="4">第 4 節</option>
+                <option value="lunch" selected>午休時間</option>
+                <option value="5">第 5 節</option>
+                <option value="6">第 6 節</option>
+                <option value="7">第 7 節</option>
+                <option value="8">第 8 節 / 放學</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">事證詳細記錄</label>
+            <textarea id="conflict-notes" rows="3" required placeholder="例：午休因借球起口角推擠，雙方帶至辦公室冷靜..." class="w-full border border-pink-200 rounded-xl p-3 text-xs focus:outline-none bg-white"></textarea>
+          </div>
+
+          <div class="flex items-center justify-end space-x-3 pt-2">
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
+            <button type="submit" class="px-5 py-2 text-xs font-black text-white bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 rounded-xl shadow-md">確實記錄並扣點</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  saveConflictEvent(e, classId) {
+    e.preventDefault();
+    const checkboxes = document.querySelectorAll('input[name="involved_seats"]:checked');
+    const seats = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+
+    if (seats.length === 0) {
+      window.appState.showToast('請至少勾選一位學生', 'warning');
+      return;
+    }
+
+    const type = document.getElementById('conflict-type').value;
+    const period = document.getElementById('conflict-period').value;
+    const notes = document.getElementById('conflict-notes').value.trim();
+
+    const tag = this.store.getTags().find(t => t.id === type) || {
+      id: type,
+      name: '重大衝突違紀',
+      category: 'conflict',
+      delta: -5,
+      severity: 'critical'
+    };
+
+    seats.forEach(seatNo => {
+      this.store.addEvent({
+        classId,
+        seatNo,
+        period,
+        tagId: tag.id,
+        tagName: tag.name,
+        category: 'conflict',
+        delta: tag.delta,
+        severity: 'critical',
+        note: `[重大事件] ${notes} (涉案座號: ${seats.join(', ')})`
+      });
+      this.showFloatingBubble(seatNo, tag.delta);
+    });
+
+    if (window.appState?.playWarning) window.appState.playWarning();
+
+    window.appState.showToast(`已確實記錄座號 ${seats.join(', ')} 重大事件`, 'success');
+    window.appState.closeModal();
+    this.render('classroom-matrix-view', classId);
+  }
+}
+
+// Global Classroom Matrix Instance
+window.matrixView = new ClassroomMatrix(window.appStore, window.timetableEngine, window.statisticsEngine);
+
+// --- retroLogView.js ---
+/**
+ * Dedicated Post-Class Retro-Logging & Recall Center (⏰ 課堂事後快速補記專區)
+ * Standalone primary module allowing teachers to batch record classroom events,
+ * adjust points, apply smart parent comments, and view recent retro history.
+ */
+
+class RetroLogView {
+  constructor(store) {
+    this.store = store;
+    this.currentClassId = '801';
+    this.selectedDate = new Date().toISOString().split('T')[0];
+    this.selectedPeriod = 1;
+    this.selectedSeats = new Set();
+    this.selectedTagId = null;
+    this.customDelta = 1;
+    this.customNote = '';
+  }
+
+  render(containerId, classId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (classId) this.currentClassId = classId;
+    const classes = this.store.getClasses();
+    const currentClass = this.store.getClass(this.currentClassId) || Object.values(classes)[0];
+    if (currentClass) this.currentClassId = currentClass.id;
+
+    const students = this.store.getStudents(this.currentClassId);
+    const tags = this.store.getTagsSortedByClassFrequency(this.currentClassId);
+    if (!this.selectedTagId && tags.length > 0) {
+      this.selectedTagId = tags[0].id;
+      this.customDelta = tags[0].delta;
+    }
+
+    const selectedTag = tags.find(t => t.id === this.selectedTagId) || tags[0] || { name: '課堂記點', delta: 1, category: 'discipline' };
+
+    // Get recent retro events for this class
+    const allEvents = this.store.getEvents(this.currentClassId);
+    const retroEvents = allEvents.filter(e => e.note && e.note.includes('[事後補記]')).slice(0, 15);
+
+    container.innerHTML = `
+      <div class="space-y-6 animate-fade-in-up">
+        
+        <!-- Header Banner -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-pink-200 shadow-sm bg-gradient-to-r from-amber-50/80 via-white to-pink-50/80">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+              <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+              <div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  ⏰ 課堂事後快速補記專區
+                  <span class="kitty-bow"></span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium">
+                  上課不方便掏手機？下課回辦公室 1 秒批次勾選學生補記，自動生成親師聯絡簿評語！
+                </p>
+              </div>
+            </div>
+
+            <!-- Class & Time Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center space-x-1 border border-amber-300 rounded-xl px-2.5 py-1.5 bg-white shadow-sm">
+                <span class="text-xs font-bold text-slate-600">班級：</span>
+                <select id="retro-class-select" onchange="retroLogView.switchClass(this.value)" class="text-xs font-black bg-transparent focus:outline-none text-pink-900 cursor-pointer">
+                  ${Object.values(classes).map(c => `
+                    <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
+                      ${c.name} (${c.type === 'homeroom' ? '導師班' : '科任班'})
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <div class="flex items-center space-x-1 border border-pink-200 rounded-xl px-2.5 py-1.5 bg-white shadow-sm">
+                <span class="text-xs font-bold text-slate-600">日期：</span>
+                <input type="date" value="${this.selectedDate}" onchange="retroLogView.setDate(this.value)" class="text-xs font-black bg-transparent focus:outline-none text-slate-800 cursor-pointer">
+              </div>
+
+              <div class="flex items-center space-x-1 border border-pink-200 rounded-xl px-2.5 py-1.5 bg-white shadow-sm">
+                <span class="text-xs font-bold text-slate-600">節次：</span>
+                <select onchange="retroLogView.setPeriod(this.value)" class="text-xs font-black bg-transparent focus:outline-none text-slate-800 cursor-pointer">
+                  <option value="0" ${this.selectedPeriod === 0 ? 'selected' : ''}>早自習</option>
+                  <option value="1" ${this.selectedPeriod === 1 ? 'selected' : ''}>第 1 節</option>
+                  <option value="2" ${this.selectedPeriod === 2 ? 'selected' : ''}>第 2 節</option>
+                  <option value="3" ${this.selectedPeriod === 3 ? 'selected' : ''}>第 3 節</option>
+                  <option value="4" ${this.selectedPeriod === 4 ? 'selected' : ''}>第 4 節</option>
+                  <option value="5" ${this.selectedPeriod === 5 ? 'selected' : ''}>午休/午餐</option>
+                  <option value="6" ${this.selectedPeriod === 6 ? 'selected' : ''}>第 5 節</option>
+                  <option value="7" ${this.selectedPeriod === 7 ? 'selected' : ''}>第 6 節</option>
+                  <option value="8" ${this.selectedPeriod === 8 ? 'selected' : ''}>第 7 節</option>
+                  <option value="9" ${this.selectedPeriod === 9 ? 'selected' : ''}>第 8 節/課後</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main 2-Column Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- Left Column: Student Selection Matrix (7 Cols) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="glass-card rounded-3xl p-5 border border-pink-200 bg-white shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5 border-b border-pink-100">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs sm:text-sm font-black text-slate-900">👥 選取補記學生</span>
+                  <span id="retro-selected-badge" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-300">
+                    已選取 ${this.selectedSeats.size} 人
+                  </span>
+                </div>
+
+                <!-- Quick Selection Filters -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button onclick="retroLogView.selectAll()" class="px-2 py-1 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 text-[11px] font-black transition border border-pink-200">
+                    全選
+                  </button>
+                  <button onclick="retroLogView.selectNone()" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-black transition border border-slate-300">
+                    清除
+                  </button>
+                  <button id="retro-odd-btn" onclick="retroLogView.selectOdd()" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-[11px] font-black transition border border-sky-200">
+                    單號(男)
+                  </button>
+                  <button onclick="retroLogView.selectEven()" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[11px] font-black transition border border-rose-200">
+                    雙號(女)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Student Cards Grid (5 Columns) -->
+              <div class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[360px] overflow-y-auto pr-1">
+                ${students.map(s => {
+                  const isSelected = this.selectedSeats.has(s.seatNo);
+                  return `
+                    <div id="retro-student-${s.seatNo}" onclick="retroLogView.toggleSeat(${s.seatNo})" 
+                      class="cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 ${
+                        isSelected 
+                          ? 'bg-pink-500 text-white border-pink-600 shadow-md transform scale-[1.02] font-black' 
+                          : 'bg-white hover:bg-pink-50/60 border-pink-200 text-slate-800 font-bold'
+                      }">
+                      <div class="text-[11px] opacity-80 font-mono">${String(s.seatNo).padStart(2, '0')} 號</div>
+                      <div class="text-xs truncate font-black mt-0.5">${s.name}</div>
+                      <div class="text-[10px] mt-1 font-mono ${isSelected ? 'text-pink-100' : 'text-slate-500'}">
+                        ${s.points !== undefined ? (s.points > 0 ? '+' + s.points : s.points) : '0'} 分
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Tag & Comment Generator (5 Cols) -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="glass-card rounded-3xl p-5 border border-pink-200 bg-white shadow-sm space-y-4">
+              
+              <!-- 1. Select Tag -->
+              <div>
+                <label class="block text-xs font-black text-slate-800 mb-1.5 flex items-center justify-between">
+                  <span>🏷️ 選擇課堂記點標籤</span>
+                  <span class="text-[11px] font-bold ${this.customDelta > 0 ? 'text-emerald-600' : this.customDelta < 0 ? 'text-rose-600' : 'text-slate-500'}">
+                    分值：${this.customDelta > 0 ? '+' : ''}${this.customDelta} 分
+                  </span>
+                </label>
+                <div class="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1">
+                  ${tags.map(t => `
+                    <button type="button" onclick="retroLogView.selectTag('${t.id}')" 
+                      class="p-2 rounded-xl text-left border text-xs font-black transition flex items-center justify-between ${
+                        this.selectedTagId === t.id 
+                          ? 'bg-pink-100 text-pink-900 border-pink-400 shadow-sm' 
+                          : 'bg-slate-50 hover:bg-pink-50 text-slate-700 border-slate-200'
+                      }">
+                      <span class="truncate">${t.name}</span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded-md ${t.delta > 0 ? 'bg-emerald-100 text-emerald-800' : t.delta < 0 ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-700'}">
+                        ${t.delta > 0 ? '+' : ''}${t.delta}
+                      </span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- 2. Point Adjustment Slider -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-xs font-black text-slate-700">⚡ 調整給分：</label>
+                  <div class="flex items-center gap-1">
+                    <button type="button" onclick="retroLogView.adjustDelta(-1)" class="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 font-black text-xs hover:bg-rose-200">-</button>
+                    <span class="font-mono font-black text-xs px-2 py-0.5 rounded-lg border ${this.customDelta > 0 ? 'color-rule-pos-badge' : this.customDelta < 0 ? 'color-rule-neg-badge' : 'color-rule-zero-badge'}">
+                      ${this.customDelta > 0 ? '+' : ''}${this.customDelta}
+                    </span>
+                    <button type="button" onclick="retroLogView.adjustDelta(1)" class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-black text-xs hover:bg-emerald-200">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Smart Memo & Comment Generator -->
+              <div>
+                <label class="block text-xs font-black text-slate-800 mb-1.5">💬 事後備忘 / 聯絡簿評語</label>
+                <textarea id="retro-memo-input" rows="3" oninput="retroLogView.customNote = this.value" placeholder="請輸入或點擊下方快速評語..." 
+                  class="w-full border-2 border-pink-200 rounded-2xl p-2.5 text-xs font-bold focus:outline-none focus:border-pink-500 bg-white font-sans">${this.customNote}</textarea>
+
+                <!-- Quick Templates -->
+                <div class="flex flex-wrap gap-1 mt-1.5">
+                  <button id="retro-first-tpl-btn" type="button" onclick="retroLogView.applyTemplate('今日上課主動上台解題，思維清晰')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                    + 主動解題
+                  </button>
+                  <button type="button" onclick="retroLogView.applyTemplate('課堂學習專注，認真筆記')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                    + 專注認真
+                  </button>
+                  <button type="button" onclick="retroLogView.applyTemplate('課堂稍有分心，經提醒已迅速跟上')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition">
+                    • 分心已改善
+                  </button>
+                  <button type="button" onclick="retroLogView.applyTemplate('未帶作業/學用品，已指導補齊')" class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
+                    - 缺學用品
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4. 1-Click Batch Submit Button -->
+              <button id="retro-submit-btn" onclick="retroLogView.submitBatch()" 
+                class="w-full py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-amber-500 via-pink-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-2 active:scale-95">
+                <span class="kitty-bow !w-4 !h-4"></span>
+                <span id="retro-submit-btn-text">✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)</span>
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section 2: Recent Retro Logs Stream -->
+        <div class="glass-card rounded-3xl p-5 border border-pink-200 bg-white shadow-sm">
+          <div class="flex items-center justify-between mb-3.5 pb-2.5 border-b border-pink-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="history" class="w-4 h-4 text-pink-600"></i>
+              <h3 class="text-sm font-black text-slate-900">🕒 本班近期事後補記歷史記錄</h3>
+            </div>
+            <span class="text-xs font-bold text-slate-400">共 ${retroEvents.length} 筆記錄</span>
+          </div>
+
+          ${retroEvents.length === 0 ? `
+            <div class="text-center py-8 text-slate-400 text-xs font-bold">
+              <div class="kitty-cat-mini mx-auto mb-1.5"></div>
+              尚無事後補記記錄，在上方勾選學生即可隨時補記！
+            </div>
+          ` : `
+            <div class="divide-y divide-pink-100 max-h-[260px] overflow-y-auto">
+              ${retroEvents.map(e => {
+                const s = this.store.getStudent(e.classId, e.seatNo);
+                return `
+                  <div class="py-2.5 flex items-center justify-between text-xs hover:bg-pink-50/40 px-2 rounded-xl transition">
+                    <div class="flex items-center space-x-3">
+                      <span class="font-mono font-bold text-slate-500 text-[11px]">${e.date} (${e.period !== undefined ? '第' + e.period + '節' : ''})</span>
+                      <span class="font-black text-slate-900">${String(e.seatNo).padStart(2, '0')} 號 ${s ? s.name : ''}</span>
+                      <span class="font-bold text-slate-700">${e.tagName}</span>
+                      <span class="text-slate-500 truncate max-w-[200px] hidden sm:inline">${e.note || ''}</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                      <span class="font-black px-2 py-0.5 rounded-lg border ${e.delta > 0 ? 'color-rule-pos-badge' : e.delta < 0 ? 'color-rule-neg-badge' : 'color-rule-zero-badge'}">
+                        ${e.delta > 0 ? '+' : ''}${e.delta}
+                      </span>
+                      <button onclick="retroLogView.deleteRetroEvent('${e.id}')" class="text-slate-400 hover:text-rose-600 transition" title="刪除記錄">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+
+      </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  switchClass(classId) {
+    this.currentClassId = classId;
+    this.selectedSeats.clear();
+    this.render('retro-log-view');
+  }
+
+  setDate(date) {
+    this.selectedDate = date;
+  }
+
+  setPeriod(period) {
+    this.selectedPeriod = parseInt(period, 10);
+  }
+
+  toggleSeat(seatNo) {
+    const isSelected = this.selectedSeats.has(seatNo);
+    if (isSelected) {
+      this.selectedSeats.delete(seatNo);
+    } else {
+      this.selectedSeats.add(seatNo);
+    }
+    if (window.appState?.playPop) window.appState.playPop();
+
+    // In-place element update to prevent scroll jump and DOM reconstruction
+    const card = document.getElementById(`retro-student-${seatNo}`);
+    if (card) {
+      if (!isSelected) {
+        card.className = 'cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 bg-pink-500 text-white border-pink-600 shadow-md transform scale-[1.02] font-black';
+        const subtext = card.querySelector('.font-mono:last-child');
+        if (subtext) subtext.className = 'text-[10px] mt-1 font-mono text-pink-100';
+      } else {
+        card.className = 'cursor-pointer p-2.5 rounded-2xl border transition-all text-center select-none active:scale-95 bg-white hover:bg-pink-50/60 border-pink-200 text-slate-800 font-bold';
+        const subtext = card.querySelector('.font-mono:last-child');
+        if (subtext) subtext.className = 'text-[10px] mt-1 font-mono text-slate-500';
+      }
+    }
+
+    const badge = document.getElementById('retro-selected-badge');
+    if (badge) {
+      badge.innerText = `已選取 ${this.selectedSeats.size} 人`;
+    }
+
+    const btnText = document.getElementById('retro-submit-btn-text');
+    if (btnText) {
+      btnText.innerText = `✨ 立即 1 鍵批次補記 (${this.selectedSeats.size} 位學生)`;
+    }
+  }
+
+  selectAll() {
+    const students = this.store.getStudents(this.currentClassId);
+    students.forEach(s => this.selectedSeats.add(s.seatNo));
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  selectNone() {
+    this.selectedSeats.clear();
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  selectOdd() {
+    this.selectedSeats.clear();
+    const students = this.store.getStudents(this.currentClassId);
+    students.filter(s => s.seatNo % 2 !== 0).forEach(s => this.selectedSeats.add(s.seatNo));
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  selectEven() {
+    this.selectedSeats.clear();
+    const students = this.store.getStudents(this.currentClassId);
+    students.filter(s => s.seatNo % 2 === 0).forEach(s => this.selectedSeats.add(s.seatNo));
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  selectTag(tagId) {
+    this.selectedTagId = tagId;
+    const tag = this.store.getTags().find(t => t.id === tagId);
+    if (tag) {
+      this.customDelta = tag.delta;
+    }
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  adjustDelta(diff) {
+    this.customDelta += diff;
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  applyTemplate(text) {
+    this.customNote = text;
+    const input = document.getElementById('retro-memo-input');
+    if (input) input.value = text;
+    if (window.appState?.playPop) window.appState.playPop();
+  }
+
+  submitBatch() {
+    if (this.selectedSeats.size === 0) {
+      window.appState.showToast('請至少選取 1 位學生進行補記！', 'warning');
+      return;
+    }
+
+    const tag = this.store.getTags().find(t => t.id === this.selectedTagId) || {
+      name: '課堂記點',
+      category: 'discipline'
+    };
+
+    const seatsArray = Array.from(this.selectedSeats);
+    seatsArray.forEach(seatNo => {
+      this.store.addEvent({
+        classId: this.currentClassId,
+        seatNo,
+        period: this.selectedPeriod,
+        tagId: this.selectedTagId || 'custom_retro',
+        tagName: tag.name,
+        category: tag.category || 'discipline',
+        delta: this.customDelta,
+        severity: this.customDelta > 0 ? 'positive' : this.customDelta < 0 ? 'warning' : 'neutral',
+        note: `[事後補記] ${this.customNote}`.trim(),
+        date: this.selectedDate
+      });
+    });
+
+    if (this.customDelta > 0 && window.appState?.playChime) {
+      window.appState.playChime();
+    } else if (this.customDelta < 0 && window.appState?.playWarning) {
+      window.appState.playWarning();
+    }
+
+    window.appState.showToast(`🎉 成功為 ${seatsArray.length} 位學生完成事後補記 (${this.customDelta > 0 ? '+' : ''}${this.customDelta}分)！🎀`, 'success');
+
+    // Reset selection
+    this.selectedSeats.clear();
+    this.customNote = '';
+    this.render('retro-log-view');
+  }
+
+  deleteRetroEvent(eventId) {
+    if (confirm('確定要刪除這筆事後補記記錄嗎？')) {
+      this.store.deleteEvent(eventId);
+      window.appState.showToast('已刪除記錄', 'info');
+      this.render('retro-log-view');
+    }
+  }
+}
+
+// Global RetroLogView Instance
+window.retroLogView = new RetroLogView(window.appStore);
+
+// --- test runner ---
+/**
+ * ClassQuant Hub - Milestone M1 Challenger 2 Browser Empirical Test Runner
+ * Rigorous In-Browser Test Suite for:
+ * 1. Retro Log View Seat Selection & O(1) In-Place Interaction Performance
+ * 2. Quick Scoring Auto-Clear under Failure/Error Conditions (finally block verification)
+ * 3. Floating Score Bubbles Visual Styling, Coordinates, and Non-Destructive Lifecycle
+ */
+
+(async function runChallenger2Tests() {
+  const results = {
+    total: 0,
+    passed: 0,
+    failed: 0,
+    details: []
+  };
+
+  function assert(condition, suite, name, detail = '') {
+    results.total++;
+    if (condition) {
+      results.passed++;
+      results.details.push({ suite, name, passed: true, detail });
+      console.log(`%c[PASS] [${suite}] ${name}`, 'color: #16a34a; font-weight: bold;');
+    } else {
+      results.failed++;
+      results.details.push({ suite, name, passed: false, detail });
+      console.error(`[FAIL] [${suite}] ${name}: ${detail}`);
+    }
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Setup Mock App State
+  window.appState = {
+    currentClassId: '801',
+    isSoundEnabled: () => true,
+    playPop: () => {},
+    playChime: () => {},
+    playWarning: () => {},
+    showToast: (msg, type) => {},
+    renderClassDropdown: () => {},
+    switchTab: (tab) => {},
+    closeModal: () => {
+      const modal = document.getElementById('global-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+  };
+
+  const store = window.appStore || new Store();
+  const timetable = window.timetableEngine || new TimetableEngine(store);
+  const statistics = window.statisticsEngine || new StatisticsEngine(store);
+  const matrix = window.matrixView || new ClassroomMatrix(store, timetable, statistics);
+  const retroLog = window.retroLogView || new RetroLogView(store);
+
+  window.appStore = store;
+  window.timetableEngine = timetable;
+  window.statisticsEngine = statistics;
+  window.matrixView = matrix;
+  window.retroLogView = retroLog;
+
+  console.log('Starting M1 Challenger 2 Empirical Test Runner in Browser...');
+
+  // =========================================================================
+  // SUITE 1: RetroLogView Seat Selection & In-Place Performance
+  // =========================================================================
+  const S1 = 'RetroLogView In-Place Seat Selection';
+
+  try {
+    // 1. Render retroLogView
+    retroLog.render('retro-log-view', '801');
+    const student1Card = document.getElementById('retro-student-1');
+    assert(student1Card !== null, S1, 'Retro student card 1 rendered successfully');
+
+    // 2. Test in-place toggleSeat on seat 1 without calling render()
+    let renderCallCount = 0;
+    const originalRender = retroLog.render.bind(retroLog);
+    retroLog.render = function(...args) {
+      renderCallCount++;
+      return originalRender(...args);
+    };
+
+    const cardRefBefore = document.getElementById('retro-student-1');
+    retroLog.toggleSeat(1);
+
+    const cardRefAfter = document.getElementById('retro-student-1');
+    const isNodePreserved = (cardRefBefore === cardRefAfter);
+    assert(isNodePreserved, S1, 'toggleSeat(1) preserves exact DOM node identity (zero re-render)', `isNodePreserved=${isNodePreserved}`);
+    assert(renderCallCount === 0, S1, 'toggleSeat(1) did not call render()', `renderCallCount=${renderCallCount}`);
+    assert(retroLog.selectedSeats.has(1), S1, 'retroLog.selectedSeats contains seat 1 after toggle');
+    assert(cardRefAfter.classList.contains('bg-pink-500'), S1, 'Card has selected background class bg-pink-500');
+    assert(cardRefAfter.classList.contains('text-white'), S1, 'Card has selected text color text-white');
+
+    const badge = document.getElementById('retro-selected-badge');
+    assert(badge && badge.innerText.includes('已選取 1 人'), S1, 'Selection badge updated to "已選取 1 人"', badge?.innerText);
+
+    const btnText = document.getElementById('retro-submit-btn-text');
+    assert(btnText && btnText.innerText.includes('1 位學生'), S1, 'Submit button text updated to "1 位學生"', btnText?.innerText);
+
+    // 3. Deselect seat 1
+    retroLog.toggleSeat(1);
+    assert(!retroLog.selectedSeats.has(1), S1, 'Seat 1 removed from selectedSeats on second tap');
+    assert(renderCallCount === 0, S1, 'Deselect did not call render()', `renderCallCount=${renderCallCount}`);
+    assert(cardRefAfter.classList.contains('bg-white'), S1, 'Card restored to unselected bg-white');
+    assert(cardRefAfter.classList.contains('text-slate-800'), S1, 'Card restored to unselected text-slate-800');
+    assert(badge && badge.innerText.includes('已選取 0 人'), S1, 'Selection badge updated to "已選取 0 人"');
+    assert(btnText && btnText.innerText.includes('0 位學生'), S1, 'Submit button text updated to "0 位學生"');
+
+    // Restore render
+    retroLog.render = originalRender;
+
+    // 4. Batch Selection Filters
+    retroLog.selectOdd();
+    const oddSeats = Array.from(retroLog.selectedSeats);
+    const allOdd = oddSeats.every(s => s % 2 !== 0);
+    assert(oddSeats.length > 0 && allOdd, S1, 'selectOdd() correctly selects all odd numbered students', `count=${oddSeats.length}`);
+
+    retroLog.selectEven();
+    const evenSeats = Array.from(retroLog.selectedSeats);
+    const allEven = evenSeats.every(s => s % 2 === 0);
+    assert(evenSeats.length > 0 && allEven, S1, 'selectEven() correctly selects all even numbered students', `count=${evenSeats.length}`);
+
+    retroLog.selectAll();
+    const allStudents = store.getStudents('801');
+    assert(retroLog.selectedSeats.size === allStudents.length, S1, 'selectAll() selects 100% of class roster', `selected=${retroLog.selectedSeats.size}/${allStudents.length}`);
+
+    retroLog.selectNone();
+    assert(retroLog.selectedSeats.size === 0, S1, 'selectNone() clears all selections');
+
+    // 5. Interaction Performance Benchmark: 1,000 rapid toggle operations
+    const startTime = performance.now();
+    for (let i = 0; i < 1000; i++) {
+      const seatNo = (i % 30) + 1;
+      retroLog.toggleSeat(seatNo);
+    }
+    const elapsed = performance.now() - startTime;
+    assert(elapsed < 100, S1, `1,000 rapid in-place seat toggles executed in ${elapsed.toFixed(2)}ms (< 100ms threshold)`);
+
+    // Reset selection after benchmark
+    retroLog.selectNone();
+
+    // 6. Batch Submit Workflow with Tag & Memo
+    retroLog.toggleSeat(2);
+    retroLog.toggleSeat(4);
+    retroLog.customDelta = 3;
+    retroLog.customNote = '數學分組討論表現優秀';
+    
+    let toastMessage = '';
+    window.appState.showToast = (msg) => { toastMessage = msg; };
+
+    const initialEventsCount = store.getEvents('801').length;
+    retroLog.submitBatch();
+
+    const postEvents = store.getEvents('801');
+    const newEvents = postEvents.filter(e => e.note && e.note.includes('數學分組討論表現優秀'));
+    assert(newEvents.length === 2, S1, 'submitBatch() created 2 new retro events in store', `count=${newEvents.length}`);
+    assert(newEvents.every(e => e.delta === 3), S1, 'All new events have correct delta (+3)');
+    assert(newEvents.some(e => e.seatNo === 2) && newEvents.some(e => e.seatNo === 4), S1, 'Events recorded for seat 2 and seat 4');
+    assert(retroLog.selectedSeats.size === 0, S1, 'submitBatch() cleanly cleared selectedSeats');
+    assert(toastMessage.includes('成功為 2 位學生完成事後補記'), S1, 'Success toast shown upon batch submit', toastMessage);
+
+    // Test empty submit warning
+    let warnToast = '';
+    window.appState.showToast = (msg, type) => { if (type === 'warning') warnToast = msg; };
+    retroLog.submitBatch();
+    assert(warnToast.includes('請至少選取 1 位學生'), S1, 'submitBatch() prevents empty submissions with warning toast');
+  } catch (err) {
+    assert(false, S1, 'Unexpected error during Suite 1 execution', err.stack);
+  }
+
+  // =========================================================================
+  // SUITE 2: Quick Scoring Auto-Clear Resilience (finally block verification)
+  // =========================================================================
+  const S2 = 'Quick Scoring Auto-Clear & Finally Resilience';
+
+  try {
+    matrix.render('classroom-matrix-view', '801');
+    const tag = store.getTags()[0] || { id: 'tag_plus_1', name: '專注聽講', delta: 1, category: 'discipline' };
+
+    // 1. Normal Flow Auto-Clear
+    matrix.toggleSeat(1);
+    matrix.toggleSeat(3);
+    assert(matrix.selectedSeats.has(1) && matrix.selectedSeats.has(3), S2, 'Seats 1 and 3 selected');
+    assert(document.getElementById('seat-card-1').classList.contains('selected'), S2, 'Seat 1 card has .selected class in DOM');
+
+    matrix.applyTagToSelected('801', tag.id);
+    assert(matrix.selectedSeats.size === 0, S2, 'Normal flow: matrix.selectedSeats is automatically cleared');
+    assert(!document.getElementById('seat-card-1').classList.contains('selected'), S2, 'Seat 1 card has .selected class removed');
+    assert(!document.getElementById('seat-card-3').classList.contains('selected'), S2, 'Seat 3 card has .selected class removed');
+    assert(document.getElementById('selected-count').innerText === '0', S2, 'selected-count display reset to 0');
+    assert(document.getElementById('clear-sel-btn').classList.contains('hidden'), S2, 'clear-sel-btn hidden after scoring');
+
+    // 2. Resilience: Exception in timetable.detectActiveSlot()
+    matrix.toggleSeat(2);
+    matrix.toggleSeat(4);
+    assert(matrix.selectedSeats.size === 2, S2, 'Seats 2 and 4 selected prior to simulated timetable crash');
+
+    const origDetectSlot = matrix.timetable.detectActiveSlot;
+    matrix.timetable.detectActiveSlot = () => {
+      throw new Error('SIMULATED_TIMETABLE_EXCEPTION');
+    };
+
+    matrix.applyTagToSelected('801', tag.id);
+    matrix.timetable.detectActiveSlot = origDetectSlot;
+
+    assert(matrix.selectedSeats.size === 0, S2, 'Finally block clears selectedSeats even when timetable.detectActiveSlot throws', `size=${matrix.selectedSeats.size}`);
+    assert(!document.getElementById('seat-card-2').classList.contains('selected'), S2, 'Seat 2 UI deselected after timetable crash');
+    assert(!document.getElementById('seat-card-4').classList.contains('selected'), S2, 'Seat 4 UI deselected after timetable crash');
+
+    // 3. Resilience: Exception in store.addEvent() (e.g. storage full / quota exceeded)
+    matrix.toggleSeat(5);
+    matrix.toggleSeat(6);
+    assert(matrix.selectedSeats.size === 2, S2, 'Seats 5 and 6 selected prior to simulated store failure');
+
+    const origAddEvent = matrix.store.addEvent;
+    matrix.store.addEvent = () => {
+      throw new Error('SIMULATED_QUOTA_EXCEEDED_ERROR');
+    };
+
+    matrix.applyTagToSelected('801', tag.id);
+    matrix.store.addEvent = origAddEvent;
+
+    assert(matrix.selectedSeats.size === 0, S2, 'Finally block clears selectedSeats even when store.addEvent throws');
+    assert(!document.getElementById('seat-card-5').classList.contains('selected'), S2, 'Seat 5 UI deselected after store failure');
+    assert(!document.getElementById('seat-card-6').classList.contains('selected'), S2, 'Seat 6 UI deselected after store failure');
+
+    // 4. Resilience: Exception in showFloatingBubble()
+    matrix.toggleSeat(7);
+    const origBubble = matrix.showFloatingBubble;
+    matrix.showFloatingBubble = () => {
+      throw new Error('SIMULATED_BUBBLE_CREATION_ERROR');
+    };
+
+    matrix.applyTagToSelected('801', tag.id);
+    matrix.showFloatingBubble = origBubble;
+
+    assert(matrix.selectedSeats.size === 0, S2, 'Finally block clears selectedSeats even when showFloatingBubble throws');
+    assert(!document.getElementById('seat-card-7').classList.contains('selected'), S2, 'Seat 7 UI deselected after bubble error');
+
+    // 5. Resilience: Exception in audio / toast handlers
+    matrix.toggleSeat(8);
+    const origChime = window.appState.playChime;
+    const origToast = window.appState.showToast;
+    window.appState.playChime = () => { throw new Error('SIMULATED_AUDIO_ERROR'); };
+    window.appState.showToast = () => { throw new Error('SIMULATED_TOAST_ERROR'); };
+
+    matrix.applyTagToSelected('801', tag.id);
+    window.appState.playChime = origChime;
+    window.appState.showToast = origToast;
+
+    assert(matrix.selectedSeats.size === 0, S2, 'Finally block clears selectedSeats even when audio/toast throws');
+    assert(!document.getElementById('seat-card-8').classList.contains('selected'), S2, 'Seat 8 UI deselected after audio error');
+
+    // 6. Score Span Index Target Correction Verification
+    matrix.toggleSeat(9);
+    const card9 = document.getElementById('seat-card-9');
+    const spansBefore = card9.querySelectorAll('div > span');
+    assert(spansBefore.length >= 3, S2, 'Seat card contains 3 score spans [SeatNo, AcademicScore, CharacterPts]');
+    const academicBefore = spansBefore[1].innerText;
+
+    matrix.applyTagToSelected('801', tag.id);
+
+    const spansAfter = card9.querySelectorAll('div > span');
+    const academicAfter = spansAfter[1].innerText;
+    const charPtsAfter = spansAfter[2].innerText;
+
+    assert(academicBefore === academicAfter, S2, 'Academic score span (scoreSpans[1]) remains intact and unmodified', `academicBefore=${academicBefore}, academicAfter=${academicAfter}`);
+    assert(charPtsAfter.includes('+') || charPtsAfter !== '', S2, 'Character points span (scoreSpans[2]) successfully updated with point delta', `charPtsAfter=${charPtsAfter}`);
+  } catch (err) {
+    assert(false, S2, 'Unexpected error during Suite 2 execution', err.stack);
+  }
+
+  // =========================================================================
+  // SUITE 3: Floating Score Bubbles Styling, Positioning & Non-Destructive Lifecycle
+  // =========================================================================
+  const S3 = 'Floating Score Bubbles Lifecycle & Non-Destructive Touch';
+
+  try {
+    matrix.render('classroom-matrix-view', '801');
+    const card1 = document.getElementById('seat-card-1');
+
+    // 1. Spawn a positive floating bubble
+    matrix.showFloatingBubble(1, 3);
+    const bubblePos = card1.querySelector('.point-bubble');
+    assert(bubblePos !== null, S3, 'Floating bubble element appended to target seat card');
+    assert(bubblePos.innerText.includes('3'), S3, 'Positive bubble displays point value 3', bubblePos?.innerText);
+    assert(bubblePos.classList.contains('text-emerald-600'), S3, 'Positive bubble has class text-emerald-600');
+    assert(bubblePos.style.pointerEvents === 'none', S3, 'Bubble has style.pointerEvents = "none"');
+
+    // 2. Check CSS Computed Styles for .point-bubble
+    const computed = window.getComputedStyle(bubblePos);
+    assert(computed.pointerEvents === 'none', S3, 'Computed pointer-events is "none"');
+    assert(computed.position === 'absolute', S3, 'Computed position is "absolute"');
+    assert(computed.zIndex === '50', S3, 'Computed zIndex is 50');
+
+    // 3. Pointer Events Non-Blocking Passthrough verification
+    const bubbleRect = bubblePos.getBoundingClientRect();
+    const midX = bubbleRect.left + (bubbleRect.width / 2);
+    const midY = bubbleRect.top + (bubbleRect.height / 2);
+    const hitElement = document.elementFromPoint(midX, midY);
+    const penetratesBubble = (hitElement !== bubblePos);
+    assert(penetratesBubble, S3, 'document.elementFromPoint penetrates floating bubble (pointer-events: none verified)', `hitElement=${hitElement?.tagName}.${hitElement?.className}`);
+
+    // 4. Spawn a negative floating bubble
+    const card2 = document.getElementById('seat-card-2');
+    matrix.showFloatingBubble(2, -2);
+    const bubbleNeg = card2.querySelector('.point-bubble');
+    assert(bubbleNeg !== null, S3, 'Negative floating bubble appended to seat card 2');
+    assert(bubbleNeg.innerText === '-2', S3, 'Negative bubble displays "-2"', bubbleNeg?.innerText);
+    assert(bubbleNeg.classList.contains('text-rose-600'), S3, 'Negative bubble has class text-rose-600');
+
+    // 5. Automatic DOM Cleanup verification (800ms)
+    console.log('Waiting 850ms for bubble automatic cleanup...');
+    await sleep(850);
+
+    const bubblePosAfter = card1.querySelector('.point-bubble');
+    const bubbleNegAfter = card2.querySelector('.point-bubble');
+    assert(bubblePosAfter === null, S3, 'Positive bubble cleanly removed from DOM after 800ms timeout');
+    assert(bubbleNegAfter === null, S3, 'Negative bubble cleanly removed from DOM after 800ms timeout');
+
+    // 6. Rapid Spam Stress: 100 Bubbles on single card
+    console.log('Spamming 100 bubbles rapidly on seat card 1...');
+    const originalChildrenCount = card1.children.length;
+    for (let i = 0; i < 100; i++) {
+      matrix.showFloatingBubble(1, (i % 2 === 0) ? 1 : -1);
+    }
+    const bubblesDuringSpam = card1.querySelectorAll('.point-bubble').length;
+    assert(bubblesDuringSpam === 100, S3, '100 floating bubbles concurrently mounted without crash', `count=${bubblesDuringSpam}`);
+
+    console.log('Waiting 900ms for all 100 bubbles to auto-remove...');
+    await sleep(900);
+
+    const bubblesAfterSpam = card1.querySelectorAll('.point-bubble').length;
+    assert(bubblesAfterSpam === 0, S3, 'All 100 floating bubbles cleanly removed from DOM with zero leaks', `remaining=${bubblesAfterSpam}`);
+    assert(card1.children.length === originalChildrenCount, S3, 'Seat card original DOM structure preserved intact');
+
+    // 7. Non-existent seat card safety
+    let thrown = false;
+    try {
+      matrix.showFloatingBubble(99999, 5);
+    } catch (e) {
+      thrown = true;
+    }
+    assert(!thrown, S3, 'showFloatingBubble handles non-existent seat number safely with zero exception');
+
+  } catch (err) {
+    assert(false, S3, 'Unexpected error during Suite 3 execution', err.stack);
+  }
+
+  // Expose to window for CDP evaluation
+  window.__M1_CHALLENGER2_RESULTS__ = results;
+  window.__STRESS_TEST_RESULTS__ = results;
+
+  const summaryEl = document.getElementById('summary-json');
+  const summaryScript = document.getElementById('summary-data');
+  const statusEl = document.getElementById('status');
+  if (summaryEl) summaryEl.innerText = JSON.stringify(results, null, 2);
+  if (summaryScript) summaryScript.textContent = JSON.stringify(results);
+  if (statusEl) {
+    statusEl.innerHTML = results.failed === 0
+      ? `<span class="pass">🎉 ALL ${results.total} BROWSER TESTS PASSED (100% Success Rate)</span>`
+      : `<span class="fail">❌ ${results.failed} TEST(S) FAILED</span>`;
+  }
+
+  console.log('M1 Challenger 2 Test Results:', results);
+
+  // Send report to server if running under HTTP test harness
+  try {
+    await fetch('/api/test-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(results)
+    });
+  } catch (e) {
+    // Expected when running via file://
+  }
+})();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="kitty">
+<head>
+  <meta charset="UTF-8">
+  <title>ClassQuant Hub — Tier 5 Adversarial Stress & Verification Harness</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/kitty-theme.css">
+  <link rel="stylesheet" href="../css/sanrio-characters.css">
+  <style>
+    body { font-family: sans-serif; padding: 12px; margin: 0; background: #fff1f2; }
+    #test-log-container { margin-top: 16px; background: #0f172a; color: #f8fafc; padding: 16px; border-radius: 12px; font-family: monospace; font-size: 11px; max-height: 320px; overflow-y: auto; }
+    .test-pass { color: #4ade80; margin: 2px 0; }
+    .test-fail { color: #f87171; font-weight: bold; margin: 2px 0; }
+    #status.pass { color: #16a34a; font-weight: bold; font-size: 16px; }
+    #status.fail { color: #dc2626; font-weight: bold; font-size: 16px; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <div class="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-pink-200">
+    <h2 class="text-lg font-black text-pink-700">Tier 5 Adversarial Coverage Hardening Suite</h2>
+    <div id="status" class="text-sm font-bold text-slate-700 mt-1">Running Tier 5 Stress Tests...</div>
+  </div>
+
+  <!-- Full App DOM Elements -->
+  <header id="global-header" class="sticky top-0 z-40 bg-white border-b px-4 py-2 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <button id="header-version-badge" class="text-xs px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 font-bold"><span>v1.8.5</span> 📢</button>
+      <button id="onboarding-guide-btn" onclick="appState.startTour()" class="text-xs px-2 py-1 bg-pink-500 text-white rounded-lg">🎓 教學</button>
+      <select id="global-class-select" class="text-xs border rounded px-2 py-1">
+        <option value="801" selected>8年1班 (數學)</option>
+        <option value="802">8年2班 (數學)</option>
+      </select>
+    </div>
+    <div id="header-offline-status"></div>
+  </header>
+
+  <nav id="top-nav-bar" class="flex gap-2 overflow-x-auto py-2 bg-white/80 px-2 border-b">
+    <button data-tab="matrix" onclick="appState.switchTab('matrix')" class="px-3 py-1.5 rounded-xl bg-pink-500 text-white text-xs font-bold">課堂點記板</button>
+    <button data-tab="roster" onclick="appState.switchTab('roster')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">👥 班級名單</button>
+    <button data-tab="retro" onclick="appState.switchTab('retro')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">⏰ 課堂事後補記</button>
+    <button data-tab="dashboard" onclick="appState.switchTab('dashboard')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">📊 統計戰情室</button>
+    <button data-tab="timetable" onclick="appState.switchTab('timetable')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">📅 課表排程</button>
+    <button data-tab="events" onclick="appState.switchTab('events')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">📖 學生記事檢索</button>
+    <button data-tab="student-dossier" onclick="appState.switchTab('student-dossier')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">檔案 & 晤談</button>
+    <button data-tab="ai-hub" onclick="appState.switchTab('ai-hub')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">AI 成績匯入</button>
+    <button data-tab="guide" onclick="appState.switchTab('guide')" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-bold">📖 圖文說明書</button>
+  </nav>
+
+  <main class="mt-3">
+    <section id="classroom-matrix-view"></section>
+    <section id="roster-manager-view" class="hidden"></section>
+    <section id="retro-log-view" class="hidden"></section>
+    <section id="dashboard-view" class="hidden">
+      <div class="glass-card p-6 bg-white rounded-2xl border border-pink-200">
+        <h3 class="font-bold text-slate-800">4-Quadrant Analytics</h3>
+      </div>
+    </section>
+    <section id="timetable-editor-view" class="hidden"></section>
+    <section id="events-log-view" class="hidden"></section>
+    <section id="student-dossier-view" class="hidden"></section>
+    <section id="ai-hub-view" class="hidden"></section>
+    <section id="user-guide-view" class="hidden"></section>
+  </main>
+
+  <!-- Global Modal Mock -->
+  <div id="global-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-lg w-full">
+      <h3 id="modal-title" class="font-bold">對話框</h3>
+      <div id="modal-body" class="my-4"></div>
+      <button onclick="appState.closeModal()" class="px-4 py-2 bg-slate-200 rounded-xl text-xs">關閉</button>
+    </div>
+  </div>
+  <div id="global-toast" class="hidden"></div>
+
+  <!-- Permanent Static Onboarding Tour Container -->
+  <div id="tour-overlay-container" class="fixed inset-0 pointer-events-none hidden" style="z-index: 99999;">
+    <svg id="tour-svg-overlay" class="absolute inset-0 w-full h-full pointer-events-none tour-gpu-layer" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="tour-glow-filter" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f43f5e" flood-opacity="0.9" />
+          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#fb7185" flood-opacity="0.65" />
+        </filter>
+        <linearGradient id="tour-glow-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f43f5e" />
+          <stop offset="50%" stop-color="#fb7185" />
+          <stop offset="100%" stop-color="#f43f5e" />
+        </linearGradient>
+      </defs>
+      <path id="tour-overlay-path" fill="#090d16" fill-opacity="0.78" fill-rule="evenodd" d="M 0 0 h 100 v 100 h -100 Z" class="pointer-events-auto" />
+      <path id="tour-spotlight-glow" fill="none" stroke="url(#tour-glow-stroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#tour-glow-filter)" d="M 0 0 Z" class="pointer-events-none" />
+      <path id="tour-spotlight-halo" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 4" d="M 0 0 Z" class="pointer-events-none opacity-60 animate-pulse" />
+    </svg>
+
+    <div id="tour-ghost-cursor" class="fixed pointer-events-none opacity-0 will-change-transform tour-gpu-layer" style="top: 0; left: 0; transform: translate3d(0, 0, 0); z-index: 100002;">
+      <div class="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
+        <div class="tour-ghost-ring absolute w-12 h-12 rounded-full border-2 border-pink-400 bg-pink-500/20 animate-ping"></div>
+        <div class="tour-ghost-dot w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 shadow-[0_0_20px_rgba(244,63,94,0.9)] flex items-center justify-center text-white text-base border-2 border-white">
+          👆
+        </div>
+      </div>
+    </div>
+
+    <div id="tour-pointer-container" class="fixed pointer-events-none hidden will-change-transform tour-gpu-layer" style="top: 0; left: 0; transform: translate3d(0, 0, 0); z-index: 100000;">
+      <div id="tour-pointer-inner" class="flex flex-col items-center justify-center pointer-events-none">
+        <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👆</div>
+        <div id="tour-pointer-badge" class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3.5 py-1 rounded-full shadow-2xl border-1.5 border-white whitespace-nowrap flex items-center gap-1">
+          <span id="tour-arrow-left" class="tour-arrow-lateral hidden text-sm" style="display: none;">👈</span>
+          <span id="tour-pointer-text">請點擊此處</span>
+          <span id="tour-arrow-right" class="tour-arrow-lateral hidden text-sm" style="display: none;">👉</span>
+        </div>
+        <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👇</div>
+      </div>
+    </div>
+
+    <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[380px] bg-white rounded-3xl p-4 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300" style="z-index: 100001; bottom: 14px; top: auto;">
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-pink-100">
+        <span id="tour-step-badge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700">步驟 1 / 12</span>
+        <button onclick="onboardingTour.endTour()" class="text-xs font-bold text-slate-400 hover:text-pink-600 transition cursor-pointer">✕ 結束</button>
+      </div>
+      <h4 id="tour-title" class="text-sm font-black text-slate-900 mb-1.5">步驟標題</h4>
+      <div id="tour-content" class="text-xs text-slate-600 mb-3">步驟說明內容</div>
+      <div id="tour-action-container" class="flex items-center justify-end pt-1">
+        <button id="tour-skip-btn" onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 text-xs">下一步 ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="test-log-container">
+    <div class="text-slate-400 font-bold mb-2">--- REAL-TIME TEST LOGS ---</div>
+    <div id="test-log"></div>
+  </div>
+  <pre id="summary-json" style="display: none;"></pre>
+  <script id="summary-data" type="application/json"></script>
+
+  <!-- Application Logic Modules -->
+  <script src="../js/uiMap.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/timetable.js"></script>
+  <script src="../js/statistics.js"></script>
+  <script src="../js/tagManager.js"></script>
+  <script src="../js/matrix.js"></script>
+  <script src="../js/rosterManager.js"></script>
+  <script src="../js/retroLogView.js"></script>
+  <script src="../js/timetableEditor.js"></script>
+  <script src="../js/onboardingTour.js"></script>
+
+  <!-- Tier 5 Test Runner -->
+  <script src="./tier5_adversarial_suite.js"></script>
+</body>
+</html>

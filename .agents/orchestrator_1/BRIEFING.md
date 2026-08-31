@@ -1,91 +1,80 @@
-# BRIEFING — 2026-08-30T03:07:45Z
+# BRIEFING — 2026-08-30T13:40:00Z
 
 ## Mission
-Comprehensive multi-agent architectural overhaul, bulletproof bug eradication, and fluidity refinement for ClassQuant Hub's interactive onboarding tour engine and PWA caching layer.
+Restore native touch & selection behavior, verify end-to-end mobile multi-tab navigation and features (Timetable, Roster, Post-class logging, etc.), and ensure flawless 12-step interactive onboarding tour engine in ClassQuant Hub.
 
 ## 🔒 My Identity
 - Archetype: orchestrator
-- Roles: orchestrator, user_liaison, human_reporter, successor
+- Roles: [orchestrator, user_liaison, human_reporter, successor]
 - Working directory: d:\class_point_app_dev\.agents\orchestrator_1
-- Original parent: parent
-- Original parent conversation ID: e989c5e4-036e-4023-aa4a-11872342cb92
+- Original parent: Sentinel
+- Original parent conversation ID: 0edc1fd7-bbfb-426a-8a0f-6e5c63b368fb
 
 ## 🔒 My Workflow
 - **Pattern**: Project Pattern (Dual Track: Implementation Track + E2E Testing Track)
 - **Scope document**: d:\class_point_app_dev\PROJECT.md
-1. **Decompose**: Survey codebase via parallel Explorers/Spec Miners, create PROJECT.md with Feature Inventory, Milestones, and Interface Contracts.
+1. **Decompose**: Decompose requirements into milestones (Survey -> Architecture & Interfaces -> Milestones M1-M3 -> M4 Final E2E Validation).
 2. **Dispatch & Execute**:
-   - Top-level: spawn Sub-orchestrators for milestones and E2E Testing Orchestrator.
-   - Sub-orchestrators execute Explorer -> Worker -> Reviewer -> Challenger -> Auditor iteration loops.
-3. **On failure** (in this order):
-   - Retry: nudge stuck agent or re-send task
-   - Replace: spawn fresh agent with partial progress
-   - Skip: proceed without (only if non-critical, never auditor)
-   - Redistribute: split stuck agent's remaining work
-   - Redesign: re-partition decomposition
-   - Escalate: report to parent (sub-orchestrators only, last resort)
-4. **Succession**: Self-succeed when spawn count >= 16 and all active subagents complete.
+   - Survey: Dispatch 3 parallel Explorers / Spec Miners to investigate existing codebase, event handling, onboarding tour engine, mobile viewport/tab systems.
+   - Dual-Track Setup: E2E Testing track for opaque-box test suite (Tiers 1-4) & Implementation track for feature restoration.
+   - Milestone Loop: Explorer -> Worker -> Reviewer -> Challenger -> Auditor -> Gate check.
+3. **On failure**: Retry -> Replace -> Skip -> Redistribute -> Redesign.
+4. **Succession**: Self-succeed at 16 spawns, cancel timers, dump handoff.md, spawn successor.
 - **Work items**:
-  1. Survey & Architecture Mapping [in-progress]
-  2. Decomposition & PROJECT.md creation [pending]
-  3. Milestone Dispatches [pending]
-  4. Final E2E Test Verification & Hardening [pending]
+  1. Survey & Architecture Mapping [pending]
+  2. M1: Native Touch & Selection Behavior Restoration [pending]
+  3. M2: End-to-End Mobile Tab Navigation & Feature Readiness [pending]
+  4. M3: Interactive Onboarding Tour Engine [pending]
+  5. M4: Comprehensive E2E Test Suite & Adversarial Verification [pending]
 - **Current phase**: 0 (Survey)
-- **Current focus**: Parallel codebase exploration and spec mining
+- **Current focus**: Initial survey of codebase and architecture
 
 ## 🔒 Key Constraints
-- NEVER write, modify, or create source code files directly.
-- NEVER run build/test commands yourself — require workers to do so.
-- NEVER investigate or explore the problem at the code level — dispatch Explorers for technical investigation.
-- Always enforce binary veto on Forensic Auditor violations.
-- Always include path to ORIGINAL_REQUEST.md in every subagent dispatch.
+- Strictly DISPATCH-ONLY orchestrator. Never edit source code directly; never run build/test directly; dispatch subagents.
+- Mandatory reading of ORIGINAL_REQUEST.md for all spawned subagents.
+- Zero tolerance on integrity: no hardcoded cheats, dummy facades, or skipped audits.
 - Never reuse a subagent after it has delivered its handoff — always spawn fresh.
 
 ## Current Parent
-- Conversation ID: e989c5e4-036e-4023-aa4a-11872342cb92
-- Updated: not yet
+- Conversation ID: 0edc1fd7-bbfb-426a-8a0f-6e5c63b368fb
+- Updated: 2026-08-30T13:40:00Z
 
 ## Key Decisions Made
-- Initiated Step 0 Survey with 3 parallel explorer/spec miner agents to assess tour engine, UI alignment/navigation, PWA service worker/cache sync, and existing test setups.
+- Initialized Project Orchestrator state. Initiating Step 0 Survey with 3 Explorers.
 
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
-| explorer_survey_1 | teamwork_preview_explorer | Survey: Tour Engine, Spotlight & Auto-Pilot | completed | ceb22e99-a330-4ea2-84d3-556e60686d4a |
-| explorer_survey_2 | teamwork_preview_explorer | Survey: Event Lifecycle & PWA Cache | completed | 2a25c1c1-c29c-4b70-82d3-35744aa0c406 |
-| spec_miner_survey_1 | teamwork_preview_spec_miner | Survey: Tour & PWA Spec Mining | completed | 7a9058dd-0a1d-4442-b170-f1550599f3e7 |
-| test_writer_e2e_1 | teamwork_preview_test_writer | E2E Testing Track: Infra & Test Suite | in-progress | 67918084-66cf-464a-8f4d-8fd08cccd3e6 |
-| explorer_m1_1 | teamwork_preview_explorer | M1: SVG Spotlight Cutout Geometry | in-progress | e59e8007-c408-4034-aa9a-41f765dba8bf |
-| explorer_m1_2 | teamwork_preview_explorer | M1: Guidance Arrow & Viewport Clamping | in-progress | 8b46d11c-9bf8-4d06-91b7-eb926e1511be |
-| explorer_m1_3 | teamwork_preview_explorer | M1: 60fps rAF Tracking & Performance | in-progress | 31a9f879-844c-43b4-bb87-fa695369594c |
-| explorer_m4_1 | teamwork_preview_explorer | M4: SW Cache Query Normalization | in-progress | f7942973-d3ff-4a73-bb84-67bbb72b66c0 |
-| explorer_m4_2 | teamwork_preview_explorer | M4: Version String Synchronization | completed | 2bb7d390-4da1-4a85-ae96-cf05879b1e5a |
-| explorer_m4_3 | teamwork_preview_explorer | M4: Lifecycle & Version Loop Elimination | completed | f5409f6b-992e-4057-a011-3e89bcd734a3 |
-| worker_m1_1 | teamwork_preview_worker | M1 Implementation: SVG Spotlight & Pointer Arrow | completed | 57a992af-dc2b-4101-a7f4-f8a324f019e3 |
-| worker_m4_1 | teamwork_preview_worker | M4 Implementation: PWA SW & Version Sync | completed | a70a9d3d-a291-41e1-9c9f-6035561c34ca |
-| worker_m2_1 | teamwork_preview_worker | M2 Implementation: Ghost Cursor Auto-Pilot & Navigation | completed | 4923d98b-1197-4f95-b73c-8dd82350afe2 |
-| worker_m3_1 | teamwork_preview_worker | M3 Implementation: Anti-Jump Mutex & Touch Gating | completed | d730656c-7d9a-4a54-936f-114f557c9d57 |
-| reviewer_1 | teamwork_preview_reviewer | Gate Review: Tour Engine & Interaction Defense | completed (APPROVE) | 9f0a3456-a15a-4f93-a0e8-07732cce4425 |
-| reviewer_2 | teamwork_preview_reviewer | Gate Review: PWA SW & Version Synchronization | completed (APPROVE) | 1b07e99f-5c13-4e98-a2ca-1524b42184fa |
-| challenger_1 | teamwork_preview_challenger | Gate Challenge: Interaction & Race Conditions | completed (APPROVE) | a7d1d10a-7790-484e-8ac5-2a9f9e14da5e |
-| challenger_2 | teamwork_preview_challenger | Gate Challenge: Spotlight Geometry & Cache Stress | completed (APPROVE) | 01373918-8138-47b4-8ff8-e613e112f18a |
-| auditor_1 | teamwork_preview_auditor | Forensic Integrity Audit | completed (CLEAN) | bf9406e1-3510-4d6a-8b5a-67ce21683e39 |
+| explorer_survey_touch | teamwork_preview_explorer | Survey R1: Touch & Selection Behavior | completed | 69658760-9e76-4b42-99f0-6f61b0661a99 |
+| explorer_survey_tabs | teamwork_preview_explorer | Survey R2: Tab Navigation & Features | completed | 37078046-0c92-4e31-b523-89c13831469f |
+| explorer_survey_tour | teamwork_preview_explorer | Survey R3: Onboarding Tour Engine | completed | c324f66c-e6be-4378-913f-238b5637428a |
+| e2e_test_orch | teamwork_preview_test_writer | E2E Test Suite & TEST_READY.md | in-progress | c1af9768-af9a-423d-95de-0dc524588779 |
+| m1_explorer | teamwork_preview_explorer | M1 Implementation Plan | completed | 2f05cb09-6e46-4a16-a5c2-aeaed39d8111 |
+| m1_worker | teamwork_preview_worker | M1 Code Fixes & Implementation | completed | 46b69cc3-b82c-457e-92f0-7a683642c39d |
+| m1_reviewer_1 | teamwork_preview_reviewer | M1 Review & Test Validation | completed | 23310573-a21b-40ac-a954-0cc7f1aa37d5 |
+| m1_reviewer_2 | teamwork_preview_reviewer | M1 Code & Performance Review | completed | 37f8d2de-d48b-4e10-bc1e-e54e77f60d0c |
+| m1_challenger_1 | teamwork_preview_challenger | M1 Empirical Stress Testing | completed | dc18a677-c263-483f-b3a3-8e0a22f6649b |
+| m1_challenger_2 | teamwork_preview_challenger | M1 Retro/Scoring Adversarial Tests | completed | bc9a8299-ecee-4f9d-bba6-03e12311e096 |
+| m1_auditor | teamwork_preview_auditor | M1 Forensic Integrity Audit | completed | 9d23be4c-2e9a-46fc-aaaa-c228519b9076 |
+| m2_m3_worker | teamwork_preview_worker | M2 & M3 Features & Tour Engine Verification | completed | beb33bb7-9bf3-4e50-bfb7-6415ef2c81d5 |
+| m2_m3_reviewer | teamwork_preview_reviewer | M2 & M3 Independent Review | in-progress | 93e90554-5474-476e-85f8-4e119326e783 |
+| m4_challenger_tier5 | teamwork_preview_challenger | Tier 5 Adversarial Stress & Hardening | in-progress | f9bad8aa-b7dd-43fb-a37e-ebf1dfb96ce1 |
+| m4_auditor | teamwork_preview_auditor | Full Codebase Master Forensic Audit | in-progress | ef7a10cb-b3e4-4035-8dd2-f903e5bf7689 |
 
 ## Succession Status
-- Succession required: no (project fully complete)
-- Spawn count: 19 / 16
-- Pending subagents: none
+- Succession required: no
+- Spawn count: 15 / 16
+- Pending subagents: 93e90554-5474-476e-85f8-4e119326e783, f9bad8aa-b7dd-43fb-a37e-ebf1dfb96ce1, ef7a10cb-b3e4-4035-8dd2-f903e5bf7689
 - Predecessor: none
-- Successor: none (mission completed)
+- Successor: not yet spawned
 
 ## Active Timers
-- Heartbeat cron: 18b14e24-a85d-40d6-bb97-59e18fc5c456/task-11
+- Heartbeat cron: stopped
 - Safety timer: none
-- On succession: kill all timers before spawning successor
-- On context truncation: run `manage_task(Action="list")` — re-create if missing
 
 ## Artifact Index
-- d:\class_point_app_dev\.agents\ORIGINAL_REQUEST.md — Original User Request
-- d:\class_point_app_dev\.agents\orchestrator_1\DISPATCH.md — Dispatch log
-- d:\class_point_app_dev\.agents\orchestrator_1\BRIEFING.md — Persistent memory & working index
-- d:\class_point_app_dev\.agents\orchestrator_1\progress.md — State checkpoint & heartbeat log
+- d:\class_point_app_dev\.agents\ORIGINAL_REQUEST.md — Authoritative User Request
+- d:\class_point_app_dev\.agents\orchestrator_1\DISPATCH.md — Parent Dispatch Record
+- d:\class_point_app_dev\.agents\orchestrator_1\BRIEFING.md — Persistent Working Memory
+- d:\class_point_app_dev\.agents\orchestrator_1\progress.md — Liveness & Execution Tracker
+- d:\class_point_app_dev\.agents\orchestrator_1\plan.md — Orchestration Plan

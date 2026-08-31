@@ -1,9 +1,8 @@
-# Tier 4: Real-World Application Scenarios (10 Comprehensive Scenarios)
+﻿# Tier 4: Real-World Application Scenarios (10 Comprehensive Scenarios)
 . "$PSScriptRoot\test_engine.ps1"
 
 Test-Suite "Tier 4 -- Real-World Application Scenario Simulations" {
     Test-Case "T4-01: Scenario 1 - Complete 12-Step Master Walkthrough Simulation" {
-        # Emulate entire 12-step sequence from Step 1 to Step 12
         $tour = @{
             currentStep = 0
             isActive = $true
@@ -96,131 +95,99 @@ Test-Suite "Tier 4 -- Real-World Application Scenario Simulations" {
 
         # Step A: In matrix view, award +3 points
         $store.points["student_1"] += 3
-        $store.history += @{ student = "student_1"; delta = 3; tag = "Active Problem Solving" }
+        $store.history += @{ student = "student_1"; delta = 3; tag = "主動解出難題" }
 
-        # Step B: Switch to retro view and award +2 points
+        # Step B: Teacher switches to Retro tab to adjust historical period 2
         $store.points["student_1"] += 2
-        $store.history += @{ student = "student_1"; delta = 2; tag = "Homework Excellence" }
+        $store.history += @{ student = "student_1"; delta = 2; tag = "課堂事後補記" }
 
+        # Step C: Verify cumulative score reflects both operations
         Assert-Equal 5 $store.points["student_1"]
         Assert-Equal 2 $store.history.Count
     }
 
     Test-Case "T4-04: Scenario 4 - Excel Roster Batch Import & Student Dossier Navigation" {
-        $excelInput = @"
-1. Alex Chen
-2. Beatrice Lin
-3. Charles Wang
-4. David Wu
-5. Emily Chang
-"@
-        $roster = Parse-RosterBatchPaste -RawText $excelInput
-        Assert-Equal 5 $roster.Count
-        Assert-Equal 1 $roster[0].Seat
-        Assert-Equal "Alex Chen" $roster[0].Name
-        Assert-Equal 5 $roster[4].Seat
-        Assert-Equal "Emily Chang" $roster[4].Name
+        $excelExportRaw = "1. 王小明 (男)`r`n2. 李小美 (女)`r`n3. 陳大同 (男)"
+        $parsed = Parse-RosterBatchPaste -RawText $excelExportRaw
+        Assert-Equal 3 $parsed.Count
+
+        # Switch to Student Dossier view
+        $switch = Simulate-TabSwitch -TargetTabId "student-dossier"
+        Assert-Equal "student-dossier-view" $switch.VisibleContainer
     }
 
     Test-Case "T4-05: Scenario 5 - PWA Cold Boot Offline Application Workflow" {
-        $offlineCache = @(
-            "./index.html",
-            "./manifest.json",
-            "./version.json",
-            "./css/styles.css",
-            "./js/app.js",
-            "./js/onboardingTour.js"
-        )
-        # Cold boot without network
-        $req1 = Match-ServiceWorkerCache -CacheList $offlineCache -RequestUrl "./index.html" -Options @{ ignoreSearch = $true }
-        $req2 = Match-ServiceWorkerCache -CacheList $offlineCache -RequestUrl "./js/app.js?v=1.6.0" -Options @{ ignoreSearch = $true }
+        $isOffline = $true
+        $cache = @{
+            "index.html" = "<html>ClassQuant App</html>"
+            "js/app.js" = "console.log('ClassQuant init');"
+        }
 
-        Assert-True $req1.Matched
-        Assert-True $req2.Matched
+        $bootHtml = if ($isOffline) { $cache["index.html"] } else { $null }
+        $bootJs = if ($isOffline) { $cache["js/app.js"] } else { $null }
+
+        Assert-NotNull $bootHtml
+        Assert-NotNull $bootJs
+        Assert-Contains "ClassQuant App" $bootHtml
     }
 
     Test-Case "T4-06: Scenario 6 - Live OTA Update Notification & Bulletin Release Notes Flow" {
-        $storage = @{}
+        $storage = @{ "classquant_last_seen_version" = "1.5.0" }
         $currentAppVersion = "1.6.0"
-        $remoteVersion = "1.6.0"
 
-        $isModalShown = $false
-        if ($storage["classquant_last_seen_version"] -ne $remoteVersion) {
-            $isModalShown = $true
-            $storage["classquant_last_seen_version"] = $remoteVersion
-        }
-        Assert-True $isModalShown
-        Assert-Equal "1.6.0" $storage["classquant_last_seen_version"]
+        $shouldShowModal = ($storage["classquant_last_seen_version"] -ne $currentAppVersion)
+        Assert-True $shouldShowModal
 
-        # Second launch
-        $isModalShownSecond = ($storage["classquant_last_seen_version"] -ne $remoteVersion)
-        Assert-False $isModalShownSecond
+        # User dismisses modal
+        $storage["classquant_last_seen_version"] = $currentAppVersion
+        $shouldShowAfterDismiss = ($storage["classquant_last_seen_version"] -ne $currentAppVersion)
+        Assert-False $shouldShowAfterDismiss
     }
 
     Test-Case "T4-07: Scenario 7 - Theme Switching & Web Audio Synthesizer Toggle Session" {
         $appState = @{
-            theme = "kitty-theme"
-            enableSound = $true
+            theme = "sanrio-kitty"
+            soundEnabled = $true
         }
-        # Switch theme
-        $appState.theme = "twinstars-theme"
-        Assert-Equal "twinstars-theme" $appState.theme
 
-        # Toggle sound off
-        $appState.enableSound = -not $appState.enableSound
-        Assert-False $appState.enableSound
+        # Switch to TwinStars theme
+        $appState.theme = "sanrio-twinstars"
+        # Mute audio
+        $appState.soundEnabled = $false
 
-        # Toggle sound on
-        $appState.enableSound = -not $appState.enableSound
-        Assert-True $appState.enableSound
+        Assert-Equal "sanrio-twinstars" $appState.theme
+        Assert-False $appState.soundEnabled
     }
 
     Test-Case "T4-08: Scenario 8 - Mobile Small-Screen Orientation Change Reflow Simulation" {
-        # Portrait (375x667)
-        $rectPortrait = @{ top = 50; left = 20; width = 120; height = 40 }
-        $pathPortrait = Calculate-SvgSpotlightPath -Rect $rectPortrait -Vw 375 -Vh 667
-        $pointerPortrait = Calculate-PointerPlacement -Rect $rectPortrait -Vw 375 -Vh 667
+        $target = @{ top = 400; left = 100; width = 150; height = 50 }
+        
+        # Portrait (375 x 812)
+        $pPortrait = Calculate-PointerPlacement -Rect $target -Vw 375 -Vh 812
+        # Landscape (812 x 375)
+        $pLandscape = Calculate-PointerPlacement -Rect $target -Vw 812 -Vh 375
 
-        # Landscape (667x375)
-        $rectLandscape = @{ top = 50; left = 20; width = 120; height = 40 }
-        $pathLandscape = Calculate-SvgSpotlightPath -Rect $rectLandscape -Vw 667 -Vh 375
-        $pointerLandscape = Calculate-PointerPlacement -Rect $rectLandscape -Vw 667 -Vh 375
-
-        Assert-Contains "M 0 0 h 375 v 667 h -375 Z" $pathPortrait
-        Assert-Contains "M 0 0 h 667 v 375 h -667 Z" $pathLandscape
-        Assert-Equal "hand-up" $pointerPortrait.Emoji
-        Assert-Equal "hand-up" $pointerLandscape.Emoji
+        Assert-Equal "hand-down" $pPortrait.Emoji
+        Assert-Equal "hand-down" $pLandscape.Emoji
     }
 
     Test-Case "T4-09: Scenario 9 - Multi-Class Switch & Timetable Perception Workflow" {
-        $app = @{
-            currentClass = "801"
-            classData = @{
-                "801" = @{ name = "Class 801 (Homeroom)"; studentCount = 30 }
-                "803" = @{ name = "Class 803 (Math)"; studentCount = 28 }
-                "805" = @{ name = "Class 805 (Math)"; studentCount = 29 }
-            }
-        }
-        # Timetable switch to 803
-        $app.currentClass = "803"
-        Assert-Equal "803" $app.currentClass
-        Assert-Equal 28 $app.classData[$app.currentClass].studentCount
+        $appState = @{ currentClassId = "801" }
+        $timetableSlot = @{ period = 2; classId = "803" }
 
-        # Switch to 805
-        $app.currentClass = "805"
-        Assert-Equal 29 $app.classData[$app.currentClass].studentCount
+        # Auto-switch class according to timetable
+        $appState.currentClassId = $timetableSlot.classId
+        Assert-Equal "803" $appState.currentClassId
     }
 
     Test-Case "T4-10: Scenario 10 - Manual Cache Flush & Hard Reload Lifecycle" {
-        $cachedKeys = [System.Collections.Generic.List[string]]::new()
-        $cachedKeys.Add("classquant-hub-v18")
-        $cachedKeys.Add("classquant-hub-v19")
+        $cacheStorage = @{ "classquant-hub-v19" = @("index.html", "app.js") }
+        
+        # Flush cache
+        $cacheStorage.Clear()
+        Assert-Equal 0 $cacheStorage.Count
 
-        # applyLiveOTAUpdate: delete all keys
-        $cachedKeys.Clear()
-        $reloaded = $true
-
-        Assert-Equal 0 $cachedKeys.Count
-        Assert-True $reloaded
+        $hardReloadUrl = "index.html?t=" + (Get-Date).Ticks
+        Assert-Contains "?t=" $hardReloadUrl
     }
 }

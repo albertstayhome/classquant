@@ -1,62 +1,39 @@
-# Original User Request
+﻿# Original User Request
 
-## 2026-08-30T03:07:20Z
+## 2026-08-30T13:39:37Z
 
-Comprehensive multi-agent architectural overhaul, bulletproof bug eradication, and fluidity refinement for ClassQuant Hub's interactive onboarding tour engine and PWA caching layer.
-
-Working directory: d:\class_point_app_dev
-Integrity mode: development
-
-## Requirements
-
-### R1. Pixel-Perfect SVG Spotlight & Directional Arrow Alignment
-- Ensure the spotlight mask and directional guidance pointers dynamically calculate exact bounding geometries and center-align across all mobile viewports, orientations, and responsive layout reflows with zero offset or clipping.
-
-### R2. Natural Ghost Cursor Auto-Pilot & Coherent View Navigation
-- Implement smooth, human-like simulated cursor movements and interactions for auto-pilot steps. Ensure tab and view switches transition naturally with visible feedback rather than abrupt instantaneous teleportation.
-
-### R3. Hardened Anti-Jump & Anti-Lock Interaction Defense
-- Implement strict event lifecycle management that completely eliminates accidental step skipping, double-click ghost events, and interaction deadlocks regardless of how fast or erratically the user taps.
-
-### R4. Resilient PWA Service Worker & Version Cache Synchronization
-- Unify runtime version variables with static manifest/HTML badges. Ensure Service Worker updates and cache-busting protocols reliably deliver the latest builds to mobile devices without stale-cache rollback flashes.
-
-## Acceptance Criteria
-
-### Tour Execution & Reliability
-- [ ] The 12-step master walkthrough executes end-to-end smoothly without freezing, skipping, or visual glitches.
-- [ ] Directional arrows and SVG spotlight cutouts remain centered on target elements during and after viewport scrolling.
-- [ ] Auto-pilot steps demonstrate visible gesture travel and trigger real underlying tab transitions seamlessly.
-- [ ] PWA version cleanly updates and displays the latest release without bouncing back to older cached versions.
-
-## 2026-08-30T09:09:01Z
-
-Comprehensive multi-agent architectural overhaul, bulletproof bug eradication, and fluidity refinement for ClassQuant Hub's interactive onboarding tour engine and PWA caching layer.
+Comprehensive mobile interaction restoration, event pipeline audit, and seamless multi-tab feature verification for ClassQuant Hub.
 
 Working directory: d:\class_point_app_dev
 Integrity mode: development
 
 ## Requirements
 
-### R1. Pixel-Perfect SVG Spotlight & Directional Arrow Alignment
-- Ensure the spotlight mask and directional guidance pointers dynamically calculate exact bounding geometries and center-align across all mobile viewports, orientations, and responsive layout reflows with zero offset or clipping.
+### R1. Native Touch & Selection Behavior Restoration
+- Ensure that tapping student seat cards toggles selection instantaneously, and tapping quick tags immediately awards points/deductions and automatically clears student selection, restoring the intuitive one-tap classroom logging workflow.
+- In-place score animations (+3 / -1 stamp floats) must animate smoothly without disrupting active touches or triggering full DOM re-renders.
 
-### R2. Natural Ghost Cursor Auto-Pilot & Coherent View Navigation
-- Implement smooth, human-like simulated cursor movements and interactions for auto-pilot steps. Ensure tab and view switches transition naturally with visible feedback rather than abrupt instantaneous teleportation.
+### R2. End-to-End Mobile Tab Navigation & Feature Readiness
+- Ensure all top navigation tabs (課堂點記板, 👥 班級名單, ⏰ 課堂事後補記, 📊 統計戰情室, 📅 課表排程, 📖 學生記事檢索, 檔案 & 晤談, AI 成績匯入, 📖 圖文說明書) render and operate with zero JavaScript exceptions, zero event capture blocking, and zero layout shift on mobile viewports.
+- Timetable scheduling, roster modification, and post-class logging must execute reliably across both mobile browsers and installed PWA instances.
 
-### R3. Hardened Anti-Jump & Anti-Lock Interaction Defense
-- Implement strict event lifecycle management that completely eliminates accidental step skipping, double-click ghost events, and interaction deadlocks regardless of how fast or erratically the user taps.
-
-### R4. Resilient PWA Service Worker & Version Cache Synchronization
-- Unify runtime version variables with static manifest/HTML badges. Ensure Service Worker updates and cache-busting protocols reliably deliver the latest builds to mobile devices without stale-cache rollback flashes.
+### R3. Flawless Interactive Onboarding Tour Engine
+- Ensure tapping  🎓 教學 instantly launches the spotlight walkthrough.
+- All 12 walkthrough steps must advance either via direct interaction or the 下一步 ➔ button with zero deadlocks, zero touch blocking, and zero perceived latency.
 
 ## Acceptance Criteria
 
-### Tour Execution & Reliability
-- [ ] Tapping "🎓 教學" immediately launches the spotlight overlay, popover instruction card, and directional pointers on all real mobile devices and browsers with 0ms perceived lag.
-- [ ] The 12-step master walkthrough executes end-to-end smoothly without freezing, skipping, or visual glitches.
-- [ ] Directional arrows and SVG spotlight cutouts remain centered on target elements during and after viewport scrolling.
-- [ ] Auto-pilot steps demonstrate visible gesture travel and trigger real underlying tab transitions seamlessly.
-- [ ] Rapid tapping outside or inside the spotlight cannot trigger unintended step skipping or lockups.
-- [ ] PWA version cleanly updates and displays the latest release without bouncing back to older cached versions.
+### Interaction & Logging
+- [ ] Tapping a student seat card toggles selection immediately.
+- [ ] Tapping any quick score tag awards points and automatically clears selected students.
+- [ ] Floating score bubbles (+3 / -1) animate cleanly without resetting student cards or view state.
 
+### Tab Navigation & Timetable
+- [ ] Tapping 📅 課表排程 switches view and renders weekly schedule grid with interactive cell editing.
+- [ ] Tapping 👥 班級名單 opens roster view with functional student search and batch import.
+- [ ] Tapping ⏰ 課堂事後補記 and 📊 統計戰情室 switches views smoothly with complete data rendering.
+
+### Onboarding Walkthrough
+- [ ] Tapping 🎓 教學 starts the spotlight tour instantly.
+- [ ] Clicking 下一步 ➔ or interacting with the target element smoothly advances through all 12 steps to completion.
+- [ ] Ending the tour cleanly tears down all overlays and restores 100% normal page interaction.

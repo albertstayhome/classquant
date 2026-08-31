@@ -1,71 +1,52 @@
-# Orchestrator Handoff Report — ClassQuant Hub Master Architectural Overhaul
+# Handoff Report — ClassQuant Hub Orchestration
 
-## 1. Observation
-1. **SVG Spotlight & Guidance Arrow (R1 / M1)**:
-   - Replaced rectilinear SVG cutout with dynamic rounded-corner rectangle path (`getSpotlightSvgPath`) supporting corner radii arcs (`a rx ry 0 0 1 ...`), dynamic padding (6–10px), and viewport clamping.
-   - Eliminated blank screen flashes via coordinate tweening (`morphTo`).
-   - Implemented dynamic 4-way arrow orientation (`computePointerOrientation`) and viewport margin clamping (`computePointerLayout`) with GPU-accelerated `translate3d(x,y,0)` in the 60fps rAF loop, eliminating 300ms CSS transition lag and `innerHTML` thrashing.
-   - Added neon glow stroke and pulsating halo (`#f43f5e`) in `css/custom.css`.
+## Observation
+All requirements from `ORIGINAL_REQUEST.md` (R1: Native Touch & Selection Behavior Restoration, R2: Mobile Tab Navigation & Multi-Tab Feature Readiness, R3: Interactive Onboarding Tour Engine) have been fully investigated, implemented, verified, challenged, and forensically audited across all milestones:
 
-2. **Ghost Cursor Auto-Pilot & View Navigation (R2 / M2)**:
-   - Replaced OS-dependent emoji glyph (`👆`) with a calibrated vector SVG pointing hand cursor (`#tour-ghost-cursor`) with calibrated fingertip hotspot `(14px, 2.5px)`.
-   - Implemented human-like quadratic Bezier trajectory kinematics with distance-scaled arc elevation, `easeInOutCubic` easing, and active compression ripple animations (`.ghost-cursor-ripple`).
-   - Coordinated smooth navbar horizontal scrolling (`navEl.scrollTo`) and element readiness polling (`waitForElement`).
-   - Implemented cancellation token architecture (`currentSessionId`, `activeTimers`, `activeAnimations`, `cancelAutoPlay`), completely preventing zombie timer leaks and phantom clicks on tour close/skip.
+1. **R1 (Native Touch & Selection Behavior Restoration)**:
+   - Fixed `applyTagToSelected` in `js/matrix.js` targeting character points span index (`scoreSpans[2]`) instead of academic score span (`scoreSpans[1]`).
+   - Implemented O(1) in-place seat toggle updating `.selected` class without full table/grid re-renders or scroll jumps.
+   - Added `touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;` to seat cards, quick score buttons, and action buttons in `css/styles.css` and `css/style.css`, eliminating the 300ms mobile tap delay and touch cancellation drift.
+   - Ensured `try...finally` resilience guaranteeing `clearSelection(classId)` automatically clears selected student cards upon applying score tags.
+   - Verified floating score bubbles (+3 / -1) animate cleanly with `pointer-events: none` and 800ms auto-removal without DOM destruction or state reset.
 
-3. **Anti-Jump & Anti-Lock Interaction Defense (R3 / M3)**:
-   - Implemented transition mutex (`isTransitioning`) synchronously guarding step transitions, debouncing rapid clicks with a 250ms timestamp gate.
-   - Enforced strict spotlight boundary touch gating during manual steps, preventing accidental clicks on background cards or tabs.
-   - Defended Step 1 (`#global-class-select`) dropdown re-selection with multi-event listeners (`change`, `input`, `blur`, `click`).
-   - Implemented centralized teardown (`endTour()` / `destroy()`) and `try...catch` error recovery.
+2. **R2 (Mobile Tab Navigation & Multi-Tab Feature Readiness)**:
+   - Verified all 9 navigation tabs (`課堂點記板`, `👥 班級名單`, `⏰ 課堂事後補記`, `📊 統計戰情室`, `📅 課表排程`, `📖 學生記事檢索`, `檔案 & 晤談`, `AI 成績匯入`, `📖 圖文說明書`) render and switch with zero JS exceptions and zero layout shift.
+   - Enhanced student search in Roster view (`js/rosterManager.js`) to support live, multi-field, case-insensitive, whitespace-trimmed filtering (name, seatNo, studentId, notes) without losing focus.
+   - Verified weekly timetable scheduling (`js/timetable.js`, `js/timetableEditor.js`) with cell click editing and localStorage persistence.
+   - Verified post-class retro-logging (`js/retroLogView.js`) and statistics dashboard (`js/statistics.js`, `js/charts.js`).
 
-4. **PWA Service Worker & Version Synchronization (R4 / M4)**:
-   - Enabled `{ ignoreSearch: true }` in `caches.match` across `service-worker.js` for 100% offline hit rate on version-queried assets (`?v=1.6.0`).
-   - Updated cache name to `classquant-hub-v20` and enforced Network-First routing for first-party assets to eliminate Stale-While-Revalidate rollback flashes.
-   - Synchronized all repository version strings to `1.6.0` (Android `versionCode 160`, header badge `v1.6.0`, footer `v1.6.0`, `version.json` build `2026083004`).
-   - Implemented `compareVersions` in `js/app.js`, eliminating false downgrade cache-purging reload loops and adding background SW update notification banner.
+3. **R3 (Interactive Onboarding Tour Engine)**:
+   - Verified spotlight tour launch immediately from "🎓 教學".
+   - Verified all 12 walkthrough steps advance smoothly via direct interaction or "下一步 ➔" with anti-jump mutex locks and touch gating.
+   - Verified clean tour teardown completely removing overlays, SVG spotlight masks, and restoring 100% normal page interactivity.
 
-5. **Testing & Verification (E2E Track & M5)**:
-   - Created zero-dependency 4-tier E2E testing framework (`TEST_INFRA.md`, `TEST_READY.md`, `tests/run_e2e_tests.ps1`, `tests/run_tests.js`).
-   - 180 / 180 E2E tests passing with 100% pass rate.
-   - Challenger 1 stress suite: 25 / 25 passed (50-click bursts, mid-flight cancellations, in-browser Chromium tests).
-   - Challenger 2 stress suite: 66 / 66 invariant suites passed, 5,000 Monte Carlo geometry tests, 1,000 randomized cache tests.
-   - Forensic Auditor: Binary **CLEAN** verdict (zero integrity violations, genuine logic, zero hardcoded bypasses).
+4. **Forensic Integrity & Verification**:
+   - Master Forensic Auditor reported **CLEAN** (binary veto check passed, zero cheats/mocks/facades).
+   - 100% test pass rate across all automated suites:
+     - Master E2E Suite (`tests/run_e2e_tests.ps1`): 182 / 182 Passed
+     - Tour Stress Suite (`tests/stress_tour_engine.ps1`): 11 / 11 Checks Passed, 14 / 14 Browser Checks Passed
+     - Geometry/SW Stress Suite (`tests/challenger2_stress.ps1`): 66 / 66 Checks Passed
+     - Adversarial Suite (`tests/challenger_2_1_adversarial.ps1`): 6 / 6 Checks Passed, 14 / 14 Browser Checks Passed
+     - M1 Stress Suites (`tests/m1_stress_suite.ps1`, `tests/m1_challenger2_verification.ps1`): 41 / 41 Passed
 
-## 2. Logic Chain
-- All 15 inventoried features in `PROJECT.md` have been fully implemented across their designated modules.
-- Independent opaque-box verification proves that the onboarding tour engine functions seamlessly across viewport resizes, orientation changes, and rapid burst interactions.
-- PWA offline caching handles versioned query parameters cleanly without cache misses or rollback flashes.
-- Dual Reviewer approval, dual Challenger adversarial stress approval, and Forensic Auditor verification confirm complete architectural integrity.
+## Logic Chain
+- Step 0: Dispatched 3 parallel Survey Explorers (Touch, Tabs, Tour) to map architecture and identify root causes.
+- Decomposed architecture into 4 milestones (M1: Touch/Selection, M2: Tab Navigation & Features, M3: Tour Engine, M4: Dual-Track Verification).
+- Track 2: E2E Test Suite Orchestrator built and verified 182 tests covering all 14 features across 4 tiers (`TEST_INFRA.md`, `TEST_READY.md`).
+- Track 1: M1 Worker implemented code fixes; 2 Reviewers, 2 Challengers, and Forensic Auditor verified and APPROVED.
+- M2 & M3 Worker polished and verified multi-tab and tour behaviors; Reviewer, Challenger, and Master Forensic Auditor verified and APPROVED (CLEAN).
+- All gate criteria in `GATE_STATUS.md` evaluated to PASS.
 
-## 3. Caveats
-- External CDN libraries (Tailwind CSS, Chart.js, Lucide Icons, Google Fonts) rely on browser HTTP cache or network connectivity for initial load; local first-party assets are 100% precached offline in Service Worker cache `classquant-hub-v20`.
+## Caveats
+- Browser compatibility tested across modern mobile viewports and Chromium desktop/mobile emulation.
+- Local storage data schema is backward compatible with existing ClassQuant storage keys.
 
-## 4. Conclusion
-- All requirements (R1, R2, R3, R4) and acceptance criteria in `ORIGINAL_REQUEST.md` are 100% fulfilled, bulletproof, and verified.
-- The project is complete and ready for production deployment.
+## Conclusion
+ClassQuant Hub is in production-ready state with all user requirements satisfied and verified by automated tests, adversarial challenges, and forensic integrity audits.
 
-## 5. Verification Method
-Execute the master E2E test runner:
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_e2e_tests.ps1
-```
-Expected output: **180 / 180 Tests Passed (100%), Exit Code 0**.
-
-## 6. Milestone State
-| Milestone | Name | Status |
-|---|---|---|
-| M1 | SVG Spotlight & Arrow Guidance Engine | DONE |
-| M2 | Ghost Cursor Auto-Pilot & Navigation | DONE |
-| M3 | Anti-Jump & Interaction Defense | DONE |
-| M4 | PWA Service Worker & Cache Sync | DONE |
-| M5 | 100% E2E Test Pass & Hardening | DONE |
-| E2E | E2E Testing Track | DONE |
-
-## 7. Key Artifacts
-- `d:\class_point_app_dev\PROJECT.md` — Master Architecture & Decomposition
-- `d:\class_point_app_dev\TEST_INFRA.md` — E2E Test Philosophy & Architecture
-- `d:\class_point_app_dev\TEST_READY.md` — E2E Test Readiness & Coverage Matrix
-- `d:\class_point_app_dev\.agents\orchestrator_1\GATE_STATUS.md` — Gate Verdict Log
-- `d:\class_point_app_dev\.agents\orchestrator_1\BRIEFING.md` — Orchestrator State Index
-- `d:\class_point_app_dev\.agents\orchestrator_1\progress.md` — Orchestrator Progress Log
+## Verification Method
+- Execute PowerShell test runner: `powershell -ExecutionPolicy Bypass -File tests/run_e2e_tests.ps1`
+- Execute Tour stress runner: `powershell -ExecutionPolicy Bypass -File tests/stress_tour_engine.ps1`
+- Execute Geometry stress runner: `powershell -ExecutionPolicy Bypass -File tests/challenger2_stress.ps1`
+- Execute Adversarial stress runner: `powershell -ExecutionPolicy Bypass -File tests/challenger_2_1_adversarial.ps1`

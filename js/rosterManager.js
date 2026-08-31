@@ -8,6 +8,83 @@ class RosterManager {
   constructor(store) {
     this.store = store;
     this.currentClassId = '801';
+    this.searchQuery = '';
+  }
+
+  getFilteredStudents(classId) {
+    const students = this.store.getStudents(classId || this.currentClassId);
+    if (!this.searchQuery) return students;
+    const q = this.searchQuery.toLowerCase().trim();
+    if (!q) return students;
+    return students.filter(s => {
+      const nameMatch = s.name && s.name.toLowerCase().includes(q);
+      const seatMatch = s.seatNo !== undefined && (String(s.seatNo).includes(q) || String(s.seatNo).padStart(2, '0').includes(q));
+      const idMatch = s.studentId && String(s.studentId).toLowerCase().includes(q);
+      const notesMatch = s.notes && String(s.notes).toLowerCase().includes(q);
+      return nameMatch || seatMatch || idMatch || notesMatch;
+    });
+  }
+
+  handleSearch(query) {
+    this.searchQuery = query || '';
+    this.renderStudentGrid();
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    const input = document.getElementById('roster-search-input');
+    if (input) input.value = '';
+    this.renderStudentGrid();
+  }
+
+  renderStudentGrid() {
+    const gridContainer = document.getElementById('roster-student-grid-container');
+    const countBadge = document.getElementById('roster-student-count-badge');
+    const allStudents = this.store.getStudents(this.currentClassId);
+    const filteredStudents = this.getFilteredStudents(this.currentClassId);
+
+    if (countBadge) {
+      countBadge.innerHTML = this.searchQuery
+        ? `搜尋結果 ${filteredStudents.length} / 共 ${allStudents.length} 位學生`
+        : `共 ${allStudents.length} 位學生`;
+    }
+
+    if (!gridContainer) return;
+
+    if (filteredStudents.length === 0) {
+      gridContainer.innerHTML = `
+        <div class="col-span-full py-8 text-center bg-pink-50/50 rounded-2xl border border-dashed border-pink-200">
+          <div class="text-2xl mb-1.5">🔍</div>
+          <div class="text-xs sm:text-sm font-black text-slate-700">查無符合「${this.searchQuery}」的學生</div>
+          <div class="text-[11px] text-slate-500 mt-1">請嘗試搜尋其他姓名或座號</div>
+          <button onclick="rosterManager.clearSearch()" class="mt-2.5 px-3 py-1 bg-pink-100 text-pink-700 rounded-xl text-xs font-bold hover:bg-pink-200 transition">
+            清除搜尋條件
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    gridContainer.innerHTML = filteredStudents.map(s => `
+      <div id="roster-student-card-${s.seatNo}" class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner">
+            ${String(s.seatNo).padStart(2, '0')}
+          </span>
+          <input id="roster-student-name-input-${s.seatNo}" type="text" value="${s.name}" 
+            onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
+            class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-28 bg-white">
+        </div>
+        
+        <div class="flex items-center space-x-1">
+          <button id="roster-student-delete-${s.seatNo}" onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    if (window.lucide) window.lucide.createIcons();
   }
 
   render(containerId) {
@@ -69,45 +146,39 @@ class RosterManager {
 
         <!-- Student Roster Grid -->
         <div class="bg-white rounded-2xl p-5 border border-pink-200 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
               <span>${currentClass ? currentClass.name : ''} 學生名冊清單</span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 font-bold">共 ${students.length} 位學生</span>
+              <span id="roster-student-count-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 font-bold">共 ${students.length} 位學生</span>
             </h3>
-            <button id="roster-add-student-btn" onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition flex items-center gap-1">
-              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
-            </button>
+            <div class="flex items-center space-x-2">
+              <div class="relative">
+                <input type="text" id="roster-search-input" placeholder="🔍 搜尋座號或姓名..." 
+                  value="${this.searchQuery || ''}" 
+                  oninput="rosterManager.handleSearch(this.value)" 
+                  class="border border-pink-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-bold bg-white focus:outline-none focus:border-pink-500 shadow-sm w-44 sm:w-56">
+                ${this.searchQuery ? `<button onclick="rosterManager.clearSearch()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600">✕</button>` : ''}
+              </div>
+              <button id="roster-add-student-btn" onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition flex items-center gap-1">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
+              </button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[550px] overflow-y-auto pr-1">
-            ${students.map(s => `
-              <div id="roster-student-card-${s.seatNo}" class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
-                <div class="flex items-center space-x-2.5">
-                  <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner">
-                    ${String(s.seatNo).padStart(2, '0')}
-                  </span>
-                  <input id="roster-student-name-input-${s.seatNo}" type="text" value="${s.name}" 
-                    onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
-                    class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-28 bg-white">
-                </div>
-                
-                <div class="flex items-center space-x-1">
-                  <button id="roster-student-delete-${s.seatNo}" onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                  </button>
-                </div>
-              </div>
-            `).join('')}
+          <div id="roster-student-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[550px] overflow-y-auto pr-1">
+            <!-- Student cards rendered by renderStudentGrid -->
           </div>
         </div>
       </div>
     `;
 
+    this.renderStudentGrid();
     if (window.lucide) window.lucide.createIcons();
   }
 
   switchClass(classId) {
     this.currentClassId = classId;
+    this.searchQuery = '';
     this.render('roster-manager-view');
   }
 
