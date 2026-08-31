@@ -430,6 +430,20 @@ class Store {
     return true;
   }
 
+  swapTags(tagIdA, tagIdB) {
+    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
+    const idxA = this.data.tags.findIndex(t => t.id === tagIdA);
+    const idxB = this.data.tags.findIndex(t => t.id === tagIdB);
+    if (idxA === -1 || idxB === -1 || idxA === idxB) return false;
+
+    const temp = this.data.tags[idxA];
+    this.data.tags[idxA] = this.data.tags[idxB];
+    this.data.tags[idxB] = temp;
+
+    this.saveToStorage();
+    return true;
+  }
+
   getMultiStudentEvents(classId, seatNos = []) {
     const classEvents = this.getEvents(classId);
     if (!seatNos || seatNos.length === 0) return classEvents;

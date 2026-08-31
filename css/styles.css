@@ -241,3 +241,56 @@ html.dark .compact-seat-tile.selected {
   background-color: rgba(244, 63, 94, 0.2) !important;
   box-shadow: 0 0 0 3px #f43f5e !important;
 }
+
+/* --- iOS Home Screen Style Jiggle Mode & Smooth Drag Styles --- */
+@keyframes ios-jiggle {
+  0% { transform: rotate(-1.2deg) scale(0.98); }
+  50% { transform: rotate(1.2deg) scale(1.02); }
+  100% { transform: rotate(-1.2deg) scale(0.98); }
+}
+
+@keyframes ios-jiggle-alt {
+  0% { transform: rotate(1.2deg) scale(1.01); }
+  50% { transform: rotate(-1.2deg) scale(0.99); }
+  100% { transform: rotate(1.2deg) scale(1.01); }
+}
+
+.ios-jiggle-active .student-seat-card:not(.is-dragging),
+.ios-jiggle-active .tag-sort-card:not(.is-dragging) {
+  animation: ios-jiggle 0.3s ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+  cursor: grab;
+}
+
+.ios-jiggle-active .student-seat-card:nth-child(2n):not(.is-dragging),
+.ios-jiggle-active .tag-sort-card:nth-child(2n):not(.is-dragging) {
+  animation: ios-jiggle-alt 0.33s ease-in-out infinite alternate;
+}
+
+.student-seat-card.is-dragging,
+.tag-sort-card.is-dragging {
+  opacity: 0.25 !important;
+  transform: scale(0.92) !important;
+  filter: grayscale(40%);
+}
+
+.student-seat-card.drop-target-hover,
+.tag-sort-card.drop-target-hover {
+  transform: scale(1.1) !important;
+  border-color: #ec4899 !important;
+  box-shadow: 0 0 0 3px #f472b6, 0 12px 28px -5px rgba(236, 72, 153, 0.45) !important;
+  background-color: #fdf2f8 !important;
+  z-index: 30 !important;
+}
+
+#ios-drag-floating-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%) scale(1.12);
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 3px #ec4899;
+  opacity: 0.95;
+  border-radius: 1rem;
+  background: white;
+  transition: transform 0.05s ease-out;
+}

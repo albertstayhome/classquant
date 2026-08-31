@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.0';
+    this.appVersion = '1.7.1';
     this.init();
   }
 
@@ -290,19 +290,33 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
+          <!-- v1.7.1 -->
+          <div class="p-3.5 rounded-2xl border-2 border-pink-400 bg-pink-50/20 shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-500 text-white font-black text-xs shadow-sm">
+                v1.7.1 (最新 iOS 長按拖曳排位 • 標籤拖拽 • 歷史全量版)
+              </span>
+              <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【iOS 桌面級長按拖曳排座位】長按學生卡片 350ms 進入如 iPhone 桌面晃動模式（Jiggle Mode），手指拖移即可自由滑動，滑到目標座位放手瞬間對調，支援「✅ 完成」一鍵鎖定！</li>
+              <li>• 【標籤清單自由拖曳排序】標籤管理中心同步支援手指長按上下拖拽，放手立即調整標籤順位！</li>
+              <li>• 【全量歷史日誌快取穿透】全面優化 PWA 離線快取版本與日誌穿透，保證呈現從 v1.0.0 至最新版之所有發布紀錄！</li>
+            </ul>
+          </div>
+
           <!-- v1.7.0 -->
-          <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.7.0 (真實教室排座位 • 標籤自訂排序 • 班級主頁同步版)
+                v1.7.0
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
             </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【真實教室排座位模式】新增「🪑 排座位」功能，頂部標註【🏫 講台/黑板】方位，點選兩位學生即可直接對調座位，支援常規直排、S型蛇行、隨機換位！</li>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【真實教室排座位】頂部標註【🏫 講台/黑板】方位，支援常規直排、S型蛇行、隨機換位！</li>
               <li>• 【課堂快速標籤自訂排序】標籤管理中心支援「▲ 上移 / ▼ 下移」，前 4 個標籤優先顯示於第 1 頁，並支援「📌 依自訂順序」與「📊 依使用頻率」一鍵切換！</li>
               <li>• 【班級名單與主頁同步】建立新班級或匯入名冊後，全域狀態自動同步切換，點記板即時更新！</li>
-              <li>• 【歷史日誌全量復原】完整修復從 v1.0.0 至最新版本之歷史發布日誌！</li>
             </ul>
           </div>
 

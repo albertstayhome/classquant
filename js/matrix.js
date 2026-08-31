@@ -17,8 +17,16 @@ class ClassroomMatrix {
     this.currentTagPage = 0;
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
-    this.isSeatingArrangeMode = false;
-    this.arrangeFirstSeat = null;
+
+    // iOS-Style Long-Press Drag & Drop State
+    this.isJiggleMode = false;
+    this.isDragging = false;
+    this.draggedSeatNo = null;
+    this.dragGhost = null;
+    this.dragStartCoords = { x: 0, y: 0 };
+    this.currentHoverSeatNo = null;
+    this.longPressTimer = null;
+    this.justFinishedDrag = false;
   }
 
   toggleQuickSelectBar() {
@@ -30,42 +38,151 @@ class ClassroomMatrix {
     }
   }
 
-  toggleSeatingArrangeMode(classId) {
-    this.isSeatingArrangeMode = !this.isSeatingArrangeMode;
-    this.arrangeFirstSeat = null;
+  toggleJiggleMode(classId) {
+    this.isJiggleMode = !this.isJiggleMode;
     this.selectedSeats.clear();
-    if (this.isSeatingArrangeMode) {
-      window.appState.showToast('🪑 已進入排座位模式：點選兩位學生即可直接對調座位！', 'info');
+    if (this.isJiggleMode) {
+      if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+      window.appState.showToast('📱 已進入 iOS 拖曳排位模式：長按卡片並拖移至目標座位即可直接對調！', 'info');
     } else {
-      window.appState.showToast('✅ 已儲存座位表配置，恢復課堂點記模式', 'success');
+      window.appState.showToast('✅ 座位表已鎖定並儲存，恢復課堂點記模式', 'success');
     }
     this.render('classroom-matrix-view', classId);
   }
 
-  handleSeatArrangeClick(seatNo, classId) {
-    if (!this.arrangeFirstSeat) {
-      this.arrangeFirstSeat = seatNo;
-      if (window.appState?.playPop) window.appState.playPop();
-      const student = this.store.getStudents(classId).find(s => s.seatNo === seatNo);
-      window.appState.showToast(`已選取 ${seatNo} 號【${student ? student.name : ''}】，請點選要對調座位的另一位同學`, 'info');
-      this.render('classroom-matrix-view', classId);
-    } else if (this.arrangeFirstSeat === seatNo) {
-      this.arrangeFirstSeat = null;
-      window.appState.showToast('已取消選取', 'info');
-      this.render('classroom-matrix-view', classId);
-    } else {
-      const seatA = this.arrangeFirstSeat;
-      const seatB = seatNo;
-      const students = this.store.getStudents(classId);
-      const studentA = students.find(s => s.seatNo === seatA);
-      const studentB = students.find(s => s.seatNo === seatB);
+  exitJiggleMode(classId) {
+    this.isJiggleMode = false;
+    window.appState.showToast('✅ 已儲存座位表配置', 'success');
+    this.render('classroom-matrix-view', classId);
+  }
 
-      this.store.swapStudentSeats(classId, seatA, seatB);
-      if (window.appState?.playChime) window.appState.playChime();
-      window.appState.showToast(`✨ 成功對調 ${seatA} 號【${studentA ? studentA.name : ''}】與 ${seatB} 號【${studentB ? studentB.name : ''}】的座位！`, 'success');
-      this.arrangeFirstSeat = null;
-      this.render('classroom-matrix-view', classId);
+  // --- iOS Long-Press & Touch Drag Handlers ---
+  handleSeatTouchStart(e, seatNo, classId) {
+    if (e.touches && e.touches.length > 1) return;
+    const touch = e.touches ? e.touches[0] : e;
+    this.dragStartCoords = { x: touch.clientX, y: touch.clientY };
+
+    clearTimeout(this.longPressTimer);
+    // Long press 320ms to trigger iOS Drag Mode
+    this.longPressTimer = setTimeout(() => {
+      this.startIOSDrag(touch, seatNo, classId);
+    }, 320);
+  }
+
+  handleSeatTouchMove(e, classId) {
+    const touch = e.touches ? e.touches[0] : e;
+
+    if (this.isDragging) {
+      if (e.preventDefault) e.preventDefault();
+      this.updateGhostPosition(touch.clientX, touch.clientY);
+
+      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetCard = elemBelow ? elemBelow.closest('.student-seat-card') : null;
+      if (targetCard) {
+        const targetSeatNo = parseInt(targetCard.getAttribute('data-seat-no'), 10);
+        if (!isNaN(targetSeatNo)) {
+          this.setHoverTarget(targetSeatNo);
+        }
+      } else {
+        this.clearHoverTarget();
+      }
+    } else {
+      // If user moved more than 8px before timer fired, they are scrolling -> cancel long press
+      const dx = Math.abs(touch.clientX - this.dragStartCoords.x);
+      const dy = Math.abs(touch.clientY - this.dragStartCoords.y);
+      if (dx > 8 || dy > 8) {
+        clearTimeout(this.longPressTimer);
+      }
     }
+  }
+
+  handleSeatTouchEnd(e, classId) {
+    clearTimeout(this.longPressTimer);
+
+    if (this.isDragging) {
+      this.justFinishedDrag = true;
+      setTimeout(() => { this.justFinishedDrag = false; }, 300);
+
+      const sourceSeat = this.draggedSeatNo;
+      const targetSeat = this.currentHoverSeatNo;
+
+      if (targetSeat && targetSeat !== sourceSeat) {
+        this.store.swapStudentSeats(classId, sourceSeat, targetSeat);
+        if (window.appState?.playChime) window.appState.playChime();
+        if (navigator.vibrate) navigator.vibrate(50);
+        const students = this.store.getStudents(classId);
+        const studentA = students.find(s => s.seatNo === sourceSeat);
+        const studentB = students.find(s => s.seatNo === targetSeat);
+        window.appState.showToast(`✨ 成功對調 ${sourceSeat} 號【${studentA ? studentA.name : ''}】與 ${targetSeat} 號【${studentB ? studentB.name : ''}】！`, 'success');
+      }
+
+      this.stopIOSDrag(classId);
+    }
+  }
+
+  startIOSDrag(touch, seatNo, classId) {
+    this.isDragging = true;
+    this.draggedSeatNo = seatNo;
+    this.isJiggleMode = true;
+
+    if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+    if (window.appState?.playPop) window.appState.playPop();
+
+    const originalCard = document.getElementById(`seat-card-${seatNo}`);
+    if (originalCard) {
+      originalCard.classList.add('is-dragging');
+
+      // Create floating ghost
+      const ghost = originalCard.cloneNode(true);
+      ghost.id = 'ios-drag-floating-ghost';
+      ghost.style.width = `${originalCard.offsetWidth}px`;
+      ghost.style.height = `${originalCard.offsetHeight}px`;
+      ghost.style.left = `${touch.clientX}px`;
+      ghost.style.top = `${touch.clientY}px`;
+      document.body.appendChild(ghost);
+      this.dragGhost = ghost;
+    }
+
+    const gridContainer = document.getElementById('seat-grid-container');
+    if (gridContainer) gridContainer.classList.add('ios-jiggle-active');
+
+    const doneBanner = document.getElementById('ios-jiggle-done-bar');
+    if (doneBanner) doneBanner.classList.remove('hidden');
+  }
+
+  updateGhostPosition(clientX, clientY) {
+    if (this.dragGhost) {
+      this.dragGhost.style.left = `${clientX}px`;
+      this.dragGhost.style.top = `${clientY}px`;
+    }
+  }
+
+  setHoverTarget(targetSeatNo) {
+    if (this.currentHoverSeatNo === targetSeatNo) return;
+    this.clearHoverTarget();
+    this.currentHoverSeatNo = targetSeatNo;
+    const card = document.getElementById(`seat-card-${targetSeatNo}`);
+    if (card && targetSeatNo !== this.draggedSeatNo) {
+      card.classList.add('drop-target-hover');
+    }
+  }
+
+  clearHoverTarget() {
+    if (this.currentHoverSeatNo) {
+      const card = document.getElementById(`seat-card-${this.currentHoverSeatNo}`);
+      if (card) card.classList.remove('drop-target-hover');
+      this.currentHoverSeatNo = null;
+    }
+  }
+
+  stopIOSDrag(classId) {
+    this.isDragging = false;
+    this.clearHoverTarget();
+    if (this.dragGhost) {
+      this.dragGhost.remove();
+      this.dragGhost = null;
+    }
+    this.render('classroom-matrix-view', classId);
   }
 
   applyAutoArrange(classId, pattern) {
@@ -74,7 +191,6 @@ class ClassroomMatrix {
     if (window.appState?.playChime) window.appState.playChime();
     const patternNames = { normal: '常規直排', snake_s: 'S型蛇行', col_first: '由左至右直排', random: '隨機抽籤' };
     window.appState.showToast(`已套用【${patternNames[pattern] || pattern}】座位排法！`, 'success');
-    this.arrangeFirstSeat = null;
     this.render('classroom-matrix-view', classId);
   }
 
@@ -186,8 +302,9 @@ class ClassroomMatrix {
             <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-600 underline font-bold text-xs ml-0.5">清空</button>
           </div>
 
-          <button onclick="matrixView.toggleSeatingArrangeMode('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${this.isSeatingArrangeMode ? 'bg-amber-500 text-white ring-2 ring-amber-300' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'} rounded-xl shadow-sm transition flex items-center gap-1">
-            <i data-lucide="layout" class="w-3.5 h-3.5"></i> ${this.isSeatingArrangeMode ? '完成排位' : '🪑 排座位'}
+          <!-- iOS Jiggle / Reorder Toggle Button -->
+          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'} rounded-xl shadow-sm transition flex items-center gap-1">
+            ${this.isJiggleMode ? '<span>✅ 完成排位</span>' : '<i data-lucide="move" class="w-3.5 h-3.5"></i> <span>🪑 拖曳排位</span>'}
           </button>
 
           <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold bg-pink-50 text-pink-800 border border-pink-300 rounded-xl hover:bg-pink-100 shadow-sm transition flex items-center gap-1">
@@ -212,16 +329,16 @@ class ClassroomMatrix {
         </div>
       </div>
 
-      <!-- Seating Arrangement Helper Drawer (When Arrange Mode is ON) -->
-      ${this.isSeatingArrangeMode ? `
-        <div class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md mb-3 animate-fade-in-up">
+      <!-- iOS Jiggle Helper Drawer (When Jiggle Mode is Active) -->
+      ${this.isJiggleMode ? `
+        <div id="ios-jiggle-done-bar" class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md mb-3 animate-fade-in-up">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
-              <span class="text-2xl">🪑</span>
+              <span class="text-2xl animate-bounce">📱</span>
               <div>
-                <strong class="text-amber-900 font-black text-xs sm:text-sm">【真實教室排座位模式】</strong>
+                <strong class="text-amber-900 font-black text-xs sm:text-sm">【iOS 桌面級拖曳排位模式】</strong>
                 <p class="text-[11px] text-amber-800 font-bold">
-                  ${this.arrangeFirstSeat ? `👉 已選中 <strong class="text-pink-600 font-black text-sm">${this.arrangeFirstSeat} 號</strong>，請點選要對調的另一位同學！` : '💡 點選任一位學生，再點選另一位學生即可直接對調座位！'}
+                  💡 按住任一位學生卡片即可隨意拖動，移至目標座位放開即自動對調！
                 </p>
               </div>
             </div>
@@ -239,8 +356,8 @@ class ClassroomMatrix {
               <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'random')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
                 🎲 隨機換位
               </button>
-              <button onclick="matrixView.toggleSeatingArrangeMode('${currentClassId}')" class="px-3.5 py-1 text-xs font-black bg-emerald-600 text-white rounded-xl shadow-md hover:bg-emerald-700 active:scale-95 transition">
-                ✅ 完成排位
+              <button onclick="matrixView.exitJiggleMode('${currentClassId}')" class="px-4 py-1.5 text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-md hover:brightness-110 active:scale-95 transition flex items-center gap-1">
+                <span>✅ 完成</span>
               </button>
             </div>
           </div>
@@ -280,14 +397,15 @@ class ClassroomMatrix {
       </div>
 
       <!-- Zero-Scroll Responsive Student Grid in Actual Seating Order -->
-      <div class="grid grid-cols-${cols} sm:grid-cols-${cols} md:grid-cols-${cols} lg:grid-cols-${cols} gap-1.5 sm:gap-2.5 mb-4" id="seat-grid-container">
+      <div class="grid grid-cols-${cols} sm:grid-cols-${cols} md:grid-cols-${cols} lg:grid-cols-${cols} gap-1.5 sm:gap-2.5 mb-4 ${this.isJiggleMode ? 'ios-jiggle-active' : ''}" id="seat-grid-container"
+           onmousemove="matrixView.handleSeatTouchMove(event, '${currentClassId}')"
+           onmouseup="matrixView.handleSeatTouchEnd(event, '${currentClassId}')">
         ${seatOrder.map(seatNo => {
           const s = studentMap[seatNo];
           if (!s) return '';
 
           const profile = this.stats.getStudentProfile(currentClassId, s.seatNo);
           const isSelected = this.selectedSeats.has(s.seatNo);
-          const isArrangeTarget = this.isSeatingArrangeMode && this.arrangeFirstSeat === s.seatNo;
           const characterPoints = profile ? profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social : 0;
           const academicScore = profile ? profile.scoreMean : 70;
 
@@ -303,30 +421,31 @@ class ClassroomMatrix {
             mascotTitle = '酷洛米 (需關懷)';
           }
 
-          const cardClickAction = this.isSeatingArrangeMode
-            ? `matrixView.handleSeatArrangeClick(${s.seatNo}, '${currentClassId}')`
-            : `matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')`;
-
           return `
             <div id="seat-card-${s.seatNo}"
-                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''} ${isArrangeTarget ? 'ring-4 ring-pink-500 bg-pink-50 scale-105 shadow-lg' : ''}"
-                 onclick="${cardClickAction}">
+                 data-seat-no="${s.seatNo}"
+                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''}"
+                 ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
+                 ontouchmove="matrixView.handleSeatTouchMove(event, '${currentClassId}')"
+                 ontouchend="matrixView.handleSeatTouchEnd(event, '${currentClassId}')"
+                 onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
+                 onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
               
               <!-- Seat Header: Seat No + Mascot -->
-              <div class="flex items-center justify-between mb-0.5">
-                <span class="w-5 h-5 rounded-lg ${isArrangeTarget ? 'bg-pink-600 text-white' : 'bg-pink-100 text-pink-900 border border-pink-300'} font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">
+              <div class="flex items-center justify-between mb-0.5 pointer-events-none">
+                <span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">
                   ${String(s.seatNo).padStart(2, '0')}
                 </span>
                 <div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>
               </div>
 
               <!-- Student Name -->
-              <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight">
+              <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">
                 ${s.name}
               </div>
 
               <!-- Unified Dual Score Summary -->
-              <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none">
+              <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none pointer-events-none">
                 <span class="text-blue-700" title="學業均分">📘${academicScore}</span>
                 <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'}" title="品格常規點數">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}

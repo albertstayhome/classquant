@@ -100,7 +100,9 @@ class TagManager {
             </div>
           </div>
 
-          <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+          <div class="space-y-2 max-h-72 overflow-y-auto pr-1" id="tag-manager-drag-list"
+               onmousemove="tagManager.handleTagTouchMove(event)"
+               onmouseup="tagManager.handleTagTouchEnd(event)">
             ${tags.map((tag, idx) => {
               const isPos = tag.delta > 0;
               const isZero = tag.delta === 0;
@@ -108,10 +110,16 @@ class TagManager {
               const isTop4 = idx < 4;
 
               return `
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border ${isTop4 ? 'border-pink-300 shadow-sm ring-1 ring-pink-200' : 'border-pink-100'} hover:border-pink-300 transition text-xs">
-                  <div class="flex items-center space-x-2.5">
+                <div id="tag-item-${tag.id}"
+                     data-tag-id="${tag.id}"
+                     class="tag-sort-card flex items-center justify-between p-2.5 rounded-xl bg-white border ${isTop4 ? 'border-pink-300 shadow-sm ring-1 ring-pink-200' : 'border-pink-100'} hover:border-pink-300 transition text-xs select-none cursor-grab active:cursor-grabbing"
+                     ontouchstart="tagManager.handleTagTouchStart(event, '${tag.id}')"
+                     ontouchmove="tagManager.handleTagTouchMove(event)"
+                     ontouchend="tagManager.handleTagTouchEnd(event)"
+                     onmousedown="tagManager.handleTagTouchStart(event, '${tag.id}')">
+                  <div class="flex items-center space-x-2.5 pointer-events-none">
                     <!-- Order Badge & Up/Down Arrows -->
-                    <div class="flex items-center space-x-1">
+                    <div class="flex items-center space-x-1 pointer-events-auto">
                       <span class="w-6 h-6 rounded-lg ${isTop4 ? 'bg-pink-500 text-white' : 'bg-slate-100 text-slate-700'} font-black text-[10px] flex items-center justify-center shadow-inner" title="${isTop4 ? '第 1 頁優先顯示' : `第 ${Math.floor(idx / 4) + 1} 頁`}">
                         #${idx + 1}
                       </span>
@@ -137,7 +145,7 @@ class TagManager {
                     </div>
                   </div>
 
-                  <div class="flex items-center space-x-1.5">
+                  <div class="flex items-center space-x-1.5 pointer-events-auto">
                     <button onclick="tagManager.editTagDelta('${tag.id}')" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-slate-100 text-[11px] font-bold border transition">
                       改分值
                     </button>
@@ -154,6 +162,117 @@ class TagManager {
     `;
 
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  // --- Tag Drag Handlers ---
+  handleTagTouchStart(e, tagId) {
+    const touch = e.touches ? e.touches[0] : e;
+    this.dragStartCoords = { x: touch.clientX, y: touch.clientY };
+
+    clearTimeout(this.longPressTimer);
+    this.longPressTimer = setTimeout(() => {
+      this.startTagDrag(touch, tagId);
+    }, 280);
+  }
+
+  handleTagTouchMove(e) {
+    const touch = e.touches ? e.touches[0] : e;
+
+    if (this.isDraggingTag) {
+      if (e.preventDefault) e.preventDefault();
+      if (this.tagDragGhost) {
+        this.tagDragGhost.style.left = `${touch.clientX}px`;
+        this.tagDragGhost.style.top = `${touch.clientY}px`;
+      }
+
+      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetCard = elemBelow ? elemBelow.closest('.tag-sort-card') : null;
+      if (targetCard) {
+        const targetId = targetCard.getAttribute('data-tag-id');
+        this.setTagHoverTarget(targetId);
+      } else {
+        this.clearTagHoverTarget();
+      }
+    } else if (this.dragStartCoords) {
+      const dx = Math.abs(touch.clientX - this.dragStartCoords.x);
+      const dy = Math.abs(touch.clientY - this.dragStartCoords.y);
+      if (dx > 8 || dy > 8) {
+        clearTimeout(this.longPressTimer);
+      }
+    }
+  }
+
+  handleTagTouchEnd(e) {
+    clearTimeout(this.longPressTimer);
+
+    if (this.isDraggingTag) {
+      const sourceId = this.draggedTagId;
+      const targetId = this.currentHoverTagId;
+
+      if (targetId && targetId !== sourceId) {
+        this.store.swapTags(sourceId, targetId);
+        if (window.appState?.playChime) window.appState.playChime();
+        if (navigator.vibrate) navigator.vibrate(40);
+        window.appState.showToast('✨ 標籤順序已調整！', 'success');
+      }
+
+      this.stopTagDrag();
+    }
+  }
+
+  startTagDrag(touch, tagId) {
+    this.isDraggingTag = true;
+    this.draggedTagId = tagId;
+
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    if (window.appState?.playPop) window.appState.playPop();
+
+    const originalCard = document.getElementById(`tag-item-${tagId}`);
+    if (originalCard) {
+      originalCard.classList.add('is-dragging');
+
+      const ghost = originalCard.cloneNode(true);
+      ghost.id = 'ios-drag-floating-ghost';
+      ghost.style.width = `${originalCard.offsetWidth}px`;
+      ghost.style.height = `${originalCard.offsetHeight}px`;
+      ghost.style.left = `${touch.clientX}px`;
+      ghost.style.top = `${touch.clientY}px`;
+      document.body.appendChild(ghost);
+      this.tagDragGhost = ghost;
+    }
+
+    const list = document.getElementById('tag-manager-drag-list');
+    if (list) list.classList.add('ios-jiggle-active');
+  }
+
+  setTagHoverTarget(targetId) {
+    if (this.currentHoverTagId === targetId) return;
+    this.clearTagHoverTarget();
+    this.currentHoverTagId = targetId;
+    const card = document.getElementById(`tag-item-${targetId}`);
+    if (card && targetId !== this.draggedTagId) {
+      card.classList.add('drop-target-hover');
+    }
+  }
+
+  clearTagHoverTarget() {
+    if (this.currentHoverTagId) {
+      const card = document.getElementById(`tag-item-${this.currentHoverTagId}`);
+      if (card) card.classList.remove('drop-target-hover');
+      this.currentHoverTagId = null;
+    }
+  }
+
+  stopTagDrag() {
+    this.isDraggingTag = false;
+    this.clearTagHoverTarget();
+    if (this.tagDragGhost) {
+      this.tagDragGhost.remove();
+      this.tagDragGhost = null;
+    }
+    const modalContent = document.getElementById('global-modal-content');
+    if (modalContent) this.renderModalContent(modalContent);
+    if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
   }
 
   handleSortModeChange(mode) {
