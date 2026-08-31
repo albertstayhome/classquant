@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.8';
+    this.appVersion = '1.7.9';
     this.init();
   }
 
@@ -289,19 +289,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.8 -->
+          <!-- v1.7.9 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.7.8 (啟動即時自動偵測更新 • Auto OTA & 標籤擠開塞入動效版)
+                v1.7.9 (各班標籤完全獨立 • 頂部常駐固定叉叉 • 靜態精準擠開動效版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【啟動即時自動偵測更新 (Auto OTA Detection)】桌面安裝版 App 每次開啟時主動檢測雲端版本，發現新版本時一鍵自動清空快取並無縫套用最新版！</li>
-              <li>• 【標籤清單擠開塞入動效 (Insertion Parting & Reordering)】自訂標籤清單拖曳時，滑經的項目以 60fps 彈簧物理曲線向上下擠開讓位，放手平滑塞入目標位置！</li>
-              <li>• 【浮起立體縮影視覺層次還原】長按時浮起的卡片維持 100% 清晰立體高亮縮影，底部座位則呈現專屬粉紅落點虛線光暈槽！</li>
-              <li>• 【手指接觸點 100% 零位移浮起】座位拖曳全面改採硬體加速 relative translate3d，長按起飛零跳動、零位移，100% 貼合手指原點！</li>
+              <li>• 【各班級快速標籤 100% 獨立管理】每個班級（導師班、任教各科任班）擁有專屬自訂標籤庫與獨立排序順序，互不干擾！</li>
+              <li>• 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！</li>
+              <li>• 【靜態參考座標 60fps 彈簧擠開塞入動效】重構為數學靜態中心命中演算法，拖曳時滑經項目 100% 零閃爍向上下平滑擠開讓位！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.8 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.7.8
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【啟動即時自動偵測更新】桌面安裝版 App 每次開啟時主動檢測雲端版本！</li>
             </ul>
           </div>
 

@@ -748,7 +748,7 @@ class ClassroomMatrix {
       return;
     }
 
-    const tag = this.store.getTags().find(t => t.id === tagId);
+    const tag = this.store.getTags(classId).find(t => t.id === tagId);
     if (!tag) return;
 
     const activeSlot = this.timetable.detectActiveSlot();
@@ -1141,7 +1141,7 @@ class ClassroomMatrix {
     const period = document.getElementById('conflict-period').value;
     const notes = document.getElementById('conflict-notes').value.trim();
 
-    const tag = this.store.getTags().find(t => t.id === type) || {
+    const tag = this.store.getTags(classId).find(t => t.id === type) || {
       id: type,
       name: '重大衝突違紀',
       category: 'conflict',

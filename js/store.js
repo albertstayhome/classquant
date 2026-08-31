@@ -371,31 +371,46 @@ class Store {
     this.saveToStorage();
   }
 
-  // --- Tag Management CRUD & Custom Sorting ---
-  getTags() {
+  // --- Tag Management CRUD & Custom Sorting (Per-Class Independent) ---
+  getTags(classId = null) {
+    if (classId) {
+      if (!this.data.classTags) this.data.classTags = {};
+      if (!this.data.classTags[classId] || !Array.isArray(this.data.classTags[classId]) || this.data.classTags[classId].length === 0) {
+        this.data.classTags[classId] = JSON.parse(JSON.stringify(this.data.tags || DEFAULT_TAGS));
+      }
+      return this.data.classTags[classId];
+    }
     return this.data.tags || DEFAULT_TAGS;
   }
 
-  getTagSortMode() {
+  getTagSortMode(classId = null) {
+    if (classId && this.data.settings?.classTagSortModes?.[classId]) {
+      return this.data.settings.classTagSortModes[classId];
+    }
     return this.data.settings?.tagSortMode || 'custom';
   }
 
-  setTagSortMode(mode) {
+  setTagSortMode(mode, classId = null) {
     if (!this.data.settings) this.data.settings = {};
-    this.data.settings.tagSortMode = mode;
+    if (classId) {
+      if (!this.data.settings.classTagSortModes) this.data.settings.classTagSortModes = {};
+      this.data.settings.classTagSortModes[classId] = mode;
+    } else {
+      this.data.settings.tagSortMode = mode;
+    }
     this.saveToStorage();
   }
 
   getTagsSorted(classId) {
-    const mode = this.getTagSortMode();
+    const mode = this.getTagSortMode(classId);
     if (mode === 'frequency') {
       return this.getTagsSortedByClassFrequency(classId);
     }
-    return this.getTags();
+    return this.getTags(classId);
   }
 
   getTagsSortedByClassFrequency(classId) {
-    const tags = this.getTags();
+    const tags = this.getTags(classId);
     const classEvents = this.getEvents(classId);
     const freqMap = {};
     classEvents.forEach(e => {
@@ -414,57 +429,61 @@ class Store {
     });
   }
 
-  moveTag(tagId, direction) {
-    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
-    const idx = this.data.tags.findIndex(t => t.id === tagId);
+  moveTag(tagId, direction, classId = null) {
+    const tagList = this.getTags(classId);
+    const idx = tagList.findIndex(t => t.id === tagId);
     if (idx === -1) return false;
 
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= this.data.tags.length) return false;
+    if (targetIdx < 0 || targetIdx >= tagList.length) return false;
 
-    const temp = this.data.tags[idx];
-    this.data.tags[idx] = this.data.tags[targetIdx];
-    this.data.tags[targetIdx] = temp;
+    const temp = tagList[idx];
+    tagList[idx] = tagList[targetIdx];
+    tagList[targetIdx] = temp;
 
     this.saveToStorage();
     return true;
   }
 
-  swapTags(tagIdA, tagIdB) {
-    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
-    const idxA = this.data.tags.findIndex(t => t.id === tagIdA);
-    const idxB = this.data.tags.findIndex(t => t.id === tagIdB);
+  swapTags(tagIdA, tagIdB, classId = null) {
+    const tagList = this.getTags(classId);
+    const idxA = tagList.findIndex(t => t.id === tagIdA);
+    const idxB = tagList.findIndex(t => t.id === tagIdB);
     if (idxA === -1 || idxB === -1 || idxA === idxB) return false;
 
-    const temp = this.data.tags[idxA];
-    this.data.tags[idxA] = this.data.tags[idxB];
-    this.data.tags[idxB] = temp;
+    const temp = tagList[idxA];
+    tagList[idxA] = tagList[idxB];
+    tagList[idxB] = temp;
 
     this.saveToStorage();
     return true;
   }
 
-  reorderTags(sourceTagId, targetTagId) {
-    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
-    const fromIdx = this.data.tags.findIndex(t => t.id === sourceTagId);
-    const toIdx = this.data.tags.findIndex(t => t.id === targetTagId);
+  reorderTags(sourceTagId, targetTagId, classId = null) {
+    const tagList = this.getTags(classId);
+    const fromIdx = tagList.findIndex(t => t.id === sourceTagId);
+    const toIdx = tagList.findIndex(t => t.id === targetTagId);
     if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return false;
 
-    const [moved] = this.data.tags.splice(fromIdx, 1);
-    this.data.tags.splice(toIdx, 0, moved);
+    const [moved] = tagList.splice(fromIdx, 1);
+    tagList.splice(toIdx, 0, moved);
 
     this.saveToStorage();
     return true;
   }
 
-  getMultiStudentEvents(classId, seatNos = []) {
-    const classEvents = this.getEvents(classId);
-    if (!seatNos || seatNos.length === 0) return classEvents;
-    const seatSet = new Set(seatNos.map(Number));
-    return classEvents.filter(e => seatSet.has(Number(e.seatNo)));
+  reorderTagsByIndex(fromIdx, toIdx, classId = null) {
+    const tagList = this.getTags(classId);
+    if (fromIdx < 0 || fromIdx >= tagList.length || toIdx < 0 || toIdx >= tagList.length || fromIdx === toIdx) return false;
+
+    const [moved] = tagList.splice(fromIdx, 1);
+    tagList.splice(toIdx, 0, moved);
+
+    this.saveToStorage();
+    return true;
   }
 
-  addTag(tag) {
+  addTag(tag, classId = null) {
     const newTag = {
       id: 'tag_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       name: tag.name,
@@ -473,33 +492,49 @@ class Store {
       severity: tag.severity || (tag.delta > 0 ? 'positive' : tag.delta < 0 ? 'warning' : 'info'),
       icon: tag.icon || 'tag'
     };
+    if (classId) {
+      const tagList = this.getTags(classId);
+      tagList.push(newTag);
+    }
     if (!this.data.tags) this.data.tags = [];
     this.data.tags.push(newTag);
     this.saveToStorage();
     return newTag;
   }
 
-  updateTag(tagId, updated) {
-    const idx = (this.data.tags || []).findIndex(t => t.id === tagId);
+  updateTag(tagId, updated, classId = null) {
+    const tagList = this.getTags(classId);
+    const idx = tagList.findIndex(t => t.id === tagId);
     if (idx !== -1) {
-      this.data.tags[idx] = {
-        ...this.data.tags[idx],
+      tagList[idx] = {
+        ...tagList[idx],
         ...updated,
-        delta: Number(updated.delta !== undefined ? updated.delta : this.data.tags[idx].delta)
+        delta: Number(updated.delta !== undefined ? updated.delta : tagList[idx].delta)
       };
       this.saveToStorage();
-      return this.data.tags[idx];
+      return tagList[idx];
     }
     return null;
   }
 
-  deleteTag(tagId) {
-    this.data.tags = (this.data.tags || []).filter(t => t.id !== tagId);
+  deleteTag(tagId, classId = null) {
+    if (classId) {
+      if (this.data.classTags && this.data.classTags[classId]) {
+        this.data.classTags[classId] = this.data.classTags[classId].filter(t => t.id !== tagId);
+      }
+    } else {
+      this.data.tags = (this.data.tags || []).filter(t => t.id !== tagId);
+    }
     this.saveToStorage();
   }
 
-  resetTagsToDefault() {
-    this.data.tags = [...DEFAULT_TAGS];
+  resetTagsToDefault(classId = null) {
+    if (classId) {
+      if (!this.data.classTags) this.data.classTags = {};
+      this.data.classTags[classId] = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+    } else {
+      this.data.tags = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+    }
     this.saveToStorage();
   }
 
