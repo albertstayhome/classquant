@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.2';
+    this.appVersion = '1.7.3';
     this.init();
   }
 
@@ -290,18 +290,18 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.2 -->
+          <!-- v1.7.3 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.7.2 (iOS 即時彈開讓位 • Spring Displacement 物理微動效版)
+                v1.7.3 (iOS 即時彈開讓位 • Spring Displacement 物理微動效版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線（`cubic-bezier`）即時向旁滑動彈開讓位，空出目標卡位槽！</li>
+              <li>• 【即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線 (cubic-bezier) 即時向旁滑動彈開讓位，空出目標卡位槽！</li>
               <li>• 【專屬粉紅吸附卡位槽】空出的位置顯現粉紅虛線光暈槽，精準預覽落點！</li>
-              <li>• 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角（Velocity Tilt）與 Sanrio 清脆音效！</li>
+              <li>• 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角 (Velocity Tilt) 與 Sanrio 清脆音效！</li>
               <li>• 【標籤管理清單同步升級】標籤拖曳時上下項目同步平滑滑移讓位！</li>
             </ul>
           </div>

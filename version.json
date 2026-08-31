@@ -1,13 +1,13 @@
 {
-  "version": "1.7.2",
-  "buildNumber": 2026083120,
+  "version": "1.7.3",
+  "buildNumber": 2026083125,
   "releaseDate": "2026-08-31",
   "appName": "ClassQuant Hub",
   "releaseNotes": [
-    "1. 【即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線（`cubic-bezier`）即時向旁滑動彈開讓位，空出目標卡位槽！",
+    "1. 【iOS 即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線即時向旁滑動彈開讓位，空出目標卡位槽！",
     "2. 【專屬粉紅吸附卡位槽】空出的位置顯現粉紅虛線光暈槽，精準預覽落點！",
-    "3. 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角（Velocity Tilt）與 Sanrio 清脆音效！",
-    "4. 【標籤管理清單同步升級】標籤拖曳時上下項目同步平滑滑移讓位！"
+    "3. 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角 (Velocity Tilt) 與 Sanrio 清脆音效！",
+    "4. 【全系統語法與快取穿透防護】修復版本日誌嵌套字元問題，全面強化 Service Worker 離線快取穿透！"
   ],
   "minAppVersion": "1.0.0",
   "otaUpdateEnabled": true

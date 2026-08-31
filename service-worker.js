@@ -2,7 +2,7 @@
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v58';
+const CACHE_NAME = 'classquant-hub-v60';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -72,12 +72,12 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request).then(res => res || caches.match('./index.html')))
+        .catch(() => caches.match(event.request, { ignoreSearch: true }).then(res => res || caches.match('./index.html')))
     );
   } else {
-    // Stale-While-Revalidate: Return cache immediately, fetch fresh copy in background
+    // Stale-While-Revalidate: Return cache immediately with ignoreSearch, fetch fresh copy in background
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
+      caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
