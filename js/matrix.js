@@ -56,7 +56,7 @@ class ClassroomMatrix {
     this.render('classroom-matrix-view', classId);
   }
 
-  // --- iOS Long-Press & Touch Drag Handlers ---
+  // --- iOS Long-Press & Spring Displacement Drag Handlers ---
   handleSeatTouchStart(e, seatNo, classId) {
     if (e.touches && e.touches.length > 1) return;
     const touch = e.touches ? e.touches[0] : e;
@@ -69,68 +69,18 @@ class ClassroomMatrix {
     }, 320);
   }
 
-  handleSeatTouchMove(e, classId) {
-    const touch = e.touches ? e.touches[0] : e;
-
-    if (this.isDragging) {
-      if (e.preventDefault) e.preventDefault();
-      this.updateGhostPosition(touch.clientX, touch.clientY);
-
-      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      const targetCard = elemBelow ? elemBelow.closest('.student-seat-card') : null;
-      if (targetCard) {
-        const targetSeatNo = parseInt(targetCard.getAttribute('data-seat-no'), 10);
-        if (!isNaN(targetSeatNo)) {
-          this.setHoverTarget(targetSeatNo);
-        }
-      } else {
-        this.clearHoverTarget();
-      }
-    } else {
-      // If user moved more than 8px before timer fired, they are scrolling -> cancel long press
-      const dx = Math.abs(touch.clientX - this.dragStartCoords.x);
-      const dy = Math.abs(touch.clientY - this.dragStartCoords.y);
-      if (dx > 8 || dy > 8) {
-        clearTimeout(this.longPressTimer);
-      }
-    }
-  }
-
-  handleSeatTouchEnd(e, classId) {
-    clearTimeout(this.longPressTimer);
-
-    if (this.isDragging) {
-      this.justFinishedDrag = true;
-      setTimeout(() => { this.justFinishedDrag = false; }, 300);
-
-      const sourceSeat = this.draggedSeatNo;
-      const targetSeat = this.currentHoverSeatNo;
-
-      if (targetSeat && targetSeat !== sourceSeat) {
-        this.store.swapStudentSeats(classId, sourceSeat, targetSeat);
-        if (window.appState?.playChime) window.appState.playChime();
-        if (navigator.vibrate) navigator.vibrate(50);
-        const students = this.store.getStudents(classId);
-        const studentA = students.find(s => s.seatNo === sourceSeat);
-        const studentB = students.find(s => s.seatNo === targetSeat);
-        window.appState.showToast(`✨ 成功對調 ${sourceSeat} 號【${studentA ? studentA.name : ''}】與 ${targetSeat} 號【${studentB ? studentB.name : ''}】！`, 'success');
-      }
-
-      this.stopIOSDrag(classId);
-    }
-  }
-
   startIOSDrag(touch, seatNo, classId) {
     this.isDragging = true;
     this.draggedSeatNo = seatNo;
     this.isJiggleMode = true;
+    this.lastTouchX = touch.clientX;
 
     if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
     if (window.appState?.playPop) window.appState.playPop();
 
     const originalCard = document.getElementById(`seat-card-${seatNo}`);
     if (originalCard) {
-      originalCard.classList.add('is-dragging');
+      originalCard.classList.add('is-dragging', 'seating-drop-slot');
 
       // Create floating ghost
       const ghost = originalCard.cloneNode(true);
@@ -150,34 +100,137 @@ class ClassroomMatrix {
     if (doneBanner) doneBanner.classList.remove('hidden');
   }
 
-  updateGhostPosition(clientX, clientY) {
-    if (this.dragGhost) {
-      this.dragGhost.style.left = `${clientX}px`;
-      this.dragGhost.style.top = `${clientY}px`;
+  handleSeatTouchMove(e, classId) {
+    const touch = e.touches ? e.touches[0] : e;
+
+    if (this.isDragging) {
+      if (e.preventDefault) e.preventDefault();
+
+      // Dynamic tilt based on drag velocity
+      const vx = touch.clientX - (this.lastTouchX || touch.clientX);
+      this.lastTouchX = touch.clientX;
+      const tilt = Math.max(-6, Math.min(6, vx * 0.45));
+
+      if (this.dragGhost) {
+        this.dragGhost.style.left = `${touch.clientX}px`;
+        this.dragGhost.style.top = `${touch.clientY}px`;
+        this.dragGhost.style.transform = `translate(-50%, -50%) scale(1.12) rotate(${tilt}deg)`;
+      }
+
+      const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetCard = elemBelow ? elemBelow.closest('.student-seat-card') : null;
+      if (targetCard) {
+        const targetSeatNo = parseInt(targetCard.getAttribute('data-seat-no'), 10);
+        if (!isNaN(targetSeatNo)) {
+          this.applySpringDisplacement(targetSeatNo, classId);
+        }
+      } else {
+        this.resetSpringDisplacement(classId);
+      }
+    } else if (this.dragStartCoords) {
+      // If user moved more than 8px before timer fired, they are scrolling -> cancel long press
+      const dx = Math.abs(touch.clientX - this.dragStartCoords.x);
+      const dy = Math.abs(touch.clientY - this.dragStartCoords.y);
+      if (dx > 8 || dy > 8) {
+        clearTimeout(this.longPressTimer);
+      }
     }
   }
 
-  setHoverTarget(targetSeatNo) {
+  applySpringDisplacement(targetSeatNo, classId) {
     if (this.currentHoverSeatNo === targetSeatNo) return;
-    this.clearHoverTarget();
     this.currentHoverSeatNo = targetSeatNo;
-    const card = document.getElementById(`seat-card-${targetSeatNo}`);
-    if (card && targetSeatNo !== this.draggedSeatNo) {
-      card.classList.add('drop-target-hover');
+
+    const layout = this.store.getSeatingLayout(classId);
+    const cols = layout.cols || 5;
+    const seatOrder = [...layout.seatOrder];
+    const fromIdx = seatOrder.indexOf(Number(this.draggedSeatNo));
+    const toIdx = seatOrder.indexOf(Number(targetSeatNo));
+
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    // Calculate projected reordered slots
+    const projected = [...seatOrder];
+    const [moved] = projected.splice(fromIdx, 1);
+    projected.splice(toIdx, 0, moved);
+
+    // Apply FLIP displacement transform to each card in grid
+    seatOrder.forEach(seatNo => {
+      const card = document.getElementById(`seat-card-${seatNo}`);
+      if (!card) return;
+
+      if (seatNo === this.draggedSeatNo) {
+        // Dragged source card slot dynamically moves to target position
+        const origIdx = fromIdx;
+        const newIdx = toIdx;
+        const colDiff = (newIdx % cols) - (origIdx % cols);
+        const rowDiff = Math.floor(newIdx / cols) - Math.floor(origIdx / cols);
+        card.style.transform = `translate3d(${colDiff * 105}%, ${rowDiff * 105}%, 0) scale(0.95)`;
+        card.classList.add('seating-drop-slot');
+      } else {
+        const origIdx = seatOrder.indexOf(seatNo);
+        const newIdx = projected.indexOf(seatNo);
+        const colDiff = (newIdx % cols) - (origIdx % cols);
+        const rowDiff = Math.floor(newIdx / cols) - Math.floor(origIdx / cols);
+
+        if (colDiff !== 0 || rowDiff !== 0) {
+          // Push aside with spring bounce
+          card.style.transform = `translate3d(${colDiff * 105}%, ${rowDiff * 105}%, 0) scale(0.96)`;
+          card.classList.add('shadow-md');
+        } else {
+          card.style.transform = '';
+          card.classList.remove('shadow-md');
+        }
+      }
+    });
+
+    if (targetSeatNo !== this.draggedSeatNo && navigator.vibrate) {
+      navigator.vibrate(15);
     }
   }
 
-  clearHoverTarget() {
-    if (this.currentHoverSeatNo) {
-      const card = document.getElementById(`seat-card-${this.currentHoverSeatNo}`);
-      if (card) card.classList.remove('drop-target-hover');
-      this.currentHoverSeatNo = null;
+  resetSpringDisplacement(classId) {
+    if (!this.currentHoverSeatNo) return;
+    this.currentHoverSeatNo = null;
+
+    const layout = this.store.getSeatingLayout(classId);
+    layout.seatOrder.forEach(seatNo => {
+      const card = document.getElementById(`seat-card-${seatNo}`);
+      if (card) {
+        card.style.transform = '';
+        card.classList.remove('shadow-md');
+      }
+    });
+  }
+
+  handleSeatTouchEnd(e, classId) {
+    clearTimeout(this.longPressTimer);
+
+    if (this.isDragging) {
+      this.justFinishedDrag = true;
+      setTimeout(() => { this.justFinishedDrag = false; }, 300);
+
+      const sourceSeat = this.draggedSeatNo;
+      const targetSeat = this.currentHoverSeatNo;
+
+      if (targetSeat && targetSeat !== sourceSeat) {
+        this.store.reorderStudentSeats(classId, sourceSeat, targetSeat);
+        if (window.appState?.playChime) window.appState.playChime();
+        if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+
+        const students = this.store.getStudents(classId);
+        const studentA = students.find(s => s.seatNo === sourceSeat);
+        const studentB = students.find(s => s.seatNo === targetSeat);
+        window.appState.showToast(`✨ 成功將 ${sourceSeat} 號【${studentA ? studentA.name : ''}】移至 ${studentB ? studentB.name : ''} 前方！`, 'success');
+      }
+
+      this.stopIOSDrag(classId);
     }
   }
 
   stopIOSDrag(classId) {
     this.isDragging = false;
-    this.clearHoverTarget();
+    this.resetSpringDisplacement(classId);
     if (this.dragGhost) {
       this.dragGhost.remove();
       this.dragGhost = null;

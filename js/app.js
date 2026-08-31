@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.1';
+    this.appVersion = '1.7.2';
     this.init();
   }
 
@@ -290,18 +290,33 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.1 -->
-          <div class="p-3.5 rounded-2xl border-2 border-pink-400 bg-pink-50/20 shadow-sm">
+          <!-- v1.7.2 -->
+          <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-pink-500 text-white font-black text-xs shadow-sm">
-                v1.7.1 (最新 iOS 長按拖曳排位 • 標籤拖拽 • 歷史全量版)
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
+                v1.7.2 (iOS 即時彈開讓位 • Spring Displacement 物理微動效版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
-            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
-              <li>• 【iOS 桌面級長按拖曳排座位】長按學生卡片 350ms 進入如 iPhone 桌面晃動模式（Jiggle Mode），手指拖移即可自由滑動，滑到目標座位放手瞬間對調，支援「✅ 完成」一鍵鎖定！</li>
-              <li>• 【標籤清單自由拖曳排序】標籤管理中心同步支援手指長按上下拖拽，放手立即調整標籤順位！</li>
-              <li>• 【全量歷史日誌快取穿透】全面優化 PWA 離線快取版本與日誌穿透，保證呈現從 v1.0.0 至最新版之所有發布紀錄！</li>
+            <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
+              <li>• 【即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線（`cubic-bezier`）即時向旁滑動彈開讓位，空出目標卡位槽！</li>
+              <li>• 【專屬粉紅吸附卡位槽】空出的位置顯現粉紅虛線光暈槽，精準預覽落點！</li>
+              <li>• 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角（Velocity Tilt）與 Sanrio 清脆音效！</li>
+              <li>• 【標籤管理清單同步升級】標籤拖曳時上下項目同步平滑滑移讓位！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.7.1
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【iOS 桌面級長按拖曳排座位】長按學生卡片 350ms 進入如 iPhone 桌面晃動模式（Jiggle Mode），手指拖移即可自由滑動，放手瞬間對調，支援「✅ 完成」一鍵鎖定！</li>
+              <li>• 【標籤清單自由拖曳排序】標籤管理中心同步支援手指長按上下拖拽！</li>
             </ul>
           </div>
 

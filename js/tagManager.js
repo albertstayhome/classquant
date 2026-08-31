@@ -247,18 +247,49 @@ class TagManager {
 
   setTagHoverTarget(targetId) {
     if (this.currentHoverTagId === targetId) return;
-    this.clearTagHoverTarget();
     this.currentHoverTagId = targetId;
-    const card = document.getElementById(`tag-item-${targetId}`);
-    if (card && targetId !== this.draggedTagId) {
-      card.classList.add('drop-target-hover');
+
+    const tags = this.store.getTags();
+    const fromIdx = tags.findIndex(t => t.id === this.draggedTagId);
+    const toIdx = tags.findIndex(t => t.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    tags.forEach((tag, idx) => {
+      const card = document.getElementById(`tag-item-${tag.id}`);
+      if (!card) return;
+
+      if (tag.id === this.draggedTagId) {
+        const offset = (toIdx - fromIdx) * 105;
+        card.style.transform = `translateY(${offset}%) scale(0.96)`;
+        card.classList.add('seating-drop-slot');
+      } else {
+        let newIdx = idx;
+        if (fromIdx < toIdx && idx > fromIdx && idx <= toIdx) {
+          newIdx = idx - 1;
+        } else if (fromIdx > toIdx && idx >= toIdx && idx < fromIdx) {
+          newIdx = idx + 1;
+        }
+        const offset = (newIdx - idx) * 105;
+        if (offset !== 0) {
+          card.style.transform = `translateY(${offset}%) scale(0.97)`;
+        } else {
+          card.style.transform = '';
+        }
+      }
+    });
+
+    if (navigator.vibrate && targetId !== this.draggedTagId) {
+      navigator.vibrate(15);
     }
   }
 
   clearTagHoverTarget() {
     if (this.currentHoverTagId) {
-      const card = document.getElementById(`tag-item-${this.currentHoverTagId}`);
-      if (card) card.classList.remove('drop-target-hover');
+      const tags = this.store.getTags();
+      tags.forEach(tag => {
+        const card = document.getElementById(`tag-item-${tag.id}`);
+        if (card) card.style.transform = '';
+      });
       this.currentHoverTagId = null;
     }
   }

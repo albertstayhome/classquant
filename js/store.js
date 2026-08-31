@@ -543,6 +543,20 @@ class Store {
     return false;
   }
 
+  reorderStudentSeats(classId, sourceSeatNo, targetSeatNo) {
+    const layout = this.getSeatingLayout(classId);
+    const fromIdx = layout.seatOrder.indexOf(Number(sourceSeatNo));
+    const toIdx = layout.seatOrder.indexOf(Number(targetSeatNo));
+
+    if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+      const [moved] = layout.seatOrder.splice(fromIdx, 1);
+      layout.seatOrder.splice(toIdx, 0, moved);
+      this.saveSeatingLayout(classId, layout);
+      return true;
+    }
+    return false;
+  }
+
   autoArrangeSeating(classId, pattern = 'normal', cols = 5) {
     const students = this.getStudents(classId);
     const sortedSeatNos = students.map(s => s.seatNo).sort((a, b) => a - b);
