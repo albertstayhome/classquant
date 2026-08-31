@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.2';
+    this.appVersion = '1.8.3';
     this.init();
   }
 
@@ -289,19 +289,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.2 -->
+          <!-- v1.8.3 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.2 (極速 0 延遲指尖追蹤 • 輕快 140ms 氣泡擠開版)
+                v1.8.3 (1:1 指尖真硬體鎖定 • 瞬時流體推開版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【極速 0 延遲指尖追蹤 (Zero Latency Finger Tracking)】徹底解除拖曳縮影的 CSS 過渡限制，指尖拖動即時同步、120fps/60fps 敏捷流暢！</li>
-              <li>• 【輕快 140ms 氣泡擠開動態 (Snappy 140ms FLIP Parting)】縮短位移補間至 140ms 彈性物理曲線，推開與塞入如絲般輕快順暢！</li>
+              <li>• 【1:1 指尖真硬體鎖定 (1:1 Hardware Direct Finger Lock)】徹底捨棄函式庫預設內建定速滾動，直接以硬體級原生 Touch 座標渲染，手指滑多快卡片就以 120fps/60fps 絕對等速同步跟隨！</li>
+              <li>• 【瞬時流體推開讓位 (Real-Time Fluid Parting)】相鄰標籤以 120ms 輕快彈簧曲線即時推開讓位，鬆手平滑塞入目標位置！</li>
               <li>• 【各班級快速標籤 100% 獨立管理】每個班級（導師班、任教各科任班）擁有專屬自訂標籤庫與獨立排序順序，互不干擾！</li>
               <li>• 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.2
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【極速 0 延遲指尖追蹤】解除拖曳縮影的 CSS 過渡限制！</li>
             </ul>
           </div>
 

@@ -1,11 +1,11 @@
 {
-  "version": "1.8.2",
-  "buildNumber": 2026083190,
+  "version": "1.8.3",
+  "buildNumber": 2026083195,
   "releaseDate": "2026-08-31",
   "appName": "ClassQuant Hub",
   "releaseNotes": [
-    "1. 【極速 0 延遲指尖追蹤 (Zero Latency Finger Tracking)】徹底解除拖曳縮影的 CSS 過渡限制，指尖拖動即時同步、120fps/60fps 敏捷流暢！",
-    "2. 【輕快 140ms 氣泡擠開動態 (Snappy 140ms FLIP Parting)】縮短位移補間至 140ms 彈性物理曲線，推開與塞入如絲般輕快順暢！",
+    "1. 【1:1 指尖真硬體鎖定 (1:1 Hardware Direct Finger Lock)】徹底捨棄函式庫預設內建定速滾動，直接以硬體級原生 Touch 座標渲染，手指滑多快卡片就以 120fps/60fps 絕對等速同步跟隨！",
+    "2. 【瞬時流體推開讓位 (Real-Time Fluid Parting)】相鄰標籤以 120ms 輕快彈簧曲線即時推開讓位，鬆手平滑塞入目標位置！",
     "3. 【各班級快速標籤 100% 獨立管理】每個班級（導師班、任教各科任班）擁有專屬自訂標籤庫與獨立排序順序，互不干擾！",
     "4. 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！"
   ],
