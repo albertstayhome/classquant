@@ -371,9 +371,27 @@ class Store {
     this.saveToStorage();
   }
 
-  // --- Tag Management CRUD ---
+  // --- Tag Management CRUD & Custom Sorting ---
   getTags() {
     return this.data.tags || DEFAULT_TAGS;
+  }
+
+  getTagSortMode() {
+    return this.data.settings?.tagSortMode || 'custom';
+  }
+
+  setTagSortMode(mode) {
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings.tagSortMode = mode;
+    this.saveToStorage();
+  }
+
+  getTagsSorted(classId) {
+    const mode = this.getTagSortMode();
+    if (mode === 'frequency') {
+      return this.getTagsSortedByClassFrequency(classId);
+    }
+    return this.getTags();
   }
 
   getTagsSortedByClassFrequency(classId) {
@@ -394,6 +412,22 @@ class Store {
       }
       return 0;
     });
+  }
+
+  moveTag(tagId, direction) {
+    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
+    const idx = this.data.tags.findIndex(t => t.id === tagId);
+    if (idx === -1) return false;
+
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= this.data.tags.length) return false;
+
+    const temp = this.data.tags[idx];
+    this.data.tags[idx] = this.data.tags[targetIdx];
+    this.data.tags[targetIdx] = temp;
+
+    this.saveToStorage();
+    return true;
   }
 
   getMultiStudentEvents(classId, seatNos = []) {
@@ -440,6 +474,134 @@ class Store {
   resetTagsToDefault() {
     this.data.tags = [...DEFAULT_TAGS];
     this.saveToStorage();
+  }
+
+  // --- Real Classroom Seating Layout Management (真實座位排列管理) ---
+  getSeatingLayout(classId) {
+    if (!this.data.seatingLayout) this.data.seatingLayout = {};
+    const students = this.getStudents(classId);
+    const studentCount = students.length;
+
+    let layout = this.data.seatingLayout[classId];
+    if (!layout || !layout.seatOrder || layout.seatOrder.length === 0) {
+      // Default: 5 columns for <= 30 students, 6 columns for > 30
+      const defaultCols = studentCount > 30 ? 6 : 5;
+      layout = {
+        cols: defaultCols,
+        podiumPosition: 'top', // 'top' (前方黑板) or 'bottom'
+        seatOrder: students.map(s => s.seatNo)
+      };
+      this.data.seatingLayout[classId] = layout;
+      this.saveToStorage();
+    } else {
+      // Ensure all current students are present in seatOrder
+      const currentSeatNos = new Set(students.map(s => s.seatNo));
+      const existing = layout.seatOrder.filter(no => currentSeatNos.has(no));
+      students.forEach(s => {
+        if (!existing.includes(s.seatNo)) {
+          existing.push(s.seatNo);
+        }
+      });
+      layout.seatOrder = existing;
+    }
+
+    return layout;
+  }
+
+  saveSeatingLayout(classId, layout) {
+    if (!this.data.seatingLayout) this.data.seatingLayout = {};
+    this.data.seatingLayout[classId] = layout;
+    this.saveToStorage();
+  }
+
+  swapStudentSeats(classId, seatNoA, seatNoB) {
+    const layout = this.getSeatingLayout(classId);
+    const idxA = layout.seatOrder.indexOf(Number(seatNoA));
+    const idxB = layout.seatOrder.indexOf(Number(seatNoB));
+
+    if (idxA !== -1 && idxB !== -1) {
+      const temp = layout.seatOrder[idxA];
+      layout.seatOrder[idxA] = layout.seatOrder[idxB];
+      layout.seatOrder[idxB] = temp;
+      this.saveSeatingLayout(classId, layout);
+      return true;
+    }
+    return false;
+  }
+
+  autoArrangeSeating(classId, pattern = 'normal', cols = 5) {
+    const students = this.getStudents(classId);
+    const sortedSeatNos = students.map(s => s.seatNo).sort((a, b) => a - b);
+    let newOrder = [...sortedSeatNos];
+
+    if (pattern === 'snake_s') {
+      // Snake S curve by columns (e.g. Col 1 top-to-bottom, Col 2 bottom-to-top...)
+      const rows = Math.ceil(sortedSeatNos.length / cols);
+      const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+      let currentIdx = 0;
+
+      for (let c = 0; c < cols; c++) {
+        const isDownward = c % 2 === 0;
+        if (isDownward) {
+          for (let r = 0; r < rows; r++) {
+            if (currentIdx < sortedSeatNos.length) {
+              grid[r][c] = sortedSeatNos[currentIdx++];
+            }
+          }
+        } else {
+          for (let r = rows - 1; r >= 0; r--) {
+            if (currentIdx < sortedSeatNos.length) {
+              grid[r][c] = sortedSeatNos[currentIdx++];
+            }
+          }
+        }
+      }
+
+      newOrder = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c] !== null) {
+            newOrder.push(grid[r][c]);
+          }
+        }
+      }
+    } else if (pattern === 'random') {
+      // Fisher-Yates shuffle
+      for (let i = newOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newOrder[i], newOrder[j]] = [newOrder[j], newOrder[i]];
+      }
+    } else if (pattern === 'col_first') {
+      // Column first standard (Col 1: 1,2,3,4,5,6 -> Col 2: 7,8,9,10,11,12...)
+      const rows = Math.ceil(sortedSeatNos.length / cols);
+      const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+      let currentIdx = 0;
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          if (currentIdx < sortedSeatNos.length) {
+            grid[r][c] = sortedSeatNos[currentIdx++];
+          }
+        }
+      }
+
+      newOrder = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c] !== null) {
+            newOrder.push(grid[r][c]);
+          }
+        }
+      }
+    }
+
+    const layout = {
+      cols: Number(cols) || 5,
+      podiumPosition: 'top',
+      seatOrder: newOrder
+    };
+    this.saveSeatingLayout(classId, layout);
+    return layout;
   }
 
   // --- Theme Management ---

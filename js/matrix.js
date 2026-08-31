@@ -17,6 +17,8 @@ class ClassroomMatrix {
     this.currentTagPage = 0;
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
+    this.isSeatingArrangeMode = false;
+    this.arrangeFirstSeat = null;
   }
 
   toggleQuickSelectBar() {
@@ -26,6 +28,62 @@ class ClassroomMatrix {
       if (this.showQuickSelectBar) bar.classList.remove('hidden');
       else bar.classList.add('hidden');
     }
+  }
+
+  toggleSeatingArrangeMode(classId) {
+    this.isSeatingArrangeMode = !this.isSeatingArrangeMode;
+    this.arrangeFirstSeat = null;
+    this.selectedSeats.clear();
+    if (this.isSeatingArrangeMode) {
+      window.appState.showToast('🪑 已進入排座位模式：點選兩位學生即可直接對調座位！', 'info');
+    } else {
+      window.appState.showToast('✅ 已儲存座位表配置，恢復課堂點記模式', 'success');
+    }
+    this.render('classroom-matrix-view', classId);
+  }
+
+  handleSeatArrangeClick(seatNo, classId) {
+    if (!this.arrangeFirstSeat) {
+      this.arrangeFirstSeat = seatNo;
+      if (window.appState?.playPop) window.appState.playPop();
+      const student = this.store.getStudents(classId).find(s => s.seatNo === seatNo);
+      window.appState.showToast(`已選取 ${seatNo} 號【${student ? student.name : ''}】，請點選要對調座位的另一位同學`, 'info');
+      this.render('classroom-matrix-view', classId);
+    } else if (this.arrangeFirstSeat === seatNo) {
+      this.arrangeFirstSeat = null;
+      window.appState.showToast('已取消選取', 'info');
+      this.render('classroom-matrix-view', classId);
+    } else {
+      const seatA = this.arrangeFirstSeat;
+      const seatB = seatNo;
+      const students = this.store.getStudents(classId);
+      const studentA = students.find(s => s.seatNo === seatA);
+      const studentB = students.find(s => s.seatNo === seatB);
+
+      this.store.swapStudentSeats(classId, seatA, seatB);
+      if (window.appState?.playChime) window.appState.playChime();
+      window.appState.showToast(`✨ 成功對調 ${seatA} 號【${studentA ? studentA.name : ''}】與 ${seatB} 號【${studentB ? studentB.name : ''}】的座位！`, 'success');
+      this.arrangeFirstSeat = null;
+      this.render('classroom-matrix-view', classId);
+    }
+  }
+
+  applyAutoArrange(classId, pattern) {
+    const layout = this.store.getSeatingLayout(classId);
+    this.store.autoArrangeSeating(classId, pattern, layout.cols || 5);
+    if (window.appState?.playChime) window.appState.playChime();
+    const patternNames = { normal: '常規直排', snake_s: 'S型蛇行', col_first: '由左至右直排', random: '隨機抽籤' };
+    window.appState.showToast(`已套用【${patternNames[pattern] || pattern}】座位排法！`, 'success');
+    this.arrangeFirstSeat = null;
+    this.render('classroom-matrix-view', classId);
+  }
+
+  toggleTagSortMode(classId) {
+    const currentMode = this.store.getTagSortMode();
+    const newMode = currentMode === 'custom' ? 'frequency' : 'custom';
+    this.store.setTagSortMode(newMode);
+    window.appState.showToast(`標籤排序已切換為：「${newMode === 'custom' ? '📌 依自訂清單順序' : '📊 依班級使用頻率'}」`, 'info');
+    this.render('classroom-matrix-view', classId);
   }
 
   selectGender(gender) {
@@ -43,15 +101,20 @@ class ClassroomMatrix {
 
   selectRow(rowIdx) {
     const currentClassId = window.appState.currentClassId;
-    const students = this.store.getStudents(currentClassId);
-    const start = (rowIdx - 1) * 6 + 1;
-    const end = rowIdx * 6;
+    const layout = this.store.getSeatingLayout(currentClassId);
+    const cols = layout.cols || 5;
+    const seatOrder = layout.seatOrder || [];
+
     this.selectedSeats.clear();
-    students.forEach(s => {
-      if (s.seatNo >= start && s.seatNo <= end) {
-        this.selectedSeats.add(s.seatNo);
+    // rowIdx is 1-based
+    const startIdx = (rowIdx - 1) * cols;
+    const endIdx = startIdx + cols;
+    for (let i = startIdx; i < endIdx && i < seatOrder.length; i++) {
+      if (seatOrder[i]) {
+        this.selectedSeats.add(seatOrder[i]);
       }
-    });
+    }
+
     if (window.appState?.playPop) window.appState.playPop();
     this.updateSelectionUI(currentClassId);
   }
@@ -72,10 +135,17 @@ class ClassroomMatrix {
     }
 
     const students = this.store.getStudents(currentClassId);
+    const studentMap = {};
+    students.forEach(s => { studentMap[s.seatNo] = s; });
+
+    const layout = this.store.getSeatingLayout(currentClassId);
+    const cols = layout.cols || (students.length > 30 ? 6 : 5);
+    const seatOrder = layout.seatOrder || students.map(s => s.seatNo);
     const overview = this.stats.getClassOverview(currentClassId);
     
-    // Per-Class Independent Frequency Sorted Tags
-    const sortedTags = this.store.getTagsSortedByClassFrequency(currentClassId);
+    // Tag Sorting
+    const sortMode = this.store.getTagSortMode();
+    const sortedTags = this.store.getTagsSorted(currentClassId);
     const isHomeroom = cls.type === 'homeroom';
 
     // Chunk tags into pages of 4 (2 cols x 2 rows, large comfortable readable cards)
@@ -116,6 +186,10 @@ class ClassroomMatrix {
             <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-600 underline font-bold text-xs ml-0.5">清空</button>
           </div>
 
+          <button onclick="matrixView.toggleSeatingArrangeMode('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${this.isSeatingArrangeMode ? 'bg-amber-500 text-white ring-2 ring-amber-300' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'} rounded-xl shadow-sm transition flex items-center gap-1">
+            <i data-lucide="layout" class="w-3.5 h-3.5"></i> ${this.isSeatingArrangeMode ? '完成排位' : '🪑 排座位'}
+          </button>
+
           <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold bg-pink-50 text-pink-800 border border-pink-300 rounded-xl hover:bg-pink-100 shadow-sm transition flex items-center gap-1">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
           </button>
@@ -138,10 +212,45 @@ class ClassroomMatrix {
         </div>
       </div>
 
+      <!-- Seating Arrangement Helper Drawer (When Arrange Mode is ON) -->
+      ${this.isSeatingArrangeMode ? `
+        <div class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md mb-3 animate-fade-in-up">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-2">
+              <span class="text-2xl">🪑</span>
+              <div>
+                <strong class="text-amber-900 font-black text-xs sm:text-sm">【真實教室排座位模式】</strong>
+                <p class="text-[11px] text-amber-800 font-bold">
+                  ${this.arrangeFirstSeat ? `👉 已選中 <strong class="text-pink-600 font-black text-sm">${this.arrangeFirstSeat} 號</strong>，請點選要對調的另一位同學！` : '💡 點選任一位學生，再點選另一位學生即可直接對調座位！'}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'normal')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+                📐 常規直排
+              </button>
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'snake_s')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+                🔄 S型蛇行
+              </button>
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'col_first')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+                📊 左至右排
+              </button>
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'random')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+                🎲 隨機換位
+              </button>
+              <button onclick="matrixView.toggleSeatingArrangeMode('${currentClassId}')" class="px-3.5 py-1 text-xs font-black bg-emerald-600 text-white rounded-xl shadow-md hover:bg-emerald-700 active:scale-95 transition">
+                ✅ 完成排位
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
       <!-- Quick Group / Row / Gender Select Drawer -->
       <div id="matrix-quick-select-drawer" class="${this.showQuickSelectBar ? '' : 'hidden'} p-2 rounded-2xl bg-pink-50 border border-pink-200 mb-2.5 flex flex-wrap items-center justify-between gap-1.5 text-xs">
         <div class="flex items-center space-x-1">
-          <span class="font-bold text-pink-900 text-[11px]">組別/排：</span>
+          <span class="font-bold text-pink-900 text-[11px]">橫排選取：</span>
           <button onclick="matrixView.selectRow(1)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第1排</button>
           <button onclick="matrixView.selectRow(2)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第2排</button>
           <button onclick="matrixView.selectRow(3)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第3排</button>
@@ -155,11 +264,30 @@ class ClassroomMatrix {
         </div>
       </div>
 
-      <!-- Zero-Scroll 5-Column Student Grid -->
-      <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 gap-1.5 sm:gap-2.5 mb-4" id="seat-grid-container">
-        ${students.map(s => {
+      <!-- Blackboard / Podium Real Classroom Visual Anchor -->
+      <div class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none">
+        <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
+          🪟 靠窗側
+        </span>
+        <div class="flex items-center gap-2">
+          <span class="kitty-bow !w-3.5 !h-3.5"></span>
+          <span class="tracking-widest text-emerald-100 font-black sm:text-sm">【 🏫 講台 / 黑板 】</span>
+          <span class="kitty-bow !w-3.5 !h-3.5"></span>
+        </div>
+        <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
+          靠門側 🚪
+        </span>
+      </div>
+
+      <!-- Zero-Scroll Responsive Student Grid in Actual Seating Order -->
+      <div class="grid grid-cols-${cols} sm:grid-cols-${cols} md:grid-cols-${cols} lg:grid-cols-${cols} gap-1.5 sm:gap-2.5 mb-4" id="seat-grid-container">
+        ${seatOrder.map(seatNo => {
+          const s = studentMap[seatNo];
+          if (!s) return '';
+
           const profile = this.stats.getStudentProfile(currentClassId, s.seatNo);
           const isSelected = this.selectedSeats.has(s.seatNo);
+          const isArrangeTarget = this.isSeatingArrangeMode && this.arrangeFirstSeat === s.seatNo;
           const characterPoints = profile ? profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social : 0;
           const academicScore = profile ? profile.scoreMean : 70;
 
@@ -175,14 +303,18 @@ class ClassroomMatrix {
             mascotTitle = '酷洛米 (需關懷)';
           }
 
+          const cardClickAction = this.isSeatingArrangeMode
+            ? `matrixView.handleSeatArrangeClick(${s.seatNo}, '${currentClassId}')`
+            : `matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')`;
+
           return `
             <div id="seat-card-${s.seatNo}"
-                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''}"
-                 onclick="matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
+                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''} ${isArrangeTarget ? 'ring-4 ring-pink-500 bg-pink-50 scale-105 shadow-lg' : ''}"
+                 onclick="${cardClickAction}">
               
               <!-- Seat Header: Seat No + Mascot -->
               <div class="flex items-center justify-between mb-0.5">
-                <span class="w-5 h-5 rounded-lg bg-pink-100 border border-pink-300 font-black text-[11px] sm:text-xs text-pink-900 flex items-center justify-center shadow-inner">
+                <span class="w-5 h-5 rounded-lg ${isArrangeTarget ? 'bg-pink-600 text-white' : 'bg-pink-100 text-pink-900 border border-pink-300'} font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">
                   ${String(s.seatNo).padStart(2, '0')}
                 </span>
                 <div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>
@@ -212,7 +344,9 @@ class ClassroomMatrix {
           <div class="flex items-center gap-1.5">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
             <span class="font-black text-slate-900 text-xs sm:text-sm">課堂快速標籤</span>
-            <span class="text-[10px] sm:text-xs text-slate-500 font-medium hidden sm:inline">（依 ${cls.name} 使用頻率排序）</span>
+            <button onclick="matrixView.toggleTagSortMode('${currentClassId}')" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold transition ${sortMode === 'custom' ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-700 border border-blue-300'}" title="點擊切換排序方式">
+              ${sortMode === 'custom' ? '📌 依自訂順序' : '📊 依使用頻率'}
+            </button>
           </div>
 
           <div class="flex items-center space-x-2">

@@ -35,6 +35,9 @@ class RosterManager {
           </div>
 
           <div class="flex items-center space-x-2">
+            <button onclick="appState.switchTab('matrix')" class="px-3.5 py-2 rounded-2xl bg-white border border-pink-300 hover:bg-pink-50 text-pink-700 text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-pink-500"></i> 🏫 前往課堂點記板
+            </button>
             <button onclick="rosterManager.openNewClassModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
               <i data-lucide="plus" class="w-4 h-4"></i> ➕ 新增班級
             </button>
@@ -108,6 +111,12 @@ class RosterManager {
 
   switchClass(classId) {
     this.currentClassId = classId;
+    if (window.appState) {
+      window.appState.currentClassId = classId;
+      if (window.timetableEngine) window.timetableEngine.setManualOverride(classId);
+      window.appState.renderClassDropdown();
+      window.appState.updateHeaderStatus();
+    }
     this.render('roster-manager-view');
   }
 
@@ -202,10 +211,19 @@ class RosterManager {
     }
     this.store.save(fullData);
 
-    window.appState.showToast(`🎉 成功為 ${classId} 班匯入 ${newStudents.length} 位學生名單！`, 'success');
+    // Sync with global appState & timetable engine so home page immediately reflects this class
+    this.currentClassId = classId;
+    if (window.appState) {
+      window.appState.currentClassId = classId;
+      if (window.timetableEngine) window.timetableEngine.setManualOverride(classId);
+      window.appState.renderClassDropdown();
+      window.appState.updateHeaderStatus();
+    }
+
+    window.appState.showToast(`🎉 成功為 ${classId} 班匯入 ${newStudents.length} 位學生名單！已同步至主頁點記板`, 'success');
     window.appState.closeModal();
     this.render('roster-manager-view');
-    if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+    if (window.matrixView) window.matrixView.render('classroom-matrix-view', classId);
   }
 
   updateStudentName(classId, seatNo, newName) {
@@ -319,10 +337,17 @@ class RosterManager {
     this.store.save(fullData);
 
     this.currentClassId = id;
-    window.appState.showToast(`已成功建立 ${name}！請接著匯入學生名單`, 'success');
+    if (window.appState) {
+      window.appState.currentClassId = id;
+      if (window.timetableEngine) window.timetableEngine.setManualOverride(id);
+      window.appState.renderClassDropdown();
+      window.appState.updateHeaderStatus();
+    }
+
+    window.appState.showToast(`已成功建立 ${name}！已同步設為當前班級，請接著匯入學生名單`, 'success');
     window.appState.closeModal();
-    window.appState.renderClassDropdown();
     this.render('roster-manager-view');
+    if (window.matrixView) window.matrixView.render('classroom-matrix-view', id);
   }
 
   openEditClassModal(classId) {

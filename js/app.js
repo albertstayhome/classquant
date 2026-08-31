@@ -290,11 +290,105 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.5.2 -->
+          <!-- v1.7.0 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.5.2 (最新實戰導覽版本)
+                v1.7.0 (真實教室排座位 • 標籤自訂排序 • 班級主頁同步版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【真實教室排座位模式】新增「🪑 排座位」功能，頂部標註【🏫 講台/黑板】方位，點選兩位學生即可直接對調座位，支援常規直排、S型蛇行、隨機換位！</li>
+              <li>• 【課堂快速標籤自訂排序】標籤管理中心支援「▲ 上移 / ▼ 下移」，前 4 個標籤優先顯示於第 1 頁，並支援「📌 依自訂順序」與「📊 依使用頻率」一鍵切換！</li>
+              <li>• 【班級名單與主頁同步】建立新班級或匯入名冊後，全域狀態自動同步切換，點記板即時更新！</li>
+              <li>• 【歷史日誌全量復原】完整修復從 v1.0.0 至最新版本之歷史發布日誌！</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.3
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【標籤管理中心強化】自訂行為與表現標籤增刪改查、分值微調與類別色彩規則強化。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.2
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【事後補記專區優化】課堂事後回憶補記支援多生批次勾選、常用評語模組與提交記錄流。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.1
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【課表排程編輯器】週一至週五第 1~8 節課表視覺化網格編輯，科任與導師班快速切換。</li>
+            </ul>
+          </div>
+
+          <!-- v1.6.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.6.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【PWA 離線同步】全新 Service Worker 智能快取與版本原子化同步，保證 100% 離線可用。</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.4
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【繁體中文編碼防護】全介面 UTF-8 編碼與觸控手勢事件防禦。</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.3
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【動態座標追蹤】60fps 平滑轉場與導航欄水平置中。</li>
+            </ul>
+          </div>
+
+          <!-- v1.5.2 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.5.2
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-30</span>
             </div>

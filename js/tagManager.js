@@ -84,34 +84,62 @@ class TagManager {
 
         <!-- Current Tags List -->
         <div>
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">現有標籤清單 (${tags.length} 個)</h4>
-            <button onclick="tagManager.restoreDefaults()" class="text-xs text-pink-600 hover:underline font-bold transition">
-              恢復官方預設標籤
-            </button>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">現有標籤清單 (${tags.length} 個)</h4>
+              <span class="text-[10px] text-pink-600 font-bold">💡 排在前 4 個的標籤，會優先顯示在點記板第 1 頁</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <select onchange="tagManager.handleSortModeChange(this.value)" class="text-xs font-black px-2.5 py-1 rounded-xl border border-pink-300 bg-pink-50 text-pink-900 focus:outline-none">
+                <option value="custom" ${this.store.getTagSortMode() === 'custom' ? 'selected' : ''}>📌 依此清單順序</option>
+                <option value="frequency" ${this.store.getTagSortMode() === 'frequency' ? 'selected' : ''}>📊 依班級使用頻率</option>
+              </select>
+              <button onclick="tagManager.restoreDefaults()" class="text-xs text-slate-500 hover:text-pink-600 hover:underline font-bold transition">
+                恢復預設
+              </button>
+            </div>
           </div>
 
           <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
-            ${tags.map(tag => {
+            ${tags.map((tag, idx) => {
               const isPos = tag.delta > 0;
               const isZero = tag.delta === 0;
               const badgeClass = isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge';
+              const isTop4 = idx < 4;
 
               return `
-                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-pink-100 hover:border-pink-300 transition text-xs shadow-sm">
-                  <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border ${isTop4 ? 'border-pink-300 shadow-sm ring-1 ring-pink-200' : 'border-pink-100'} hover:border-pink-300 transition text-xs">
+                  <div class="flex items-center space-x-2.5">
+                    <!-- Order Badge & Up/Down Arrows -->
+                    <div class="flex items-center space-x-1">
+                      <span class="w-6 h-6 rounded-lg ${isTop4 ? 'bg-pink-500 text-white' : 'bg-slate-100 text-slate-700'} font-black text-[10px] flex items-center justify-center shadow-inner" title="${isTop4 ? '第 1 頁優先顯示' : `第 ${Math.floor(idx / 4) + 1} 頁`}">
+                        #${idx + 1}
+                      </span>
+                      <div class="flex flex-col space-y-0.5">
+                        <button type="button" onclick="tagManager.moveTagUp('${tag.id}')" ${idx === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:bg-pink-100 rounded px-1 text-slate-700 font-black text-[9px] active:scale-90"'} title="往上移一格">
+                          ▲
+                        </button>
+                        <button type="button" onclick="tagManager.moveTagDown('${tag.id}')" ${idx === tags.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:bg-pink-100 rounded px-1 text-slate-700 font-black text-[9px] active:scale-90"'} title="往下移一格">
+                          ▼
+                        </button>
+                      </div>
+                    </div>
+
                     <span class="font-black px-2.5 py-0.5 rounded-lg text-xs border ${badgeClass}">
                       ${tag.delta > 0 ? '+' : ''}${tag.delta} 分
                     </span>
                     <div>
-                      <strong class="text-slate-900 font-black text-sm">${tag.name}</strong>
-                      <span class="text-[10px] text-slate-500 ml-2">(${tag.category === 'academic' ? '學業' : tag.category === 'conflict' ? '衝突' : tag.category === 'social' ? '熱心' : '常規'})</span>
+                      <div class="flex items-center gap-1">
+                        <strong class="text-slate-900 font-black text-sm">${tag.name}</strong>
+                        ${isTop4 ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold border border-amber-300">⭐ 第1頁</span>' : ''}
+                      </div>
+                      <span class="text-[10px] text-slate-500">(${tag.category === 'academic' ? '學業' : tag.category === 'conflict' ? '衝突' : tag.category === 'social' ? '熱心' : '常規'})</span>
                     </div>
                   </div>
 
-                  <div class="flex items-center space-x-2">
+                  <div class="flex items-center space-x-1.5">
                     <button onclick="tagManager.editTagDelta('${tag.id}')" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-slate-100 text-[11px] font-bold border transition">
-                      修改分值
+                      改分值
                     </button>
                     <button onclick="tagManager.deleteTag('${tag.id}')" class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="刪除此標籤">
                       <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -126,6 +154,32 @@ class TagManager {
     `;
 
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  handleSortModeChange(mode) {
+    this.store.setTagSortMode(mode);
+    window.appState.showToast(`標籤排序已切換為：「${mode === 'custom' ? '📌 依自訂清單順序' : '📊 依班級使用頻率'}」`, 'info');
+    if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+  }
+
+  moveTagUp(tagId) {
+    const success = this.store.moveTag(tagId, 'up');
+    if (success) {
+      if (window.appState?.playPop) window.appState.playPop();
+      const modalContent = document.getElementById('global-modal-content');
+      if (modalContent) this.renderModalContent(modalContent);
+      if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+    }
+  }
+
+  moveTagDown(tagId) {
+    const success = this.store.moveTag(tagId, 'down');
+    if (success) {
+      if (window.appState?.playPop) window.appState.playPop();
+      const modalContent = document.getElementById('global-modal-content');
+      if (modalContent) this.renderModalContent(modalContent);
+      if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+    }
   }
 
   handleCreateTag(e) {
@@ -157,7 +211,7 @@ class TagManager {
       const newDelta = parseInt(newDeltaStr, 10);
       if (!isNaN(newDelta)) {
         tag.delta = newDelta;
-        this.store.updateTag(tag);
+        this.store.updateTag(tag.id, tag);
         window.appState.showToast(`已將「${tag.name}」分值更新為 ${newDelta > 0 ? '+' : ''}${newDelta}`, 'success');
         this.openTagManagerModal();
         if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
