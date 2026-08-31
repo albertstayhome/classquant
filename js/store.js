@@ -444,6 +444,19 @@ class Store {
     return true;
   }
 
+  reorderTags(sourceTagId, targetTagId) {
+    if (!this.data.tags) this.data.tags = [...DEFAULT_TAGS];
+    const fromIdx = this.data.tags.findIndex(t => t.id === sourceTagId);
+    const toIdx = this.data.tags.findIndex(t => t.id === targetTagId);
+    if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return false;
+
+    const [moved] = this.data.tags.splice(fromIdx, 1);
+    this.data.tags.splice(toIdx, 0, moved);
+
+    this.saveToStorage();
+    return true;
+  }
+
   getMultiStudentEvents(classId, seatNos = []) {
     const classEvents = this.getEvents(classId);
     if (!seatNos || seatNos.length === 0) return classEvents;

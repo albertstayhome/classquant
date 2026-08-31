@@ -252,10 +252,12 @@ class TagManager {
       const targetId = this.currentHoverTagId;
 
       if (targetId && targetId !== sourceId) {
-        this.store.swapTags(sourceId, targetId);
+        this.store.reorderTags(sourceId, targetId);
         if (window.appState?.playChime) window.appState.playChime();
-        if (navigator.vibrate) navigator.vibrate(40);
-        window.appState.showToast('✨ 標籤順序已調整！', 'success');
+        if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+        const tagA = this.store.getTags().find(t => t.id === sourceId);
+        const tagB = this.store.getTags().find(t => t.id === targetId);
+        window.appState.showToast(`✨ 成功將【${tagA ? tagA.name : ''}】塞入至【${tagB ? tagB.name : ''}】前方！`, 'success');
       }
 
       this.stopTagDrag();
@@ -271,26 +273,38 @@ class TagManager {
     const toIdx = tags.findIndex(t => t.id === targetId);
     if (fromIdx === -1 || toIdx === -1) return;
 
+    // Get sample card height + Tailwind space-y-2 gap (8px)
+    const sampleCard = document.getElementById(`tag-item-${this.draggedTagId}`);
+    const cardHeight = sampleCard ? sampleCard.offsetHeight : 52;
+    const gap = 8;
+    const step = cardHeight + gap;
+
     tags.forEach((tag, idx) => {
       const card = document.getElementById(`tag-item-${tag.id}`);
       if (!card) return;
 
       if (tag.id === this.draggedTagId) {
-        const offset = (toIdx - fromIdx) * 105;
-        card.style.transform = `translateY(${offset}%) scale(0.96)`;
+        // Dragged source slot moves directly to the target gap position
+        const offset = (toIdx - fromIdx) * step;
+        card.style.transform = `translate3d(0, ${offset}px, 0) scale(0.96)`;
         card.classList.add('seating-drop-slot');
       } else {
-        let newIdx = idx;
+        // Dynamic insertion parting (擠開、塞入讓位動效)
+        let offset = 0;
         if (fromIdx < toIdx && idx > fromIdx && idx <= toIdx) {
-          newIdx = idx - 1;
+          // Dragging downwards: items between fromIdx and toIdx glide UP by 1 slot
+          offset = -step;
         } else if (fromIdx > toIdx && idx >= toIdx && idx < fromIdx) {
-          newIdx = idx + 1;
+          // Dragging upwards: items between toIdx and fromIdx glide DOWN by 1 slot
+          offset = step;
         }
-        const offset = (newIdx - idx) * 105;
+
         if (offset !== 0) {
-          card.style.transform = `translateY(${offset}%) scale(0.97)`;
+          card.style.transform = `translate3d(0, ${offset}px, 0) scale(0.98)`;
+          card.classList.add('shadow-md');
         } else {
           card.style.transform = '';
+          card.classList.remove('shadow-md');
         }
       }
     });
@@ -305,7 +319,10 @@ class TagManager {
       const tags = this.store.getTags();
       tags.forEach(tag => {
         const card = document.getElementById(`tag-item-${tag.id}`);
-        if (card) card.style.transform = '';
+        if (card) {
+          card.style.transform = '';
+          card.classList.remove('shadow-md');
+        }
       });
       this.currentHoverTagId = null;
     }
