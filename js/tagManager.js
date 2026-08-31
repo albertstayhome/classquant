@@ -181,8 +181,10 @@ class TagManager {
     if (this.isDraggingTag) {
       if (e.preventDefault) e.preventDefault();
       if (this.tagDragGhost) {
-        this.tagDragGhost.style.left = `${touch.clientX}px`;
-        this.tagDragGhost.style.top = `${touch.clientY}px`;
+        const left = touch.clientX - (this.tagTouchOffsetX || 0);
+        const top = touch.clientY - (this.tagTouchOffsetY || 0);
+        this.tagDragGhost.style.left = `${left}px`;
+        this.tagDragGhost.style.top = `${top}px`;
       }
 
       const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -229,14 +231,20 @@ class TagManager {
 
     const originalCard = document.getElementById(`tag-item-${tagId}`);
     if (originalCard) {
+      const rect = originalCard.getBoundingClientRect();
+      this.tagTouchOffsetX = touch.clientX - rect.left;
+      this.tagTouchOffsetY = touch.clientY - rect.top;
+
       originalCard.classList.add('is-dragging');
 
       const ghost = originalCard.cloneNode(true);
       ghost.id = 'ios-drag-floating-ghost';
-      ghost.style.width = `${originalCard.offsetWidth}px`;
-      ghost.style.height = `${originalCard.offsetHeight}px`;
-      ghost.style.left = `${touch.clientX}px`;
-      ghost.style.top = `${touch.clientY}px`;
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+      ghost.style.transformOrigin = `${this.tagTouchOffsetX}px ${this.tagTouchOffsetY}px`;
+      ghost.style.transform = 'scale(1.04)';
       document.body.appendChild(ghost);
       this.tagDragGhost = ghost;
     }
@@ -301,8 +309,12 @@ class TagManager {
       this.tagDragGhost.remove();
       this.tagDragGhost = null;
     }
+    const list = document.getElementById('tag-manager-drag-list');
+    const scrollPos = list ? list.scrollTop : 0;
     const modalContent = document.getElementById('global-modal-content');
     if (modalContent) this.renderModalContent(modalContent);
+    const newList = document.getElementById('tag-manager-drag-list');
+    if (newList) newList.scrollTop = scrollPos;
     if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
   }
 

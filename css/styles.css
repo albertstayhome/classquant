@@ -293,7 +293,6 @@ html.dark .compact-seat-tile.selected {
   position: fixed;
   pointer-events: none;
   z-index: 999999;
-  transform: translate(-50%, -50%) scale(1.12);
   box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 3px #ec4899;
   opacity: 0.96;
   border-radius: 1rem;

@@ -41,6 +41,7 @@ class ClassroomMatrix {
   toggleJiggleMode(classId) {
     this.isJiggleMode = !this.isJiggleMode;
     this.selectedSeats.clear();
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || window.scrollY || 0;
     if (this.isJiggleMode) {
       if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
       window.appState.showToast('📱 已進入 iOS 拖曳排位模式：長按卡片並拖移至目標座位即可直接對調！', 'info');
@@ -48,12 +49,15 @@ class ClassroomMatrix {
       window.appState.showToast('✅ 座位表已鎖定並儲存，恢復課堂點記模式', 'success');
     }
     this.render('classroom-matrix-view', classId);
+    window.scrollTo({ top: currentScrollY, behavior: 'instant' });
   }
 
   exitJiggleMode(classId) {
     this.isJiggleMode = false;
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || window.scrollY || 0;
     window.appState.showToast('✅ 已儲存座位表配置', 'success');
     this.render('classroom-matrix-view', classId);
+    window.scrollTo({ top: currentScrollY, behavior: 'instant' });
   }
 
   // --- iOS Long-Press & Spring Displacement Drag Handlers ---
@@ -80,15 +84,22 @@ class ClassroomMatrix {
 
     const originalCard = document.getElementById(`seat-card-${seatNo}`);
     if (originalCard) {
+      const rect = originalCard.getBoundingClientRect();
+      // Calculate exact finger contact offset inside card so lift coordinates match 100%
+      this.touchOffsetX = touch.clientX - rect.left;
+      this.touchOffsetY = touch.clientY - rect.top;
+
       originalCard.classList.add('is-dragging', 'seating-drop-slot');
 
-      // Create floating ghost
+      // Create floating ghost exactly at originalCard coordinates
       const ghost = originalCard.cloneNode(true);
       ghost.id = 'ios-drag-floating-ghost';
-      ghost.style.width = `${originalCard.offsetWidth}px`;
-      ghost.style.height = `${originalCard.offsetHeight}px`;
-      ghost.style.left = `${touch.clientX}px`;
-      ghost.style.top = `${touch.clientY}px`;
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+      ghost.style.transformOrigin = `${this.touchOffsetX}px ${this.touchOffsetY}px`;
+      ghost.style.transform = 'scale(1.08)';
       document.body.appendChild(ghost);
       this.dragGhost = ghost;
     }
@@ -109,12 +120,15 @@ class ClassroomMatrix {
       // Dynamic tilt based on drag velocity
       const vx = touch.clientX - (this.lastTouchX || touch.clientX);
       this.lastTouchX = touch.clientX;
-      const tilt = Math.max(-6, Math.min(6, vx * 0.45));
+      const tilt = Math.max(-5, Math.min(5, vx * 0.4));
 
       if (this.dragGhost) {
-        this.dragGhost.style.left = `${touch.clientX}px`;
-        this.dragGhost.style.top = `${touch.clientY}px`;
-        this.dragGhost.style.transform = `translate(-50%, -50%) scale(1.12) rotate(${tilt}deg)`;
+        // Move ghost using finger offset so contact point never shifts
+        const left = touch.clientX - (this.touchOffsetX || 0);
+        const top = touch.clientY - (this.touchOffsetY || 0);
+        this.dragGhost.style.left = `${left}px`;
+        this.dragGhost.style.top = `${top}px`;
+        this.dragGhost.style.transform = `scale(1.08) rotate(${tilt}deg)`;
       }
 
       const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -235,7 +249,19 @@ class ClassroomMatrix {
       this.dragGhost.remove();
       this.dragGhost = null;
     }
+
+    // Save exact scroll position
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || window.scrollY || 0;
+    const currentScrollX = window.pageXOffset || document.documentElement.scrollLeft || window.scrollX || 0;
+
     this.render('classroom-matrix-view', classId);
+
+    // Restore exact scroll position so screen never jumps to top
+    window.scrollTo({
+      top: currentScrollY,
+      left: currentScrollX,
+      behavior: 'instant'
+    });
   }
 
   applyAutoArrange(classId, pattern) {

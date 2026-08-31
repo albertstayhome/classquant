@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.3';
+    this.appVersion = '1.7.4';
     this.init();
   }
 
@@ -290,19 +290,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.3 -->
+          <!-- v1.7.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.7.3 (iOS 即時彈開讓位 • Spring Displacement 物理微動效版)
+                v1.7.4 (手指精準接觸點浮起 • 滾動位置鎖定版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線 (cubic-bezier) 即時向旁滑動彈開讓位，空出目標卡位槽！</li>
-              <li>• 【專屬粉紅吸附卡位槽】空出的位置顯現粉紅虛線光暈槽，精準預覽落點！</li>
-              <li>• 【放手彈簧吸入回彈】放手瞬間浮動卡片彈跳吸入目標座位，搭配手指拖動速度傾角 (Velocity Tilt) 與 Sanrio 清脆音效！</li>
-              <li>• 【標籤管理清單同步升級】標籤拖曳時上下項目同步平滑滑移讓位！</li>
+              <li>• 【手指精準接觸點浮起 (Pixel-Perfect Lift)】長按卡片浮起時 100% 保持在手指按壓位置，不再強制位移或往角落跳動！</li>
+              <li>• 【拖曳對調後頁面滾動位置凍結】放手對調或完成排位後，畫面精準鎖定在當前瀏覽位置，不再跳至頁面頂端！</li>
+              <li>• 【iOS 即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線 (cubic-bezier) 即時向旁滑動彈開讓位，空出目標卡位槽！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.7.3
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【全系統語法與快取穿透防護】修復版本日誌模版嵌套字元問題，全面強化 Service Worker 離線快取穿透！</li>
             </ul>
           </div>
 
