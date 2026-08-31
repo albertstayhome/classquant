@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.4';
+    this.appVersion = '1.7.5';
     this.init();
   }
 
@@ -290,18 +290,33 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.4 -->
+          <!-- v1.7.5 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.7.4 (手指精準接觸點浮起 • 滾動位置鎖定版)
+                v1.7.5 (100% 零位移接觸點浮起 • 標籤單一整頁滑動 • 捲軸鎖定版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【手指精準接觸點浮起 (Pixel-Perfect Lift)】長按卡片浮起時 100% 保持在手指按壓位置，不再強制位移或往角落跳動！</li>
-              <li>• 【拖曳對調後頁面滾動位置凍結】放手對調或完成排位後，畫面精準鎖定在當前瀏覽位置，不再跳至頁面頂端！</li>
-              <li>• 【iOS 即時彈開讓位 (Spring Displacement)】拖動學生卡片滑過鄰近同學時，周遭卡片以 60fps 彈簧物理曲線 (cubic-bezier) 即時向旁滑動彈開讓位，空出目標卡位槽！</li>
+              <li>• 【手指接觸點零位移浮起 (100% Zero-Offset Lift)】座位拖曳全面改採硬體加速 relative translate3d，長按起飛零跳動、零位移，100% 貼合手指原點！</li>
+              <li>• 【自訂標籤單一整頁滑動體驗】取消內外雙層滾動分割，新增標籤與現有標籤整合為單一平滑滑動頁面！</li>
+              <li>• 【標籤排序捲軸位置完全鎖定】點擊上下箭頭或拖曳調整標籤順序時，捲軸精準停留在原處，不再跳至頁面頂端！</li>
+              <li>• 【系統防護與事件檢討報告】永久記錄升級防護指引，落實全流程發布品質把關！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.7.4
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【手指精準接觸點浮起】長按卡片浮起時保持在手指按壓位置！</li>
+              <li>• 【拖曳對調後頁面滾動位置凍結】放手對調後畫面鎖定在當前瀏覽位置！</li>
             </ul>
           </div>
 

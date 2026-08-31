@@ -78,6 +78,7 @@ class ClassroomMatrix {
     this.draggedSeatNo = seatNo;
     this.isJiggleMode = true;
     this.lastTouchX = touch.clientX;
+    this.dragStartTouch = { x: touch.clientX, y: touch.clientY };
 
     if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
     if (window.appState?.playPop) window.appState.playPop();
@@ -85,21 +86,19 @@ class ClassroomMatrix {
     const originalCard = document.getElementById(`seat-card-${seatNo}`);
     if (originalCard) {
       const rect = originalCard.getBoundingClientRect();
-      // Calculate exact finger contact offset inside card so lift coordinates match 100%
-      this.touchOffsetX = touch.clientX - rect.left;
-      this.touchOffsetY = touch.clientY - rect.top;
+      this.dragCardRect = rect;
 
       originalCard.classList.add('is-dragging', 'seating-drop-slot');
 
-      // Create floating ghost exactly at originalCard coordinates
+      // Create floating ghost exactly at originalCard coordinates with 100% precision
       const ghost = originalCard.cloneNode(true);
       ghost.id = 'ios-drag-floating-ghost';
       ghost.style.width = `${rect.width}px`;
       ghost.style.height = `${rect.height}px`;
       ghost.style.left = `${rect.left}px`;
       ghost.style.top = `${rect.top}px`;
-      ghost.style.transformOrigin = `${this.touchOffsetX}px ${this.touchOffsetY}px`;
-      ghost.style.transform = 'scale(1.08)';
+      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.05)';
+      ghost.style.transformOrigin = 'center center';
       document.body.appendChild(ghost);
       this.dragGhost = ghost;
     }
@@ -120,15 +119,12 @@ class ClassroomMatrix {
       // Dynamic tilt based on drag velocity
       const vx = touch.clientX - (this.lastTouchX || touch.clientX);
       this.lastTouchX = touch.clientX;
-      const tilt = Math.max(-5, Math.min(5, vx * 0.4));
+      const tilt = Math.max(-5, Math.min(5, vx * 0.35));
 
-      if (this.dragGhost) {
-        // Move ghost using finger offset so contact point never shifts
-        const left = touch.clientX - (this.touchOffsetX || 0);
-        const top = touch.clientY - (this.touchOffsetY || 0);
-        this.dragGhost.style.left = `${left}px`;
-        this.dragGhost.style.top = `${top}px`;
-        this.dragGhost.style.transform = `scale(1.08) rotate(${tilt}deg)`;
+      if (this.dragGhost && this.dragStartTouch && this.dragCardRect) {
+        const dx = touch.clientX - this.dragStartTouch.x;
+        const dy = touch.clientY - this.dragStartTouch.y;
+        this.dragGhost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.05) rotate(${tilt}deg)`;
       }
 
       const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);

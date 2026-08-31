@@ -293,12 +293,13 @@ html.dark .compact-seat-tile.selected {
   position: fixed;
   pointer-events: none;
   z-index: 999999;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 3px #ec4899;
-  opacity: 0.96;
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.35), 0 0 0 3px #ec4899;
+  opacity: 0.98;
   border-radius: 1rem;
   background: white;
-  transition: transform 0.08s ease-out;
-  will-change: transform, left, top;
+  margin: 0 !important;
+  transition: none !important;
+  will-change: transform;
 }
 
 /* Landing Slot Silhouette */

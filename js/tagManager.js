@@ -10,10 +10,7 @@ class TagManager {
   }
 
   openTagManagerModal() {
-    if (window.onboardingTour && window.onboardingTour.isActive) {
-      window.onboardingTour.nextStep();
-      return;
-    }
+    this.lastModalScrollTop = 0;
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
@@ -24,10 +21,13 @@ class TagManager {
   }
 
   renderModalContent(container) {
+    const scrollEl = document.getElementById('tag-manager-modal-scroll');
+    const savedScrollTop = scrollEl ? scrollEl.scrollTop : (this.lastModalScrollTop || 0);
+
     const tags = this.store.getTags();
 
     container.innerHTML = `
-      <div class="p-6 max-h-[85vh] overflow-y-auto">
+      <div id="tag-manager-modal-scroll" class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-pink-200">
           <div class="flex items-center space-x-2.5">
@@ -82,7 +82,7 @@ class TagManager {
           </form>
         </div>
 
-        <!-- Current Tags List -->
+        <!-- Current Tags List (Unified single scrolling page) -->
         <div>
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div>
@@ -100,7 +100,7 @@ class TagManager {
             </div>
           </div>
 
-          <div class="space-y-2 max-h-72 overflow-y-auto pr-1" id="tag-manager-drag-list"
+          <div class="space-y-2 pr-1" id="tag-manager-drag-list"
                onmousemove="tagManager.handleTagTouchMove(event)"
                onmouseup="tagManager.handleTagTouchEnd(event)">
             ${tags.map((tag, idx) => {
@@ -162,6 +162,12 @@ class TagManager {
     `;
 
     if (window.lucide) window.lucide.createIcons();
+
+    // Restore scroll position so modal never jumps
+    const newScrollEl = document.getElementById('tag-manager-modal-scroll');
+    if (newScrollEl && savedScrollTop) {
+      newScrollEl.scrollTop = savedScrollTop;
+    }
   }
 
   // --- Tag Drag Handlers ---
@@ -175,16 +181,46 @@ class TagManager {
     }, 280);
   }
 
+  startTagDrag(touch, tagId) {
+    this.isDraggingTag = true;
+    this.draggedTagId = tagId;
+    this.tagDragStartTouch = { x: touch.clientX, y: touch.clientY };
+
+    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    if (window.appState?.playPop) window.appState.playPop();
+
+    const originalCard = document.getElementById(`tag-item-${tagId}`);
+    if (originalCard) {
+      const rect = originalCard.getBoundingClientRect();
+      this.tagCardRect = rect;
+
+      originalCard.classList.add('is-dragging', 'seating-drop-slot');
+
+      const ghost = originalCard.cloneNode(true);
+      ghost.id = 'ios-drag-floating-ghost';
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+      ghost.style.transform = 'translate3d(0, 0, 0) scale(1.03)';
+      ghost.style.transformOrigin = 'center center';
+      document.body.appendChild(ghost);
+      this.tagDragGhost = ghost;
+    }
+
+    const list = document.getElementById('tag-manager-drag-list');
+    if (list) list.classList.add('ios-jiggle-active');
+  }
+
   handleTagTouchMove(e) {
     const touch = e.touches ? e.touches[0] : e;
 
     if (this.isDraggingTag) {
       if (e.preventDefault) e.preventDefault();
-      if (this.tagDragGhost) {
-        const left = touch.clientX - (this.tagTouchOffsetX || 0);
-        const top = touch.clientY - (this.tagTouchOffsetY || 0);
-        this.tagDragGhost.style.left = `${left}px`;
-        this.tagDragGhost.style.top = `${top}px`;
+      if (this.tagDragGhost && this.tagDragStartTouch && this.tagCardRect) {
+        const dx = touch.clientX - this.tagDragStartTouch.x;
+        const dy = touch.clientY - this.tagDragStartTouch.y;
+        this.tagDragGhost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.03)`;
       }
 
       const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -220,37 +256,6 @@ class TagManager {
 
       this.stopTagDrag();
     }
-  }
-
-  startTagDrag(touch, tagId) {
-    this.isDraggingTag = true;
-    this.draggedTagId = tagId;
-
-    if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
-    if (window.appState?.playPop) window.appState.playPop();
-
-    const originalCard = document.getElementById(`tag-item-${tagId}`);
-    if (originalCard) {
-      const rect = originalCard.getBoundingClientRect();
-      this.tagTouchOffsetX = touch.clientX - rect.left;
-      this.tagTouchOffsetY = touch.clientY - rect.top;
-
-      originalCard.classList.add('is-dragging');
-
-      const ghost = originalCard.cloneNode(true);
-      ghost.id = 'ios-drag-floating-ghost';
-      ghost.style.width = `${rect.width}px`;
-      ghost.style.height = `${rect.height}px`;
-      ghost.style.left = `${rect.left}px`;
-      ghost.style.top = `${rect.top}px`;
-      ghost.style.transformOrigin = `${this.tagTouchOffsetX}px ${this.tagTouchOffsetY}px`;
-      ghost.style.transform = 'scale(1.04)';
-      document.body.appendChild(ghost);
-      this.tagDragGhost = ghost;
-    }
-
-    const list = document.getElementById('tag-manager-drag-list');
-    if (list) list.classList.add('ios-jiggle-active');
   }
 
   setTagHoverTarget(targetId) {
@@ -309,12 +314,10 @@ class TagManager {
       this.tagDragGhost.remove();
       this.tagDragGhost = null;
     }
-    const list = document.getElementById('tag-manager-drag-list');
-    const scrollPos = list ? list.scrollTop : 0;
+    const scrollEl = document.getElementById('tag-manager-modal-scroll');
+    this.lastModalScrollTop = scrollEl ? scrollEl.scrollTop : 0;
     const modalContent = document.getElementById('global-modal-content');
     if (modalContent) this.renderModalContent(modalContent);
-    const newList = document.getElementById('tag-manager-drag-list');
-    if (newList) newList.scrollTop = scrollPos;
     if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
   }
 
@@ -325,6 +328,8 @@ class TagManager {
   }
 
   moveTagUp(tagId) {
+    const scrollEl = document.getElementById('tag-manager-modal-scroll');
+    this.lastModalScrollTop = scrollEl ? scrollEl.scrollTop : 0;
     const success = this.store.moveTag(tagId, 'up');
     if (success) {
       if (window.appState?.playPop) window.appState.playPop();
@@ -335,6 +340,8 @@ class TagManager {
   }
 
   moveTagDown(tagId) {
+    const scrollEl = document.getElementById('tag-manager-modal-scroll');
+    this.lastModalScrollTop = scrollEl ? scrollEl.scrollTop : 0;
     const success = this.store.moveTag(tagId, 'down');
     if (success) {
       if (window.appState?.playPop) window.appState.playPop();
