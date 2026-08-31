@@ -13,6 +13,11 @@
   <meta name="apple-mobile-web-app-title" content="ClassQuant">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f43f5e'/%3E%3Cpath d='M30 45 C30 35 40 28 50 28 C60 28 70 35 70 45 C70 58 60 65 50 65 C40 65 30 58 30 45 Z' fill='%23ffffff'/%3E%3Cellipse cx='42' cy='46' rx='3' ry='4.5' fill='%23222'/%3E%3Cellipse cx='58' cy='46' rx='3' ry='4.5' fill='%23222'/%3E%3Cellipse cx='50' cy='53' rx='3.5' ry='2.5' fill='%23fbbf24'/%3E%3Cpath d='M62 32 C65 26 74 26 77 31 C79 35 75 40 70 39 C72 44 68 49 63 47 C58 45 59 38 62 32 Z' fill='%23ef4444'/%3E%3Ccircle cx='66' cy='36' r='3.5' fill='%23ffedd5'/%3E%3C/svg%3E">
 
+  <!-- Cache-Control Meta Headers to Prevent Mobile Stale Cache Lockups -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -29,9 +34,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="./css/styles.css?v=1.6.0">
-  <link rel="stylesheet" href="./css/kitty-theme.css?v=1.6.0">
-  <link rel="stylesheet" href="./css/sanrio-characters.css?v=1.6.0">
+  <link rel="stylesheet" href="./css/styles.css?v=1.8.7">
+  <link rel="stylesheet" href="./css/kitty-theme.css?v=1.8.7">
+  <link rel="stylesheet" href="./css/sanrio-characters.css?v=1.8.7">
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300 font-sans selection:bg-pink-300 selection:text-pink-900">
 
@@ -53,7 +58,7 @@
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
             <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.8.6</span>
+              <span>v1.8.7</span>
               <span>📢</span>
             </button>
           </div>
@@ -590,25 +595,25 @@
   </div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/uiMap.js?v=1.8.6"></script>
-  <script src="./js/store.js?v=1.8.6"></script>
-  <script src="./js/timetable.js?v=1.8.6"></script>
-  <script src="./js/statistics.js?v=1.8.6"></script>
-  <script src="./js/charts.js?v=1.8.6"></script>
-  <script src="./js/tagManager.js?v=1.8.6"></script>
-  <script src="./js/matrix.js?v=1.8.6"></script>
-  <script src="./js/rosterManager.js?v=1.8.6"></script>
-  <script src="./js/retroLogView.js?v=1.8.6"></script>
-  <script src="./js/eventsLog.js?v=1.8.6"></script>
-  <script src="./js/studentDossier.js?v=1.8.6"></script>
-  <script src="./js/timetableEditor.js?v=1.8.6"></script>
-  <script src="./js/aiImportExport.js?v=1.8.6"></script>
-  <script src="./js/onboardingTour.js?v=1.8.6"></script>
-  <script src="./js/onboardingWizard.js?v=1.8.6"></script>
-  <script src="./js/userGuide.js?v=1.8.6"></script>
-  <script src="./js/app.js?v=1.8.6"></script>
+  <script src="./js/uiMap.js?v=1.8.7"></script>
+  <script src="./js/store.js?v=1.8.7"></script>
+  <script src="./js/timetable.js?v=1.8.7"></script>
+  <script src="./js/statistics.js?v=1.8.7"></script>
+  <script src="./js/charts.js?v=1.8.7"></script>
+  <script src="./js/tagManager.js?v=1.8.7"></script>
+  <script src="./js/matrix.js?v=1.8.7"></script>
+  <script src="./js/rosterManager.js?v=1.8.7"></script>
+  <script src="./js/retroLogView.js?v=1.8.7"></script>
+  <script src="./js/eventsLog.js?v=1.8.7"></script>
+  <script src="./js/studentDossier.js?v=1.8.7"></script>
+  <script src="./js/timetableEditor.js?v=1.8.7"></script>
+  <script src="./js/aiImportExport.js?v=1.8.7"></script>
+  <script src="./js/onboardingTour.js?v=1.8.7"></script>
+  <script src="./js/onboardingWizard.js?v=1.8.7"></script>
+  <script src="./js/userGuide.js?v=1.8.7"></script>
+  <script src="./js/app.js?v=1.8.7"></script>
 
-  <!-- Register Service Worker for 100% Offline PWA functionality & Update Detection -->
+  <!-- Register Service Worker for 100% Offline PWA functionality & Instant Auto Update -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -624,19 +629,18 @@
           .then(reg => {
             console.log('[PWA] Service Worker registered with scope:', reg.scope);
 
-            // If a worker is already waiting to activate
+            // Automatically tell waiting worker to take over immediately
             if (reg.waiting) {
-              promptSWUpdate(reg);
+              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
               return;
             }
 
-            // Listen for new service worker installation
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
               if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    promptSWUpdate(reg);
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                   }
                 });
               }
@@ -644,34 +648,6 @@
           })
           .catch(err => console.error('[PWA] Service Worker registration failed:', err));
       });
-    }
-
-    function promptSWUpdate(reg) {
-      if (window.appState && typeof window.appState.showSWUpdateBanner === 'function') {
-        window.appState.showSWUpdateBanner(reg);
-      } else {
-        const existing = document.getElementById('pwa-update-banner');
-        if (existing) return;
-        const banner = document.createElement('div');
-        banner.id = 'pwa-update-banner';
-        banner.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/95 text-white border border-pink-400 shadow-2xl backdrop-blur-md flex items-center gap-3 text-xs font-bold animate-fade-in-up';
-        banner.innerHTML = `
-          <span>🎉 發現新版本 ClassQuant Hub！</span>
-          <button id="pwa-reload-btn" class="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl text-white font-black hover:brightness-110 active:scale-95 transition">立即更新</button>
-          <button id="pwa-dismiss-btn" class="px-2 py-1 text-slate-400 hover:text-white transition">稍後</button>
-        `;
-        document.body.appendChild(banner);
-        document.getElementById('pwa-reload-btn').addEventListener('click', () => {
-          if (reg && reg.waiting) {
-            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          } else {
-            window.location.reload();
-          }
-        });
-        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
-          banner.remove();
-        });
-      }
     }
   </script>
 </body>

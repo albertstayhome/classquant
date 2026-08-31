@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.6';
+    this.appVersion = '1.8.7';
     this.init();
   }
 
@@ -289,6 +289,27 @@ class AppState {
     });
   }
 
+  async hardResetCacheAndReload() {
+    this.showToast('🔄 正在徹底清除快取並重新載入最新版本...', 'info');
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      localStorage.removeItem('classquant_tour_completed');
+      localStorage.removeItem('classquant_onboarding_completed');
+    } catch (e) {
+      console.error(e);
+    }
+    setTimeout(() => {
+      window.location.href = window.location.origin + window.location.pathname + '?nocache=' + Date.now();
+    }, 300);
+  }
+
   // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
   openBulletinModal() {
     const modal = document.getElementById('global-modal');
@@ -311,6 +332,17 @@ class AppState {
           </div>
           <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold flex items-center justify-center transition">
             ✕
+          </button>
+        </div>
+
+        <!-- Urgent Cache Refresh Action -->
+        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 mb-4 flex items-center justify-between gap-2 shadow-sm">
+          <div class="text-xs text-amber-900 font-bold">
+            <span>手機若畫面異常或舊版卡住？</span>
+            <span class="block text-[11px] text-amber-700 font-medium">點擊右側按鈕可徹底清除舊快取並強制載入最新版！</span>
+          </div>
+          <button onclick="appState.hardResetCacheAndReload()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white rounded-xl text-xs font-black shadow transition active:scale-95 shrink-0">
+            🔄 強制修復
           </button>
         </div>
 
@@ -343,11 +375,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.6 -->
+          <!-- v1.8.7 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.6 (多 Agent 協同架構全系統驗證通過版)
+                v1.8.7 (強制穿透舊快取與一鍵自動修復版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【強制穿透舊快取】加入 HTTP No-Cache 檔頭與 Service Worker 自動強制跳過等待（Auto Skip Waiting），杜絕手機瀏覽器鎖死於舊版！</li>
+              <li>• 【一鍵強制修復】公佈欄頂部新增「🔄 強制修復」按鈕，可一鍵徹底清除手機本機快取並重新載入最新功能！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.6 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.6
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
             </div>
