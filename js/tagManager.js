@@ -274,6 +274,7 @@ class TagManager {
     const originalCard = document.getElementById(`tag-item-${tagId}`);
     if (originalCard) {
       const rect = originalCard.getBoundingClientRect();
+      this.initialCardRect = rect;
 
       // Clone clean ghost
       const ghost = originalCard.cloneNode(true);
@@ -321,10 +322,16 @@ class TagManager {
         this.ghostEl.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.05)`;
       }
 
-      // 2. Continuous Proximity Center Detection
-      let newTargetIdx = this.cardSnapshots.length - 1;
-      for (let i = 0; i < this.cardSnapshots.length; i++) {
-        if (touch.clientY < this.cardSnapshots[i].centerY) {
+      // 2. Human Intuition Centerline & Gap Midpoint Detection with Hysteresis
+      const ghostCenterY = this.initialCardRect.top + dy + (this.initialCardRect.height / 2);
+      const n = this.cardSnapshots.length;
+      let newTargetIdx = n - 1;
+
+      for (let i = 0; i < n - 1; i++) {
+        const boundaryY = (this.cardSnapshots[i].centerY + this.cardSnapshots[i + 1].centerY) / 2;
+        // Directional hysteresis deadzone: requires crossing past the gap/centerline before flipping slot
+        const hysteresis = (this.targetIndex !== null && this.targetIndex > i) ? -6 : 6;
+        if (ghostCenterY < boundaryY + hysteresis) {
           newTargetIdx = i;
           break;
         }

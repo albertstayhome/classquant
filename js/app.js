@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.4';
+    this.appVersion = '1.8.5';
     this.init();
   }
 
@@ -289,20 +289,33 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.4 -->
+          <!-- v1.8.5 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.4 (觸控滑動智慧防誤觸 • 長按專注拖曳模式)
+                v1.8.5 (人體直覺過半中線與間隙判定 • 雙向遲滯防抖版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【觸控滑動智慧防誤觸 (Smart Scroll vs Drag Disambiguation)】手指滑動頁面時即時取消長按判定，滑動頁面絲滑順暢，絕不誤觸拖曳！</li>
-              <li>• 【長按 300ms 專注拖曳模式】僅在手指按住同一卡片不動 300ms 後才進入拖曳排序，震動提示明確、操作穩定！</li>
-              <li>• 【1:1 指尖真硬體鎖定 (1:1 Hardware Direct Finger Lock)】徹底捨棄函式庫預設內建定速滾動，手指滑多快卡片就以 120fps/60fps 絕對等速同步跟隨！</li>
+              <li>• 【人體直覺過半中線與間隙判定 (Human Intuition Midpoint & Gap Threshold)】拖曳虛影落點判定全面升級為「過半中線與相鄰間隙」幾何邊界，唯有手指與卡片確實越過中線或間隙才觸發推開，符合人體操作直覺！</li>
+              <li>• 【雙向遲滯防抖保護 (Hysteresis Deadzone Protection)】加入雙向防抖死區，在交界處微幅晃動 100% 絕不反覆抽搐！</li>
+              <li>• 【觸控滑動智慧防誤觸】滑動頁面即時取消長按判定，滑動頁面絲滑順暢，絕不誤觸！</li>
+              <li>• 【1:1 指尖真硬體鎖定】原生 Touch 座標直推，120fps 絕對等速同步跟隨！</li>
               <li>• 【各班級快速標籤 100% 獨立管理】每個班級擁有專屬自訂標籤庫與獨立排序順序，互不干擾！</li>
-              <li>• 【頂部常駐固定叉叉 (Sticky Permanent Close X)】標籤管理中心頂部橫幅永久鎖定於視窗上方，隨頁面滑動絕不消失，隨時一鍵關閉！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.4
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【觸控滑動智慧防誤觸】手指滑動頁面時即時取消長按判定！</li>
             </ul>
           </div>
 
