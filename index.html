@@ -58,7 +58,7 @@
               <span class="kitty-bow !w-3.5 !h-3.5"></span>
             </h1>
             <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-2 py-0.2 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5" title="查看公佈欄與更新日誌">
-              <span>v1.8.7</span>
+              <span>v1.8.8</span>
               <span>📢</span>
             </button>
           </div>
@@ -511,107 +511,24 @@
   <!-- Global Toast Container -->
   <div id="global-toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none"></div>
 
-  <!-- Permanent Static Onboarding Tour Container (Zero Dynamic Overhead) -->
-  <div id="tour-overlay-container" class="fixed inset-0 pointer-events-none hidden" style="z-index: 99999;">
-    <!-- Industry Standard SVG Mask Layer (GPU Composited) -->
-    <svg id="tour-svg-overlay" class="absolute inset-0 w-full h-full pointer-events-none tour-gpu-layer" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="tour-glow-filter" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f43f5e" flood-opacity="0.9" />
-          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#fb7185" flood-opacity="0.65" />
-        </filter>
-        <linearGradient id="tour-glow-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#f43f5e" />
-          <stop offset="50%" stop-color="#fb7185" />
-          <stop offset="100%" stop-color="#f43f5e" />
-        </linearGradient>
-      </defs>
-      <!-- Dark Backdrop Mask with Rounded Cutout -->
-      <path id="tour-overlay-path" d="" fill="rgba(15, 23, 42, 0.78)" fill-rule="evenodd" style="pointer-events: auto;"></path>
-      <!-- Outer Radar Pulse Halo -->
-      <rect id="tour-spotlight-halo" x="0" y="0" width="0" height="0" rx="0" ry="0" fill="none" stroke="#fb7185" stroke-width="2" class="tour-pulse-halo pointer-events-none" style="pointer-events: none;"></rect>
-      <!-- Synchronized Glowing Outline Accent -->
-      <rect id="tour-spotlight-glow" x="0" y="0" width="0" height="0" rx="14" ry="14" fill="none" stroke="url(#tour-glow-stroke)" stroke-width="3" filter="url(#tour-glow-filter)" class="tour-spotlight-pulse pointer-events-none" style="pointer-events: none;"></rect>
-    </svg>
-
-    <!-- Calibrated Vector SVG Ghost Cursor Layer -->
-    <div id="tour-ghost-cursor" class="fixed pointer-events-none will-change-transform opacity-0 hidden" style="top: 0; left: 0; transform: translate3d(0, 0, 0); transition: opacity 0.2s ease-out; z-index: 100002;">
-      <div id="tour-ghost-cursor-body" class="relative pointer-events-none flex items-center justify-center" style="width: 40px; height: 42px; transform-origin: 14px 2.5px;">
-        <svg id="tour-ghost-svg" width="40" height="42" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" class="filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.45)]">
-          <defs>
-            <linearGradient id="ghost-hand-skin" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ffffff" />
-              <stop offset="60%" stop-color="#fff5f5" />
-              <stop offset="100%" stop-color="#ffe4e6" />
-            </linearGradient>
-          </defs>
-          <g>
-            <path d="M10.5 16.5V4.5C10.5 2.57 12.07 1 14 1C15.93 1 17.5 2.57 17.5 4.5V14.25M17.5 14.25V7.5C17.5 5.84 18.84 4.5 20.5 4.5C22.16 4.5 23.5 5.84 23.5 7.5V14.25M23.5 14.25V9.75C23.5 8.09 24.84 6.75 26.5 6.75C28.16 6.75 29.5 8.09 29.5 9.75V15.75M29.5 15.75V12C29.5 10.34 30.84 9 32.5 9C34.16 9 35.5 10.34 35.5 12V22.5C35.5 29.13 30.13 34.5 23.5 34.5H18.25C14.11 34.5 10.28 32.35 8.1 28.84L4.8 23.53C3.65 21.68 4.22 19.26 6.07 18.11C7.92 16.96 10.34 17.53 11.49 19.38L13.5 22.5" 
-              fill="url(#ghost-hand-skin)" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="14" cy="2.5" r="2.5" fill="#f43f5e" />
-          </g>
-        </svg>
-        <div id="tour-ghost-ripple" class="hidden"></div>
-      </div>
-    </div>
-
-    <!-- Static 4-Way Directional Pointer -->
-    <div id="tour-pointer-container" class="fixed pointer-events-none hidden will-change-transform tour-gpu-layer" style="top: 0; left: 0; transform: translate3d(0, 0, 0); z-index: 100000;">
-      <div id="tour-pointer-inner" class="flex flex-col items-center justify-center pointer-events-none">
-        <div id="tour-arrow-up" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👆</div>
-        <div id="tour-pointer-badge" class="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-black text-[11px] px-3.5 py-1 rounded-full shadow-2xl border-1.5 border-white whitespace-nowrap flex items-center gap-1">
-          <span id="tour-arrow-left" class="tour-arrow-lateral hidden text-sm" style="display: none;">👈</span>
-          <span id="tour-pointer-text">請點擊此處</span>
-          <span id="tour-arrow-right" class="tour-arrow-lateral hidden text-sm" style="display: none;">👉</span>
-        </div>
-        <div id="tour-arrow-down" class="tour-arrow-icon text-3xl filter drop-shadow-[0_4px_12px_rgba(244,63,94,0.95)] hidden" style="display: none;">👇</div>
-      </div>
-    </div>
-
-    <!-- Viewport-Safe Popover Card -->
-    <div id="tour-popover" class="fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[380px] bg-white rounded-3xl p-4 shadow-2xl border-2 border-pink-300 pointer-events-auto transition-all duration-300" style="z-index: 100001; bottom: 14px; top: auto;">
-      <div class="flex items-center justify-between pb-2 mb-2 border-b border-pink-100">
-        <div class="flex items-center space-x-2">
-          <span class="kitty-bow !w-3.5 !h-3.5"></span>
-          <span id="tour-step-badge" class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700">步驟 1 / 12</span>
-        </div>
-        <button onclick="onboardingTour.endTour()" class="text-xs font-bold text-slate-400 hover:text-pink-600 transition cursor-pointer" title="結束教學">
-          ✕ 結束
-        </button>
-      </div>
-      <h4 id="tour-title" class="text-sm sm:text-base font-black text-slate-900 mb-1.5 flex items-center gap-1.5">1. 班級切換樞紐 (點擊展開)</h4>
-      <div id="tour-content" class="text-xs text-slate-600 mb-3 leading-relaxed">這裡是你管理班級的核心！<strong>請點擊下拉選單</strong>，看看裡面為各班獨立保存的分數與名單。</div>
-      <div id="tour-action-container" class="flex items-center justify-end pt-1">
-        <div class="flex items-center gap-2 w-full justify-between pt-1">
-          <div class="px-2.5 py-1 rounded-xl bg-pink-50 text-pink-700 text-[11px] font-bold border border-pink-200 truncate">
-            👆 點發光處或直接點右側 ➔
-          </div>
-          <button onclick="onboardingTour.nextStep()" class="px-4 py-2 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-xs sm:text-sm shadow-lg border-2 border-white transition flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 animate-bounce ring-2 ring-pink-200">
-            <span>下一步 ➔</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/uiMap.js?v=1.8.7"></script>
-  <script src="./js/store.js?v=1.8.7"></script>
-  <script src="./js/timetable.js?v=1.8.7"></script>
-  <script src="./js/statistics.js?v=1.8.7"></script>
-  <script src="./js/charts.js?v=1.8.7"></script>
-  <script src="./js/tagManager.js?v=1.8.7"></script>
-  <script src="./js/matrix.js?v=1.8.7"></script>
-  <script src="./js/rosterManager.js?v=1.8.7"></script>
-  <script src="./js/retroLogView.js?v=1.8.7"></script>
-  <script src="./js/eventsLog.js?v=1.8.7"></script>
-  <script src="./js/studentDossier.js?v=1.8.7"></script>
-  <script src="./js/timetableEditor.js?v=1.8.7"></script>
-  <script src="./js/aiImportExport.js?v=1.8.7"></script>
-  <script src="./js/onboardingTour.js?v=1.8.7"></script>
-  <script src="./js/onboardingWizard.js?v=1.8.7"></script>
-  <script src="./js/userGuide.js?v=1.8.7"></script>
-  <script src="./js/app.js?v=1.8.7"></script>
+  <script src="./js/uiMap.js?v=1.8.8"></script>
+  <script src="./js/store.js?v=1.8.8"></script>
+  <script src="./js/timetable.js?v=1.8.8"></script>
+  <script src="./js/statistics.js?v=1.8.8"></script>
+  <script src="./js/charts.js?v=1.8.8"></script>
+  <script src="./js/tagManager.js?v=1.8.8"></script>
+  <script src="./js/matrix.js?v=1.8.8"></script>
+  <script src="./js/rosterManager.js?v=1.8.8"></script>
+  <script src="./js/retroLogView.js?v=1.8.8"></script>
+  <script src="./js/eventsLog.js?v=1.8.8"></script>
+  <script src="./js/studentDossier.js?v=1.8.8"></script>
+  <script src="./js/timetableEditor.js?v=1.8.8"></script>
+  <script src="./js/aiImportExport.js?v=1.8.8"></script>
+  <script src="./js/onboardingTour.js?v=1.8.8"></script>
+  <script src="./js/onboardingWizard.js?v=1.8.8"></script>
+  <script src="./js/userGuide.js?v=1.8.8"></script>
+  <script src="./js/app.js?v=1.8.8"></script>
 
   <!-- Register Service Worker for 100% Offline PWA functionality & Instant Auto Update -->
   <script>

@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.7';
+    this.appVersion = '1.8.8';
     this.init();
   }
 
@@ -375,11 +375,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.7 -->
+          <!-- v1.8.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.7 (強制穿透舊快取與一鍵自動修復版)
+                v1.8.8 (徹底移除靜態遮罩 DOM • 經典架構純淨回歸版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【徹底移除靜態遮罩 DOM】自 HTML 根除硬編碼的靜態遮罩與 path，教學引導改回純動態生命週期，平常頁面 0 覆蓋層、0 死鎖！</li>
+              <li>• 【還原經典輕量導覽引擎】回歸 1.5.2 簡潔純淨架構，每一步均有清晰的「下一步 ➔」與「✕ 結束」，永不卡死！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.7 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.7
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
             </div>

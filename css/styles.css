@@ -1,4 +1,8 @@
 /* Base Tailwind & Custom Color Rules for ClassQuant Hub */
+.hidden {
+  display: none !important;
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
