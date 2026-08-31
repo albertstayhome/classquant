@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.7.7';
+    this.appVersion = '1.7.8';
     this.init();
   }
 
@@ -70,8 +70,8 @@ class AppState {
     this.updateHeaderVersionBadge();
     this.switchTab('matrix');
 
-    // Auto check updates and show release notes ONCE on launch
-    setTimeout(() => this.checkReleaseNotesOnLaunch(), 1000);
+    // Auto check updates on launch
+    setTimeout(() => this.checkForUpdates(true), 600);
   }
 
   updateHeaderVersionBadge() {
@@ -98,9 +98,8 @@ class AppState {
             if (!this.isHeaderCollapsed) {
               this.toggleHeader(false, true);
             }
-          } 
-          // When scrolling up back to top, reveal header
-          else if (currentScrollY < 15) {
+          } else if (currentScrollY < lastScrollY - 15) {
+            // When scrolling up more than 15px, expand header
             if (this.isHeaderCollapsed) {
               this.toggleHeader(true, true);
             }
@@ -113,45 +112,42 @@ class AppState {
     }, { passive: true });
   }
 
+  toggleHeader(forceExpand = null, isAuto = false) {
+    const header = document.getElementById('global-header');
+    const unhidePill = document.getElementById('header-unhide-pill');
+    if (!header || !unhidePill) return;
+
+    if (forceExpand !== null) {
+      this.isHeaderCollapsed = !forceExpand;
+    } else {
+      this.isHeaderCollapsed = !this.isHeaderCollapsed;
+    }
+
+    if (this.isHeaderCollapsed) {
+      header.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+      header.classList.remove('sticky');
+      unhidePill.classList.remove('hidden');
+    } else {
+      header.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+      header.classList.add('sticky');
+      unhidePill.classList.add('hidden');
+    }
+  }
+
   updateNetworkBadge(isOnline) {
-    const badge = document.getElementById('header-offline-status');
-    if (badge) {
-      badge.innerHTML = isOnline 
+    const badge = document.getElementById('header-schedule-status');
+    if (badge && !isOnline) {
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="opacity-70">離線狀態</span>';
+    }
+    const netIcon = document.getElementById('network-status-indicator');
+    if (netIcon) {
+      netIcon.innerHTML = isOnline 
         ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span class="text-[10px] text-emerald-600 font-bold hidden sm:inline">已連線</span>'
         : '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span class="text-[10px] text-slate-500 font-bold hidden sm:inline">離線模式</span>';
     }
   }
 
-  // --- OTA Live Push Update Engine & Proactive Release Notes (Strictly Once per Version) ---
-  async checkReleaseNotesOnLaunch() {
-    const lastSeen = localStorage.getItem('classquant_last_seen_version');
-    if (lastSeen === this.appVersion) {
-      // User has already seen this version, do not prompt again!
-      return;
-    }
-
-    try {
-      const res = await fetch(`./version.json?t=${Date.now()}`);
-      if (res.ok) {
-        const info = await res.json();
-        this.showReleaseNotesModal(info, true);
-        return;
-      }
-    } catch (e) {}
-
-    // Fallback modal if offline
-    this.showReleaseNotesModal({
-      version: this.appVersion,
-      releaseDate: '2026-08-29',
-      releaseNotes: [
-        "1. 頂部新增「🌱 新手引導」互動教學嚮導，一步步引導建立班級與標籤",
-        "2. 頂部橫幅隨頁面滑動智慧自動收合，釋放全螢幕視野",
-        "3. 新增精緻三麗鷗微動畫（加分星星粒子、卡片微彈回饋）",
-        "4. 精簡移除 NAS 模組，系統運行更加輕快順手"
-      ]
-    }, true);
-  }
-
+  // --- OTA Live Push Update Engine & Proactive Release Notes ---
   async checkForUpdates(silent = true) {
     if (!navigator.onLine) {
       if (!silent) this.showToast('目前處於離線狀態，無法檢查更新', 'info');
@@ -159,11 +155,10 @@ class AppState {
     }
 
     try {
-      const res = await fetch(`./version.json?t=${Date.now()}`);
+      const res = await fetch(`./version.json?t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const info = await res.json();
-        const lastSeen = localStorage.getItem('classquant_last_seen_version');
-        if (info.version && info.version !== this.appVersion && lastSeen !== info.version) {
+        if (info.version && info.version !== this.appVersion) {
           this.showReleaseNotesModal(info, false);
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
@@ -175,9 +170,6 @@ class AppState {
   }
 
   showReleaseNotesModal(info, isNewVersionNotice = false) {
-    // Immediately mark as seen so it NEVER pops up repeatedly!
-    localStorage.setItem('classquant_last_seen_version', info.version || this.appVersion);
-
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
@@ -191,7 +183,7 @@ class AppState {
           ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${info.version}
           <span class="kitty-bow"></span>
         </h3>
-        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-29'}</p>
+        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-31'}</p>
 
         <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-2 mb-5 font-bold">
           <div class="text-pink-900 font-black flex items-center gap-1">
@@ -210,7 +202,7 @@ class AppState {
           <button onclick="appState.dismissReleaseNotes('${info.version}')" 
             class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5 active:scale-95">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span>✨ 開始體驗最新功能！</span>
+            <span>✨ 立即更新並體驗最新功能！</span>
           </button>
         </div>
       </div>
@@ -223,17 +215,24 @@ class AppState {
   async dismissReleaseNotes(version) {
     localStorage.setItem('classquant_last_seen_version', version);
     this.closeModal();
-    this.showToast(`已套用 v${version} 最新功能！🎀`, 'success');
-    // If the currently loaded DOM does not have the latest elements, clear cache and hard reload
-    if (this.appVersion !== version || !document.getElementById('onboarding-guide-btn')) {
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        for (let k of keys) {
-          await caches.delete(k);
-        }
+    this.showToast(`正在更新至 v${version}... 🎀`, 'info');
+
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (let k of keys) {
+        await caches.delete(k);
       }
-      setTimeout(() => location.reload(true), 300);
     }
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let reg of registrations) {
+        await reg.update();
+      }
+    }
+    setTimeout(() => {
+      const cleanUrl = window.location.origin + window.location.pathname + '?v=' + encodeURIComponent(version);
+      window.location.href = cleanUrl;
+    }, 400);
   }
 
   // --- System Bulletin Board & Full Changelog Archive (📢 系統公佈欄 & 歷史更新日誌) ---
@@ -290,19 +289,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.7.7 -->
+          <!-- v1.7.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.7.7 (標籤清單擠開塞入動效 • Insertion Parting & Reordering 版)
+                v1.7.8 (啟動即時自動偵測更新 • Auto OTA & 標籤擠開塞入動效版)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
+              <li>• 【啟動即時自動偵測更新 (Auto OTA Detection)】桌面安裝版 App 每次開啟時主動檢測雲端版本，發現新版本時一鍵自動清空快取並無縫套用最新版！</li>
               <li>• 【標籤清單擠開塞入動效 (Insertion Parting & Reordering)】自訂標籤清單拖曳時，滑經的項目以 60fps 彈簧物理曲線向上下擠開讓位，放手平滑塞入目標位置！</li>
               <li>• 【浮起立體縮影視覺層次還原】長按時浮起的卡片維持 100% 清晰立體高亮縮影，底部座位則呈現專屬粉紅落點虛線光暈槽！</li>
               <li>• 【手指接觸點 100% 零位移浮起】座位拖曳全面改採硬體加速 relative translate3d，長按起飛零跳動、零位移，100% 貼合手指原點！</li>
-              <li>• 【自訂標籤單一整頁滑動與捲軸鎖定】新增標籤與現有標籤整合為單一平滑滑動頁面，調整順序時捲軸完全鎖定不跳頂！</li>
+            </ul>
+          </div>
+
+          <!-- v1.7.7 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.7.7
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【標籤清單擠開塞入動效】自訂標籤清單拖曳時滑經的項目向上下擠開讓位，放手平滑塞入目標位置！</li>
             </ul>
           </div>
 
@@ -698,8 +710,8 @@ class AppState {
 
         <!-- Footer Action -->
         <div class="flex items-center justify-between pt-3 border-t border-pink-100">
-          <button onclick="appState.checkForUpdates(false)" class="text-xs text-pink-600 font-black hover:underline flex items-center gap-1">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 手動檢查雲端更新
+          <button onclick="appState.applyLiveOTAUpdate()" class="text-xs text-pink-600 font-black hover:underline flex items-center gap-1">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 🔄 強制檢查並更新至最新版
           </button>
           <button onclick="appState.closeModal()" class="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-black text-xs shadow-md transition">
             關閉公佈欄
@@ -713,22 +725,23 @@ class AppState {
   }
 
   async applyLiveOTAUpdate() {
-    this.showToast('🔄 正在為您更新最新代碼並清除舊快取...', 'info');
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (let reg of registrations) {
-        await reg.update();
-      }
-    }
+    this.showToast('🔄 正在清除舊快取並載入最新版本...', 'info');
     if ('caches' in window) {
       const keys = await caches.keys();
       for (let k of keys) {
         await caches.delete(k);
       }
     }
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let reg of registrations) {
+        await reg.update();
+      }
+    }
     setTimeout(() => {
-      window.location.reload(true);
-    }, 800);
+      const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
+      window.location.href = cleanUrl;
+    }, 500);
   }
 
   // --- Web Audio API Native Sound Engine ---
