@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.8';
+    this.appVersion = '1.8.9';
     this.init();
   }
 
@@ -375,11 +375,25 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.8 -->
+          <!-- v1.8.9 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-300 bg-white shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
-                v1.8.8 (徹底移除靜態遮罩 DOM • 經典架構純淨回歸版)
+                v1.8.9 (課表排程高對比主題修復 • 經典 DOM 純淨版)
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1 font-medium pl-1">
+              <li>• 【課表排程全面重構】徹底修復課表管理在淺色主題下的文字對比與樣式相容性，清晰呈現每週節次！</li>
+              <li>• 【終止所有子代理程序】徹底關閉所有背景子代理，回歸最高效能與乾淨架構！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.8 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-pink-50/40">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-black text-xs border border-slate-300">
+                v1.8.8
               </span>
               <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
             </div>
