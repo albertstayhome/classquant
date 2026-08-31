@@ -371,33 +371,49 @@ class Store {
     this.saveToStorage();
   }
 
-  // --- Tag Management CRUD & Custom Sorting (Per-Class Independent) ---
+  // --- Tag Management CRUD & Custom Sorting (Homeroom vs Subject Classes) ---
+  getTagGroup(classId = null) {
+    if (!classId) return 'homeroom';
+    const cls = this.getClass(classId);
+    if (cls && cls.type === 'homeroom') return 'homeroom';
+    return 'subject'; // 任教班 / 數學班
+  }
+
   getTags(classId = null) {
-    if (classId) {
-      if (!this.data.classTags) this.data.classTags = {};
-      if (!this.data.classTags[classId] || !Array.isArray(this.data.classTags[classId]) || this.data.classTags[classId].length === 0) {
-        this.data.classTags[classId] = JSON.parse(JSON.stringify(this.data.tags || DEFAULT_TAGS));
-      }
-      return this.data.classTags[classId];
+    const group = this.getTagGroup(classId);
+    if (!this.data.groupTags) {
+      this.data.groupTags = {
+        homeroom: JSON.parse(JSON.stringify(this.data.tags || DEFAULT_TAGS)),
+        subject: JSON.parse(JSON.stringify(this.data.tags || DEFAULT_TAGS))
+      };
     }
-    return this.data.tags || DEFAULT_TAGS;
+    if (!this.data.groupTags[group] || !Array.isArray(this.data.groupTags[group]) || this.data.groupTags[group].length === 0) {
+      this.data.groupTags[group] = JSON.parse(JSON.stringify(this.data.tags || DEFAULT_TAGS));
+    }
+    return this.data.groupTags[group];
+  }
+
+  copyHomeroomTagsToSubject() {
+    const homeroomTags = this.getTags('801'); // homeroom group
+    if (!this.data.groupTags) this.data.groupTags = {};
+    this.data.groupTags.subject = JSON.parse(JSON.stringify(homeroomTags));
+    this.saveToStorage();
+    return true;
   }
 
   getTagSortMode(classId = null) {
-    if (classId && this.data.settings?.classTagSortModes?.[classId]) {
-      return this.data.settings.classTagSortModes[classId];
+    const group = this.getTagGroup(classId);
+    if (this.data.settings?.groupTagSortModes?.[group]) {
+      return this.data.settings.groupTagSortModes[group];
     }
     return this.data.settings?.tagSortMode || 'custom';
   }
 
   setTagSortMode(mode, classId = null) {
+    const group = this.getTagGroup(classId);
     if (!this.data.settings) this.data.settings = {};
-    if (classId) {
-      if (!this.data.settings.classTagSortModes) this.data.settings.classTagSortModes = {};
-      this.data.settings.classTagSortModes[classId] = mode;
-    } else {
-      this.data.settings.tagSortMode = mode;
-    }
+    if (!this.data.settings.groupTagSortModes) this.data.settings.groupTagSortModes = {};
+    this.data.settings.groupTagSortModes[group] = mode;
     this.saveToStorage();
   }
 
@@ -492,12 +508,8 @@ class Store {
       severity: tag.severity || (tag.delta > 0 ? 'positive' : tag.delta < 0 ? 'warning' : 'info'),
       icon: tag.icon || 'tag'
     };
-    if (classId) {
-      const tagList = this.getTags(classId);
-      tagList.push(newTag);
-    }
-    if (!this.data.tags) this.data.tags = [];
-    this.data.tags.push(newTag);
+    const tagList = this.getTags(classId);
+    tagList.push(newTag);
     this.saveToStorage();
     return newTag;
   }
@@ -518,23 +530,17 @@ class Store {
   }
 
   deleteTag(tagId, classId = null) {
-    if (classId) {
-      if (this.data.classTags && this.data.classTags[classId]) {
-        this.data.classTags[classId] = this.data.classTags[classId].filter(t => t.id !== tagId);
-      }
-    } else {
-      this.data.tags = (this.data.tags || []).filter(t => t.id !== tagId);
+    const group = this.getTagGroup(classId);
+    if (this.data.groupTags && this.data.groupTags[group]) {
+      this.data.groupTags[group] = this.data.groupTags[group].filter(t => t.id !== tagId);
     }
     this.saveToStorage();
   }
 
   resetTagsToDefault(classId = null) {
-    if (classId) {
-      if (!this.data.classTags) this.data.classTags = {};
-      this.data.classTags[classId] = JSON.parse(JSON.stringify(DEFAULT_TAGS));
-    } else {
-      this.data.tags = JSON.parse(JSON.stringify(DEFAULT_TAGS));
-    }
+    const group = this.getTagGroup(classId);
+    if (!this.data.groupTags) this.data.groupTags = {};
+    this.data.groupTags[group] = JSON.parse(JSON.stringify(DEFAULT_TAGS));
     this.saveToStorage();
   }
 

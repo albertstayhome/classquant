@@ -42,6 +42,7 @@ class TagManager {
     const tags = this.store.getTags(this.currentClassId);
     const cls = this.store.getClass(this.currentClassId);
     const className = cls ? cls.name : `${this.currentClassId} 班`;
+    const isHomeroom = cls ? cls.type === 'homeroom' : this.currentClassId === '801';
 
     container.innerHTML = `
       <div class="flex flex-col max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl border-2 border-pink-300">
@@ -51,10 +52,12 @@ class TagManager {
             <div class="sanrio-kitty-badge !w-9 !h-9"></div>
             <div>
               <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-1.5">
-                【${className}】快速標籤管理
-                <span class="kitty-bow !w-3 !h-3"></span>
+                ${isHomeroom ? '【導師班】快速標籤管理' : '【任教班/數學班】快速標籤管理'}
+                <span class="kitty-bow !w-3.5 !h-3.5"></span>
               </h3>
-              <p class="text-[11px] text-pink-700 font-bold">班級專屬自訂順序 • 長按拖曳氣泡擠開排序</p>
+              <p class="text-[11px] text-pink-700 font-bold">
+                ${isHomeroom ? '【801 導師班專屬】標籤庫 • 長按拖曳氣泡擠開排序' : `【${className} 等全體任教班共用】標籤庫 • 長按拖曳排序`}
+              </p>
             </div>
           </div>
           <!-- Permanently pinned close X button that never scrolls away -->
@@ -68,7 +71,7 @@ class TagManager {
           <!-- Add New Tag Form Accordion -->
           <div class="glass-card rounded-2xl p-4 border border-pink-300 bg-pink-50/50">
             <h4 class="text-xs font-black text-pink-800 mb-3 flex items-center gap-1.5">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i> 為【${className}】新增自訂表現標籤
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> 為【${isHomeroom ? '導師班' : '任教班/數學班'}】新增自訂表現標籤
             </h4>
             <form onsubmit="tagManager.handleCreateTag(event)" class="space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -104,15 +107,20 @@ class TagManager {
           <div>
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
-                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">【${className}】現有標籤 (${tags.length} 個)</h4>
-                <span class="text-[10px] text-pink-600 font-bold">💡 排在前 4 個的標籤，會優先顯示在【${className}】點記板第 1 頁</span>
+                <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">【${isHomeroom ? '導師班' : '任教班/數學班'}】現有標籤 (${tags.length} 個)</h4>
+                <span class="text-[10px] text-pink-600 font-bold">💡 排在前 4 個的標籤，會優先顯示在點記板第 1 頁</span>
               </div>
               <div class="flex items-center space-x-2">
                 <select onchange="tagManager.handleSortModeChange(this.value)" class="text-xs font-black px-2.5 py-1 rounded-xl border border-pink-300 bg-pink-50 text-pink-900 focus:outline-none">
                   <option value="custom" ${this.store.getTagSortMode(this.currentClassId) === 'custom' ? 'selected' : ''}>📌 依此清單自訂順序</option>
-                  <option value="frequency" ${this.store.getTagSortMode(this.currentClassId) === 'frequency' ? 'selected' : ''}>📊 依本班使用頻率</option>
+                  <option value="frequency" ${this.store.getTagSortMode(this.currentClassId) === 'frequency' ? 'selected' : ''}>📊 依班級使用頻率</option>
                 </select>
-                <button onclick="tagManager.restoreDefaults()" class="text-xs text-slate-500 hover:text-pink-600 hover:underline font-bold transition">
+                ${!isHomeroom ? `
+                  <button onclick="tagManager.copyHomeroomTags()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition flex items-center gap-0.5" title="將導師班標籤複製一份覆蓋至任教班">
+                    📥 複製導師班標籤
+                  </button>
+                ` : ''}
+                <button onclick="tagManager.restoreDefaults()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition">
                   恢復預設
                 </button>
               </div>
@@ -176,7 +184,7 @@ class TagManager {
           <!-- Bottom Big Finish Button -->
           <button onclick="window.appState.closeModal()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-black text-xs shadow-lg shadow-pink-500/25 transition active:scale-95 flex items-center justify-center gap-1.5 mt-5 mb-2 cursor-pointer">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span>完成並返回【${className}】點記板</span>
+            <span>完成並返回點記板</span>
           </button>
         </div>
       </div>
@@ -244,6 +252,7 @@ class TagManager {
     this.isDragging = true;
     this.draggedTagId = tagId;
     this.scrollEl = document.getElementById('tag-manager-modal-scroll');
+    this.startScrollTop = this.scrollEl ? this.scrollEl.scrollTop : 0;
 
     if (navigator.vibrate) navigator.vibrate([35, 25, 35]);
     if (window.appState?.playPop) window.appState.playPop();
@@ -251,7 +260,7 @@ class TagManager {
     const listEl = document.getElementById('tag-manager-drag-list');
     const cards = Array.from(listEl.querySelectorAll('.tag-sort-card'));
 
-    // Snapshot static visual centers
+    // Snapshot static visual centers relative to scroll container top
     this.cardSnapshots = cards.map((card, index) => {
       const rect = card.getBoundingClientRect();
       return {
@@ -322,13 +331,34 @@ class TagManager {
         this.ghostEl.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.05)`;
       }
 
-      // 2. Human Intuition Centerline & Gap Midpoint Detection with Hysteresis
+      // 2. Auto-scroll with scroll delta synchronization
+      const currentScrollTop = this.scrollEl ? this.scrollEl.scrollTop : 0;
+      const deltaScroll = currentScrollTop - this.startScrollTop;
+
+      if (this.scrollEl) {
+        const modalRect = this.scrollEl.getBoundingClientRect();
+        let scrollSpeed = 0;
+        if (touch.clientY < modalRect.top + 70) {
+          scrollSpeed = -Math.min(14, Math.max(3, (modalRect.top + 70 - touch.clientY) * 0.35));
+        } else if (touch.clientY > modalRect.bottom - 70) {
+          scrollSpeed = Math.min(14, Math.max(3, (touch.clientY - (modalRect.bottom - 70)) * 0.35));
+        }
+        if (scrollSpeed !== 0) {
+          this.scrollEl.scrollTop += scrollSpeed;
+        }
+      }
+
+      // 3. Human Intuition Centerline & Gap Midpoint Detection with Scroll Delta Compensation
       const ghostCenterY = this.initialCardRect.top + dy + (this.initialCardRect.height / 2);
       const n = this.cardSnapshots.length;
       let newTargetIdx = n - 1;
 
       for (let i = 0; i < n - 1; i++) {
-        const boundaryY = (this.cardSnapshots[i].centerY + this.cardSnapshots[i + 1].centerY) / 2;
+        // Adjust snapshot centers for real-time container scroll
+        const center_i = this.cardSnapshots[i].centerY - deltaScroll;
+        const center_next = this.cardSnapshots[i + 1].centerY - deltaScroll;
+        const boundaryY = (center_i + center_next) / 2;
+
         // Directional hysteresis deadzone: requires crossing past the gap/centerline before flipping slot
         const hysteresis = (this.targetIndex !== null && this.targetIndex > i) ? -6 : 6;
         if (ghostCenterY < boundaryY + hysteresis) {
@@ -337,22 +367,12 @@ class TagManager {
         }
       }
 
+      newTargetIdx = Math.max(0, Math.min(n - 1, newTargetIdx));
+
       if (newTargetIdx !== this.targetIndex) {
         this.targetIndex = newTargetIdx;
         this.updateListDisplacement(this.draggedIndex, newTargetIdx);
         if (navigator.vibrate) navigator.vibrate(15);
-      }
-
-      // 3. Fast Edge Auto-Scroll if dragging near top or bottom
-      if (this.scrollEl) {
-        const modalRect = this.scrollEl.getBoundingClientRect();
-        if (touch.clientY < modalRect.top + 60) {
-          const speed = Math.max(8, (modalRect.top + 60 - touch.clientY) * 0.4);
-          this.scrollEl.scrollTop -= speed;
-        } else if (touch.clientY > modalRect.bottom - 60) {
-          const speed = Math.max(8, (touch.clientY - (modalRect.bottom - 60)) * 0.4);
-          this.scrollEl.scrollTop += speed;
-        }
       }
     } else if (this.startTouchX && this.startTouchY) {
       const dx = Math.abs(touch.clientX - this.startTouchX);
@@ -387,6 +407,17 @@ class TagManager {
         card.style.transform = offset !== 0 ? `translate3d(0, ${offset}px, 0)` : '';
       }
     });
+  }
+
+  copyHomeroomTags() {
+    if (confirm('確定要將【導師班】的所有自訂標籤與排序，完整複製並覆蓋至【任教班/數學班】嗎？\n（此操作將會取代任教班目前的標籤清單與自訂順序）')) {
+      this.store.copyHomeroomTagsToSubject();
+      if (window.appState?.playChime) window.appState.playChime();
+      if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+      window.appState.showToast('✨ 已成功將【導師班】標籤庫複製覆蓋至【任教班】！', 'success');
+      this.openTagManagerModal();
+      if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+    }
   }
 
   handleDirectDragEnd(e) {
