@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.6';
+    this.appVersion = '1.8.7';
     this.init();
   }
 
@@ -124,11 +124,11 @@ class AppState {
     }
 
     if (this.isHeaderCollapsed) {
-      header.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+      header.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none', '!h-0', '!py-0', '!overflow-hidden');
       header.classList.remove('sticky');
       unhidePill.classList.remove('hidden');
     } else {
-      header.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+      header.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none', '!h-0', '!py-0', '!overflow-hidden');
       header.classList.add('sticky');
       unhidePill.classList.add('hidden');
     }
@@ -289,19 +289,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.6 -->
+          <!-- v1.8.7 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.6 (邊界滾動動效修復 • 導師班/任教班雙重庫與一鍵複製)
+                v1.8.7 (頂部選單最小化鈕常駐 • 展開提示整合導覽列)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【修正邊界自動滾動動畫消失 Bug】實時校準滾動位移（Scroll Delta Compensation），滾動頁面時氣泡推開動態與虛影落點 100% 完美保持，絕不消失！</li>
-              <li>• 【標籤庫雙重架構：導師班 vs 任教班/數學班】標籤庫全面整合為「導師班專屬」與「任教班/數學班共用」兩套，任教班間標籤即時同步！</li>
-              <li>• 【新增一鍵複製導師班標籤至任教班】在任教班標籤管理中提供「📥 複製導師班標籤」按鈕，隨時一鍵將導師班標籤與自訂順序覆蓋套用！</li>
-              <li>• 【人體直覺過半中線與間隙判定】拖曳虛影唯有越過中線與間隙才觸發推開，搭配雙向防抖死區，手感自然沉穩！</li>
+              <li>• 【頂部選單最小化按鈕常駐與手機佈局最佳化】重新精算手機螢幕寬度，頂部橫幅控制列 100% 單行自適應，最小化收合按鈕 (▲) 醒目常駐於右上角，絕不被擠出螢幕外！</li>
+              <li>• 【頂部選單展開提示整合至導覽列】徹底移除畫面中間彈跳遮擋的浮動大按鈕，改為優雅整合至吸頂導覽列首位的「🎀 ▼ 選單」按鈕，操作自然俐落、0 遮擋視野！</li>
+              <li>• 【標籤庫雙重架構與一鍵複製】導師班與任教班獨立/共用雙模式，支援隨時一鍵複製導師班標籤至全體任教班！</li>
+              <li>• 【修正邊界自動滾動動畫消失 Bug】實時滾動位移差補償，滾動時氣泡推開動態完美流暢！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.6 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.6
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【修正邊界滾動消失 Bug】實時校準滾動位移差！</li>
             </ul>
           </div>
 
