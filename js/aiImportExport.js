@@ -11,8 +11,7 @@
 class AIService {
   constructor() {
     // Encrypted master key (ciphertext encrypted with passcode '0228')
-    // Can be populated once teacher Albert provides his API key
-    this.encryptedKey = ''; 
+    this.encryptedKey = 'cWMceVIKYHYGeWpKAh9naWVAS3pxBnpxZVx7T1ZWCgwHRgdoVwBYfAlVeQx3amR6aX9UFWE='; 
   }
 
   static encrypt(plainText, passcode = '0228') {
@@ -127,11 +126,21 @@ class AIService {
       };
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+    let modelName = 'gemini-3.6-flash';
+    let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
+
+    if (!response.ok && response.status === 404) {
+      modelName = 'gemini-2.5-flash';
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+    }
 
     if (!response.ok) {
       const errJson = await response.json().catch(() => ({}));
@@ -898,7 +907,8 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     resultBox.classList.remove('hidden');
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+      let model = 'gemini-3.6-flash';
+      let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -906,9 +916,20 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
         })
       });
 
+      if (!res.ok && res.status === 404) {
+        model = 'gemini-2.5-flash';
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: '1+1' }] }]
+          })
+        });
+      }
+
       if (res.ok) {
         resultBox.className = 'p-2.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1.5';
-        resultBox.innerHTML = `<span>✅ 驗證成功！Google Gemini 2.5 Flash 服務連線正常，可立即使用。</span>`;
+        resultBox.innerHTML = `<span>✅ 驗證成功！Google Gemini 雲端 AI 服務連線正常，可立即使用。</span>`;
         window.appState.showToast('✅ Gemini API Key 驗證成功！', 'success');
       } else {
         const errJson = await res.json().catch(() => ({}));
