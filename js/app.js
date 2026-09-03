@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.9';
+    this.appVersion = '1.9.0';
     this.init();
   }
 
@@ -99,6 +99,7 @@ class AppState {
       header.classList.remove('header-collapsed');
       if (unhidePill) unhidePill.classList.add('hidden');
     }
+    if (window.lucide) window.lucide.createIcons();
   }
 
   updateNetworkBadge(isOnline) {
@@ -256,17 +257,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.9 -->
+          <!-- v1.9.0 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.9 (頂部選單重疊問題徹底修復 • 單一吸頂架構)
+                v1.9.0 (手機端雙行佈局重構 • 元素重疊徹底修復 • 最小化按鈕常駐)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【修復頂部選單重疊問題】將頂部橫幅（Header）與導覽分頁列（Nav）整合至單一吸頂容器（Unified Sticky Container），兩行彼此獨立順序排列，徹底杜絕滑動時上下疊在同一個位置的衝突！</li>
-              <li>• 【優雅切換模式】點擊「▲」按鈕時頂部橫幅自然收合，分頁列自動接替吸頂；點擊「🎀 ▼ 選單」立即滑出展開，手感滑順且絕不擋住視線！</li>
+              <li>• 【徹底解決手機端頂部橫幅元素重疊】重構手機端為雙行清爽佈局：第 1 行常駐專屬三麗鷗商標、App 標題與版本號，收合鈕 (▲ 收合) 穩固常駐於右上角；第 2 行寬敞配置班級選單與快速工具，兩行互不干擾、字體按鈕 100% 絕不重疊！</li>
+              <li>• 【單一吸頂架構】分頁導覽列與頂部橫幅整合為單一吸頂外框，滑動與收合時層級井然有序、0 遮擋視野！</li>
+              <li>• 【座位表 1:1 硬體拖曳引擎】全面移植原生硬體觸控鎖定與精確像素槽位推移，告別殘留與換位漂移！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.9 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.9
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【修復頂部選單重疊問題】將頂部橫幅與導覽分頁列整合至單一吸頂容器！</li>
             </ul>
           </div>
 
