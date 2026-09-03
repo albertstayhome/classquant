@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.0';
+    this.appVersion = '1.9.1';
     this.init();
   }
 
@@ -257,18 +257,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.0 -->
+          <!-- v1.9.1 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.9.0 (手機端雙行佈局重構 • 元素重疊徹底修復 • 最小化按鈕常駐)
+                v1.9.1 (Google Gemini 2.5 Flash 智慧成績轉換 • 免費高速雲端算力)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【徹底解決手機端頂部橫幅元素重疊】重構手機端為雙行清爽佈局：第 1 行常駐專屬三麗鷗商標、App 標題與版本號，收合鈕 (▲ 收合) 穩固常駐於右上角；第 2 行寬敞配置班級選單與快速工具，兩行互不干擾、字體按鈕 100% 絕不重疊！</li>
-              <li>• 【單一吸頂架構】分頁導覽列與頂部橫幅整合為單一吸頂外框，滑動與收合時層級井然有序、0 遮擋視野！</li>
-              <li>• 【座位表 1:1 硬體拖曳引擎】全面移植原生硬體觸控鎖定與精確像素槽位推移，告別殘留與換位漂移！</li>
+              <li>• 【Google Gemini 2.5 Flash AI 智慧成績一鍵轉換（限連網使用）】全新旗艦功能！貼上任意口語文字（如「1號85粗心、2號42需補救」）、Line/Excel 複製文字，或直接拍照上傳成績單，AI 1 秒自動解析對應座號與成績！</li>
+              <li>• 【本機 LocalStorage 安全金鑰】支援每台設備獨立設定個人 Google Gemini API Key，每日提供 1,500 次呼叫，3~6 位家人親戚共用完全免費 (0 元免綁卡)！</li>
+              <li>• 【成績核對與確認彈窗】AI 辨識後自動比對班級花名冊姓名，提供試卷預覽與微調表格，確認無誤一鍵入庫，自動建立安全歷史快照！</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.0 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.9.0
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【手機端頂部橫幅雙行排版】第 1 行專屬商標與收合鈕，第 2 行寬敞班級選單與快捷工具，字體按鈕 100% 絕不重疊！</li>
             </ul>
           </div>
 
