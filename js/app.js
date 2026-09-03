@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.8';
+    this.appVersion = '1.8.9';
     this.init();
   }
 
@@ -40,10 +40,7 @@ class AppState {
       this.updateHeaderClock();
     }, 1000);
 
-    // 5. Setup Smart Scroll for Auto-Collapsing Header on Scroll Down
-    this.setupSmartScrollListener();
-
-    // 6. Setup PWA Install Prompt Listener
+    // 5. Setup PWA Install Prompt Listener
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this.deferredPrompt = e;
@@ -51,16 +48,22 @@ class AppState {
       if (installBtn) installBtn.classList.remove('hidden');
     });
 
-    // 7. Network online/offline detection & Auto OTA check
+    // 6. Network online/offline detection & Auto OTA check
     window.addEventListener('online', () => {
-      this.showToast('📶 網路已連線 (正在自動檢查雲端更新...)', 'success');
       this.updateNetworkBadge(true);
+      this.showToast('網路連線已恢復 🌐', 'success');
       this.checkForUpdates(true);
     });
     window.addEventListener('offline', () => {
-      this.showToast('🟢 目前處於離線模式，所有操作自動存於本機', 'info');
       this.updateNetworkBadge(false);
+      this.showToast('目前為離線模式，所有本機功能正常運作 📴', 'info');
     });
+    this.updateNetworkBadge(navigator.onLine);
+
+    // 7. Initial OTA check
+    setTimeout(() => {
+      this.checkForUpdates(true);
+    }, 2500);
 
     // Initial render
     this.updateHeaderStatus();
@@ -69,9 +72,6 @@ class AppState {
     this.updateSoundButtonUI();
     this.updateHeaderVersionBadge();
     this.switchTab('matrix');
-
-    // Auto check updates on launch
-    setTimeout(() => this.checkForUpdates(true), 600);
   }
 
   updateHeaderVersionBadge() {
@@ -81,41 +81,10 @@ class AppState {
     }
   }
 
-  // --- Smart Auto-Collapsing Header on Scroll Down ---
-  setupSmartScrollListener() {
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-
-    window.addEventListener('scroll', () => {
-      // If onboarding tour is active, DO NOT AUTO-COLLAPSE HEADER!
-      if (window.onboardingTour && window.onboardingTour.isActive) return;
-
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          // When scrolling down more than 70px, automatically collapse header
-          if (currentScrollY > 70 && currentScrollY > lastScrollY) {
-            if (!this.isHeaderCollapsed) {
-              this.toggleHeader(false, true);
-            }
-          } else if (currentScrollY < lastScrollY - 15) {
-            // When scrolling up more than 15px, expand header
-            if (this.isHeaderCollapsed) {
-              this.toggleHeader(true, true);
-            }
-          }
-          lastScrollY = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-  }
-
-  toggleHeader(forceExpand = null, isAuto = false) {
+  toggleHeader(forceExpand = null) {
     const header = document.getElementById('global-header');
     const unhidePill = document.getElementById('header-unhide-pill');
-    if (!header || !unhidePill) return;
+    if (!header) return;
 
     if (forceExpand !== null) {
       this.isHeaderCollapsed = !forceExpand;
@@ -124,13 +93,11 @@ class AppState {
     }
 
     if (this.isHeaderCollapsed) {
-      header.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none', '!h-0', '!py-0', '!overflow-hidden');
-      header.classList.remove('sticky');
-      unhidePill.classList.remove('hidden');
+      header.classList.add('header-collapsed');
+      if (unhidePill) unhidePill.classList.remove('hidden');
     } else {
-      header.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none', '!h-0', '!py-0', '!overflow-hidden');
-      header.classList.add('sticky');
-      unhidePill.classList.add('hidden');
+      header.classList.remove('header-collapsed');
+      if (unhidePill) unhidePill.classList.add('hidden');
     }
   }
 
@@ -289,19 +256,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.8 -->
+          <!-- v1.8.9 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.8 (座位表拖曳引擎升級 • 滾動鎖定優化 • 自動歷史快照防護)
+                v1.8.9 (頂部選單重疊問題徹底修復 • 單一吸頂架構)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【座位表拖曳引擎全面升級】全面移植 1:1 原生硬體觸控鎖定與精確像素槽位推移，支援螢幕邊緣智慧自動滾動與全局防漏接，徹底根除懸浮縮影殘留與換位漂移！</li>
-              <li>• 【標籤管理中心彈窗捲動鎖定優化】新增、修改分值、刪除標籤、恢復預設或複製標籤時，彈窗 100% 保持在當前滾動位置，操作不再突兀跳回頂部！</li>
-              <li>• 【本地歷史快照自動防呆機制】重大操作（批次匯入、刪除班級、清空資料前）自動建立本機歷史快照，支援最近 5 筆記錄「1 秒無痛還原」，資料安全固若金湯！</li>
-              <li>• 【舊版自訂標籤雙向相容無縫遷移】智慧向下相容升級，自動將先前建立的班級自訂標籤完整保留並升級至新版雙重架構！</li>
+              <li>• 【修復頂部選單重疊問題】將頂部橫幅（Header）與導覽分頁列（Nav）整合至單一吸頂容器（Unified Sticky Container），兩行彼此獨立順序排列，徹底杜絕滑動時上下疊在同一個位置的衝突！</li>
+              <li>• 【優雅切換模式】點擊「▲」按鈕時頂部橫幅自然收合，分頁列自動接替吸頂；點擊「🎀 ▼ 選單」立即滑出展開，手感滑順且絕不擋住視線！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.8 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.8
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【座位表拖曳引擎全面升級】全面移植 1:1 原生硬體觸控鎖定與精確像素槽位推移，支援螢幕邊緣智慧自動滾動與全局防漏接！</li>
+              <li>• 【標籤管理中心彈窗捲動鎖定優化】彈窗 100% 保持在當前滾動位置，操作不再突兀跳回頂部！</li>
+              <li>• 【本地歷史快照自動防呆機制】重大操作前自動建立本機快照，支援 1 秒無痛還原！</li>
             </ul>
           </div>
 
@@ -972,23 +952,6 @@ class AppState {
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.22);
     } catch (e) {}
-  }
-
-  toggleHeader(forceShow = false, isSilent = false) {
-    const header = document.getElementById('global-header');
-    const pill = document.getElementById('header-unhide-pill');
-    if (!header) return;
-
-    if (forceShow || header.classList.contains('header-collapsed')) {
-      header.classList.remove('header-collapsed');
-      if (pill) pill.classList.add('hidden');
-      this.isHeaderCollapsed = false;
-    } else {
-      header.classList.add('header-collapsed');
-      if (pill) pill.classList.remove('hidden');
-      this.isHeaderCollapsed = true;
-      if (!isSilent) this.showToast('已收合頂部橫幅，點擊上方按鈕可隨時展開 🎀', 'info');
-    }
   }
 
   applyTheme(themeName) {
