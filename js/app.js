@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.6';
+    this.appVersion = '1.9.7';
     this.init();
   }
 
@@ -255,6 +255,21 @@ class AppState {
           <div class="text-xs font-black text-slate-800 flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.7 -->
+          <div class="p-3.5 rounded-2xl border-2 border-cyan-500 bg-slate-900 text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.7 ([OAA模式] 學生綜合能力量化評定卡 • 實力至上主義考核)
+              </span>
+              <span class="text-[11px] text-cyan-300 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-cyan-100 space-y-1.5 font-medium pl-1">
+              <li>• 【實裝 OAA 模式】學生個人檔案新增「[OAA模式]」自由切換！高度還原《歡迎來到實力至上主義的教室》科技學生證，提供 S/A/B/C/D 階級與詳細數值！</li>
+              <li>• 【班級考核差異化模型】導師班採計 4 維度（学力 40%、規律服従 35%、身体能力 15%、協作表現 10%，掃除納入服從），數學班採計 3 維度（学力 55%、課堂服従 30%、思考解題 15%，排除體育整潔）。</li>
+              <li>• 【硬核實力卡階防護】加權總分達 S 級需学力達 85 分以上，達 A 級需及格 (60分)，成績未達標將強制卡階，完全有理有據！</li>
+            </ul>
           </div>
 
           <!-- v1.9.6 -->
