@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.7';
+    this.appVersion = '1.9.8';
     this.init();
   }
 
@@ -257,18 +257,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.7 -->
+          <!-- v1.9.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-cyan-500 bg-slate-900 text-white shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-black text-xs shadow-sm font-mono">
-                v1.9.7 ([OAA模式] 學生綜合能力量化評定卡 • 實力至上主義考核)
+                v1.9.8 (全域 [OAA 科技主題] 上線 • 導覽列依使用頻率黃金排序)
               </span>
               <span class="text-[11px] text-cyan-300 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-cyan-100 space-y-1.5 font-medium pl-1">
-              <li>• 【實裝 OAA 模式】學生個人檔案新增「[OAA模式]」自由切換！高度還原《歡迎來到實力至上主義的教室》科技學生證，提供 S/A/B/C/D 階級與詳細數值！</li>
-              <li>• 【班級考核差異化模型】導師班採計 4 維度（学力 40%、規律服従 35%、身体能力 15%、協作表現 10%，掃除納入服從），數學班採計 3 維度（学力 55%、課堂服従 30%、思考解題 15%，排除體育整潔）。</li>
-              <li>• 【硬核實力卡階防護】加權總分達 S 級需学力達 85 分以上，達 A 級需及格 (60分)，成績未達標將強制卡階，完全有理有據！</li>
+              <li>• 【全域 OAA 科技主題】將通用深色模式直接升級為「OAA 高度育成科技主題」！右上角一鍵在「三麗鷗」與「OAA」間無縫切換全站風格！</li>
+              <li>• 【導覽列依使用頻率重排】導覽列順序依每日上課動線調整：點記板 ➔ 補記 ➔ 記事檢索 ➔ 學生檔案 ➔ 班級統計 ➔ 成績匯入 ➔ 班級名單 ➔ 課表排程 ➔ 互動板。</li>
+              <li>• 【卡片文案精簡】移除 OAA 卡片中二標語，回歸冷靜純粹的高科技數據儀表板。</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.7 -->
+          <div class="p-3.5 rounded-2xl border border-cyan-500/40 bg-slate-900/60 text-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-900 text-cyan-200 font-bold text-xs font-mono">
+                v1.9.7
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-300 space-y-1 font-medium pl-1">
+              <li>• 【實裝 OAA 模式】學生個人檔案新增「[OAA模式]」自由切換與硬核卡階。</li>
             </ul>
           </div>
 
@@ -1062,30 +1075,44 @@ class AppState {
   }
 
   applyTheme(themeName) {
+    if (themeName === 'dark') themeName = 'oaa';
     const html = document.documentElement;
     html.setAttribute('data-theme', themeName);
     if (themeName === 'kitty') {
       html.classList.remove('dark');
+      html.classList.remove('oaa');
     } else {
       html.classList.add('dark');
+      html.classList.add('oaa');
     }
     window.appStore.setTheme(themeName);
     this.updateThemeButtonUI(themeName);
+
+    // Refresh active student dossier if visible to sync OAA mode
+    if (this.activeTab === 'student-dossier' && window.studentDossierView) {
+      window.studentDossierView.render('student-dossier-view');
+    }
   }
 
   toggleTheme() {
     const current = window.appStore.getTheme();
-    const next = current === 'kitty' ? 'dark' : 'kitty';
+    const next = current === 'kitty' ? 'oaa' : 'kitty';
     this.applyTheme(next);
-    this.showToast(`已切換至：${next === 'kitty' ? '🎀 三麗鷗 (Kitty & 小雙星) 主題' : '🌙 科技深色主題'}`, 'info');
+    this.showToast(`已切換至：${next === 'kitty' ? '🎀 三麗鷗粉嫩主題' : '🕶️ [OAA] 高度育成科技模式'}`, 'info');
   }
 
   updateThemeButtonUI(themeName) {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
-      btn.innerHTML = themeName === 'kitty' 
-        ? '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">主題</span>' 
-        : '<i data-lucide="moon" class="w-4 h-4 text-blue-400"></i><span class="text-xs font-bold text-slate-300 ml-0.5 hidden md:inline">深色</span>';
+      if (themeName === 'oaa') {
+        btn.innerHTML = '<span class="text-xs">🕶️</span><span class="text-xs font-mono font-black text-cyan-300 ml-0.5 hidden md:inline">OAA</span>';
+        btn.className = "px-2.5 py-1.5 rounded-xl border border-cyan-500 bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 transition active:scale-95 flex items-center gap-1 shrink-0 shadow-sm cursor-pointer";
+        btn.title = "目前為 OAA 高度育成科技模式，點擊切換為三麗鷗主題";
+      } else {
+        btn.innerHTML = '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">三麗鷗</span>';
+        btn.className = "px-2.5 py-1.5 rounded-xl border border-pink-300 hover:bg-pink-100 transition active:scale-95 flex items-center gap-1 shrink-0 cursor-pointer";
+        btn.title = "目前為三麗鷗主題，點擊切換為 OAA 模式";
+      }
       if (window.lucide) window.lucide.createIcons();
     }
   }

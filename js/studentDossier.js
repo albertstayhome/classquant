@@ -10,14 +10,20 @@ class StudentDossierView {
     this.charts = charts;
     this.currentClassId = '801';
     this.currentSeatNo = 1;
-    this.dossierMode = localStorage.getItem('classquant_dossier_mode') || 'default';
+  }
+
+  isOAAMode() {
+    const saved = localStorage.getItem('classquant_dossier_mode');
+    if (saved) return saved === 'oaa';
+    const globalTheme = window.appStore ? window.appStore.getTheme() : 'kitty';
+    return globalTheme === 'oaa';
   }
 
   toggleDossierMode() {
-    this.dossierMode = this.dossierMode === 'oaa' ? 'default' : 'oaa';
-    localStorage.setItem('classquant_dossier_mode', this.dossierMode);
+    const next = this.isOAAMode() ? 'default' : 'oaa';
+    localStorage.setItem('classquant_dossier_mode', next);
     this.render('student-dossier-view', this.currentClassId, this.currentSeatNo);
-    window.appState.showToast(this.dossierMode === 'oaa' ? '🕶️ 已切換為【OAA 學生綜合能力模式】' : '🌸 已切換為【預設教育模式】', 'info');
+    window.appState.showToast(next === 'oaa' ? '已切換為【OAA 學生綜合能力卡】' : '已切換為【預設教育模式】', 'info');
   }
 
   // --- Calculate Grounded OAA Metrics (Firmly derived from store data) ---
@@ -214,7 +220,7 @@ class StudentDossierView {
     const events = this.store.getEvents(this.currentClassId).filter(e => e.seatNo === student.seatNo);
     const oaa = this.calculateOAA(student, this.currentClassId, profile, events);
 
-    if (this.dossierMode === 'oaa') {
+    if (this.isOAAMode()) {
       this.renderOAAMode(container, student, classes, students, profile, events, oaa);
     } else {
       this.renderDefaultMode(container, student, classes, students, profile, events, oaa);
@@ -453,11 +459,20 @@ class StudentDossierView {
                 </div>
               </div>
 
-              <!-- Character Quote / Motto (Left side vertical text from reference) -->
-              <div class="text-center lg:text-left px-2">
-                <p class="text-xs sm:text-sm font-bold tracking-wider text-cyan-200/90 leading-relaxed italic">
-                  「實力是一切的起點，也是唯一的評判標準。」
-                </p>
+              <!-- Clean Technical Metadata -->
+              <div class="px-2 space-y-1 font-mono text-[11px] text-cyan-300/80">
+                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
+                  <span class="text-cyan-400/60">座號</span>
+                  <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')}</span>
+                </div>
+                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
+                  <span class="text-cyan-400/60">班級</span>
+                  <span class="font-bold text-white">${this.currentClassId} 班</span>
+                </div>
+                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
+                  <span class="text-cyan-400/60">類別</span>
+                  <span class="font-bold text-white">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
+                </div>
               </div>
             </div>
 

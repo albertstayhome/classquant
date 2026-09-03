@@ -1,0 +1,128 @@
+/* Classroom of the Elite (高度育成高等學校) OAA Sci-Fi Dark Theme */
+
+html[data-theme="oaa"] body {
+  background-color: #0b1822;
+  background-image: 
+    radial-gradient(rgba(56, 189, 248, 0.18) 1px, transparent 1px),
+    linear-gradient(to right, rgba(14, 30, 44, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 30, 44, 0.35) 1px, transparent 1px);
+  background-size: 24px 24px, 48px 48px, 48px 48px;
+  color: #e2e8f0;
+}
+
+/* OAA High-Tech Metal Glass Card */
+html[data-theme="oaa"] .glass-card {
+  background: rgba(14, 30, 44, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(56, 189, 248, 0.28);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(56, 189, 248, 0.15);
+  border-radius: 1.25rem;
+  color: #f1f5f9;
+}
+
+html[data-theme="oaa"] .glass-card-hover:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Header & Nav */
+html[data-theme="oaa"] header,
+html[data-theme="oaa"] nav,
+html[data-theme="oaa"] footer {
+  background: rgba(10, 22, 33, 0.95);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+/* Navigation Tabs */
+html[data-theme="oaa"] .nav-tab-btn {
+  color: #94a3b8;
+  border-radius: 0.875rem;
+}
+html[data-theme="oaa"] .nav-tab-btn:hover {
+  background-color: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+html[data-theme="oaa"] .tab-active {
+  color: #38bdf8 !important;
+  background-color: rgba(14, 116, 144, 0.35) !important;
+  border: 1px solid rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Classroom Seat Cards */
+html[data-theme="oaa"] .student-seat-card,
+html[data-theme="oaa"] .compact-seat-tile {
+  background: rgba(15, 33, 48, 0.9);
+  border: 1.5px solid rgba(56, 189, 248, 0.22);
+  color: #f1f5f9;
+  border-radius: 1rem;
+}
+html[data-theme="oaa"] .student-seat-card:hover,
+html[data-theme="oaa"] .compact-seat-tile:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+html[data-theme="oaa"] .student-seat-card.selected,
+html[data-theme="oaa"] .compact-seat-tile.selected {
+  border-color: #38bdf8 !important;
+  background-color: rgba(14, 116, 144, 0.4) !important;
+  box-shadow: 0 0 0 2px #38bdf8, 0 0 15px rgba(56, 189, 248, 0.5) !important;
+}
+
+/* Input Fields */
+html[data-theme="oaa"] input,
+html[data-theme="oaa"] select,
+html[data-theme="oaa"] textarea {
+  background-color: #0d1e2b !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+html[data-theme="oaa"] input:focus,
+html[data-theme="oaa"] select:focus,
+html[data-theme="oaa"] textarea:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Text Overrides */
+html[data-theme="oaa"] .text-slate-900,
+html[data-theme="oaa"] .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+html[data-theme="oaa"] .text-slate-700,
+html[data-theme="oaa"] .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+html[data-theme="oaa"] .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+/* Modal Overlay */
+html[data-theme="oaa"] #global-modal-content {
+  background: #0f2434 !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Background Utility Replacements */
+html[data-theme="oaa"] .bg-white {
+  background-color: #0f2434 !important;
+}
+html[data-theme="oaa"] .bg-pink-50,
+html[data-theme="oaa"] .bg-pink-50\/50,
+html[data-theme="oaa"] .bg-pink-50\/60,
+html[data-theme="oaa"] .bg-pink-50\/80,
+html[data-theme="oaa"] .bg-pink-50\/40,
+html[data-theme="oaa"] .bg-slate-50 {
+  background-color: rgba(14, 30, 44, 0.7) !important;
+}
+html[data-theme="oaa"] .border-pink-200,
+html[data-theme="oaa"] .border-pink-300,
+html[data-theme="oaa"] .border-pink-100,
+html[data-theme="oaa"] .border-slate-200,
+html[data-theme="oaa"] .border-slate-300 {
+  border-color: rgba(56, 189, 248, 0.25) !important;
+}
