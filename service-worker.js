@@ -2,7 +2,7 @@
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v115';
+const CACHE_NAME = 'classquant-hub-v116';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

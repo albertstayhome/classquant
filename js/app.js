@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.5';
+    this.appVersion = '1.9.6';
     this.init();
   }
 
@@ -257,18 +257,30 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.5 -->
-          <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
+          <!-- v1.9.6 -->
+          <div class="p-3.5 rounded-2xl border-2 border-slate-400 bg-slate-50/50 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.9.5 (全新「師生親友互動交流板」• 心得回饋與鑫吾公開回覆)
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-white font-bold text-xs shadow-sm">
+                v1.9.6 (互動留言板上線 • 留言資料重置與介面語氣調整)
               </span>
-              <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
+              <span class="text-[11px] text-slate-500 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【全新師生親友互動交流板】新增專屬互動交流分頁！家人親戚與老師們可隨時留下使用心得、功能許願池或狀況回報，支援心情表情與點讚互動！</li>
-              <li>• 【開發者公開回覆機制】鑫吾可在開發時直接讀取大家的心得建議進行更新，並直接在互動板上公開回覆每一位親友的心得！</li>
-              <li>• 【雲端同步與備份】支援一鍵複製心得摘要給 AI 規劃更新，並預留 Google 雲端試算表 Webhook 串接設定！</li>
+              <li>• 【互動留言板上線】提供使用者回饋意見、提出功能需求或回報問題。開發者可直接檢視並進行回覆。</li>
+              <li>• 【資料清空與語氣調整】移除所有預設範例留言，保持空白狀態，並調整介面文字為簡約中性風格。</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.5 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-bold text-xs border border-pink-300">
+                v1.9.5
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【互動留言板初版實裝】新增分頁與回覆機制。</li>
             </ul>
           </div>
 
