@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.4';
+    this.appVersion = '1.9.5';
     this.init();
   }
 
@@ -257,17 +257,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.4 -->
+          <!-- v1.9.5 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.9.4 (修復 AI 成績匯入頁面載入 • 鑫吾算力全開)
+                v1.9.5 (全新「師生親友互動交流板」• 心得回饋與鑫吾公開回覆)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【修復 AI 成績匯入頁面空白問題】修復底層腳本解析異常與班級陣列載入機制，確保「AI 成績匯入」分頁在所有手機與電腦上 100% 立即正常呈現！</li>
-              <li>• 【親友專屬生日解鎖（0228）】免申請、免輸入金鑰！親友家人只要回答「鑫吾的生日：0228」，即刻自動解密並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！</li>
+              <li>• 【全新師生親友互動交流板】新增專屬互動交流分頁！家人親戚與老師們可隨時留下使用心得、功能許願池或狀況回報，支援心情表情與點讚互動！</li>
+              <li>• 【開發者公開回覆機制】鑫吾可在開發時直接讀取大家的心得建議進行更新，並直接在互動板上公開回覆每一位親友的心得！</li>
+              <li>• 【雲端同步與備份】支援一鍵複製心得摘要給 AI 規劃更新，並預留 Google 雲端試算表 Webhook 串接設定！</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.4 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.9.4
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【修復 AI 成績匯入頁面載入】確保在所有手機與電腦上 100% 正常呈現！</li>
             </ul>
           </div>
 
@@ -1071,6 +1085,7 @@ class AppState {
       'events-log-view',
       'student-dossier-view',
       'ai-hub-view',
+      'feedback-board-view',
       'user-guide-view'
     ];
 
@@ -1089,6 +1104,7 @@ class AppState {
       'events': 'events-log-view',
       'student-dossier': 'student-dossier-view',
       'ai-hub': 'ai-hub-view',
+      'feedback-board': 'feedback-board-view',
       'guide': 'user-guide-view'
     };
 
@@ -1117,6 +1133,8 @@ class AppState {
       window.studentDossierView.render('student-dossier-view', this.currentClassId);
     } else if (this.activeTab === 'ai-hub') {
       window.aiHub.render('ai-hub-view');
+    } else if (this.activeTab === 'feedback-board' && window.feedbackBoard) {
+      window.feedbackBoard.render('feedback-board-view');
     } else if (this.activeTab === 'guide') {
       window.userGuideView.render('user-guide-view');
     }
