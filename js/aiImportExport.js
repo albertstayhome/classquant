@@ -10,11 +10,38 @@ class AIImportExportHub {
     this.selectedImageBase64 = null;
     this.selectedImageMime = null;
     this.selectedImageName = null;
+    this.systemKey = ''; // Teacher's built-in system Gemini key
   }
 
-  // --- API Key Management (Stored in device LocalStorage) ---
+  // --- API Key Management (Stored in device LocalStorage with System Fallback) ---
   getApiKey() {
-    return localStorage.getItem('classquant_gemini_api_key') || '';
+    // 1. Check URL parameter ?setup_key=... or ?api_key=... for silent 1-click provisioning
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryKey = urlParams.get('setup_key') || urlParams.get('api_key');
+      if (queryKey && queryKey.trim()) {
+        const trimmed = queryKey.trim();
+        localStorage.setItem('classquant_gemini_api_key', trimmed);
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        return trimmed;
+      }
+    } catch (e) {}
+
+    // 2. Check device LocalStorage
+    const localKey = localStorage.getItem('classquant_gemini_api_key');
+    if (localKey && localKey.trim()) return localKey.trim();
+
+    // 3. Teacher's built-in system key
+    if (this.systemKey) {
+      try {
+        return atob(this.systemKey);
+      } catch (e) {
+        return this.systemKey;
+      }
+    }
+
+    return '';
   }
 
   setApiKey(key) {
