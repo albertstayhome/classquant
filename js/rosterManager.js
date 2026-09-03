@@ -203,6 +203,9 @@ class RosterManager {
       gender: 'M'
     }));
 
+    // Create snapshot before overwriting roster
+    this.store.createSnapshot(`批次匯入 ${classId} 班名單前`);
+
     // Update in store
     const fullData = this.store.data;
     fullData.students[classId] = newStudents;
@@ -410,6 +413,7 @@ class RosterManager {
     }
 
     if (confirm(`⚠️ 確定要刪除 ${classId} 班及其所有學生名單與記點記錄嗎？`)) {
+      this.store.createSnapshot(`刪除 ${classId} 班前`);
       const fullData = this.store.data;
       delete fullData.classes[classId];
       delete fullData.students[classId];

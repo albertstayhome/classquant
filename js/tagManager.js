@@ -415,8 +415,7 @@ class TagManager {
       if (window.appState?.playChime) window.appState.playChime();
       if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
       window.appState.showToast('✨ 已成功將【導師班】標籤庫複製覆蓋至【任教班】！', 'success');
-      this.openTagManagerModal();
-      if (window.matrixView) window.matrixView.render('classroom-matrix-view', window.appState.currentClassId);
+      this.refreshModalPreservingScroll();
     }
   }
 
@@ -528,8 +527,7 @@ class TagManager {
 
     this.store.addTag(newTag, this.currentClassId);
     window.appState.showToast(`已成功新增標籤：「${name} (${delta > 0 ? '+' : ''}${delta})」`, 'success');
-    this.openTagManagerModal();
-    if (window.matrixView) window.matrixView.render('classroom-matrix-view', this.currentClassId);
+    this.refreshModalPreservingScroll();
   }
 
   editTagDelta(tagId) {
@@ -544,8 +542,7 @@ class TagManager {
         tag.delta = newDelta;
         this.store.updateTag(tag.id, tag, this.currentClassId);
         window.appState.showToast(`已將「${tag.name}」分值更新為 ${newDelta > 0 ? '+' : ''}${newDelta}`, 'success');
-        this.openTagManagerModal();
-        if (window.matrixView) window.matrixView.render('classroom-matrix-view', this.currentClassId);
+        this.refreshModalPreservingScroll();
       }
     }
   }
@@ -558,8 +555,7 @@ class TagManager {
     if (confirm(`確定要刪除「${tag.name}」標籤嗎？`)) {
       this.store.deleteTag(tagId, this.currentClassId);
       window.appState.showToast(`已刪除「${tag.name}」標籤`, 'info');
-      this.openTagManagerModal();
-      if (window.matrixView) window.matrixView.render('classroom-matrix-view', this.currentClassId);
+      this.refreshModalPreservingScroll();
     }
   }
 
@@ -568,9 +564,22 @@ class TagManager {
     if (confirm('確定要恢復為官方預設標籤清單嗎？（自訂標籤將被重設）')) {
       this.store.resetTagsToDefault(this.currentClassId);
       window.appState.showToast('已成功恢復官方預設標籤！', 'success');
-      this.openTagManagerModal();
-      if (window.matrixView) window.matrixView.render('classroom-matrix-view', this.currentClassId);
+      this.refreshModalPreservingScroll();
     }
+  }
+
+  refreshModalPreservingScroll() {
+    const scrollEl = document.getElementById('tag-manager-modal-scroll');
+    if (scrollEl) {
+      this.lastModalScrollTop = scrollEl.scrollTop;
+    }
+    const modalContent = document.getElementById('global-modal-content');
+    if (modalContent) {
+      this.renderModalContent(modalContent);
+    } else {
+      this.openTagManagerModal();
+    }
+    if (window.matrixView) window.matrixView.render('classroom-matrix-view', this.currentClassId);
   }
 }
 

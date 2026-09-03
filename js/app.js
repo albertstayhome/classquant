@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.8.7';
+    this.appVersion = '1.8.8';
     this.init();
   }
 
@@ -289,19 +289,32 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.8.7 -->
+          <!-- v1.8.8 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.8.7 (頂部選單最小化鈕常駐 • 展開提示整合導覽列)
+                v1.8.8 (座位表拖曳引擎升級 • 滾動鎖定優化 • 自動歷史快照防護)
               </span>
-              <span class="text-[11px] text-pink-700 font-mono font-bold">2026-08-31</span>
+              <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【頂部選單最小化按鈕常駐與手機佈局最佳化】重新精算手機螢幕寬度，頂部橫幅控制列 100% 單行自適應，最小化收合按鈕 (▲) 醒目常駐於右上角，絕不被擠出螢幕外！</li>
-              <li>• 【頂部選單展開提示整合至導覽列】徹底移除畫面中間彈跳遮擋的浮動大按鈕，改為優雅整合至吸頂導覽列首位的「🎀 ▼ 選單」按鈕，操作自然俐落、0 遮擋視野！</li>
-              <li>• 【標籤庫雙重架構與一鍵複製】導師班與任教班獨立/共用雙模式，支援隨時一鍵複製導師班標籤至全體任教班！</li>
-              <li>• 【修正邊界自動滾動動畫消失 Bug】實時滾動位移差補償，滾動時氣泡推開動態完美流暢！</li>
+              <li>• 【座位表拖曳引擎全面升級】全面移植 1:1 原生硬體觸控鎖定與精確像素槽位推移，支援螢幕邊緣智慧自動滾動與全局防漏接，徹底根除懸浮縮影殘留與換位漂移！</li>
+              <li>• 【標籤管理中心彈窗捲動鎖定優化】新增、修改分值、刪除標籤、恢復預設或複製標籤時，彈窗 100% 保持在當前滾動位置，操作不再突兀跳回頂部！</li>
+              <li>• 【本地歷史快照自動防呆機制】重大操作（批次匯入、刪除班級、清空資料前）自動建立本機歷史快照，支援最近 5 筆記錄「1 秒無痛還原」，資料安全固若金湯！</li>
+              <li>• 【舊版自訂標籤雙向相容無縫遷移】智慧向下相容升級，自動將先前建立的班級自訂標籤完整保留並升級至新版雙重架構！</li>
+            </ul>
+          </div>
+
+          <!-- v1.8.7 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.8.7
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-08-31</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【頂部選單最小化按鈕常駐】右上角最小化鈕常駐，展開按鈕整合至吸頂導覽列！</li>
             </ul>
           </div>
 

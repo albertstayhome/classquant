@@ -78,6 +78,24 @@ class Store {
           lastSyncTime: null
         };
       }
+
+      // Seamlessly migrate legacy classTags if groupTags is missing
+      if (!this.data.groupTags) {
+        const legacyHomeroom = this.data.classTags?.['801'] || this.data.tags || DEFAULT_TAGS;
+        const legacySubject = this.data.classTags?.['803'] || this.data.classTags?.['805'] || this.data.tags || DEFAULT_TAGS;
+        this.data.groupTags = {
+          homeroom: JSON.parse(JSON.stringify(legacyHomeroom)),
+          subject: JSON.parse(JSON.stringify(legacySubject))
+        };
+      }
+
+      // Auto Snapshot (at most once every 3 hours on startup)
+      const lastSnap = localStorage.getItem('classquant_last_auto_snapshot_ts');
+      const now = Date.now();
+      if (!lastSnap || (now - parseInt(lastSnap, 10)) > 3 * 3600 * 1000) {
+        this.createSnapshot('啟動時日常備份');
+        localStorage.setItem('classquant_last_auto_snapshot_ts', String(now));
+      }
     }
   }
 
@@ -809,12 +827,56 @@ class Store {
     return JSON.stringify(this.data, null, 2);
   }
 
+  // --- Local Automatic Data Snapshots & 1-Click Rollback ---
+  createSnapshot(reason = '自動快照') {
+    try {
+      const raw = localStorage.getItem('class_point_quant_hub_snapshots_v1');
+      const snapshots = raw ? JSON.parse(raw) : [];
+      snapshots.unshift({
+        timestamp: Date.now(),
+        timeStr: new Date().toLocaleString('zh-TW', { hour12: false }),
+        reason,
+        data: JSON.parse(JSON.stringify(this.data))
+      });
+      // Maintain latest 5 snapshots to avoid localStorage bloat
+      if (snapshots.length > 5) snapshots.length = 5;
+      localStorage.setItem('class_point_quant_hub_snapshots_v1', JSON.stringify(snapshots));
+      return true;
+    } catch (e) {
+      console.warn('Snapshot skipped:', e);
+      return false;
+    }
+  }
+
+  getSnapshots() {
+    try {
+      const raw = localStorage.getItem('class_point_quant_hub_snapshots_v1');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  restoreSnapshot(timestamp) {
+    const snapshots = this.getSnapshots();
+    const target = snapshots.find(s => s.timestamp === Number(timestamp));
+    if (target && target.data) {
+      // Create backup of current state before rollback
+      this.createSnapshot('還原前自動備份');
+      this.data = target.data;
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
   importAllData(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
       if (!parsed.classes || !parsed.students) {
         throw new Error('資料結構不符合規格：缺少 classes 或 students 欄位');
       }
+      this.createSnapshot('匯入全系統備份前');
       this.data = parsed;
       this.saveToStorage();
       return { success: true };
@@ -824,11 +886,13 @@ class Store {
   }
 
   resetToDemo() {
+    this.createSnapshot('重置展示資料前');
     localStorage.removeItem(STORAGE_KEY);
     this.initDemoData();
   }
 
   clearAll() {
+    this.createSnapshot('清空所有資料前');
     this.data = {
       classes: {},
       students: {},

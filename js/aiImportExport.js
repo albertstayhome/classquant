@@ -121,6 +121,48 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
         </div>
       </div>
 
+      <!-- Snapshots History / Safety Net -->
+      <div class="glass-card rounded-3xl p-5 sm:p-6 border border-pink-200 bg-white shadow-sm mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-pink-600"></i>
+            ⏱️ 本地歷史快照防呆機制（最近 5 筆自動備份）
+          </h3>
+          <button onclick="aiHub.createManualSnapshot()" class="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-300 text-xs font-bold flex items-center gap-1 transition shadow-sm">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i> 立即拍攝快照
+          </button>
+        </div>
+        <p class="text-xs text-slate-600 font-medium mb-3">系統會在每次重大異動（批次匯入、刪除班級、清空資料前）自動拍攝本機快照。若操作失誤，可隨時「1 秒無痛復原」：</p>
+
+        <div class="space-y-2">
+          ${(() => {
+            const snaps = this.store.getSnapshots();
+            if (snaps.length === 0) {
+              return '<div class="text-xs text-slate-500 py-3 text-center bg-slate-50 rounded-xl">目前尚無歷史快照記錄</div>';
+            }
+            return snaps.map(s => {
+              const classCount = Object.keys(s.data?.classes || {}).length;
+              let studentCount = 0;
+              Object.values(s.data?.students || {}).forEach(arr => studentCount += (arr?.length || 0));
+              const eventCount = s.data?.events?.length || 0;
+              return `
+                <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-pink-50/50 border border-pink-200 text-xs text-slate-800">
+                  <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                    <span class="font-mono font-bold text-slate-700">${s.timeStr}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-white text-pink-700 border border-pink-200 font-bold text-[11px]">${s.reason}</span>
+                    <span class="text-slate-500 text-[11px]">(${classCount} 班 • ${studentCount} 位學生 • ${eventCount} 筆事件)</span>
+                  </div>
+                  <button onclick="aiHub.restoreSnapshot(${s.timestamp})" class="px-3 py-1 rounded-lg bg-white border border-pink-300 hover:bg-pink-100 text-pink-800 text-xs font-black shadow-sm transition active:scale-95">
+                    ↩️ 還原此版本
+                  </button>
+                </div>
+              `;
+            }).join('');
+          })()}
+        </div>
+      </div>
+
       <!-- Danger Zone / Data Management -->
       <div class="glass-card rounded-3xl p-5 sm:p-6 border border-pink-200 bg-white shadow-sm">
         <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider mb-3">資料庫維護與重設</h3>
@@ -308,6 +350,26 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     a.download = `${cls ? cls.name : currentClassId}_全班統計報表.csv`;
     a.click();
     window.appState.showToast('已匯出班級統計 CSV 報表！', 'success');
+  }
+
+  createManualSnapshot() {
+    const success = this.store.createSnapshot('手動拍攝快照');
+    if (success) {
+      window.appState.showToast('📸 已成功建立當前狀態本地快照！', 'success');
+      this.render('ai-import-export-view');
+    }
+  }
+
+  restoreSnapshot(timestamp) {
+    if (confirm('⚠️ 確定要將系統狀態還原至此快照版本嗎？（系統會在還原前自動建立一份備份）')) {
+      const ok = this.store.restoreSnapshot(timestamp);
+      if (ok) {
+        window.appState.showToast('🎉 已成功還原至歷史快照版本！', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        window.appState.showToast('還原快照失敗', 'danger');
+      }
+    }
   }
 
   resetToDemoData() {
