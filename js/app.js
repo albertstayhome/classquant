@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.1';
+    this.appVersion = '1.9.2';
     this.init();
   }
 
@@ -257,18 +257,31 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.1 -->
+          <!-- v1.9.2 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.9.1 (Google Gemini 2.5 Flash 智慧成績轉換 • 免費高速雲端算力)
+                v1.9.2 (親友生日專屬解鎖：0228 • 全域 AI 服務架構)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【Google Gemini 2.5 Flash AI 智慧成績一鍵轉換（限連網使用）】全新旗艦功能！貼上任意口語文字（如「1號85粗心、2號42需補救」）、Line/Excel 複製文字，或直接拍照上傳成績單，AI 1 秒自動解析對應座號與成績！</li>
-              <li>• 【本機 LocalStorage 安全金鑰】支援每台設備獨立設定個人 Google Gemini API Key，每日提供 1,500 次呼叫，3~6 位家人親戚共用完全免費 (0 元免綁卡)！</li>
-              <li>• 【成績核對與確認彈窗】AI 辨識後自動比對班級花名冊姓名，提供試卷預覽與微調表格，確認無誤一鍵入庫，自動建立安全歷史快照！</li>
+              <li>• 【親友專屬通關解鎖（鑫吾的生日：0228）】免申請、免輸入金鑰！親友家人只要回答「鑫吾的生日：0228」，即刻自動解鎖並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！</li>
+              <li>• 【全域 AI 服務架構 (AIService)】建立統一 AI 服務中樞，未來所有擴充之 AI 評語、教學助理、學期摘要功能皆可直接共用此親友授權！</li>
+              <li>• 【雙軌自主授權】若不知道生日或欲使用自己獨立額度，亦可展開自行貼入個人 Google Gemini API Key，兼顧家人便利與獨立隱私！</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.1 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.9.1
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【Google Gemini 2.5 Flash 智慧成績轉換】貼上文字或拍照，1 秒自動對應花名冊座號與分數並彈出預覽！</li>
             </ul>
           </div>
 

@@ -4,18 +4,44 @@
  * Styled with unified Sanrio Pastel Glass-Card Theme.
  */
 
-class AIImportExportHub {
-  constructor(store) {
-    this.store = store;
-    this.selectedImageBase64 = null;
-    this.selectedImageMime = null;
-    this.selectedImageName = null;
-    this.systemKey = ''; // Teacher's built-in system Gemini key
+/**
+ * Centralized Google Gemini AI Service
+ * Supports Family Passcode Verification ("鑫吾的生日: 0228") and reusable API calls.
+ */
+class AIService {
+  constructor() {
+    // Encrypted master key (ciphertext encrypted with passcode '0228')
+    // Can be populated once teacher Albert provides his API key
+    this.encryptedKey = ''; 
   }
 
-  // --- API Key Management (Stored in device LocalStorage with System Fallback) ---
+  static encrypt(plainText, passcode = '0228') {
+    let result = '';
+    for (let i = 0; i < plainText.length; i++) {
+      result += String.fromCharCode(plainText.charCodeAt(i) ^ passcode.charCodeAt(i % passcode.length));
+    }
+    return btoa(result);
+  }
+
+  static decrypt(ciphertext, passcode = '0228') {
+    try {
+      const raw = atob(ciphertext);
+      let result = '';
+      for (let i = 0; i < raw.length; i++) {
+        result += String.fromCharCode(raw.charCodeAt(i) ^ passcode.charCodeAt(i % passcode.length));
+      }
+      return result;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  isFamilyAuthorized() {
+    return localStorage.getItem('classquant_family_authorized') === 'true';
+  }
+
   getApiKey() {
-    // 1. Check URL parameter ?setup_key=... or ?api_key=... for silent 1-click provisioning
+    // 1. Silent URL parameter check (?setup_key=... or ?api_key=...)
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const queryKey = urlParams.get('setup_key') || urlParams.get('api_key');
@@ -28,17 +54,14 @@ class AIImportExportHub {
       }
     } catch (e) {}
 
-    // 2. Check device LocalStorage
-    const localKey = localStorage.getItem('classquant_gemini_api_key');
-    if (localKey && localKey.trim()) return localKey.trim();
+    // 2. User/device custom key
+    const customKey = localStorage.getItem('classquant_gemini_api_key');
+    if (customKey && customKey.trim()) return customKey.trim();
 
-    // 3. Teacher's built-in system key
-    if (this.systemKey) {
-      try {
-        return atob(this.systemKey);
-      } catch (e) {
-        return this.systemKey;
-      }
+    // 3. Family authorized key (decrypted from encrypted master key)
+    if (this.isFamilyAuthorized() && this.encryptedKey) {
+      const decrypted = AIService.decrypt(this.encryptedKey, '0228');
+      if (decrypted) return decrypted;
     }
 
     return '';
@@ -50,10 +73,106 @@ class AIImportExportHub {
 
   clearApiKey() {
     localStorage.removeItem('classquant_gemini_api_key');
+    localStorage.removeItem('classquant_family_authorized');
   }
 
   hasApiKey() {
     return Boolean(this.getApiKey());
+  }
+
+  verifyFamilyPasscode(passcode) {
+    if ((passcode || '').trim() === '0228') {
+      localStorage.setItem('classquant_family_authorized', 'true');
+      if (this.encryptedKey) {
+        const decrypted = AIService.decrypt(this.encryptedKey, '0228');
+        if (decrypted) {
+          localStorage.setItem('classquant_gemini_api_key', decrypted);
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  async generateContent({ prompt, systemInstruction, responseSchema, images = [] }) {
+    const key = this.getApiKey();
+    if (!key) throw new Error('AUTH_REQUIRED');
+    if (!navigator.onLine) throw new Error('OFFLINE');
+
+    const parts = [];
+    images.forEach(img => {
+      parts.push({
+        inlineData: {
+          mimeType: img.mimeType || 'image/jpeg',
+          data: img.data
+        }
+      });
+    });
+    parts.push({ text: prompt });
+
+    const requestBody = {
+      contents: [{ parts }]
+    };
+
+    if (systemInstruction) {
+      requestBody.systemInstruction = {
+        parts: [{ text: systemInstruction }]
+      };
+    }
+
+    if (responseSchema) {
+      requestBody.generationConfig = {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema
+      };
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => ({}));
+      throw new Error(errJson.error?.message || `HTTP ${response.status} 錯誤`);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates?.[0];
+    if (!candidate || !candidate.content?.parts?.[0]?.text) {
+      throw new Error('Gemini API 未回傳有效解析內容');
+    }
+
+    return candidate.content.parts[0].text;
+  }
+}
+
+// Global AI Service
+window.aiService = new AIService();
+
+class AIImportExportHub {
+  constructor(store) {
+    this.store = store;
+    this.selectedImageBase64 = null;
+    this.selectedImageMime = null;
+    this.selectedImageName = null;
+  }
+
+  getApiKey() {
+    return window.aiService.getApiKey();
+  }
+
+  setApiKey(key) {
+    window.aiService.setApiKey(key);
+  }
+
+  clearApiKey() {
+    window.aiService.clearApiKey();
+  }
+
+  hasApiKey() {
+    return window.aiService.hasApiKey();
   }
 
   render(containerId) {
@@ -62,6 +181,7 @@ class AIImportExportHub {
 
     const classes = this.store.getClasses();
     const currentClassId = window.appState.currentClassId || (classes[0] ? classes[0].id : '801');
+    const isFamilyAuth = window.aiService.isFamilyAuthorized();
     const hasKey = this.hasApiKey();
     const today = new Date().toISOString().split('T')[0];
 
@@ -115,20 +235,34 @@ class AIImportExportHub {
             </div>
           </div>
 
-          <!-- API Key Status & Setup Button -->
+          <!-- API Key / Family Authorization Status & Setup Button -->
           <div>
-            ${hasKey ? `
-              <button onclick="aiHub.openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black flex items-center gap-1.5 transition shadow-sm" title="點擊修改或測試 API Key">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>🟢 Gemini API Key 已就緒</span>
-                <i data-lucide="settings" class="w-3.5 h-3.5 text-emerald-600"></i>
-              </button>
-            ` : `
-              <button onclick="aiHub.openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-black flex items-center gap-1.5 transition shadow-md animate-bounce" title="點擊設定免費 Google Gemini API Key">
-                <i data-lucide="key" class="w-3.5 h-3.5"></i>
-                <span>🔑 點此設定 Gemini API Key (免費)</span>
-              </button>
-            `}
+            ${(() => {
+              if (isFamilyAuth) {
+                return `
+                  <button onclick="aiHub.openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-900 border border-pink-300 text-xs font-black flex items-center gap-1.5 transition shadow-sm" title="點擊查看親友授權狀態">
+                    <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+                    <span>🎂 鑫吾親友專屬 AI 算力（已授權）</span>
+                    <i data-lucide="settings" class="w-3.5 h-3.5 text-pink-700"></i>
+                  </button>
+                `;
+              } else if (hasKey) {
+                return `
+                  <button onclick="aiHub.openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black flex items-center gap-1.5 transition shadow-sm" title="點擊修改或測試自訂 API Key">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>🟢 自訂 Gemini API Key 已就緒</span>
+                    <i data-lucide="settings" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  </button>
+                `;
+              } else {
+                return `
+                  <button onclick="aiHub.openApiKeyModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-black flex items-center gap-1.5 transition shadow-md animate-bounce" title="親友輸入生日解鎖，或自訂個人金鑰">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                    <span>🎂 親友生日解鎖 / 設定金鑰</span>
+                  </button>
+                `;
+              }
+            })()}
           </div>
         </div>
 
@@ -547,17 +681,21 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const currentKey = this.getApiKey();
+    const isFamilyAuth = window.aiService.isFamilyAuthorized();
+
     modalContent.innerHTML = `
       <div class="p-5 sm:p-6 animate-fade-in-up">
+        <!-- Header -->
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-pink-200">
           <div class="flex items-center space-x-2">
-            <span class="text-2xl">🔑</span>
+            <span class="text-2xl">🎂</span>
             <div>
               <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-1.5">
-                <span>設定 Google Gemini API Key</span>
+                <span>啟用 ClassQuant AI 雲端服務</span>
                 <span class="kitty-bow !w-3 !h-3"></span>
               </h3>
-              <p class="text-xs text-slate-500 font-medium">供本機直接呼叫 Gemini 2.5 Flash 模型進行成績辨識</p>
+              <p class="text-xs text-slate-500 font-medium">親友專屬解鎖或自訂 Google Gemini API Key</p>
             </div>
           </div>
           <button onclick="aiHub.closeGlobalModal()" class="p-1.5 rounded-xl hover:bg-pink-100 text-slate-400 hover:text-slate-700 transition">
@@ -565,55 +703,164 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
           </button>
         </div>
 
-        <div class="space-y-3.5 mb-5 text-xs text-slate-700">
-          <div class="p-3.5 rounded-2xl bg-pink-50/80 border border-pink-200 leading-relaxed font-medium">
-            <div class="font-black text-pink-900 mb-1 flex items-center gap-1">
-              <span>💡 如何免費取得您的專屬 API Key（30秒即可取得）：</span>
-            </div>
-            <ol class="list-decimal pl-4 space-y-1 text-slate-600">
-              <li>點擊前往官方 <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-pink-600 font-bold underline">Google AI Studio (點此免費申請)</a>。</li>
-              <li>登入您的 Google 帳號，點擊「Create API key」按鈕。</li>
-              <li>複製產生的金鑰（以 <code>AIzaSy...</code> 開頭），貼在下方輸入框中。</li>
-              <li class="text-emerald-700 font-bold">✨ 完全免費！無需填寫信用卡，每天提供 1,500 次免費呼叫，家人親戚共用綽綽有餘。</li>
-            </ol>
+        <!-- 1. Family Birthday Passcode Challenge Card -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-pink-50 via-rose-50/50 to-purple-50 border-2 border-pink-300 shadow-sm mb-4">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-pink-500 text-white font-black text-[11px]">親友專屬解鎖</span>
+            <h4 class="text-xs sm:text-sm font-black text-pink-950">免設定！回答問題即可直接使用鑫吾的專屬 AI 算力</h4>
           </div>
+          <p class="text-xs text-slate-600 font-medium mb-3 leading-relaxed">
+            親友家人完全不需要申請任何 Google 帳號或金鑰，只要回答通關問題，即可終身啟用鑫吾贊助的 Google Gemini 雲端算力：
+          </p>
 
-          <div>
-            <label class="block font-black text-slate-800 mb-1.5">Gemini API Key：</label>
-            <div class="relative">
-              <input type="password" id="gemini-api-key-input" value="${currentKey}" placeholder="貼上您的 API Key (AIzaSy...)" class="w-full bg-slate-50 border-2 border-pink-300 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:outline-none focus:border-pink-500 pr-10 shadow-inner font-bold">
-              <button type="button" onclick="aiHub.togglePasswordVisibility('gemini-api-key-input')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
-                <i data-lucide="eye" class="w-4 h-4"></i>
+          <div class="p-3 bg-white rounded-xl border border-pink-200 mb-3">
+            <label class="block text-xs font-black text-pink-900 mb-1.5 flex items-center gap-1">
+              <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-600"></i>
+              <span>通關問題：請問【鑫吾的生日】是幾月幾號？（4 位數字）</span>
+            </label>
+            <div class="flex items-center space-x-2">
+              <input type="text" id="family-birthday-input" maxlength="4" placeholder="例: 0101" class="w-32 bg-pink-50/50 border-2 border-pink-300 rounded-xl px-3 py-2 text-center text-sm font-black tracking-widest text-slate-900 focus:outline-none focus:border-pink-500 font-mono shadow-inner">
+              <button onclick="aiHub.verifyFamilyBirthday()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs font-black shadow-md transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
+                <span>驗證並啟用</span>
               </button>
             </div>
-            <p class="text-[11px] text-slate-500 mt-1">🔒 金鑰僅儲存於您目前的裝置瀏覽器中（LocalStorage），絕不上傳任何第三方伺服器。</p>
           </div>
 
-          <div id="gemini-test-result" class="hidden p-2.5 rounded-xl text-xs font-bold"></div>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-pink-100">
-          <div>
-            ${currentKey ? `
-              <button onclick="aiHub.clearApiKeyFromModal()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition">
-                🗑️ 清除金鑰
-              </button>
+          <div id="family-verify-feedback" class="${isFamilyAuth ? '' : 'hidden'} p-2.5 rounded-xl text-xs font-bold">
+            ${isFamilyAuth ? `
+              <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span>✅ 此裝置已通過「鑫吾生日」驗證，正使用專屬 AI 算力！</span>
+                </div>
+                <button onclick="aiHub.revokeFamilyAuth()" class="px-2 py-1 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-lg border border-rose-200 transition">
+                  取消授權
+                </button>
+              </div>
             ` : ''}
           </div>
-          <div class="flex items-center space-x-2">
-            <button id="btn-test-gemini-key" onclick="aiHub.testApiKeyConnection()" class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-              <i data-lucide="zap" class="w-3.5 h-3.5"></i> 測試連線
-            </button>
-            <button onclick="aiHub.saveApiKeyFromModal()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs font-black shadow-md transition flex items-center gap-1">
-              <i data-lucide="check" class="w-4 h-4"></i> 儲存金鑰
-            </button>
-          </div>
         </div>
+
+        <!-- 2. Manual Personal Key Accordion (For non-family or custom keys) -->
+        <details class="group rounded-2xl border border-pink-200 bg-white p-3.5 shadow-sm">
+          <summary class="text-xs font-black text-slate-700 cursor-pointer flex items-center justify-between list-none">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="key" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>若不知道答案，或欲使用自己獨立的 Google Gemini API Key：</span>
+            </span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition"></i>
+          </summary>
+
+          <div class="mt-3 pt-3 border-t border-pink-100 space-y-3 text-xs text-slate-700">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 leading-relaxed font-medium">
+              <span>💡 您可前往官方 <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-pink-600 font-bold underline">Google AI Studio</a> 申請自己的免費金鑰（免綁卡、每日 1,500 次），並貼在下方：</span>
+            </div>
+
+            <div>
+              <label class="block font-black text-slate-800 mb-1">個人 Gemini API Key：</label>
+              <div class="relative">
+                <input type="password" id="gemini-api-key-input" value="${isFamilyAuth ? '' : currentKey}" placeholder="貼上個人 API Key (AIzaSy...)" class="w-full bg-slate-50 border-2 border-pink-300 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-pink-500 pr-10 shadow-inner font-bold">
+                <button type="button" onclick="aiHub.togglePasswordVisibility('gemini-api-key-input')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="gemini-test-result" class="hidden p-2.5 rounded-xl text-xs font-bold"></div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div>
+                ${currentKey ? `
+                  <button onclick="aiHub.clearApiKeyFromModal()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition">
+                    🗑️ 清除已存金鑰
+                  </button>
+                ` : ''}
+              </div>
+              <div class="flex items-center space-x-2">
+                <button id="btn-test-gemini-key" onclick="aiHub.testApiKeyConnection()" class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i> 測試連線
+                </button>
+                <button onclick="aiHub.saveApiKeyFromModal()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-black shadow-md transition flex items-center gap-1">
+                  <i data-lucide="check" class="w-4 h-4"></i> 儲存自訂金鑰
+                </button>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     `;
 
     modal.classList.remove('hidden');
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  verifyFamilyBirthday() {
+    const input = document.getElementById('family-birthday-input');
+    const feedback = document.getElementById('family-verify-feedback');
+    if (!input || !feedback) return;
+
+    const val = input.value.trim();
+    if (!val) {
+      window.appState.showToast('請輸入 4 位生日數字', 'danger');
+      return;
+    }
+
+    if (val === '0228') {
+      const ok = window.aiService.verifyFamilyPasscode(val);
+      feedback.className = 'p-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 block';
+      
+      if (window.aiService.encryptedKey) {
+        feedback.innerHTML = `<span>🎉 驗證成功！已為您啟用鑫吾的專屬 Google Gemini AI 算力，即開即用！</span>`;
+        window.appState.showToast('🎉 通關成功！已為您解鎖鑫吾的專屬 AI 算力！', 'success');
+        setTimeout(() => {
+          this.closeGlobalModal();
+          this.render('ai-hub-view');
+        }, 1000);
+      } else {
+        // If master key has not been baked into code yet
+        feedback.innerHTML = `
+          <div>
+            <div class="text-emerald-900 font-black mb-1">🎉 鑫吾生日驗證通過！</div>
+            <p class="text-slate-700 font-medium mb-2">這是首次初始化設定，請鑫吾在下方輸入您的 Gemini API Key 完成金鑰綁定（日後所有輸入 0228 的親友皆可直接解鎖調用）：</p>
+            <div class="flex items-center space-x-2">
+              <input type="password" id="master-key-setup-input" placeholder="貼上您的 Gemini API Key (AIzaSy...)" class="flex-1 px-3 py-1.5 border border-pink-300 rounded-lg text-xs font-mono font-bold bg-white">
+              <button onclick="aiHub.saveMasterKeyFromInit()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0">綁定並啟用</button>
+            </div>
+          </div>
+        `;
+      }
+      feedback.classList.remove('hidden');
+    } else {
+      feedback.className = 'p-3 rounded-xl text-xs font-bold bg-rose-50 text-rose-800 border border-rose-300 block';
+      feedback.innerHTML = `<span>❌ 生日不正確。若非親友，請點擊下方展開「若不知道答案，或欲使用自己獨立的 API Key」。</span>`;
+      feedback.classList.remove('hidden');
+      window.appState.showToast('生日驗證未通過，請檢查輸入或自行設定金鑰', 'danger');
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  saveMasterKeyFromInit() {
+    const input = document.getElementById('master-key-setup-input');
+    if (!input) return;
+    const key = input.value.trim();
+    if (!key) {
+      window.appState.showToast('請輸入有效金鑰', 'danger');
+      return;
+    }
+    window.aiService.setApiKey(key);
+    localStorage.setItem('classquant_family_authorized', 'true');
+    window.appState.showToast('🎉 已成功綁定專屬 Gemini API Key！所有親友皆可直接使用！', 'success');
+    this.closeGlobalModal();
+    this.render('ai-hub-view');
+  }
+
+  revokeFamilyAuth() {
+    if (confirm('確定要取消此裝置的親友 AI 授權嗎？')) {
+      window.aiService.clearApiKey();
+      window.appState.showToast('已取消授權', 'info');
+      this.closeGlobalModal();
+      this.render('ai-hub-view');
+    }
   }
 
   togglePasswordVisibility(inputId) {
@@ -691,7 +938,7 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
       return;
     }
     this.setApiKey(key);
-    window.appState.showToast('🎉 Google Gemini API Key 已安全保存在此裝置！', 'success');
+    window.appState.showToast('🎉 Google Gemini API Key 已保存於此裝置！', 'success');
     this.closeGlobalModal();
     this.render('ai-hub-view');
   }
@@ -771,9 +1018,8 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
       return;
     }
 
-    const apiKey = this.getApiKey();
-    if (!apiKey) {
-      window.appState.showToast('🔑 尚未設定 API Key，請先輸入您的免費 Google Gemini 金鑰！', 'info');
+    if (!window.aiService.hasApiKey()) {
+      window.appState.showToast('🔑 尚未解鎖或設定 AI 金鑰，請先回答親友通關密語！', 'info');
       this.openApiKeyModal();
       return;
     }
@@ -797,14 +1043,11 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     }
 
     try {
-      const parts = [];
-
+      const images = [];
       if (this.selectedImageBase64) {
-        parts.push({
-          inlineData: {
-            mimeType: this.selectedImageMime || 'image/jpeg',
-            data: this.selectedImageBase64
-          }
+        images.push({
+          mimeType: this.selectedImageMime || 'image/jpeg',
+          data: this.selectedImageBase64
         });
       }
 
@@ -827,54 +1070,36 @@ ${rawText || '(請見所附成績單圖片)'}
 3. note: 備註 (若無備註可填空字串 "")。
 4. 請嚴格依照 JSON Schema 格式輸出。
 `;
-      parts.push({ text: promptText });
 
-      const requestBody = {
-        contents: [{ parts }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              assessment_name: { type: "STRING" },
-              max_score: { type: "NUMBER" },
-              records: {
-                type: "ARRAY",
-                items: {
-                  type: "OBJECT",
-                  properties: {
-                    seat_no: { type: "INTEGER" },
-                    score: { type: "NUMBER" },
-                    note: { type: "STRING" }
-                  },
-                  required: ["seat_no", "score"]
-                }
-              }
-            },
-            required: ["records"]
+      const responseSchema = {
+        type: "OBJECT",
+        properties: {
+          assessment_name: { type: "STRING" },
+          max_score: { type: "NUMBER" },
+          records: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                seat_no: { type: "INTEGER" },
+                score: { type: "NUMBER" },
+                note: { type: "STRING" }
+              },
+              required: ["seat_no", "score"]
+            }
           }
-        }
+        },
+        required: ["records"]
       };
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+      const resultText = await window.aiService.generateContent({
+        prompt: promptText,
+        systemInstruction: "你是一位專業的台灣國中教務與評量數據分析助理。請嚴格輸出符合 Schema 的 JSON 格式。",
+        responseSchema,
+        images
       });
 
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        const errMsg = errJson.error?.message || `HTTP ${response.status} 錯誤`;
-        throw new Error(errMsg);
-      }
-
-      const data = await response.json();
-      const candidate = data.candidates?.[0];
-      if (!candidate || !candidate.content?.parts?.[0]?.text) {
-        throw new Error('Gemini API 未回傳有效解析內容');
-      }
-
-      const resultJson = JSON.parse(candidate.content.parts[0].text);
+      const resultJson = JSON.parse(resultText);
       const records = resultJson.records || [];
 
       if (records.length === 0) {
@@ -895,7 +1120,12 @@ ${rawText || '(請見所附成績單圖片)'}
 
     } catch (err) {
       console.error('Gemini conversion error:', err);
-      window.appState.showToast(`❌ AI 轉換失敗：${err.message}`, 'danger');
+      if (err.message === 'AUTH_REQUIRED') {
+        window.appState.showToast('🔑 尚未解鎖 AI 服務，請先回答親友通關密語！', 'info');
+        this.openApiKeyModal();
+      } else {
+        window.appState.showToast(`❌ AI 轉換失敗：${err.message}`, 'danger');
+      }
     } finally {
       if (convertBtn) {
         convertBtn.disabled = false;
