@@ -188,7 +188,7 @@ class AIImportExportHub {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const classes = this.store.getClasses();
+    const classes = Object.values(this.store.getClasses() || {});
     const currentClassId = window.appState.currentClassId || (classes[0] ? classes[0].id : '801');
     const isFamilyAuth = window.aiService.isFamilyAuthorized();
     const hasKey = this.hasApiKey();
@@ -685,7 +685,6 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
 
   // --- Gemini API Key Modal ---
   openApiKeyModal() {
-    const currentKey = this.getApiKey();
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;

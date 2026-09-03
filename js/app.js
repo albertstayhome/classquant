@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.3';
+    this.appVersion = '1.9.4';
     this.init();
   }
 
@@ -257,18 +257,30 @@ class AppState {
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.3 -->
+          <!-- v1.9.4 -->
           <div class="p-3.5 rounded-2xl border-2 border-pink-500 bg-pink-50/30 shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs shadow-sm">
-                v1.9.3 (鑫吾專屬金鑰加密封裝就緒 • 通關生日 0228 即刻啟用)
+                v1.9.4 (修復 AI 成績匯入頁面載入 • 鑫吾算力全開)
               </span>
               <span class="text-[11px] text-pink-700 font-mono font-bold">2026-09-03</span>
             </div>
             <ul class="text-xs text-slate-800 space-y-1.5 font-medium pl-1">
-              <li>• 【鑫吾專屬金鑰加密就緒】已完成密鑰封裝！親友只要輸入「鑫吾的生日：0228」，即刻自動解密並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！</li>
-              <li>• 【全域 AI 服務架構 (AIService)】支援 Google Gemini 最新極速 Flash 模型，未來所有 AI 評語、教學助理皆可直接共用此授權！</li>
-              <li>• 【0 元免綁卡硬性限額保證】使用 Google AI Studio 官方 Free Tier，無綁定信用卡，絕無超額扣款風險，安心放心使用！</li>
+              <li>• 【修復 AI 成績匯入頁面空白問題】修復底層腳本解析異常與班級陣列載入機制，確保「AI 成績匯入」分頁在所有手機與電腦上 100% 立即正常呈現！</li>
+              <li>• 【親友專屬生日解鎖（0228）】免申請、免輸入金鑰！親友家人只要回答「鑫吾的生日：0228」，即刻自動解密並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.3 -->
+          <div class="p-3.5 rounded-2xl border border-pink-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black text-xs border border-pink-300">
+                v1.9.3
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono font-bold">2026-09-03</span>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1 font-medium pl-1">
+              <li>• 【鑫吾專屬金鑰加密就緒】已完成密鑰封裝！通關密語 0228 即刻啟用！</li>
             </ul>
           </div>
 

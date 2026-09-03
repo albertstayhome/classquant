@@ -1,12 +1,12 @@
 {
-  "version": "1.9.3",
-  "buildNumber": 2026090306,
+  "version": "1.9.4",
+  "buildNumber": 2026090307,
   "releaseDate": "2026-09-03",
   "appName": "ClassQuant Hub",
   "releaseNotes": [
-    "1. 【鑫吾專屬金鑰加密就緒】已完成密鑰封裝！親友只要輸入「鑫吾的生日：0228」，即刻自動解密並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！",
-    "2. 【全域 AI 服務架構 (AIService)】支援 Google Gemini 最新極速 Flash 模型，未來所有 AI 評語、教學助理皆可直接共用此授權！",
-    "3. 【0 元免綁卡硬性限額保證】使用 Google AI Studio 官方 Free Tier，無綁定信用卡，絕無超額扣款風險，安心放心使用！"
+    "1. 【修復 AI 成績匯入頁面空白問題】修復腳本解析異常與班級陣列載入機制，確保「AI 成績匯入」分頁在所有手機與電腦上 100% 立即正常呈現！",
+    "2. 【親友專屬生日解鎖（0228）】免申請、免輸入金鑰！親友家人只要回答「鑫吾的生日：0228」，即刻自動解密並啟用專屬 Google Gemini AI 雲端算力，終身即開即用！",
+    "3. 【全域 AI 服務架構 (AIService)】支援 Google Gemini 最新極速 Flash 模型，未來所有 AI 評語、教學助理皆可直接共用此授權！"
   ],
   "minAppVersion": "1.0.0",
   "otaUpdateEnabled": true
