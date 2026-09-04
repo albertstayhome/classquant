@@ -618,10 +618,11 @@ class ClassroomMatrix {
 
             const avatarIndex = (s.seatNo - 1) % this.coteAvatars.length;
             const coteAvatar = this.coteAvatars[avatarIndex];
+            const charName = this.getCoteCharName(avatarIndex);
 
             rankBadgeHtml = `
-              <div class="flex items-center space-x-1 shrink-0">
-                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="COTE" title="實力至上主義角色頭像">
+              <div class="flex items-center space-x-1 shrink-0 cursor-pointer active:scale-90 transition" onclick="event.stopPropagation(); matrixView.triggerCoteCharacterVoice(${s.seatNo}, '${s.name.replace(/'/g, "\\'")}', '${rank}')" title="點擊聆聽【${charName}】動漫台詞彩蛋">
+                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="COTE">
                 <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
               </div>
             `;
@@ -673,7 +674,7 @@ class ClassroomMatrix {
                  onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
               
               <!-- Seat Header: Seat No + Mascot / COTE Rank -->
-              <div class="flex items-center justify-between mb-0.5 pointer-events-none">
+              <div class="flex items-center justify-between mb-1">
                 ${seatNoBadgeHtml}
                 ${rankBadgeHtml}
               </div>
@@ -702,7 +703,7 @@ class ClassroomMatrix {
 
           <div class="flex items-center space-x-2">
             <!-- Prev Page Button -->
-            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="上一頁">
+            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm cursor-pointer" title="上一頁">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
             
@@ -711,27 +712,12 @@ class ClassroomMatrix {
             </span>
 
             <!-- Next Page Button -->
-            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="下一頁">
+            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm cursor-pointer" title="下一頁">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
-          </div>
-        </div>
-              ◀
-            </button>
 
-            <!-- Page Dots Indicator -->
-            <div class="flex items-center space-x-1.5 px-1" id="tag-page-dots">
-              ${tagPages.map((_, idx) => `
-                <button onclick="matrixView.scrollToTagPage(${idx})" class="h-2.5 rounded-full transition-all ${idx === this.currentTagPage ? 'bg-pink-600 w-5' : 'bg-pink-200 w-2.5'}"></button>
-              `).join('')}
-            </div>
-
-            <!-- Next Page Button -->
-            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="下一頁">
-              ▶
-            </button>
-
-            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="text-pink-600 font-black hover:underline flex items-center gap-0.5 text-xs ml-1">
+            <!-- Custom Tag Modal Button -->
+            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="${isOAA ? 'text-amber-400 hover:text-amber-300' : 'text-pink-600 hover:text-pink-700'} font-black hover:underline flex items-center gap-0.5 text-xs ml-1 cursor-pointer" title="管理自訂標籤">
               <i data-lucide="settings" class="w-3.5 h-3.5"></i> 自訂
             </button>
           </div>
@@ -757,8 +743,8 @@ class ClassroomMatrix {
                     <button id="${btnId}" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
                       class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
                       <div class="flex flex-col pr-1 overflow-hidden">
-                        <span class="text-xs sm:text-base font-black truncate text-slate-900 leading-tight">${tag.name}</span>
-                        <span class="text-[10px] text-slate-500 font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
+                        <span class="text-xs sm:text-base font-black truncate ${isOAA ? 'text-white drop-shadow' : 'text-slate-900'} leading-tight">${tag.name}</span>
+                        <span class="text-[10px] ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
                       </div>
                       <span class="text-xs sm:text-sm font-black px-3 py-1 rounded-xl border shrink-0 ${badgeClass}">
                         ${tag.delta > 0 ? '+' : ''}${tag.delta}
@@ -1336,6 +1322,135 @@ class ClassroomMatrix {
     window.appState.showToast(`已確實記錄座號 ${seats.join(', ')} 重大事件`, 'success');
     window.appState.closeModal();
     this.render('classroom-matrix-view', classId);
+  }
+
+  getCoteCharName(index) {
+    const names = [
+      '綾小路 清隆',
+      '堀北 鈴音',
+      '輕井澤 惠',
+      '一之瀨 帆波',
+      '坂柳 有栖',
+      '櫛田 桔梗',
+      '龍園 翔',
+      '須藤 健',
+      '平田 洋介',
+      '佐倉 愛里',
+      '高圓寺 六助'
+    ];
+    return names[index] || '綾小路 清隆';
+  }
+
+  triggerCoteCharacterVoice(seatNo, studentName, rank) {
+    const avatarIndex = (seatNo - 1) % this.coteAvatars.length;
+    const coteAvatar = this.coteAvatars[avatarIndex];
+    
+    const charQuotes = [
+      { 
+        name: '綾小路 清隆', 
+        role: 'D CLASS // 學生編號 S01T004721', 
+        quote: '「所有人對我來說，都只不過是道具而已。只要最後贏的人是我，那就夠了。」' 
+      },
+      { 
+        name: '堀北 鈴音', 
+        role: 'D CLASS // 孤高的領導者', 
+        quote: '「不要隨便跟我搭話，我習慣一個人。我的目標只有帶領班級升上 A 班。」' 
+      },
+      { 
+        name: '輕井澤 惠', 
+        role: 'D CLASS // 女生領袖', 
+        quote: '「保護我……這是我們之間的契約吧？清隆君……我相信你。」' 
+      },
+      { 
+        name: '一之瀨 帆波', 
+        role: 'B CLASS // 班級領袖', 
+        quote: '「只要大家同心協力，B 班一定能全員一起升上 A 班的！加油！」' 
+      },
+      { 
+        name: '坂柳 有栖', 
+        role: 'A CLASS // 實質領袖', 
+        quote: '「呵呵，天才與凡人的差距，可不是靠努力就能彌補的呢。」' 
+      },
+      { 
+        name: '櫛田 桔梗', 
+        role: 'D CLASS // 社交核心', 
+        quote: '「老師好～我最喜歡大家了！……（切換冷笑）嘖，剛剛是誰在背後看我？找死嗎？」' 
+      },
+      { 
+        name: '龍園 翔', 
+        role: 'C CLASS // 霸者領導', 
+        quote: '「在我的字典裡，只有贏和輸兩種結果！規矩？規矩就是用來打破的。」' 
+      },
+      { 
+        name: '須藤 健', 
+        role: 'D CLASS // 籃球王牌', 
+        quote: '「老子要用籃球和實力證明給所有人看，別看扁我！」' 
+      },
+      { 
+        name: '平田 洋介', 
+        role: 'D CLASS // 男生代表', 
+        quote: '「大家不要吵架，班級團結才是最重要的，我們一定能找到雙贏的辦法！」' 
+      },
+      { 
+        name: '佐倉 愛里', 
+        role: 'D CLASS // 內向少女', 
+        quote: '「那個……我、我也想為大家做點什麼……哪怕只有一點點也好。」' 
+      },
+      { 
+        name: '高圓寺 六助', 
+        role: '自由人 // 唯我獨尊', 
+        quote: '「哈哈哈哈！美麗的我，是不會受制於任何學校規則的，Girl~」' 
+      }
+    ];
+
+    const char = charQuotes[avatarIndex] || charQuotes[0];
+
+    if (window.appState && window.appState.playPop) {
+      window.appState.playPop();
+    }
+
+    this.showCoteQuoteToast(char, coteAvatar, studentName, seatNo, rank);
+  }
+
+  showCoteQuoteToast(char, avatarSrc, studentName, seatNo, rank) {
+    let toast = document.getElementById('cote-quote-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'cote-quote-toast';
+      toast.className = 'cote-quote-toast';
+      document.body.appendChild(toast);
+    }
+
+    toast.innerHTML = `
+      <img src="${avatarSrc}" class="w-12 h-12 rounded-xl border-2 border-amber-400 shadow-md object-cover shrink-0" alt="${char.name}">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-1 mb-0.5">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="font-black text-white text-xs sm:text-sm tracking-wide truncate">${char.name}</span>
+            <span class="text-[10px] text-amber-300 font-mono font-bold shrink-0">[${String(seatNo).padStart(2, '0')}號 ${studentName}]</span>
+          </div>
+          <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
+        </div>
+        <div class="text-[10px] text-rose-300 font-mono mb-1 truncate">${char.role}</div>
+        <div class="text-xs text-amber-100 font-bold leading-snug font-serif tracking-wide italic">
+          ${char.quote}
+        </div>
+      </div>
+    `;
+
+    toast.onclick = () => {
+      toast.classList.remove('show');
+    };
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    if (this._coteToastTimer) clearTimeout(this._coteToastTimer);
+    this._coteToastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4200);
   }
 }
 

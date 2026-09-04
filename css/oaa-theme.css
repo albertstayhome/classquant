@@ -266,3 +266,206 @@ html[data-theme="oaa"] .border-slate-200,
 html[data-theme="oaa"] .border-slate-300 {
   border-color: rgba(245, 158, 11, 0.3) !important;
 }
+
+/* ==========================================================================
+   11. 課堂標籤 (Quick Tag Dock) 與三層色規深度重構 (徹底根除淺色螢光與模糊)
+   ========================================================================== */
+
+/* 正向加分標籤：深邃墨綠底 (#062c19)、翡翠微光邊框 (#10b981)、純白高對比粗體 */
+html[data-theme="oaa"] .color-rule-pos {
+  background-color: #072e1c !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.45), inset 0 1px 0 rgba(16, 185, 129, 0.2) !important;
+}
+html[data-theme="oaa"] .color-rule-pos:hover {
+  background-color: #0d442b !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.5) !important;
+}
+html[data-theme="oaa"] .color-rule-pos-badge {
+  background-color: #042416 !important;
+  color: #6ee7b7 !important;
+  border-color: #10b981 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 違規扣分標籤：制服深酒紅底 (#3b0c16)、警示赤紅邊框 (#ef4444)、純白高對比粗體 */
+html[data-theme="oaa"] .color-rule-neg {
+  background-color: #380b15 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(159, 18, 57, 0.45), inset 0 1px 0 rgba(239, 68, 68, 0.2) !important;
+}
+html[data-theme="oaa"] .color-rule-neg:hover {
+  background-color: #520f1f !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.5) !important;
+}
+html[data-theme="oaa"] .color-rule-neg-badge {
+  background-color: #26050d !important;
+  color: #fca5a5 !important;
+  border-color: #ef4444 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 零分與常規記事：深黑紫底 (#1e0e18)、校徽金邊框 (#f59e0b)、純白高對比粗體 */
+html[data-theme="oaa"] .color-rule-zero {
+  background-color: #1f0f1a !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+}
+html[data-theme="oaa"] .color-rule-zero:hover {
+  background-color: #2f1727 !important;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4) !important;
+}
+html[data-theme="oaa"] .color-rule-zero-badge {
+  background-color: #160811 !important;
+  color: #fde047 !important;
+  border-color: #f59e0b !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 快速標籤按鈕內部文字全域銳化 */
+html[data-theme="oaa"] .quick-tag-button {
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+html[data-theme="oaa"] .quick-tag-button span.text-slate-900 {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+html[data-theme="oaa"] .quick-tag-button span.text-slate-500 {
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+/* 覆蓋 Tailwind 內建淺色 Pastel 標記類別 (消除螢光白底衝突) */
+html[data-theme="oaa"] .bg-emerald-50,
+html[data-theme="oaa"] .bg-emerald-50\/40,
+html[data-theme="oaa"] .bg-emerald-100 {
+  background-color: #072e1c !important;
+  color: #a7f3d0 !important;
+}
+html[data-theme="oaa"] .border-emerald-200,
+html[data-theme="oaa"] .border-emerald-300 {
+  border-color: #10b981 !important;
+}
+html[data-theme="oaa"] .text-emerald-800,
+html[data-theme="oaa"] .text-emerald-700,
+html[data-theme="oaa"] .text-emerald-600 {
+  color: #6ee7b7 !important;
+}
+
+html[data-theme="oaa"] .bg-rose-50,
+html[data-theme="oaa"] .bg-rose-50\/40,
+html[data-theme="oaa"] .bg-rose-100 {
+  background-color: #380b15 !important;
+  color: #fecdd3 !important;
+}
+html[data-theme="oaa"] .border-rose-200,
+html[data-theme="oaa"] .border-rose-300 {
+  border-color: #ef4444 !important;
+}
+html[data-theme="oaa"] .text-rose-800,
+html[data-theme="oaa"] .text-rose-700,
+html[data-theme="oaa"] .text-rose-600 {
+  color: #fca5a5 !important;
+}
+
+html[data-theme="oaa"] .bg-amber-100,
+html[data-theme="oaa"] .bg-amber-50 {
+  background-color: #2b1407 !important;
+  color: #fde047 !important;
+  border-color: #f59e0b !important;
+}
+html[data-theme="oaa"] .text-amber-800,
+html[data-theme="oaa"] .text-amber-700 {
+  color: #fde047 !important;
+}
+
+/* 標籤管理介面卡片修復 */
+html[data-theme="oaa"] .tag-sort-card {
+  background-color: #250f1c !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  color: #ffffff !important;
+}
+html[data-theme="oaa"] .tag-sort-card:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* ==========================================================================
+   12. 《實力至上》本格動漫互動彩蛋視覺元件 (Easter Egg Modals & Toasts)
+   ========================================================================== */
+
+/* 角色台詞語音浮動 Toast */
+.cote-quote-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 9999;
+  background: linear-gradient(135deg, rgba(28, 9, 18, 0.98), rgba(45, 12, 26, 0.98));
+  border: 2px solid #f59e0b;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(245, 158, 11, 0.4);
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 92vw;
+  width: 440px;
+  opacity: 0;
+  pointer-events: auto;
+  transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.25s ease;
+}
+.cote-quote-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* S-SYSTEM 綾小路終端對話視窗 */
+#cote-terminal-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 4, 8, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#cote-terminal-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cote-terminal-card {
+  background: linear-gradient(165deg, #1d0914 0%, #2e0f21 55%, #15060f 100%);
+  border: 2px solid #f59e0b;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 25px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-radius: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.92);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#cote-terminal-modal.show .cote-terminal-card {
+  transform: scale(1);
+}
+

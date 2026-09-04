@@ -12,7 +12,45 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.9';
+    this.appVersion = '1.9.10';
+
+    // Official COTE Terminal Quotes Database for Easter Egg
+    this.coteTerminalQuotes = [
+      {
+        source: "【第1季 第12話 結尾白室獨白】",
+        quote: "「我從來沒有把你們當成同伴。不管是堀北，還是櫛田。所有人對我來說，都只不過是道具而已。只要最後贏的人是我，過程怎樣都無所謂。」"
+      },
+      {
+        source: "【尼采 (Friedrich Nietzsche) // 第1季第1話】",
+        quote: "「惡性並非誕生於軟弱，而是誕生於無知。人生來就是平等的嗎？如果真有平等的存在，那這個世界就太不合理了。」"
+      },
+      {
+        source: "【讓·保羅·薩特 (Jean-Paul Sartre) // 第1季第3話】",
+        quote: "「地獄即他人。他人不是鏡子，而是隨時會反噬你的深淵。」"
+      },
+      {
+        source: "【尼可羅·馬基維利 (Niccolò Machiavelli) // 第2季第2話】",
+        quote: "「如果要讓人畏懼或愛戴，若無法兼得，讓人畏懼遠比受人愛戴更加安全。」"
+      },
+      {
+        source: "【杜斯妥也夫斯基 (Fyodor Dostoevsky) // 第2季第6話】",
+        quote: "「如果一切都被允許，那麼任何事情都可以被做。但真正的強者，在於明知可以肆意妄為，卻依舊保持克制。」"
+      },
+      {
+        source: "【綾小路 清隆 // 處世原則】",
+        quote: "「人不付出犧牲，就無法得到任何回報。要想得到什麼，就必須付出同等的代價——這是這個世界唯一的常理。」"
+      },
+      {
+        source: "【綾小路 清隆 // 白室生存哲學】",
+        quote: "「隱藏實力並不是為了謙虛，而是在關鍵時刻，擁有隨時將整張棋盤掀翻的絕對餘裕。」"
+      },
+      {
+        source: "【伏爾泰 (Voltaire) // 第3季第1話】",
+        quote: "「歷史不過是一幕幕藉人類的罪惡、愚昧和災禍編織而成的戲劇。而勝者，永遠是操縱提線的那個人。」"
+      }
+    ];
+    this.currentCoteQuoteIdx = 0;
+
     this.init();
   }
 
@@ -255,6 +293,21 @@ class AppState {
           <div class="text-xs font-black text-slate-800 flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.10 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 bg-[#2b0e1e] text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-700 via-amber-600 to-rose-800 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.10 (課堂標籤高對比全面重構 • 選單收合排版保護 • 本格動漫語錄台詞彩蛋實裝)
+              </span>
+              <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-04</span>
+            </div>
+            <ul class="text-xs text-amber-100 space-y-1.5 font-medium pl-1">
+              <li>• 【課堂標籤高對比度全面重構】徹底消滅淺色螢光薄荷綠與粉色！加分標籤全面改採深邃墨綠，扣分標籤改採制服深酒紅，按鈕標題文字純白立體加陰影，黑底一目了然！</li>
+              <li>• 【手機選單收合排版保護】重構頂部手機導航佈局，預留安全間距，選單「收合」按鈕不再與版本號重疊碰撞；選單收合後膠囊條同步標示版本號！</li>
+              <li>• 【本格動漫互動彩蛋實裝】點擊頂部 COTE 校徽開啟「S-SYSTEM 綾小路清隆內部終端」，輪播經典哲學語錄與白室獨白；點擊學生頭貼即觸發專屬 11 位角色的動漫經典台詞！</li>
+            </ul>
           </div>
 
           <!-- v1.9.9 -->
@@ -1355,6 +1408,98 @@ class AppState {
     setTimeout(() => {
       toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
     }, 3200);
+  }
+
+  // --- COTE Official Anime Easter Egg Engine ---
+  triggerCoteEasterEgg() {
+    const modal = document.getElementById('cote-terminal-modal');
+    if (!modal) return;
+
+    this.playEliteTerminalChime();
+
+    // Show modal with animation
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      modal.classList.add('show');
+    });
+
+    this.renderCurrentCoteQuote();
+  }
+
+  closeCoteEasterEgg() {
+    const modal = document.getElementById('cote-terminal-modal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 280);
+  }
+
+  shuffleCoteQuote() {
+    this.playEliteTerminalChime();
+    this.currentCoteQuoteIdx = (this.currentCoteQuoteIdx + 1) % this.coteTerminalQuotes.length;
+    this.renderCurrentCoteQuote();
+  }
+
+  renderCurrentCoteQuote() {
+    const quoteObj = this.coteTerminalQuotes[this.currentCoteQuoteIdx];
+    const textEl = document.getElementById('cote-terminal-quote-text');
+    const sourceEl = document.getElementById('cote-quote-source');
+    const indexEl = document.getElementById('cote-quote-index');
+
+    if (textEl && quoteObj) {
+      textEl.style.opacity = '0';
+      textEl.style.transform = 'translateY(4px)';
+      setTimeout(() => {
+        textEl.textContent = quoteObj.quote;
+        if (sourceEl) sourceEl.textContent = quoteObj.source;
+        if (indexEl) indexEl.textContent = `語錄 ${this.currentCoteQuoteIdx + 1}/${this.coteTerminalQuotes.length}`;
+        textEl.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        textEl.style.opacity = '1';
+        textEl.style.transform = 'translateY(0)';
+      }, 100);
+    }
+  }
+
+  triggerWhiteRoomProtocol() {
+    this.playEliteTerminalChime();
+    const activeClassId = this.currentClassId;
+    const students = window.appStore.getStudents(activeClassId);
+    const textEl = document.getElementById('cote-terminal-quote-text');
+    const sourceEl = document.getElementById('cote-quote-source');
+    const indexEl = document.getElementById('cote-quote-index');
+
+    if (textEl) {
+      textEl.style.opacity = '0';
+      textEl.style.transform = 'translateY(4px)';
+      setTimeout(() => {
+        if (sourceEl) sourceEl.textContent = '【S-SYSTEM // 白室內部評估報告】';
+        if (indexEl) indexEl.textContent = `機密層級: TOP SECRET`;
+        textEl.innerHTML = `「已檢索 ${activeClassId} 班共 ${students.length} 名學生之日常考評與點數流向。目前一切行為數據均在精密控制的軌道之內。只要按照既定方針執行，升上 A 班的勝率就是 100%。」`;
+        textEl.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        textEl.style.opacity = '1';
+        textEl.style.transform = 'translateY(0)';
+      }, 100);
+    }
+  }
+
+  playEliteTerminalChime() {
+    if (!this.isSoundEnabled()) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.26);
+    } catch(e) {}
   }
 }
 
