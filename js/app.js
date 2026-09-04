@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.10';
+    this.appVersion = '1.9.11';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -50,6 +50,72 @@ class AppState {
       }
     ];
     this.currentCoteQuoteIdx = 0;
+
+    // Official COTE Characters Database for Dramatic Silhouette Easter Egg (Non-Q Version)
+    this.coteSilhouettes = [
+      {
+        id: 'ayanokoji',
+        name: '綾小路 清隆',
+        kana: 'AYANOKOJI KIYOTAKA',
+        classTitle: '高度育成高等學校 D CLASS // 學生編號 S01T004721',
+        image: './assets/cote/ayanokoji_oaa.jpg',
+        shoutedQuote: '「世上所謂的『平等』只不過是虛妄。所有人對我來說，都只不過是道具而已！」',
+        subQuote: '只要最後贏的人是我，過程怎樣都無所謂。',
+        auraColor: '#ef4444'
+      },
+      {
+        id: 'ryuen',
+        name: '龍園 翔',
+        kana: 'RYUEN KAKERU',
+        classTitle: '高度育成高等學校 C CLASS // 暴君統率者',
+        image: './assets/cote/ic-2-1.jpg',
+        shoutedQuote: '「規則？規矩就是用來打破的！在我的字典裡只有獲勝與臣服，給我跪下吧！」',
+        subQuote: '只要能贏，用什麼骯髒手段我都奉陪到底！',
+        auraColor: '#dc2626'
+      },
+      {
+        id: 'sakayanagi',
+        name: '坂柳 有栖',
+        kana: 'SAKAYANAGI ARISU',
+        classTitle: '高度育成高等學校 A CLASS // 天才的棋手',
+        image: './assets/cote/ic-1-5.jpg',
+        shoutedQuote: '「呵呵……天才與凡人的差距，可不是靠努力就能彌補的呢。」',
+        subQuote: '偽物終究只是偽物，就由我來親自粉碎你的幻想。',
+        auraColor: '#a855f7'
+      },
+      {
+        id: 'horikita',
+        name: '堀北 鈴音',
+        kana: 'HORIKITA SUZUNE',
+        classTitle: '高度育成高等學校 D CLASS // 孤高的銳刃',
+        image: './assets/cote/ic-1-2.jpg',
+        shoutedQuote: '「我絕不會向任何人低頭！我要用自己的雙手，帶領班級登上 A 班頂點！」',
+        subQuote: '無須同情，也不需要藉口，實力自會證明一切。',
+        auraColor: '#3b82f6'
+      },
+      {
+        id: 'koenji',
+        name: '高圓寺 六助',
+        kana: 'KOENJI ROKUSUKE',
+        classTitle: '高度育成高等學校 D CLASS // 唯我獨尊的超人',
+        image: './assets/cote/ic-2-5.jpg',
+        shoutedQuote: '「哈哈哈哈！世俗的規矩對美麗的我毫無意義，唯有我才是極致的真理！」',
+        subQuote: '任何人想命令我，都還太早了一百年呢，Girl～',
+        auraColor: '#f59e0b'
+      },
+      {
+        id: 'ichinose',
+        name: '一之瀨 帆波',
+        kana: 'ICHINOSE HONAMI',
+        classTitle: '高度育成高等學校 B CLASS // 陽光的領袖',
+        image: './assets/cote/ic-1-4.jpg',
+        shoutedQuote: '「只要大家同心協力、彼此信任，B 班一定能全員一起升上 A 班！」',
+        subQuote: '我絕對不會放棄任何一個同伴！',
+        auraColor: '#ec4899'
+      }
+    ];
+    this.currentSilhouetteIdx = 0;
+    this.silhouetteTimeout = null;
 
     this.init();
   }
@@ -180,25 +246,31 @@ class AppState {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+
     modalContent.innerHTML = `
       <div class="p-6 text-center animate-fade-in-up">
         <div class="flex justify-center mb-3">
-          <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
+          ${isOAA ? `
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 via-rose-900 to-slate-900 flex items-center justify-center text-2xl shadow-lg border-2 border-amber-400">🏛️</div>
+          ` : `
+            <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
+          `}
         </div>
-        <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
-          ${isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本'} ClassQuant Hub v${info.version}
-          <span class="kitty-bow"></span>
+        <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 ${isOAA ? 'text-amber-300' : 'text-pink-600'}">
+          ${isOAA ? '🏛️' : (isNewVersionNotice ? '🎉 歡迎使用' : '🌟 發現新版本')} ClassQuant Hub v${info.version}
+          ${isOAA ? '<span class="text-xs px-2 py-0.5 rounded bg-rose-950 text-amber-400 border border-amber-500/40 font-mono">高度育成 S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
         </h3>
-        <p class="text-xs text-slate-500 mb-4 font-bold">發布日期：${info.releaseDate || '2026-08-31'}</p>
+        <p class="text-xs ${isOAA ? 'text-amber-200/70 font-mono' : 'text-slate-500'} mb-4 font-bold">發布日期：${info.releaseDate || '2026-09-04'}</p>
 
-        <div class="text-left p-4 rounded-2xl bg-pink-50 border border-pink-200 text-xs text-slate-800 space-y-2 mb-5 font-bold">
-          <div class="text-pink-900 font-black flex items-center gap-1">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-600"></i>
+        <div class="text-left p-4 rounded-2xl ${isOAA ? 'bg-[#250d1a] border border-amber-500/40 text-amber-100 shadow-md' : 'bg-pink-50 border border-pink-200 text-slate-800'} text-xs space-y-2 mb-5 font-bold">
+          <div class="${isOAA ? 'text-amber-300' : 'text-pink-900'} font-black flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             【本次更新重點】：
           </div>
           ${(info.releaseNotes || []).map(note => `
             <div class="flex items-start gap-1.5 leading-relaxed">
-              <span class="text-pink-500 font-black">•</span>
+              <span class="${isOAA ? 'text-amber-400' : 'text-pink-500'} font-black">•</span>
               <span>${note}</span>
             </div>
           `).join('')}
@@ -206,9 +278,8 @@ class AppState {
 
         <div class="flex items-center justify-center gap-3">
           <button onclick="appState.dismissReleaseNotes('${info.version}')" 
-            class="w-full py-3 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center gap-1.5 active:scale-95">
-            <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span>✨ 立即更新並體驗最新功能！</span>
+            class="w-full py-3 rounded-2xl font-black text-white ${isOAA ? 'bg-gradient-to-r from-rose-900 via-rose-800 to-amber-700 hover:from-rose-800 hover:to-amber-600 border border-amber-400/60 shadow-lg text-amber-100 shadow-rose-950/50' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25'} transition text-sm flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+            ${isOAA ? '<span>⚡ 確認系統升級並重載終端</span>' : '<span class="kitty-bow !w-3.5 !h-3.5"></span><span>✨ 立即更新並體驗最新功能！</span>'}
           </button>
         </div>
       </div>
@@ -247,42 +318,48 @@ class AppState {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+
     modalContent.innerHTML = `
       <div class="p-5 sm:p-7 max-h-[85vh] overflow-y-auto animate-fade-in-up">
         <!-- Header -->
-        <div class="flex items-center justify-between pb-3.5 border-b border-pink-100 mb-4">
+        <div class="flex items-center justify-between pb-3.5 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-100'} mb-4">
           <div class="flex items-center space-x-3">
-            <div class="sanrio-kitty-badge !w-12 !h-12"></div>
+            ${isOAA ? `
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 via-rose-900 to-slate-900 flex items-center justify-center text-xl shadow-md border-2 border-amber-400 shrink-0">🏛️</div>
+            ` : `
+              <div class="sanrio-kitty-badge !w-12 !h-12"></div>
+            `}
             <div>
-              <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-1.5">
-                📢 系統公佈欄 & 更新日誌
-                <span class="kitty-bow"></span>
+              <h3 class="text-lg sm:text-xl font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
+                ${isOAA ? '🏛️ S-SYSTEM 系統公告與履歷檔案' : '📢 系統公佈欄 & 更新日誌'}
+                ${isOAA ? '<span class="text-xs px-2 py-0.5 rounded bg-rose-950 text-amber-400 border border-amber-500/40 font-mono">COTE OAA</span>' : '<span class="kitty-bow"></span>'}
               </h3>
-              <p class="text-xs text-slate-500 font-bold">當前版本：v${this.appVersion} • 國中導師與數學科任專用</p>
+              <p class="text-xs ${isOAA ? 'text-amber-200/70 font-mono' : 'text-slate-500 font-bold'}">當前版本：v${this.appVersion} • ${isOAA ? '高度育成考評與實力分析終端' : '國中導師與數學科任專用'}</p>
             </div>
           </div>
-          <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold flex items-center justify-center transition">
+          <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full ${isOAA ? 'bg-rose-950/80 hover:bg-rose-900 text-amber-300 border border-amber-500/40' : 'bg-pink-50 hover:bg-pink-100 text-pink-700'} font-bold flex items-center justify-center transition cursor-pointer">
             ✕
           </button>
         </div>
 
         <!-- Section 1: Active Activities & Teaching Reminders -->
-        <div class="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-sky-50 border border-pink-200 mb-5 shadow-sm">
-          <div class="flex items-center gap-1.5 text-xs font-black text-pink-900 mb-2">
-            <span class="text-base">📌</span>
-            <span>【當前活動與課堂教學提醒】</span>
+        <div class="p-4 rounded-2xl ${isOAA ? 'bg-[#250d1a] border border-amber-500/40 text-amber-100 shadow-md' : 'bg-gradient-to-r from-pink-50 via-rose-50 to-sky-50 border border-pink-200 shadow-sm'} mb-5">
+          <div class="flex items-center gap-1.5 text-xs font-black ${isOAA ? 'text-amber-300' : 'text-pink-900'} mb-2">
+            <span class="text-base">${isOAA ? '🏛️' : '📌'}</span>
+            <span>【${isOAA ? '高度育成教務指揮與考評指引' : '當前活動與課堂教學提醒'}】</span>
           </div>
-          <div class="space-y-1.5 text-xs text-slate-700 font-medium">
+          <div class="space-y-1.5 text-xs ${isOAA ? 'text-amber-100/90' : 'text-slate-700'} font-medium">
             <div class="flex items-start gap-1.5">
-              <span class="text-pink-600 font-bold">🎯</span>
-              <span><strong>段考小考量化統計</strong>：利用「統計戰情室」的四象限分析，可即時掌握各班高分低常規或雙低需關懷之學生名單。</span>
+              <span class="${isOAA ? 'text-amber-400' : 'text-pink-600'} font-bold">🎯</span>
+              <span><strong>段考小考${isOAA ? '實力數據統計' : '量化統計'}</strong>：利用「統計戰情室」的四象限分析，可即時掌握各班高分低常規或雙低需關懷之學生名單。</span>
             </div>
             <div class="flex items-start gap-1.5">
-              <span class="text-emerald-600 font-bold">⏰</span>
+              <span class="text-emerald-500 font-bold">⏰</span>
               <span><strong>課堂事後回憶補記</strong>：課堂現場無法掏手機時，下課或放學回到辦公室點擊頂部「事後補記」，1 秒批次補齊記錄！</span>
             </div>
             <div class="flex items-start gap-1.5">
-              <span class="text-blue-600 font-bold">📶</span>
+              <span class="${isOAA ? 'text-amber-300' : 'text-blue-600'} font-bold">📶</span>
               <span><strong>100% 離線支援</strong>：在地下室或無 Wi-Fi 教室操作，所有資料皆自動安全存放於本機，連網時自動背景熱更新。</span>
             </div>
           </div>
@@ -290,15 +367,30 @@ class AppState {
 
         <!-- Section 2: Full Changelog History -->
         <div class="space-y-3.5 mb-5">
-          <div class="text-xs font-black text-slate-800 flex items-center gap-1">
-            <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
+          <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
+            <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
           </div>
 
-          <!-- v1.9.10 -->
+          <!-- v1.9.11 -->
           <div class="p-3.5 rounded-2xl border-2 border-amber-400 bg-[#2b0e1e] text-white shadow-md">
             <div class="flex items-center justify-between mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-700 via-amber-600 to-rose-800 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.11 (全站風格單一開關嚴格同調 • 公佈欄與互動板暗色修復 • 震撼實力者剪影降臨彩蛋)
+              </span>
+              <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-04</span>
+            </div>
+            <ul class="text-xs text-amber-100 space-y-1.5 font-medium pl-1">
+              <li>• 【學生檔案風格開關移除】嚴格廢除學生檔案內部的額外切換按鈕！全站單一主題開關（頂部導覽列），所有模組 100% 同步沉浸。</li>
+              <li>• 【公佈欄與互動板暗色完全修復】全面清除粉紅螢光與亮白背景，公佈欄與更新彈窗在 OAA 模式下完美呈現高度育成學院深酒紅與燙金風骨。</li>
+              <li>• 【本格動漫實力者剪影降臨彩蛋】新增本格動漫角色巨幅半身剪影入場！震撼低頻音效、紅黑肅殺背光、高對比輪廓與經典立體台詞橫幅，原汁原味重現！</li>
+            </ul>
+          </div>
+
+          <!-- v1.9.10 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-500/80 bg-[#230b18] text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-800 to-amber-700 text-white font-black text-xs shadow-sm font-mono">
                 v1.9.10 (課堂標籤高對比全面重構 • 選單收合排版保護 • 本格動漫語錄台詞彩蛋實裝)
               </span>
               <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-04</span>
@@ -1481,6 +1573,143 @@ class AppState {
         textEl.style.transform = 'translateY(0)';
       }, 100);
     }
+  }
+
+  playCinematicBoomSFX() {
+    if (!this.isSoundEnabled()) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+
+      // 1. Sub-bass boom drop (cinematic anime impact: 120Hz -> 30Hz)
+      const subOsc = ctx.createOscillator();
+      const subGain = ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(120, now);
+      subOsc.frequency.exponentialRampToValueAtTime(30, now + 1.2);
+      subGain.gain.setValueAtTime(0.35, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+      subOsc.connect(subGain);
+      subGain.connect(ctx.destination);
+      subOsc.start(now);
+      subOsc.stop(now + 1.45);
+
+      // 2. Mid punch impact
+      const punchOsc = ctx.createOscillator();
+      const punchGain = ctx.createGain();
+      punchOsc.type = 'triangle';
+      punchOsc.frequency.setValueAtTime(220, now);
+      punchOsc.frequency.exponentialRampToValueAtTime(55, now + 0.35);
+      punchGain.gain.setValueAtTime(0.18, now);
+      punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      punchOsc.connect(punchGain);
+      punchGain.connect(ctx.destination);
+      punchOsc.start(now);
+      punchOsc.stop(now + 0.45);
+
+      // 3. Metallic tension shimmer
+      [523.25, 659.25, 830.61, 1046.5].forEach((freq, idx) => {
+        const chimeOsc = ctx.createOscillator();
+        const chimeGain = ctx.createGain();
+        chimeOsc.type = 'sawtooth';
+        chimeOsc.frequency.setValueAtTime(freq, now + 0.05 + idx * 0.03);
+        chimeGain.gain.setValueAtTime(0.025, now + 0.05 + idx * 0.03);
+        chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+        chimeOsc.connect(chimeGain);
+        chimeGain.connect(ctx.destination);
+        chimeOsc.start(now + 0.05 + idx * 0.03);
+        chimeOsc.stop(now + 0.9);
+      });
+    } catch(e) {}
+  }
+
+  // --- Dramatic Anime Character Silhouette Easter Egg (Non-Q Cut-In) ---
+  triggerSilhouetteCutIn(charIdx) {
+    this.playCinematicBoomSFX();
+
+    let char;
+    if (typeof charIdx === 'number' && this.coteSilhouettes[charIdx]) {
+      char = this.coteSilhouettes[charIdx];
+    } else {
+      char = this.coteSilhouettes[this.currentSilhouetteIdx % this.coteSilhouettes.length];
+      this.currentSilhouetteIdx++;
+    }
+
+    let stage = document.getElementById('cote-silhouette-stage');
+    if (!stage) {
+      stage = document.createElement('div');
+      stage.id = 'cote-silhouette-stage';
+      stage.onclick = () => this.dismissSilhouetteCutIn();
+      document.body.appendChild(stage);
+    }
+
+    if (this.silhouetteTimeout) {
+      clearTimeout(this.silhouetteTimeout);
+      this.silhouetteTimeout = null;
+    }
+
+    stage.innerHTML = `
+      <div class="cote-speed-lines"></div>
+      
+      <!-- Massive Towering Silhouette Figure -->
+      <div class="cote-silhouette-wrapper">
+        <img src="${char.image}" id="cote-silhouette-img" class="cote-silhouette-figure" alt="${char.name}">
+        <div class="cote-eye-flare"></div>
+      </div>
+
+      <!-- Shouted Anime Dialogue Banner -->
+      <div class="cote-dialogue-banner" onclick="event.stopPropagation()">
+        <div class="cote-banner-header">
+          <span class="cote-banner-badge">🏛️ S-SYSTEM // ELITE CUT-IN 實力者降臨</span>
+          <span class="cote-banner-romaji">${char.kana}</span>
+          <button type="button" onclick="appState.toggleSilhouetteUnveil()" class="cote-unveil-btn" title="切換剪影或原圖">
+            ⚡ 顯現真容
+          </button>
+        </div>
+        <div class="cote-banner-name">
+          <span>${char.name}</span>
+          <span class="cote-banner-sub">${char.classTitle}</span>
+        </div>
+        <div class="cote-banner-quote">${char.shoutedQuote}</div>
+        <div class="cote-banner-subquote">${char.subQuote}</div>
+        <div class="flex items-center justify-between text-[10px] text-amber-400/80 font-mono pt-1 border-t border-amber-500/20">
+          <span>高度育成高等學校 機密實力者資料檔案</span>
+          <span class="cursor-pointer hover:underline text-rose-300" onclick="appState.dismissSilhouetteCutIn()">[ 點擊任意處退場 ]</span>
+        </div>
+      </div>
+    `;
+
+    stage.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      stage.classList.add('show');
+    });
+
+    // Auto dismiss after 5 seconds
+    this.silhouetteTimeout = setTimeout(() => {
+      this.dismissSilhouetteCutIn();
+    }, 5000);
+  }
+
+  toggleSilhouetteUnveil() {
+    const img = document.getElementById('cote-silhouette-img');
+    if (img) {
+      img.classList.toggle('unveiled');
+      this.playEliteTerminalChime();
+    }
+  }
+
+  dismissSilhouetteCutIn() {
+    const stage = document.getElementById('cote-silhouette-stage');
+    if (!stage) return;
+    if (this.silhouetteTimeout) {
+      clearTimeout(this.silhouetteTimeout);
+      this.silhouetteTimeout = null;
+    }
+    stage.classList.remove('show');
+    setTimeout(() => {
+      stage.classList.add('hidden');
+    }, 280);
   }
 
   playEliteTerminalChime() {

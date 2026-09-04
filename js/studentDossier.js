@@ -13,17 +13,8 @@ class StudentDossierView {
   }
 
   isOAAMode() {
-    const saved = localStorage.getItem('classquant_dossier_mode');
-    if (saved) return saved === 'oaa';
     const globalTheme = window.appStore ? window.appStore.getTheme() : 'kitty';
     return globalTheme === 'oaa';
-  }
-
-  toggleDossierMode() {
-    const next = this.isOAAMode() ? 'default' : 'oaa';
-    localStorage.setItem('classquant_dossier_mode', next);
-    this.render('student-dossier-view', this.currentClassId, this.currentSeatNo);
-    window.appState.showToast(next === 'oaa' ? '已切換為【OAA 學生綜合能力卡】' : '已切換為【預設教育模式】', 'info');
   }
 
   // --- Calculate Grounded OAA Metrics (Firmly derived from store data) ---
@@ -270,13 +261,8 @@ class StudentDossierView {
           </div>
         </div>
 
-        <!-- Mode Toggle & Class/Student Switchers -->
+        <!-- Class/Student Switchers -->
         <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="studentDossierView.toggleDossierMode()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/50 text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95" title="切換至實力至上主義 OAA 學生綜合能力評估卡">
-            <span class="text-sm">🕶️</span>
-            <span>[OAA模式]</span>
-          </button>
-
           <select onchange="studentDossierView.switchClass(this.value)" class="border border-pink-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none bg-white">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -408,11 +394,6 @@ class StudentDossierView {
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="studentDossierView.toggleDossierMode()" class="px-3.5 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-black transition flex items-center gap-1.5 shadow active:scale-95">
-            <span>🌸</span>
-            <span>返回三麗鷗模式</span>
-          </button>
-
           <select onchange="studentDossierView.switchClass(this.value)" class="bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -441,7 +422,7 @@ class StudentDossierView {
           <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-amber-500/30 pb-5 lg:pb-0 lg:pr-6">
             <div>
               <!-- Silhouette / Official Photo Card -->
-              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-4 rounded-2xl bg-[#1b0812] border-2 border-amber-500/60 overflow-hidden shadow-md relative group">
+              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-2 rounded-2xl bg-[#1b0812] border-2 border-amber-500/60 overflow-hidden shadow-md relative group">
                 <img src="${coteAvatar}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${student.name}" title="高度育成生徒証明">
                 <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-center">
                   <div class="text-xs font-bold text-amber-300 uppercase tracking-widest">
@@ -451,6 +432,14 @@ class StudentDossierView {
                     NO. ${String(student.seatNo).padStart(2, '0')}
                   </div>
                 </div>
+              </div>
+
+              <!-- Easter Egg Summon Button -->
+              <div class="max-w-[240px] mx-auto mb-4">
+                <button onclick="window.appState.triggerSilhouetteCutIn(${(student.seatNo - 1) % 6})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="觸發此角色本格巨幅剪影彩蛋">
+                  <span>⚡</span>
+                  <span>實力者巨幅剪影降臨</span>
+                </button>
               </div>
 
               <!-- Clean Technical Metadata -->

@@ -469,3 +469,227 @@ html[data-theme="oaa"] .tag-sort-card:hover {
   transform: scale(1);
 }
 
+/* 召喚實力者按鈕在 OAA 模式下顯現 */
+html[data-theme="oaa"] #cote-summon-easteregg-btn {
+  display: inline-flex !important;
+}
+
+/* ==========================================================================
+   13. 實力者降臨 巨幅角色剪影震撼彩蛋 (Anime Elite Silhouette Cut-In Stage)
+   ========================================================================== */
+
+#cote-silhouette-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, rgba(136, 19, 55, 0.45) 0%, rgba(18, 6, 12, 0.94) 75%, rgba(0, 0, 0, 0.98) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#cote-silhouette-stage.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 巨幅角色半身像剪影 */
+.cote-silhouette-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 80vh;
+  max-height: 820px;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.cote-silhouette-figure {
+  height: 100%;
+  width: auto;
+  max-width: 90vw;
+  object-fit: contain;
+  object-position: bottom center;
+  transform: translateY(60px) scale(0.95);
+  opacity: 0;
+  filter: contrast(220%) brightness(12%) drop-shadow(0 0 25px rgba(220, 38, 38, 0.9)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.6));
+  transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.25s ease, filter 0.4s ease;
+}
+
+#cote-silhouette-stage.show .cote-silhouette-figure {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  animation: cote-figure-slam 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* 顯現真容模式 (移除高反差剪影，展示官方完整彩圖) */
+.cote-silhouette-figure.unveiled {
+  filter: contrast(105%) brightness(100%) drop-shadow(0 0 35px rgba(245, 158, 11, 0.75)) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.9)) !important;
+}
+
+/* 動漫特寫紅光眼煞 */
+.cote-eye-flare {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #ff003c, #ffffff, #ff003c, transparent);
+  box-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#cote-silhouette-stage.show .cote-eye-flare {
+  animation: cote-eye-flash 0.8s 0.25s ease-out forwards;
+}
+
+@keyframes cote-eye-flash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scaleX(0.1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scaleX(1.4); }
+  100% { opacity: 0.7; transform: translate(-50%, -50%) scaleX(1); }
+}
+
+@keyframes cote-figure-slam {
+  0% { transform: translateY(80px) scale(0.92); opacity: 0; }
+  70% { transform: translateY(-8px) scale(1.03); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* 震撼台詞布條 (Dramatic Shouted Dialogue Banner) */
+.cote-dialogue-banner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 860px;
+  margin-bottom: 24px;
+  padding: 16px 22px;
+  background: linear-gradient(135deg, rgba(22, 6, 14, 0.96) 0%, rgba(46, 10, 26, 0.96) 50%, rgba(18, 5, 12, 0.98) 100%);
+  border: 2px solid #f59e0b;
+  border-left: 6px solid #ef4444;
+  border-right: 6px solid #ef4444;
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(40px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.25) 0.1s, opacity 0.3s ease 0.1s;
+}
+
+#cote-silhouette-stage.show .cote-dialogue-banner {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.cote-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.cote-banner-badge {
+  font-family: monospace;
+  font-weight: 900;
+  font-size: 11px;
+  color: #fbbf24;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cote-banner-romaji {
+  font-family: monospace;
+  font-size: 10px;
+  color: #fda4af;
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+}
+
+.cote-unveil-btn {
+  background: rgba(136, 19, 55, 0.8);
+  border: 1px solid #f59e0b;
+  color: #fef08a;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto;
+}
+.cote-unveil-btn:hover {
+  background: #9f1239;
+  border-color: #fbbf24;
+  transform: scale(1.05);
+}
+
+.cote-banner-name {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 12px rgba(245, 158, 11, 0.5);
+}
+
+.cote-banner-sub {
+  font-size: 11px;
+  color: #fca5a5;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.cote-banner-quote {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fef08a;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(239, 68, 68, 0.6);
+  font-family: "Noto Serif TC", "Songti TC", serif;
+}
+
+.cote-banner-subquote {
+  font-size: 12px;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-style: italic;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+/* 動漫高速衝擊放射線背景 */
+.cote-speed-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    transparent 15px,
+    rgba(239, 68, 68, 0.04) 16px,
+    transparent 32px
+  );
+  opacity: 0.8;
+}
+
+

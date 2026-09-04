@@ -511,6 +511,12 @@ class ClassroomMatrix {
           <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm">
             事件
           </button>
+
+          ${isOAA ? `
+            <button onclick="window.appState.triggerSilhouetteCutIn()" class="px-2.5 py-1 text-xs font-black bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 text-amber-300 border border-amber-500/60 rounded-xl shadow-sm flex items-center gap-1 active:scale-95 transition cursor-pointer" title="實力者降臨 (巨幅動漫剪影彩蛋)">
+              <span>⚡ 實力降臨</span>
+            </button>
+          ` : ''}
         </div>
       </div>
 
@@ -1429,7 +1435,10 @@ class ClassroomMatrix {
             <span class="font-black text-white text-xs sm:text-sm tracking-wide truncate">${char.name}</span>
             <span class="text-[10px] text-amber-300 font-mono font-bold shrink-0">[${String(seatNo).padStart(2, '0')}號 ${studentName}]</span>
           </div>
-          <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="event.stopPropagation(); window.appState.triggerSilhouetteCutIn(${(seatNo - 1) % 6})" class="px-1.5 py-0.5 rounded bg-gradient-to-r from-rose-950 to-amber-900 border border-amber-500/60 text-[10px] text-amber-300 font-bold hover:text-white active:scale-90 transition cursor-pointer" title="召喚此角色巨幅剪影">⚡ 降臨</button>
+            <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
+          </div>
         </div>
         <div class="text-[10px] text-rose-300 font-mono mb-1 truncate">${char.role}</div>
         <div class="text-xs text-amber-100 font-bold leading-snug font-serif tracking-wide italic">
