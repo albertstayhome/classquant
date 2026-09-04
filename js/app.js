@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.12';
+    this.appVersion = '1.9.13';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -214,10 +214,23 @@ class AppState {
     });
     this.updateNetworkBadge(navigator.onLine);
 
-    // 7. Initial OTA check
+    // 7. Initial OTA check & tab resume check
     setTimeout(() => {
       this.checkForUpdates(true);
-    }, 2500);
+    }, 1500);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.checkForUpdates(true);
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('ClassQuant ServiceWorker controller updated. Reloading for fresh assets...');
+        window.location.reload();
+      });
+    }
 
     // Initial render
     this.updateHeaderStatus();
@@ -1701,14 +1714,15 @@ class AppState {
 
     stage.innerHTML = `
       <div class="cote-speed-lines"></div>
+      <button type="button" onclick="appState.dismissSilhouetteCutIn()" class="cote-stage-close-btn" title="關閉">✕</button>
       
       <!-- Character Cut-In Stage (Upper & Center Area, Cleanly Framed & Never Overlapped) -->
       <div class="cote-figure-container">
         <div class="cote-portrait-frame" style="--aura-color: ${char.auraColor}">
           <img src="${char.image}" id="cote-silhouette-img" class="cote-cutin-figure" alt="${char.name}">
           <div class="cote-portrait-glow"></div>
+          <div class="cote-eye-flare"></div>
         </div>
-        <div class="cote-eye-flare"></div>
       </div>
 
       <!-- Shouted Anime Dialogue Banner -->

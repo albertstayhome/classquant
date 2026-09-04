@@ -404,33 +404,6 @@ html[data-theme="oaa"] .tag-sort-card:hover {
    12. 《實力至上》本格動漫互動彩蛋視覺元件 (Easter Egg Modals & Toasts)
    ========================================================================== */
 
-/* 角色台詞語音浮動 Toast */
-.cote-quote-toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  z-index: 9999;
-  background: linear-gradient(135deg, rgba(28, 9, 18, 0.98), rgba(45, 12, 26, 0.98));
-  border: 2px solid #f59e0b;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(245, 158, 11, 0.4);
-  color: #ffffff;
-  padding: 12px 18px;
-  border-radius: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: 92vw;
-  width: 440px;
-  opacity: 0;
-  pointer-events: auto;
-  transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.25s ease;
-}
-.cote-quote-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 /* S-SYSTEM 綾小路終端對話視窗 */
 #cote-terminal-modal {
   position: fixed;
@@ -486,7 +459,7 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  overflow: hidden;
+  overflow-y: auto;
   background: radial-gradient(circle at 50% 35%, rgba(159, 18, 57, 0.4) 0%, rgba(20, 7, 14, 0.95) 60%, rgba(0, 0, 0, 0.98) 100%);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -504,24 +477,52 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   pointer-events: auto;
 }
 
-/* 角色本格立體半身像裁切視窗 (上層獨立區，永不被台詞布條遮擋) */
+/* 右上角獨立退場按鈕 */
+.cote-stage-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(26, 7, 16, 0.88);
+  border: 1.5px solid #fbbf24;
+  color: #fbbf24;
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+.cote-stage-close-btn:active {
+  transform: scale(0.9);
+  background: rgba(159, 18, 57, 0.9);
+}
+
+/* 角色本格立體半身像裁切視窗 (上層獨立置中，絕不被台詞布條遮擋) */
 .cote-figure-container {
   flex: 1;
   width: 100%;
-  max-width: 600px;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
   min-height: 0;
-  padding: 8px 0;
+  padding: 4px 0;
+  margin-bottom: 8px;
 }
 
 .cote-portrait-frame {
   position: relative;
-  max-height: 50vh;
-  max-width: 82vw;
+  width: min(78vw, 300px);
+  height: min(44vh, 390px);
+  max-width: 100%;
   aspect-ratio: 3 / 4;
   border-radius: 1.5rem;
   border: 3px solid #fbbf24;
@@ -531,6 +532,7 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: auto 0;
   transform: translateY(30px) scale(0.92);
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.3s ease;
@@ -564,13 +566,13 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   box-shadow: inset 0 0 25px rgba(251, 191, 36, 0.4);
 }
 
-/* 動漫特寫紅光眼煞 */
-.cote-eye-flare {
+/* 動漫特寫紅光眼煞 (直對角色雙眼，立體閃爍) */
+.cote-portrait-frame .cote-eye-flare {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 160px;
+  top: 32%;
+  left: 0;
+  right: 0;
+  width: 100%;
   height: 4px;
   background: linear-gradient(90deg, transparent, #ff003c, #ffffff, #ff003c, transparent);
   box-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c;
@@ -578,14 +580,14 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   pointer-events: none;
 }
 
-#cote-silhouette-stage.show .cote-eye-flare {
+#cote-silhouette-stage.show .cote-portrait-frame .cote-eye-flare {
   animation: cote-eye-flash 0.8s 0.25s ease-out forwards;
 }
 
 @keyframes cote-eye-flash {
-  0% { opacity: 0; transform: translate(-50%, -50%) scaleX(0.1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scaleX(1.4); }
-  100% { opacity: 0.7; transform: translate(-50%, -50%) scaleX(1); }
+  0% { opacity: 0; transform: scaleX(0.1); }
+  50% { opacity: 1; transform: scaleX(1.4); }
+  100% { opacity: 0.7; transform: scaleX(1); }
 }
 
 @keyframes cote-frame-slam {
@@ -594,15 +596,15 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* 震撼台詞布條 (Dramatic Shouted Dialogue Banner) */
+/* 震撼台詞布條 (Dramatic Shouted Dialogue Banner - 底部獨立排列絕不蓋到立繪) */
 .cote-dialogue-banner {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 860px;
+  max-width: 540px;
   margin-top: auto;
-  margin-bottom: 8px;
-  padding: 14px 18px;
+  margin-bottom: 4px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, rgba(22, 6, 14, 0.96) 0%, rgba(46, 10, 26, 0.96) 50%, rgba(18, 5, 12, 0.98) 100%);
   border: 2px solid #f59e0b;
   border-left: 6px solid #ef4444;

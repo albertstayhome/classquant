@@ -640,8 +640,8 @@ class ClassroomMatrix {
           }
 
           const seatNoBadgeHtml = isOAA
-            ? `<span class="w-5 h-5 rounded-lg bg-[#2d0f19] text-amber-300 border border-amber-500/70 font-mono font-black text-[11px] sm:text-xs flex items-center justify-center shadow-sm">${String(s.seatNo).padStart(2, '0')}</span>`
-            : `<span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">${String(s.seatNo).padStart(2, '0')}</span>`;
+            ? `<span class="w-5 h-5 rounded-lg bg-[#2d0f19] text-amber-300 border border-amber-500/70 font-mono font-black text-[11px] sm:text-xs flex items-center justify-center shadow-sm pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`
+            : `<span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`;
 
           const studentNameHtml = isOAA
             ? `<div class="text-xs sm:text-sm font-black truncate text-white text-center my-0.5 leading-tight tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
@@ -1339,118 +1339,6 @@ class ClassroomMatrix {
       '宇都宮 陸'    // ic-1-6
     ];
     return names[index] || '綾小路 清隆';
-  }
-
-  triggerCoteCharacterVoice(seatNo, studentName, rank) {
-    const avatarIndex = (seatNo - 1) % this.coteAvatars.length;
-    const coteAvatar = this.coteAvatars[avatarIndex];
-    
-    const charQuotes = [
-      { 
-        name: '綾小路 清隆', 
-        role: '2年D班 // 學生編號 S01T004721', 
-        quote: '「所有人對我來說，都只不過是道具而已。只要最後贏的人是我，那就夠了。」' 
-      },
-      { 
-        name: '堀北 鈴音', 
-        role: '2年D班 // 孤高的銳刃', 
-        quote: '「不要隨便跟我搭話，我習慣一個人。我的目標只有帶領班級升上 A 班。」' 
-      },
-      { 
-        name: '輕井澤 惠', 
-        role: '2年D班 // 核心領袖', 
-        quote: '「保護我……這是我們之間的契約吧？清隆君……我相信你。」' 
-      },
-      { 
-        name: '櫛田 桔梗', 
-        role: '2年D班 // 天使與面具', 
-        quote: '「老師好～我最喜歡大家了！……（切換冷笑）嘖，剛剛是誰在背後看我？找死嗎？」' 
-      },
-      { 
-        name: '龍園 翔', 
-        role: '2年C班 // 霸者統率', 
-        quote: '「在我的字典裡，只有贏和輸兩種結果！規矩？規矩就是用來打破的。」' 
-      },
-      { 
-        name: '七瀨 翼', 
-        role: '1年D班 // 正義與執念', 
-        quote: '「我不會允許任何卑劣的手段！我一定會親眼看清這間學校的真實規則。」' 
-      },
-      { 
-        name: '寶泉 和臣', 
-        role: '1年D班 // 絕對暴君', 
-        quote: '「不管是二年級還是前輩，惹到老子照樣打得你滿地找牙！拳頭硬就是實力！」' 
-      },
-      { 
-        name: '天澤 一夏', 
-        role: '1年A班 // 白室小惡魔', 
-        quote: '「前輩真敏銳呢～不過，稍微玩得太過火的話，可是會受傷的喔～」' 
-      },
-      { 
-        name: '八神 拓也', 
-        role: '1年B班 // 隱匿的刺客', 
-        quote: '「我一直都在注視著你……綾小路清隆，我才是最優秀的存在。」' 
-      },
-      { 
-        name: '椿 櫻子', 
-        role: '1年C班 // 冷靜策士', 
-        quote: '「棒棒糖很甜呢……計畫只要照這樣進行，最後的勝負就很明顯了。」' 
-      },
-      { 
-        name: '宇都宮 陸', 
-        role: '1年C班 // 實權統率', 
-        quote: '「我們一年C班有自己的行事方針，請不要隨意干涉我們的步伐。」' 
-      }
-    ];
-
-    const char = charQuotes[avatarIndex] || charQuotes[0];
-
-    if (window.appState && window.appState.playPop) {
-      window.appState.playPop();
-    }
-
-    this.showCoteQuoteToast(char, coteAvatar, studentName, seatNo, rank);
-  }
-
-  showCoteQuoteToast(char, avatarSrc, studentName, seatNo, rank) {
-    let toast = document.getElementById('cote-quote-toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'cote-quote-toast';
-      toast.className = 'cote-quote-toast';
-      document.body.appendChild(toast);
-    }
-
-    toast.innerHTML = `
-      <img src="${avatarSrc}" class="w-12 h-12 rounded-xl border-2 border-amber-400 shadow-md object-cover shrink-0" alt="${char.name}">
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center justify-between gap-1 mb-0.5">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="font-black text-white text-xs sm:text-sm tracking-wide truncate">${char.name}</span>
-            <span class="text-[10px] text-amber-300 font-mono font-bold shrink-0">[${String(seatNo).padStart(2, '0')}號 ${studentName}]</span>
-          </div>
-          <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
-        </div>
-        <div class="text-[10px] text-rose-300 font-mono mb-1 truncate">${char.role}</div>
-        <div class="text-xs text-amber-100 font-bold leading-snug font-serif tracking-wide italic">
-          ${char.quote}
-        </div>
-      </div>
-    `;
-
-    toast.onclick = () => {
-      toast.classList.remove('show');
-    };
-
-    // Trigger animation
-    requestAnimationFrame(() => {
-      toast.classList.add('show');
-    });
-
-    if (this._coteToastTimer) clearTimeout(this._coteToastTimer);
-    this._coteToastTimer = setTimeout(() => {
-      toast.classList.remove('show');
-    }, 4200);
   }
 }
 

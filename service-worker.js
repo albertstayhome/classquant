@@ -2,7 +2,7 @@
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v122';
+const CACHE_NAME = 'classquant-hub-v123';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -74,16 +74,21 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.clients.claim()).then(() => {
+      return self.clients.matchAll({ type: 'window' }).then((clients) => {
+        clients.forEach((client) => client.postMessage({ type: 'SW_ACTIVATED', version: CACHE_NAME }));
+      });
+    })
   );
 });
 
-// Fetch Strategy: Network-First for HTML/JSON (Instant OTA), Stale-While-Revalidate for CSS/JS
+// Fetch Strategy: Network-First for HTML/JSON & versioned assets (Instant OTA), Stale-While-Revalidate for unversioned static
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const isHtmlOrJson = url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname.endsWith('/');
+  const hasVersionParam = url.searchParams.has('v');
 
-  if (isHtmlOrJson) {
+  if (isHtmlOrJson || hasVersionParam) {
     // Network-First: Always fetch latest from server when online
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' })
@@ -94,7 +99,7 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request, { ignoreSearch: true }).then(res => res || caches.match('./index.html')))
+        .catch(() => caches.match(event.request, { ignoreSearch: true }).then(res => res || (isHtmlOrJson ? caches.match('./index.html') : null)))
     );
   } else {
     // Stale-While-Revalidate: Return cache immediately with ignoreSearch, fetch fresh copy in background
