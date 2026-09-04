@@ -129,18 +129,28 @@ class EventsLogView {
       return (b.period || 0) - (a.period || 0);
     });
 
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+
     container.innerHTML = `
-      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-5 border border-pink-200 shadow-sm bg-white">
+      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-5 ${isOAA ? 'border-2 border-amber-500/50 bg-[#240e1b]/95 text-white' : 'border border-pink-200 bg-white'} shadow-sm">
         <!-- Top Title & Action Buttons -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
           <div class="flex items-center space-x-3.5">
-            <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+            ${isOAA ? `
+              <div class="w-12 h-12 rounded-2xl bg-rose-950 border-2 border-amber-400 shadow-md flex items-center justify-center text-2xl shrink-0">
+                🏛️
+              </div>
+            ` : `
+              <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+            `}
             <div>
-              <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                學生事件記事與時序事證檢索中心
-                <span class="kitty-bow"></span>
+              <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
+                ${isOAA ? '🏛️ 高度育成 學生日常事證與考評紀錄中心' : '學生事件記事與時序事證檢索中心'}
+                ${isOAA ? '' : '<span class="kitty-bow"></span>'}
               </h2>
-              <p class="text-xs sm:text-sm text-slate-600 font-medium">支援課堂事後回憶補記、多生交叉衝突查詢與日期時序時間軸</p>
+              <p class="text-xs sm:text-sm ${isOAA ? 'text-slate-200' : 'text-slate-600'} font-medium">
+                ${isOAA ? 'S-SYSTEM 實力評價審查、課堂事後補記與時序事件軌跡' : '支援課堂事後回憶補記、多生交叉衝突查詢與日期時序時間軸'}
+              </p>
             </div>
           </div>
 
@@ -149,26 +159,26 @@ class EventsLogView {
               class="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
               <i data-lucide="clock" class="w-4 h-4"></i> ⏰ 事後快速補記
             </button>
-            <button onclick="eventsLogView.exportFilteredSummary()" class="px-3.5 py-2 rounded-2xl bg-white hover:bg-pink-50 text-slate-800 border border-pink-300 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
+            <button onclick="eventsLogView.exportFilteredSummary()" class="px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-white hover:bg-pink-50 text-slate-800 border border-pink-300'} text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
               <i data-lucide="copy" class="w-4 h-4 text-pink-500"></i> 複製搜尋結果
             </button>
           </div>
         </div>
 
         <!-- View Mode Switcher Tabs -->
-        <div class="flex items-center justify-between border-b border-pink-200 pb-3 mb-4">
+        <div class="flex items-center justify-between border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-200'} pb-3 mb-4">
           <div class="flex items-center space-x-2">
-            <button onclick="eventsLogView.switchViewMode('timeline')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'timeline' ? 'bg-pink-600 text-white shadow-sm' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}">
+            <button onclick="eventsLogView.switchViewMode('timeline')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'timeline' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
               <i data-lucide="calendar" class="w-4 h-4"></i> 📅 日期時序時間軸
             </button>
-            <button onclick="eventsLogView.switchViewMode('table')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'table' ? 'bg-pink-600 text-white shadow-sm' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}">
+            <button onclick="eventsLogView.switchViewMode('table')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'table' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
               <i data-lucide="list" class="w-4 h-4"></i> 📋 完整列表模式
             </button>
-            <button onclick="eventsLogView.switchViewMode('cross')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'cross' ? 'bg-pink-600 text-white shadow-sm' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}">
+            <button onclick="eventsLogView.switchViewMode('cross')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'cross' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
               <i data-lucide="users" class="w-4 h-4"></i> 👥 多生交叉查詢
             </button>
           </div>
-          <span class="text-xs text-slate-500 font-bold hidden sm:inline">共 ${events.length} 筆符合事證</span>
+          <span class="text-xs ${isOAA ? 'text-amber-200/80 font-mono' : 'text-slate-500 font-bold'} hidden sm:inline">共 ${events.length} 筆符合事證</span>
         </div>
 
         <!-- 1-Click Quick Scenario Presets -->
@@ -286,18 +296,20 @@ class EventsLogView {
       grouped[d].push(e);
     });
 
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+
     return `
-      <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-pink-200">
+      <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 ${isOAA ? 'before:bg-amber-500/30' : 'before:bg-pink-200'}">
         ${Object.keys(grouped).map(date => `
           <div class="relative pl-8">
             <!-- Date Pill Node -->
-            <div class="absolute left-0 top-0.5 w-7 h-7 rounded-full bg-pink-500 border-4 border-white shadow-sm flex items-center justify-center text-white text-[10px] font-black">
-              📅
+            <div class="absolute left-0 top-0.5 w-7 h-7 rounded-full ${isOAA ? 'bg-rose-900 border-2 border-amber-400 text-amber-300' : 'bg-pink-500 border-4 border-white text-white'} shadow-sm flex items-center justify-center text-[10px] font-black">
+              ${isOAA ? '🏛️' : '📅'}
             </div>
             
             <div class="mb-2 flex items-center gap-2">
-              <h3 class="text-sm sm:text-base font-black text-pink-700 font-mono">${date}</h3>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-pink-100 text-pink-800 font-bold">當日共 ${grouped[date].length} 筆記事</span>
+              <h3 class="text-sm sm:text-base font-black ${isOAA ? 'text-amber-300' : 'text-pink-700'} font-mono">${date}</h3>
+              <span class="text-[11px] px-2 py-0.5 rounded-full ${isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-pink-100 text-pink-800'} font-bold">當日共 ${grouped[date].length} 筆記事</span>
             </div>
 
             <!-- Events Cards on this Date -->

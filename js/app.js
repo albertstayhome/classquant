@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.11';
+    this.appVersion = '1.9.12';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -51,67 +51,117 @@ class AppState {
     ];
     this.currentCoteQuoteIdx = 0;
 
-    // Official COTE Characters Database for Dramatic Silhouette Easter Egg (Non-Q Version)
+    // Official COTE Characters Database for Dramatic Cut-In Easter Egg (100% Verified 11-Character Roster)
     this.coteSilhouettes = [
       {
         id: 'ayanokoji',
         name: '綾小路 清隆',
         kana: 'AYANOKOJI KIYOTAKA',
-        classTitle: '高度育成高等學校 D CLASS // 學生編號 S01T004721',
-        image: './assets/cote/ayanokoji_oaa.jpg',
+        classTitle: '高度育成高等學校 2年D班 // 學生編號 S01T004721',
+        image: './assets/cote/ayanokoji_cutin.jpg',
         shoutedQuote: '「世上所謂的『平等』只不過是虛妄。所有人對我來說，都只不過是道具而已！」',
         subQuote: '只要最後贏的人是我，過程怎樣都無所謂。',
         auraColor: '#ef4444'
       },
       {
-        id: 'ryuen',
-        name: '龍園 翔',
-        kana: 'RYUEN KAKERU',
-        classTitle: '高度育成高等學校 C CLASS // 暴君統率者',
-        image: './assets/cote/ic-2-1.jpg',
-        shoutedQuote: '「規則？規矩就是用來打破的！在我的字典裡只有獲勝與臣服，給我跪下吧！」',
-        subQuote: '只要能贏，用什麼骯髒手段我都奉陪到底！',
-        auraColor: '#dc2626'
-      },
-      {
-        id: 'sakayanagi',
-        name: '坂柳 有栖',
-        kana: 'SAKAYANAGI ARISU',
-        classTitle: '高度育成高等學校 A CLASS // 天才的棋手',
-        image: './assets/cote/ic-1-5.jpg',
-        shoutedQuote: '「呵呵……天才與凡人的差距，可不是靠努力就能彌補的呢。」',
-        subQuote: '偽物終究只是偽物，就由我來親自粉碎你的幻想。',
-        auraColor: '#a855f7'
-      },
-      {
         id: 'horikita',
         name: '堀北 鈴音',
         kana: 'HORIKITA SUZUNE',
-        classTitle: '高度育成高等學校 D CLASS // 孤高的銳刃',
-        image: './assets/cote/ic-1-2.jpg',
+        classTitle: '高度育成高等學校 2年D班 // 孤高的銳刃',
+        image: './assets/cote/ic-2-2.jpg',
         shoutedQuote: '「我絕不會向任何人低頭！我要用自己的雙手，帶領班級登上 A 班頂點！」',
         subQuote: '無須同情，也不需要藉口，實力自會證明一切。',
         auraColor: '#3b82f6'
       },
       {
-        id: 'koenji',
-        name: '高圓寺 六助',
-        kana: 'KOENJI ROKUSUKE',
-        classTitle: '高度育成高等學校 D CLASS // 唯我獨尊的超人',
-        image: './assets/cote/ic-2-5.jpg',
-        shoutedQuote: '「哈哈哈哈！世俗的規矩對美麗的我毫無意義，唯有我才是極致的真理！」',
-        subQuote: '任何人想命令我，都還太早了一百年呢，Girl～',
-        auraColor: '#f59e0b'
+        id: 'karuizawa',
+        name: '輕井澤 惠',
+        kana: 'KARUIZAWA KEI',
+        classTitle: '高度育成高等學校 2年D班 // 女生核心領袖',
+        image: './assets/cote/karuizawa_cutin.jpg',
+        shoutedQuote: '「保護我……這是我們之間的契約吧？清隆君……我相信你！」',
+        subQuote: '即使被所有人背叛，我也絕不會出賣你。',
+        auraColor: '#f43f5e'
       },
       {
-        id: 'ichinose',
-        name: '一之瀨 帆波',
-        kana: 'ICHINOSE HONAMI',
-        classTitle: '高度育成高等學校 B CLASS // 陽光的領袖',
+        id: 'kushida',
+        name: '櫛田 桔梗',
+        kana: 'KUSHIDA KIKYO',
+        classTitle: '高度育成高等學校 2年D班 // 天使的面具',
+        image: './assets/cote/ic-2-4.jpg',
+        shoutedQuote: '「大家都最喜歡我了對吧？……（切換冷笑）嘖，別得意忘形了，找死嗎？」',
+        subQuote: '敢阻礙我的人，我會不惜一切代價徹底毀掉。',
+        auraColor: '#e11d48'
+      },
+      {
+        id: 'ryuen',
+        name: '龍園 翔',
+        kana: 'RYUEN KAKERU',
+        classTitle: '高度育成高等學校 2年C班 // 暴君統率者',
+        image: './assets/cote/ic-2-5.jpg',
+        shoutedQuote: '「規則？規矩就是用來打破的！在我的字典裡只有獲勝與臣服，給我跪下吧！」',
+        subQuote: '只要能贏，用什麼骯髒手段我都奉陪到底！',
+        auraColor: '#dc2626'
+      },
+      {
+        id: 'nanase',
+        name: '七瀨 翼',
+        kana: 'NANASE TSUBASA',
+        classTitle: '高度育成高等學校 1年D班 // 正義與執念',
+        image: './assets/cote/ic-1-1.jpg',
+        shoutedQuote: '「我不會允許卑劣的手段！綾小路前輩，我一定會看清你的真實實力！」',
+        subQuote: '為了那個人的願望，我不能在這裡止步。',
+        auraColor: '#0ea5e9'
+      },
+      {
+        id: 'hosen',
+        name: '寶泉 和臣',
+        kana: 'HOSEN KAZUOMI',
+        classTitle: '高度育成高等學校 1年D班 // 絕對暴君',
+        image: './assets/cote/ic-1-2.jpg',
+        shoutedQuote: '「管你是二年級還是前輩，惹到老子照樣打得你滿地找牙！」',
+        subQuote: '實力？拳頭硬就是這間學校最大的實力！',
+        auraColor: '#b91c1c'
+      },
+      {
+        id: 'amasawa',
+        name: '天澤 一夏',
+        kana: 'AMASAWA ICHIKA',
+        classTitle: '高度育成高等學校 1年A班 // 白室惡魔小惡魔',
+        image: './assets/cote/ic-1-3.jpg',
+        shoutedQuote: '「前輩真敏銳呢～不過，稍微玩得太過火的話，可是會受傷的喔～」',
+        subQuote: '在崇拜你之前，先讓我測測前輩有沒有那個資格吧～',
+        auraColor: '#f97316'
+      },
+      {
+        id: 'yagami',
+        name: '八神 拓也',
+        kana: 'YAGAMI TAKUYA',
+        classTitle: '高度育成高等學校 1年B班 // 隱匿的刺客',
         image: './assets/cote/ic-1-4.jpg',
-        shoutedQuote: '「只要大家同心協力、彼此信任，B 班一定能全員一起升上 A 班！」',
-        subQuote: '我絕對不會放棄任何一個同伴！',
-        auraColor: '#ec4899'
+        shoutedQuote: '「我一直都在看著你……綾小路清隆，我才是最優秀的！」',
+        subQuote: '所有的光環，都該由我親手奪回來。',
+        auraColor: '#6366f1'
+      },
+      {
+        id: 'tsubaki',
+        name: '椿 櫻子',
+        kana: 'TSUBAKI SAKURAKO',
+        classTitle: '高度育成高等學校 1年C班 // 冷靜策士',
+        image: './assets/cote/ic-1-5.jpg',
+        shoutedQuote: '「棒棒糖很甜呢……只要按部就班，勝利自然會落入手中。」',
+        subQuote: '不要小看一年C班的決心。',
+        auraColor: '#8b5cf6'
+      },
+      {
+        id: 'utomiya',
+        name: '宇都宮 陸',
+        kana: 'UTOMIYA RIKU',
+        classTitle: '高度育成高等學校 1年C班 // 實權領袖',
+        image: './assets/cote/ic-1-6.jpg',
+        shoutedQuote: '「一年C班有自己的行事方針，任何人休想隨意干涉！」',
+        subQuote: '為了守護班級同伴，我不會有任何猶豫。',
+        auraColor: '#10b981'
       }
     ];
     this.currentSilhouetteIdx = 0;
@@ -1652,9 +1702,12 @@ class AppState {
     stage.innerHTML = `
       <div class="cote-speed-lines"></div>
       
-      <!-- Massive Towering Silhouette Figure -->
-      <div class="cote-silhouette-wrapper">
-        <img src="${char.image}" id="cote-silhouette-img" class="cote-silhouette-figure" alt="${char.name}">
+      <!-- Character Cut-In Stage (Upper & Center Area, Cleanly Framed & Never Overlapped) -->
+      <div class="cote-figure-container">
+        <div class="cote-portrait-frame" style="--aura-color: ${char.auraColor}">
+          <img src="${char.image}" id="cote-silhouette-img" class="cote-cutin-figure" alt="${char.name}">
+          <div class="cote-portrait-glow"></div>
+        </div>
         <div class="cote-eye-flare"></div>
       </div>
 
@@ -1663,8 +1716,8 @@ class AppState {
         <div class="cote-banner-header">
           <span class="cote-banner-badge">🏛️ S-SYSTEM // ELITE CUT-IN 實力者降臨</span>
           <span class="cote-banner-romaji">${char.kana}</span>
-          <button type="button" onclick="appState.toggleSilhouetteUnveil()" class="cote-unveil-btn" title="切換剪影或原圖">
-            ⚡ 顯現真容
+          <button type="button" onclick="appState.toggleSilhouetteUnveil()" class="cote-unveil-btn" title="切換暗影/全彩">
+            ⚡ 暗影 / 全彩
           </button>
         </div>
         <div class="cote-banner-name">
@@ -1681,20 +1734,18 @@ class AppState {
     `;
 
     stage.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      stage.classList.add('show');
-    });
+    stage.classList.add('show');
 
-    // Auto dismiss after 5 seconds
+    // Auto dismiss after 5.5 seconds
     this.silhouetteTimeout = setTimeout(() => {
       this.dismissSilhouetteCutIn();
-    }, 5000);
+    }, 5500);
   }
 
   toggleSilhouetteUnveil() {
     const img = document.getElementById('cote-silhouette-img');
     if (img) {
-      img.classList.toggle('unveiled');
+      img.classList.toggle('silhouette-mode');
       this.playEliteTerminalChime();
     }
   }

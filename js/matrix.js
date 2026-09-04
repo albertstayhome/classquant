@@ -18,19 +18,19 @@ class ClassroomMatrix {
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
 
-    // Official COTE Character Avatars for OAA Mode
+    // Official COTE Character Avatars for OAA Mode (100% Verified 11-Character Roster)
     this.coteAvatars = [
-      './assets/cote/ic-1-1.jpg', // 綾小路 清隆
-      './assets/cote/ic-1-2.jpg', // 堀北 鈴音
-      './assets/cote/ic-1-3.jpg', // 輕井澤 惠
-      './assets/cote/ic-1-4.jpg', // 一之瀨 帆波
-      './assets/cote/ic-1-5.jpg', // 坂柳 有栖
-      './assets/cote/ic-1-6.jpg', // 櫛田 桔梗
-      './assets/cote/ic-2-1.jpg', // 龍園 翔
-      './assets/cote/ic-2-2.jpg', // 須藤 健
-      './assets/cote/ic-2-3.jpg', // 平田 洋介
-      './assets/cote/ic-2-4.jpg', // 佐倉 愛里
-      './assets/cote/ic-2-5.jpg'  // 高圓寺 六助
+      './assets/cote/ic-2-1.jpg', // 綾小路 清隆 [2年D班]
+      './assets/cote/ic-2-2.jpg', // 堀北 鈴音 [2年D班]
+      './assets/cote/ic-2-3.jpg', // 輕井澤 惠 [2年D班]
+      './assets/cote/ic-2-4.jpg', // 櫛田 桔梗 [2年D班]
+      './assets/cote/ic-2-5.jpg', // 龍園 翔 [2年C班]
+      './assets/cote/ic-1-1.jpg', // 七瀨 翼 [1年D班]
+      './assets/cote/ic-1-2.jpg', // 寶泉 和臣 [1年D班]
+      './assets/cote/ic-1-3.jpg', // 天澤 一夏 [1年A班]
+      './assets/cote/ic-1-4.jpg', // 八神 拓也 [1年B班]
+      './assets/cote/ic-1-5.jpg', // 椿 櫻子 [1年C班]
+      './assets/cote/ic-1-6.jpg'  // 宇都宮 陸 [1年C班]
     ];
 
     // iOS-Style Long-Press Drag & Drop State
@@ -511,12 +511,6 @@ class ClassroomMatrix {
           <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm">
             事件
           </button>
-
-          ${isOAA ? `
-            <button onclick="window.appState.triggerSilhouetteCutIn()" class="px-2.5 py-1 text-xs font-black bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 text-amber-300 border border-amber-500/60 rounded-xl shadow-sm flex items-center gap-1 active:scale-95 transition cursor-pointer" title="實力者降臨 (巨幅動漫剪影彩蛋)">
-              <span>⚡ 實力降臨</span>
-            </button>
-          ` : ''}
         </div>
       </div>
 
@@ -627,8 +621,8 @@ class ClassroomMatrix {
             const charName = this.getCoteCharName(avatarIndex);
 
             rankBadgeHtml = `
-              <div class="flex items-center space-x-1 shrink-0 cursor-pointer active:scale-90 transition" onclick="event.stopPropagation(); matrixView.triggerCoteCharacterVoice(${s.seatNo}, '${s.name.replace(/'/g, "\\'")}', '${rank}')" title="點擊聆聽【${charName}】動漫台詞彩蛋">
-                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="COTE">
+              <div class="flex items-center space-x-1 shrink-0 pointer-events-none">
+                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="${charName}">
                 <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
               </div>
             `;
@@ -1332,17 +1326,17 @@ class ClassroomMatrix {
 
   getCoteCharName(index) {
     const names = [
-      '綾小路 清隆',
-      '堀北 鈴音',
-      '輕井澤 惠',
-      '一之瀨 帆波',
-      '坂柳 有栖',
-      '櫛田 桔梗',
-      '龍園 翔',
-      '須藤 健',
-      '平田 洋介',
-      '佐倉 愛里',
-      '高圓寺 六助'
+      '綾小路 清隆', // ic-2-1
+      '堀北 鈴音',   // ic-2-2
+      '輕井澤 惠',   // ic-2-3
+      '櫛田 桔梗',   // ic-2-4
+      '龍園 翔',     // ic-2-5
+      '七瀨 翼',     // ic-1-1
+      '寶泉 和臣',   // ic-1-2
+      '天澤 一夏',   // ic-1-3
+      '八神 拓也',   // ic-1-4
+      '椿 櫻子',     // ic-1-5
+      '宇都宮 陸'    // ic-1-6
     ];
     return names[index] || '綾小路 清隆';
   }
@@ -1354,58 +1348,58 @@ class ClassroomMatrix {
     const charQuotes = [
       { 
         name: '綾小路 清隆', 
-        role: 'D CLASS // 學生編號 S01T004721', 
+        role: '2年D班 // 學生編號 S01T004721', 
         quote: '「所有人對我來說，都只不過是道具而已。只要最後贏的人是我，那就夠了。」' 
       },
       { 
         name: '堀北 鈴音', 
-        role: 'D CLASS // 孤高的領導者', 
+        role: '2年D班 // 孤高的銳刃', 
         quote: '「不要隨便跟我搭話，我習慣一個人。我的目標只有帶領班級升上 A 班。」' 
       },
       { 
         name: '輕井澤 惠', 
-        role: 'D CLASS // 女生領袖', 
+        role: '2年D班 // 核心領袖', 
         quote: '「保護我……這是我們之間的契約吧？清隆君……我相信你。」' 
       },
       { 
-        name: '一之瀨 帆波', 
-        role: 'B CLASS // 班級領袖', 
-        quote: '「只要大家同心協力，B 班一定能全員一起升上 A 班的！加油！」' 
-      },
-      { 
-        name: '坂柳 有栖', 
-        role: 'A CLASS // 實質領袖', 
-        quote: '「呵呵，天才與凡人的差距，可不是靠努力就能彌補的呢。」' 
-      },
-      { 
         name: '櫛田 桔梗', 
-        role: 'D CLASS // 社交核心', 
+        role: '2年D班 // 天使與面具', 
         quote: '「老師好～我最喜歡大家了！……（切換冷笑）嘖，剛剛是誰在背後看我？找死嗎？」' 
       },
       { 
         name: '龍園 翔', 
-        role: 'C CLASS // 霸者領導', 
+        role: '2年C班 // 霸者統率', 
         quote: '「在我的字典裡，只有贏和輸兩種結果！規矩？規矩就是用來打破的。」' 
       },
       { 
-        name: '須藤 健', 
-        role: 'D CLASS // 籃球王牌', 
-        quote: '「老子要用籃球和實力證明給所有人看，別看扁我！」' 
+        name: '七瀨 翼', 
+        role: '1年D班 // 正義與執念', 
+        quote: '「我不會允許任何卑劣的手段！我一定會親眼看清這間學校的真實規則。」' 
       },
       { 
-        name: '平田 洋介', 
-        role: 'D CLASS // 男生代表', 
-        quote: '「大家不要吵架，班級團結才是最重要的，我們一定能找到雙贏的辦法！」' 
+        name: '寶泉 和臣', 
+        role: '1年D班 // 絕對暴君', 
+        quote: '「不管是二年級還是前輩，惹到老子照樣打得你滿地找牙！拳頭硬就是實力！」' 
       },
       { 
-        name: '佐倉 愛里', 
-        role: 'D CLASS // 內向少女', 
-        quote: '「那個……我、我也想為大家做點什麼……哪怕只有一點點也好。」' 
+        name: '天澤 一夏', 
+        role: '1年A班 // 白室小惡魔', 
+        quote: '「前輩真敏銳呢～不過，稍微玩得太過火的話，可是會受傷的喔～」' 
       },
       { 
-        name: '高圓寺 六助', 
-        role: '自由人 // 唯我獨尊', 
-        quote: '「哈哈哈哈！美麗的我，是不會受制於任何學校規則的，Girl~」' 
+        name: '八神 拓也', 
+        role: '1年B班 // 隱匿的刺客', 
+        quote: '「我一直都在注視著你……綾小路清隆，我才是最優秀的存在。」' 
+      },
+      { 
+        name: '椿 櫻子', 
+        role: '1年C班 // 冷靜策士', 
+        quote: '「棒棒糖很甜呢……計畫只要照這樣進行，最後的勝負就很明顯了。」' 
+      },
+      { 
+        name: '宇都宮 陸', 
+        role: '1年C班 // 實權統率', 
+        quote: '「我們一年C班有自己的行事方針，請不要隨意干涉我們的步伐。」' 
       }
     ];
 
@@ -1435,10 +1429,7 @@ class ClassroomMatrix {
             <span class="font-black text-white text-xs sm:text-sm tracking-wide truncate">${char.name}</span>
             <span class="text-[10px] text-amber-300 font-mono font-bold shrink-0">[${String(seatNo).padStart(2, '0')}號 ${studentName}]</span>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <button onclick="event.stopPropagation(); window.appState.triggerSilhouetteCutIn(${(seatNo - 1) % 6})" class="px-1.5 py-0.5 rounded bg-gradient-to-r from-rose-950 to-amber-900 border border-amber-500/60 text-[10px] text-amber-300 font-bold hover:text-white active:scale-90 transition cursor-pointer" title="召喚此角色巨幅剪影">⚡ 降臨</button>
-            <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
-          </div>
+          <span class="oaa-rank-badge oaa-rank-${rank} text-[9px] px-1.5 py-0.2 shrink-0">${rank}</span>
         </div>
         <div class="text-[10px] text-rose-300 font-mono mb-1 truncate">${char.role}</div>
         <div class="text-xs text-amber-100 font-bold leading-snug font-serif tracking-wide italic">

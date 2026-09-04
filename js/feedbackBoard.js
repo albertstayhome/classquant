@@ -325,6 +325,8 @@ class FeedbackBoard {
     if (!modal || !modalContent) return;
 
     const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+    const savedAuthor = localStorage.getItem('classquant_feedback_author') || '';
+    const savedRole = localStorage.getItem('classquant_feedback_role') || '導師';
 
     modalContent.innerHTML = `
       <div class="p-5 sm:p-6 animate-fade-in-up ${isOAA ? 'text-white' : ''}">

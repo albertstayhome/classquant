@@ -484,12 +484,14 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   z-index: 99999;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 45%, rgba(136, 19, 55, 0.45) 0%, rgba(18, 6, 12, 0.94) 75%, rgba(0, 0, 0, 0.98) 100%);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: radial-gradient(circle at 50% 35%, rgba(159, 18, 57, 0.4) 0%, rgba(20, 7, 14, 0.95) 60%, rgba(0, 0, 0, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 16px 16px 20px 16px;
+  box-sizing: border-box;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease;
@@ -502,51 +504,73 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   pointer-events: auto;
 }
 
-/* 巨幅角色半身像剪影 */
-.cote-silhouette-wrapper {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 80vh;
-  max-height: 820px;
-  width: auto;
+/* 角色本格立體半身像裁切視窗 (上層獨立區，永不被台詞布條遮擋) */
+.cote-figure-container {
+  flex: 1;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 0;
+  padding: 8px 0;
+}
+
+.cote-portrait-frame {
+  position: relative;
+  max-height: 50vh;
+  max-width: 82vw;
+  aspect-ratio: 3 / 4;
+  border-radius: 1.5rem;
+  border: 3px solid #fbbf24;
+  box-shadow: 0 0 35px var(--aura-color, rgba(239, 68, 68, 0.7)), 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(251, 191, 36, 0.3);
+  overflow: hidden;
+  background: #0f040a;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  pointer-events: none;
-}
-
-.cote-silhouette-figure {
-  height: 100%;
-  width: auto;
-  max-width: 90vw;
-  object-fit: contain;
-  object-position: bottom center;
-  transform: translateY(60px) scale(0.95);
+  align-items: center;
+  transform: translateY(30px) scale(0.92);
   opacity: 0;
-  filter: contrast(220%) brightness(12%) drop-shadow(0 0 25px rgba(220, 38, 38, 0.9)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.6));
-  transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.25s ease, filter 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.3s ease;
 }
 
-#cote-silhouette-stage.show .cote-silhouette-figure {
+#cote-silhouette-stage.show .cote-portrait-frame {
   transform: translateY(0) scale(1);
   opacity: 1;
-  animation: cote-figure-slam 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: cote-frame-slam 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards;
 }
 
-/* 顯現真容模式 (移除高反差剪影，展示官方完整彩圖) */
-.cote-silhouette-figure.unveiled {
-  filter: contrast(105%) brightness(100%) drop-shadow(0 0 35px rgba(245, 158, 11, 0.75)) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.9)) !important;
+.cote-cutin-figure {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: contrast(112%) brightness(106%) saturate(110%);
+  transition: filter 0.35s ease;
+}
+
+/* 暗影剪影模式 (點擊「暗影 / 全彩」可隨心切換) */
+.cote-cutin-figure.silhouette-mode {
+  filter: contrast(240%) brightness(16%) drop-shadow(0 0 20px var(--aura-color, #ef4444)) !important;
+}
+
+.cote-portrait-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 20%, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+  box-shadow: inset 0 0 25px rgba(251, 191, 36, 0.4);
 }
 
 /* 動漫特寫紅光眼煞 */
 .cote-eye-flare {
   position: absolute;
-  top: 25%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 120px;
+  width: 160px;
   height: 4px;
   background: linear-gradient(90deg, transparent, #ff003c, #ffffff, #ff003c, transparent);
   box-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c;
@@ -564,9 +588,9 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   100% { opacity: 0.7; transform: translate(-50%, -50%) scaleX(1); }
 }
 
-@keyframes cote-figure-slam {
-  0% { transform: translateY(80px) scale(0.92); opacity: 0; }
-  70% { transform: translateY(-8px) scale(1.03); opacity: 1; }
+@keyframes cote-frame-slam {
+  0% { transform: translateY(50px) scale(0.88); opacity: 0; }
+  70% { transform: translateY(-6px) scale(1.03); opacity: 1; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
@@ -576,8 +600,9 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
   z-index: 10;
   width: 100%;
   max-width: 860px;
-  margin-bottom: 24px;
-  padding: 16px 22px;
+  margin-top: auto;
+  margin-bottom: 8px;
+  padding: 14px 18px;
   background: linear-gradient(135deg, rgba(22, 6, 14, 0.96) 0%, rgba(46, 10, 26, 0.96) 50%, rgba(18, 5, 12, 0.98) 100%);
   border: 2px solid #f59e0b;
   border-left: 6px solid #ef4444;
@@ -690,6 +715,148 @@ html[data-theme="oaa"] #cote-summon-easteregg-btn {
     transparent 32px
   );
   opacity: 0.8;
+}
+
+/* ==========================================================================
+   14. 全域高對比深色模式與螢光/暗淡模糊文字徹底根除 (Universal Eradication)
+   ========================================================================== */
+
+/* 全域文字顏色深色模式強制銳化 (白字、純淺色，杜絕暗色字隱形) */
+html[data-theme="oaa"] .text-slate-900,
+html[data-theme="oaa"] .text-slate-800 {
+  color: #ffffff !important;
+}
+
+html[data-theme="oaa"] .text-slate-700,
+html[data-theme="oaa"] .text-slate-600 {
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="oaa"] .text-slate-500,
+html[data-theme="oaa"] .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+/* 徹底消除螢光粉紅色系，改用高度育成燙金/深酒紅 */
+html[data-theme="oaa"] .text-pink-600,
+html[data-theme="oaa"] .text-pink-700,
+html[data-theme="oaa"] .text-pink-800,
+html[data-theme="oaa"] .text-pink-900 {
+  color: #fbbf24 !important;
+}
+
+html[data-theme="oaa"] .text-pink-500 {
+  color: #f59e0b !important;
+}
+
+html[data-theme="oaa"] .bg-pink-600,
+html[data-theme="oaa"] .bg-pink-500,
+html[data-theme="oaa"] .bg-pink-700 {
+  background: linear-gradient(135deg, #9f1239 0%, #881337 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #fbbf24 !important;
+}
+
+html[data-theme="oaa"] .bg-pink-50,
+html[data-theme="oaa"] .bg-pink-100,
+html[data-theme="oaa"] .bg-pink-200,
+html[data-theme="oaa"] .bg-pink-50\/60 {
+  background-color: rgba(36, 12, 23, 0.9) !important;
+  color: #fef08a !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme="oaa"] .border-pink-100,
+html[data-theme="oaa"] .border-pink-200,
+html[data-theme="oaa"] .border-pink-300 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+/* 表單控制元件 (select, input, textarea) 暗色質感修復 */
+html[data-theme="oaa"] select,
+html[data-theme="oaa"] input,
+html[data-theme="oaa"] textarea {
+  background-color: #170610 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme="oaa"] select option {
+  background-color: #1d0916 !important;
+  color: #ffffff !important;
+}
+
+/* 一鍵速查情境標籤晶片 (消滅螢光淡色，改為深紅寶石/翡翠/琥珀高校色調) */
+html[data-theme="oaa"] .bg-amber-50 {
+  background-color: #3b1704 !important;
+  color: #fde047 !important;
+  border: 1px solid #f59e0b !important;
+}
+html[data-theme="oaa"] .bg-rose-50 {
+  background-color: #3f0a10 !important;
+  color: #fca5a5 !important;
+  border: 1px solid #ef4444 !important;
+}
+html[data-theme="oaa"] .bg-emerald-50 {
+  background-color: #062217 !important;
+  color: #6ee7b7 !important;
+  border: 1px solid #10b981 !important;
+}
+html[data-theme="oaa"] .bg-purple-50 {
+  background-color: #240b38 !important;
+  color: #d8b4fe !important;
+  border: 1px solid #a855f7 !important;
+}
+html[data-theme="oaa"] .bg-slate-100 {
+  background-color: #1e111a !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 事件檢索卡與時序節點修復 */
+html[data-theme="oaa"] .bg-emerald-50\/40 {
+  background-color: rgba(6, 44, 25, 0.75) !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="oaa"] .bg-rose-50\/40 {
+  background-color: rgba(63, 10, 16, 0.75) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="oaa"] .bg-slate-50\/40 {
+  background-color: rgba(30, 13, 21, 0.75) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="oaa"] .bg-white\/80 {
+  background-color: rgba(26, 9, 18, 0.85) !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* 標籤管理排序卡片修復 */
+html[data-theme="oaa"] .tag-sort-card {
+  background-color: #220c19 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  color: #ffffff !important;
+}
+html[data-theme="oaa"] .tag-sort-card:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* 頂部選單收合與膠囊條修復 */
+html[data-theme="oaa"] #header-unhide-pill {
+  background: rgba(136, 19, 55, 0.9) !important;
+  border: 1px solid #f59e0b !important;
+  color: #fef08a !important;
+}
+html[data-theme="oaa"] #header-unhide-pill:hover {
+  background: rgba(159, 18, 57, 1) !important;
 }
 
 

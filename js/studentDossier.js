@@ -377,8 +377,21 @@ class StudentDossierView {
       'E': 'text-rose-500'
     };
 
-    const avatarIndex = (student.seatNo - 1) % 11;
-    const coteAvatar = `./assets/cote/ic-${Math.floor(avatarIndex / 6) + 1}-${(avatarIndex % 6) + 1}.jpg`;
+    const coteAvatarsList = [
+      './assets/cote/ic-2-1.jpg', // 綾小路 清隆 [2年D班]
+      './assets/cote/ic-2-2.jpg', // 堀北 鈴音 [2年D班]
+      './assets/cote/ic-2-3.jpg', // 輕井澤 惠 [2年D班]
+      './assets/cote/ic-2-4.jpg', // 櫛田 桔梗 [2年D班]
+      './assets/cote/ic-2-5.jpg', // 龍園 翔 [2年C班]
+      './assets/cote/ic-1-1.jpg', // 七瀨 翼 [1年D班]
+      './assets/cote/ic-1-2.jpg', // 寶泉 和臣 [1年D班]
+      './assets/cote/ic-1-3.jpg', // 天澤 一夏 [1年A班]
+      './assets/cote/ic-1-4.jpg', // 八神 拓也 [1年B班]
+      './assets/cote/ic-1-5.jpg', // 椿 櫻子 [1年C班]
+      './assets/cote/ic-1-6.jpg'  // 宇都宮 陸 [1年C班]
+    ];
+    const avatarIndex = (student.seatNo - 1) % coteAvatarsList.length;
+    const coteAvatar = coteAvatarsList[avatarIndex];
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
@@ -436,9 +449,9 @@ class StudentDossierView {
 
               <!-- Easter Egg Summon Button -->
               <div class="max-w-[240px] mx-auto mb-4">
-                <button onclick="window.appState.triggerSilhouetteCutIn(${(student.seatNo - 1) % 6})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="觸發此角色本格巨幅剪影彩蛋">
+                <button onclick="window.appState.triggerSilhouetteCutIn(${(student.seatNo - 1) % 11})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="觸發此角色本格動漫降臨彩蛋">
                   <span>⚡</span>
-                  <span>實力者巨幅剪影降臨</span>
+                  <span>實力者本格降臨</span>
                 </button>
               </div>
 
