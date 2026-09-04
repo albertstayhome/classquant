@@ -255,10 +255,9 @@ class StudentDossierView {
           <div>
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-2xl sm:text-3xl font-black text-slate-900">${student.name}</h2>
-              <button type="button" onclick="studentDossierView.toggleStudentGender()" class="text-xs px-2.5 py-1 rounded-xl font-black transition flex items-center gap-1 shadow-sm cursor-pointer ${student.gender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'}" title="點擊切換性別 (男 / 女)">
-                <span>${student.gender === 'F' ? '👧 女生' : '👦 男生'}</span>
-                <span class="text-[9px] opacity-70">✎切換</span>
-              </button>
+              <span class="text-xs px-2.5 py-1 rounded-xl font-black ${student.gender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-700 border border-blue-300'}">
+                ${student.gender === 'F' ? '👧 女生' : '👦 男生'}
+              </span>
               <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300">
                 ${this.currentClassId} 班 • 座號 ${String(student.seatNo).padStart(2, '0')}
               </span>
@@ -507,10 +506,9 @@ class StudentDossierView {
                     <h1 class="text-2xl sm:text-4xl font-black tracking-wide text-white drop-shadow">
                       ${student.name}
                     </h1>
-                    <button type="button" onclick="studentDossierView.toggleStudentGender()" class="text-xs px-2.5 py-1 rounded-xl font-black transition flex items-center gap-1 shadow-md border cursor-pointer ${studentGender === 'F' ? 'bg-pink-900/80 text-pink-200 border-pink-500 hover:bg-pink-800' : 'bg-blue-900/80 text-blue-200 border-blue-500 hover:bg-blue-800'}" title="點擊切換性別 (男 / 女)">
-                      <span>${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
-                      <span class="text-[9px] opacity-70">✎切換</span>
-                    </button>
+                    <span class="text-xs px-2.5 py-1 rounded-xl font-black ${studentGender === 'F' ? 'bg-pink-950/90 text-pink-300 border border-pink-500/50' : 'bg-blue-950/90 text-blue-300 border border-blue-500/50'}">
+                      ${studentGender === 'F' ? '👧 女生' : '👦 男生'}
+                    </span>
                   </div>
                   <div class="text-xs font-mono tracking-wider text-amber-300/80 pl-1">
                     STUDENT DOSSIER // SEAT ${String(student.seatNo).padStart(2, '0')}

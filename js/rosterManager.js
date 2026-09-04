@@ -18,6 +18,16 @@ class RosterManager {
     const currentClass = this.store.getClass(this.currentClassId) || Object.values(classes)[0];
     if (currentClass) this.currentClassId = currentClass.id;
     const students = this.store.getStudents(this.currentClassId);
+    const maleCount = students.filter(s => (s.gender || (s.seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F')) === 'M').length;
+    const femaleCount = students.length - maleCount;
+    let defaultSplit = Math.ceil(students.length / 2);
+    for (let i = students.length - 1; i >= 0; i--) {
+      const g = students[i].gender || (students[i].seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F');
+      if (g === 'M') {
+        defaultSplit = students[i].seatNo;
+        break;
+      }
+    }
 
     container.innerHTML = `
       <div class="glass-card rounded-3xl p-5 sm:p-6 mb-6 border border-pink-200 shadow-sm bg-gradient-to-r from-pink-50/70 via-white to-sky-50/70">
@@ -66,6 +76,44 @@ class RosterManager {
             </button>
             <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 刪除班級
+            </button>
+          </div>
+        </div>
+
+        <!-- Gender Configuration Bar (One-time Class Setup) -->
+        <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-pink-50/90 border border-purple-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-2xl select-none">⚧️</span>
+            <div>
+              <div class="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
+                <span>班級性別一次性設定</span>
+                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">👦 男生 ${maleCount} 人</span>
+                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">👧 女生 ${femaleCount} 人</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">自訂前 N 號為男生（如 1~14 或 1~15 號），其餘為女生；下方亦可個別點擊學生切換。</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-purple-200 text-xs font-bold text-slate-700 shadow-sm">
+              <span>前</span>
+              <input type="number" id="roster-gender-split-input" min="0" max="${students.length}" value="${defaultSplit}" 
+                class="w-12 text-center font-black text-blue-700 border-b-2 border-blue-400 focus:outline-none bg-transparent">
+              <span>號為男生</span>
+              <button type="button" onclick="rosterManager.applyGenderSplit('${this.currentClassId}')" 
+                class="ml-1 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs transition shadow-sm cursor-pointer flex items-center gap-1">
+                <span>⚡ 一鍵劃分</span>
+              </button>
+            </div>
+
+            <button type="button" onclick="rosterManager.resetHalfGender('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 text-xs font-black transition cursor-pointer" title="重設為前半男、後半女（各半）">
+              各半重設
+            </button>
+            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'M')" class="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 text-xs font-black transition cursor-pointer" title="全班全設為男生">
+              全男
+            </button>
+            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'F')" class="px-3 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300 text-xs font-black transition cursor-pointer" title="全班全設為女生">
+              全女
             </button>
           </div>
         </div>
@@ -239,6 +287,41 @@ class RosterManager {
   toggleGender(classId, seatNo) {
     const newGender = this.store.toggleStudentGender(classId, seatNo);
     window.appState.showToast(`已將 ${seatNo} 號性別切換為【${newGender === 'F' ? '👧 女生' : '👦 男生'}】`, 'info');
+    this.render('roster-manager-view');
+    if (window.classroomMatrix) {
+      window.classroomMatrix.render('matrix-view', window.appState.currentClassId);
+    }
+  }
+
+  applyGenderSplit(classId) {
+    const input = document.getElementById('roster-gender-split-input');
+    const val = input ? parseInt(input.value, 10) : 0;
+    if (isNaN(val) || val < 0) {
+      window.appState.showToast('請輸入有效的座號界線數字', 'warning');
+      return;
+    }
+    this.store.setGenderSplitBoundary(classId, val);
+    window.appState.showToast(`已劃分：1 ~ ${val} 號為【👦 男生】，${val + 1} 號以後為【👧 女生】！`, 'success');
+    this.render('roster-manager-view');
+    if (window.classroomMatrix) {
+      window.classroomMatrix.render('matrix-view', window.appState.currentClassId);
+    }
+  }
+
+  resetHalfGender(classId) {
+    const students = this.store.getStudents(classId);
+    const half = Math.ceil(students.length / 2);
+    this.store.setGenderSplitBoundary(classId, half);
+    window.appState.showToast(`已重設為各半：1 ~ ${half} 號為男生，其餘為女生`, 'info');
+    this.render('roster-manager-view');
+    if (window.classroomMatrix) {
+      window.classroomMatrix.render('matrix-view', window.appState.currentClassId);
+    }
+  }
+
+  applyAllGender(classId, gender) {
+    this.store.setAllStudentsGender(classId, gender);
+    window.appState.showToast(`已將全班學生性別設定為【${gender === 'F' ? '👧 女生' : '👦 男生'}】`, 'success');
     this.render('roster-manager-view');
     if (window.classroomMatrix) {
       window.classroomMatrix.render('matrix-view', window.appState.currentClassId);

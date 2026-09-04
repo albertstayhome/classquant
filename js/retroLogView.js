@@ -116,11 +116,17 @@ class RetroLogView {
                   <button onclick="retroLogView.selectNone()" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-black transition border border-slate-300">
                     清除
                   </button>
-                  <button id="retro-odd-btn" onclick="retroLogView.selectOdd()" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-[11px] font-black transition border border-sky-200">
-                    單號(男)
+                  <button onclick="retroLogView.selectGender('M')" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-[11px] font-black transition border border-blue-200" title="選取全體男生 (依名冊性別設定)">
+                    👦 男生
                   </button>
-                  <button onclick="retroLogView.selectEven()" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[11px] font-black transition border border-rose-200">
-                    雙號(女)
+                  <button onclick="retroLogView.selectGender('F')" class="px-2 py-1 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 text-[11px] font-black transition border border-pink-200" title="選取全體女生 (依名冊性別設定)">
+                    👧 女生
+                  </button>
+                  <button id="retro-odd-btn" onclick="retroLogView.selectOdd()" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-[11px] font-black transition border border-sky-200" title="選取座號為單數的學生">
+                    單號
+                  </button>
+                  <button onclick="retroLogView.selectEven()" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-[11px] font-black transition border border-slate-300" title="選取座號為雙數的學生">
+                    雙號
                   </button>
                 </div>
               </div>
@@ -308,6 +314,20 @@ class RetroLogView {
 
   selectNone() {
     this.selectedSeats.clear();
+    if (window.appState?.playPop) window.appState.playPop();
+    this.render('retro-log-view');
+  }
+
+  selectGender(gender) {
+    this.selectedSeats.clear();
+    const students = this.store.getStudents(this.currentClassId);
+    const total = students.length;
+    students.forEach(s => {
+      const studentGender = s.gender || (s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F');
+      if (studentGender === gender) {
+        this.selectedSeats.add(s.seatNo);
+      }
+    });
     if (window.appState?.playPop) window.appState.playPop();
     this.render('retro-log-view');
   }

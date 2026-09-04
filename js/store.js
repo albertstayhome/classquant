@@ -773,6 +773,25 @@ class Store {
     return 'M';
   }
 
+  setGenderSplitBoundary(classId, lastBoySeatNo) {
+    const list = this.getStudents(classId);
+    const split = parseInt(lastBoySeatNo, 10);
+    list.forEach(s => {
+      s.gender = s.seatNo <= split ? 'M' : 'F';
+    });
+    this.saveToStorage();
+    return list;
+  }
+
+  setAllStudentsGender(classId, gender) {
+    const list = this.getStudents(classId);
+    list.forEach(s => {
+      s.gender = gender === 'F' ? 'F' : 'M';
+    });
+    this.saveToStorage();
+    return list;
+  }
+
   getStudent(classId, seatNo) {
     const list = this.getStudents(classId);
     return list.find(s => s.seatNo === parseInt(seatNo, 10)) || null;
