@@ -14,6 +14,9 @@ class RosterManager {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    if (window.appState?.currentClassId) {
+      this.currentClassId = window.appState.currentClassId;
+    }
     const classes = this.store.getClasses();
     const currentClass = this.store.getClass(this.currentClassId) || Object.values(classes)[0];
     if (currentClass) this.currentClassId = currentClass.id;
@@ -164,13 +167,11 @@ class RosterManager {
 
   switchClass(classId) {
     this.currentClassId = classId;
-    if (window.appState) {
-      window.appState.currentClassId = classId;
-      if (window.timetableEngine) window.timetableEngine.setManualOverride(classId);
-      window.appState.renderClassDropdown();
-      window.appState.updateHeaderStatus();
+    if (window.appState && window.appState.currentClassId !== classId) {
+      window.appState.handleManualClassChange(classId);
+    } else {
+      this.render('roster-manager-view');
     }
-    this.render('roster-manager-view');
   }
 
   // --- 1-Click Batch Paste Modal ---

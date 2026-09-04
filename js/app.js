@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.17';
+    this.appVersion = '1.9.18';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -465,6 +465,10 @@ class AppState {
     const currentTheme = window.appStore.getTheme();
     this.applyTheme(currentTheme);
 
+    // 2b. Initialize Font Size Scale
+    const currentFontSize = window.appStore.getFontSize() || 'large';
+    this.applyFontSize(currentFontSize);
+
     // 3. Listen to Timetable Engine changes
     window.timetableEngine.onClassChange((newClassId, context) => {
       if (newClassId && newClassId !== this.currentClassId) {
@@ -523,6 +527,7 @@ class AppState {
     this.updateHeaderClock();
     this.renderClassDropdown();
     this.updateSoundButtonUI();
+    this.updateFontSizeButtonUI(currentFontSize);
     this.updateHeaderVersionBadge();
     this.switchTab('matrix');
   }
@@ -1637,6 +1642,46 @@ class AppState {
     }
   }
 
+  applyFontSize(size = 'large') {
+    const validSizes = ['standard', 'large', 'xlarge'];
+    if (!validSizes.includes(size)) size = 'large';
+    const html = document.documentElement;
+    html.setAttribute('data-font-size', size);
+    window.appStore.setFontSize(size);
+    this.updateFontSizeButtonUI(size);
+  }
+
+  cycleFontSize() {
+    const current = window.appStore.getFontSize() || 'large';
+    const cycleMap = {
+      'standard': 'large',
+      'large': 'xlarge',
+      'xlarge': 'standard'
+    };
+    const next = cycleMap[current] || 'large';
+    this.applyFontSize(next);
+    const labelMap = {
+      'standard': '標準字體 (100%)',
+      'large': '舒適大字 (108%)',
+      'xlarge': '超大字體 (116%)'
+    };
+    this.showToast(`已切換全系統字級：${labelMap[next]}`, 'info');
+  }
+
+  updateFontSizeButtonUI(size) {
+    const btn = document.getElementById('font-scale-toggle-btn');
+    if (btn) {
+      const labels = {
+        'standard': '100%',
+        'large': '108%',
+        'xlarge': '116%'
+      };
+      const text = labels[size] || '108%';
+      btn.innerHTML = `<span class="text-xs font-black">🔍A</span><span class="text-xs font-bold hidden md:inline">${text}</span>`;
+      btn.title = `目前字級：${text}，點擊切換 (標準 100% / 舒適 108% / 超大 116%)`;
+    }
+  }
+
   switchTab(tabId) {
     this.activeTab = tabId;
 
@@ -1691,20 +1736,28 @@ class AppState {
   }
 
   refreshActiveTab() {
+    const activeClass = this.currentClassId || '801';
     if (this.activeTab === 'matrix') {
-      window.matrixView.render('classroom-matrix-view', this.currentClassId);
+      window.matrixView.render('classroom-matrix-view', activeClass);
     } else if (this.activeTab === 'roster') {
-      window.rosterManager.render('roster-manager-view');
+      if (window.rosterManager) {
+        window.rosterManager.currentClassId = activeClass;
+        window.rosterManager.render('roster-manager-view');
+      }
     } else if (this.activeTab === 'retro' && window.retroLogView) {
-      window.retroLogView.render('retro-log-view', this.currentClassId);
+      window.retroLogView.currentClassId = activeClass;
+      window.retroLogView.render('retro-log-view', activeClass);
     } else if (this.activeTab === 'dashboard') {
-      window.dashboardCharts.renderClassDashboard('dashboard-view', this.currentClassId);
+      window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
     } else if (this.activeTab === 'timetable') {
       window.timetableEditorView.render('timetable-editor-view');
     } else if (this.activeTab === 'events') {
-      window.eventsLogView.render('events-log-view', this.currentClassId);
+      window.eventsLogView.render('events-log-view', activeClass);
     } else if (this.activeTab === 'student-dossier') {
-      window.studentDossierView.render('student-dossier-view', this.currentClassId);
+      if (window.studentDossierView) {
+        window.studentDossierView.currentClassId = activeClass;
+        window.studentDossierView.render('student-dossier-view', activeClass);
+      }
     } else if (this.activeTab === 'ai-hub') {
       window.aiHub.render('ai-hub-view');
     } else if (this.activeTab === 'feedback-board' && window.feedbackBoard) {
@@ -1750,6 +1803,7 @@ class AppState {
     this.currentClassId = classId;
     window.timetableEngine.setManualOverride(classId);
     this.showToast(`已切換至：${classId} 班 (手動調課模式)`, 'info');
+    this.renderClassDropdown();
     this.updateHeaderStatus();
     this.refreshActiveTab();
   }

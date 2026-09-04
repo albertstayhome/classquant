@@ -141,11 +141,11 @@ class DashboardCharts {
           
           ${overview.latestBoxPlot ? `
             <div class="grid grid-cols-5 gap-2 p-2 rounded-xl border border-pink-200 text-center text-xs mb-3 bg-pink-50/50 font-bold">
-              <div><span class="text-slate-500 block text-[10px]">最低 (Min)</span>${overview.latestBoxPlot.min}</div>
-              <div><span class="text-slate-500 block text-[10px]">Q1 (25%)</span>${overview.latestBoxPlot.q1}</div>
-              <div><span class="text-pink-700 block text-[10px]">中位數 (Q2)</span>${overview.latestBoxPlot.median}</div>
-              <div><span class="text-slate-500 block text-[10px]">Q3 (75%)</span>${overview.latestBoxPlot.q3}</div>
-              <div><span class="text-slate-500 block text-[10px]">最高 (Max)</span>${overview.latestBoxPlot.max}</div>
+              <div><span class="text-slate-500 block text-xs">最低 (Min)</span>${overview.latestBoxPlot.min}</div>
+              <div><span class="text-slate-500 block text-xs">Q1 (25%)</span>${overview.latestBoxPlot.q1}</div>
+              <div><span class="text-pink-700 block text-xs">中位數 (Q2)</span>${overview.latestBoxPlot.median}</div>
+              <div><span class="text-slate-500 block text-xs">Q3 (75%)</span>${overview.latestBoxPlot.q3}</div>
+              <div><span class="text-slate-500 block text-xs">最高 (Max)</span>${overview.latestBoxPlot.max}</div>
             </div>
           ` : ''}
 
@@ -222,12 +222,12 @@ class DashboardCharts {
           <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'M')" 
             class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'M' ? 'bg-blue-600 text-white shadow' : (isOAA ? 'text-blue-300 hover:text-white' : 'text-slate-600 hover:text-blue-600')}">
             <span>👦 男生</span>
-            <span class="text-[10px] opacity-80">(${maleCount})</span>
+            <span class="text-xs opacity-80">(${maleCount})</span>
           </button>
           <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'F')" 
             class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'F' ? 'bg-pink-600 text-white shadow' : (isOAA ? 'text-pink-300 hover:text-white' : 'text-slate-600 hover:text-pink-600')}">
             <span>👧 女生</span>
-            <span class="text-[10px] opacity-80">(${femaleCount})</span>
+            <span class="text-xs opacity-80">(${femaleCount})</span>
           </button>
         </div>
       </div>
@@ -268,7 +268,7 @@ class DashboardCharts {
               }">
               
               <!-- Left: Rank + Avatar + Name -->
-              <div class="flex items-center space-x-3 min-w-[200px]">
+              <div class="flex items-center space-x-3 min-w-0 flex-1">
                 ${rankBadge}
 
                 ${isOAA && charInfo ? `
@@ -281,40 +281,40 @@ class DashboardCharts {
                   </div>
                 `}
 
-                <div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition truncate">
                       ${item.name}
                     </span>
-                    <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
+                    <span class="text-xs px-1.5 py-0.5 rounded font-bold shrink-0 ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
                       ${studentGender === 'F' ? '👧 女' : '👦 男'}
                     </span>
                   </div>
-                  <div class="text-[11px] ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-medium flex items-center gap-2">
-                    <span>座號 ${String(item.seatNo).padStart(2, '0')}</span>
+                  <div class="text-[11px] ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-medium flex items-center gap-2 min-w-0">
+                    <span class="shrink-0">座號 ${String(item.seatNo).padStart(2, '0')}</span>
                     ${isOAA && charInfo ? `
-                      <span class="text-amber-300 font-bold">• 實力對應：${charInfo.name}</span>
+                      <span class="text-amber-300 font-bold truncate">• 實力對應：${charInfo.name}</span>
                     ` : ''}
                   </div>
                 </div>
               </div>
 
               <!-- Right: Scores & Composite -->
-              <div class="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap text-xs font-bold">
-                <div class="text-right">
-                  <div class="text-[10px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'}">學業均分</div>
+              <div class="flex items-center gap-3 sm:gap-4 shrink-0 text-xs font-bold">
+                <div class="text-right shrink-0">
+                  <div class="text-[11px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'} font-bold">學業均分</div>
                   <div class="font-black ${isOAA ? 'text-cyan-300' : 'text-blue-700'}">${item.academicScore} 分</div>
                 </div>
 
-                <div class="text-right">
-                  <div class="text-[10px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'}">品格常規</div>
+                <div class="text-right shrink-0">
+                  <div class="text-[11px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'} font-bold">品格常規</div>
                   <div class="font-black ${item.characterPoints >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
                     ${item.characterPoints > 0 ? '+' : ''}${item.characterPoints} 點
                   </div>
                 </div>
 
                 <div class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'} shadow-sm text-right shrink-0">
-                  <div class="text-[9px] uppercase tracking-wider opacity-80 font-bold">綜合實力</div>
+                  <div class="text-[10px] uppercase tracking-wider opacity-90 font-bold">綜合實力</div>
                   <div class="text-sm sm:text-base font-black font-mono leading-tight">${item.composite}</div>
                 </div>
 

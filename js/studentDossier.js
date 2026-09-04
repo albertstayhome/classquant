@@ -194,9 +194,13 @@ class StudentDossierView {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    if (classId) this.currentClassId = classId;
+    if (classId) {
+      this.currentClassId = classId;
+    } else if (window.appState?.currentClassId) {
+      this.currentClassId = window.appState.currentClassId;
+    }
     if (!this.currentClassId) {
-      this.currentClassId = window.appState?.currentClassId || Object.keys(this.store.getClasses())[0] || '801';
+      this.currentClassId = Object.keys(this.store.getClasses())[0] || '801';
     }
     if (seatNo) this.currentSeatNo = parseInt(seatNo, 10);
 
@@ -463,31 +467,31 @@ class StudentDossierView {
               </div>
 
               <!-- Clean Technical Metadata -->
-              <div class="px-2 space-y-1 text-[11px] text-amber-200/90 font-medium">
-                <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/80">座號 / 班級</span>
-                  <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')} 號 (${this.currentClassId}班)</span>
+              <div class="px-2 space-y-1.5 text-xs text-amber-200/90 font-medium">
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
+                  <span class="text-amber-400/80 shrink-0">座號 / 班級</span>
+                  <span class="font-bold text-white shrink-0">${String(student.seatNo).padStart(2, '0')} 號 (${this.currentClassId}班)</span>
                 </div>
-                <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/80">性別</span>
-                  <span class="font-bold text-amber-300">${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
+                  <span class="text-amber-400/80 shrink-0">性別</span>
+                  <span class="font-bold text-amber-300 shrink-0">${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
                 </div>
-                <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/80">班級實力排名</span>
-                  <span class="font-black text-amber-300">總第 ${overallRank} 名 (${studentGender === 'F' ? '女' : '男'}生第 ${genderRank} 名)</span>
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
+                  <span class="text-amber-400/80 shrink-0">班級實力排名</span>
+                  <span class="font-black text-amber-300 truncate text-right">總第 ${overallRank} 名 (${studentGender === 'F' ? '女' : '男'}生 #${genderRank})</span>
                 </div>
-                <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/80">實力對應角色</span>
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
+                  <span class="text-amber-400/80 shrink-0">實力對應角色</span>
                   <span class="font-black text-white truncate max-w-[130px] text-right">${charName}</span>
                 </div>
-                <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/80">班級類別</span>
-                  <span class="font-bold text-white">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
+                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
+                  <span class="text-amber-400/80 shrink-0">班級類別</span>
+                  <span class="font-bold text-white shrink-0">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
                 </div>
               </div>
             </div>
 
-            <div class="mt-4 pt-3 border-t border-amber-500/20 text-[11px] text-amber-300/70 flex items-center justify-between font-mono">
+            <div class="mt-4 pt-3 border-t border-amber-500/20 text-xs text-amber-300/70 flex items-center justify-between font-mono">
               <span>OVERALL ABILITY ASSESSMENT</span>
               <span>VER. 2.0</span>
             </div>
@@ -500,7 +504,7 @@ class StudentDossierView {
               <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                 <div>
                   <div class="flex items-center space-x-2 mb-1 flex-wrap gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-950 text-amber-300 border border-amber-500/50">
+                    <span class="px-2 py-0.5 rounded text-xs font-black bg-rose-950 text-amber-300 border border-amber-500/50">
                       名前
                     </span>
                     <h1 class="text-2xl sm:text-4xl font-black tracking-wide text-white drop-shadow">
@@ -516,17 +520,17 @@ class StudentDossierView {
                 </div>
 
                 <!-- Info Badges -->
-                <div class="flex flex-col sm:flex-row gap-2 text-xs">
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-amber-400 uppercase font-bold">學籍番号</span>
+                <div class="flex flex-wrap sm:flex-nowrap gap-2 text-xs">
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
+                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">學籍番号</span>
                     <span class="font-bold text-white font-mono tracking-wider">${studentIdStr}</span>
                   </div>
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-amber-400 uppercase font-bold">全班位階</span>
-                    <span class="font-bold text-amber-200">#${overallRank} (${studentGender === 'F' ? '女' : '男'}生 #${genderRank})</span>
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
+                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">全班位階</span>
+                    <span class="font-bold text-amber-200">#${overallRank} (${studentGender === 'F' ? '女' : '男'} #${genderRank})</span>
                   </div>
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-amber-400 uppercase font-bold">實力對應</span>
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
+                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">實力對應</span>
                     <span class="font-bold text-amber-200">${charName}</span>
                   </div>
                 </div>
@@ -534,7 +538,7 @@ class StudentDossierView {
 
               <!-- Row 2: Character Evaluation Box -->
               <div class="mb-6 p-4 sm:p-5 rounded-2xl bg-[#1e0a15]/80 border border-amber-500/30 text-xs sm:text-sm text-slate-100 leading-relaxed font-medium backdrop-blur-sm relative">
-                <div class="text-[10px] text-amber-300 tracking-wider uppercase mb-1.5 flex items-center gap-1.5 font-bold">
+                <div class="text-xs text-amber-300 tracking-wider uppercase mb-1.5 flex items-center gap-1.5 font-bold">
                   <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                   <span>能力特性與綜合評語</span>
                 </div>
@@ -550,11 +554,11 @@ class StudentDossierView {
               <!-- Row 3: Four / Three Dimensions Stats Bar -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                 ${oaa.metrics.map(m => `
-                  <div class="flex items-center group cursor-pointer" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
-                    <span class="font-bold text-sm sm:text-base text-amber-100 whitespace-nowrap">${m.label}</span>
-                    <span class="text-[10px] text-amber-400/80 ml-1.5">(${m.weight})</span>
-                    <span class="flex-1 border-b border-amber-500/30 mx-3 group-hover:border-amber-400 transition"></span>
-                    <span class="font-mono font-black text-sm sm:text-base ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap">
+                  <div class="flex items-center group cursor-pointer min-w-0" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
+                    <span class="font-bold text-sm sm:text-base text-amber-100 whitespace-nowrap shrink-0">${m.label}</span>
+                    <span class="text-xs text-amber-400/80 ml-1.5 shrink-0">(${m.weight})</span>
+                    <span class="flex-1 min-w-[16px] border-b border-amber-500/30 mx-2 sm:mx-3 group-hover:border-amber-400 transition"></span>
+                    <span class="font-mono font-black text-sm sm:text-base ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
                       ${m.grade} (${m.score})
                     </span>
                   </div>
@@ -641,7 +645,11 @@ class StudentDossierView {
     this.currentClassId = classId;
     const students = this.store.getStudents(classId);
     this.currentSeatNo = students[0] ? students[0].seatNo : 1;
-    this.render('student-dossier-view', this.currentClassId, this.currentSeatNo);
+    if (window.appState && window.appState.currentClassId !== classId) {
+      window.appState.handleManualClassChange(classId);
+    } else {
+      this.render('student-dossier-view', this.currentClassId, this.currentSeatNo);
+    }
   }
 
   switchStudent(seatNo) {

@@ -696,17 +696,17 @@ class ClassroomMatrix {
 
           const dualScoreHtml = isOAA
             ? `
-              <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none">
-                <span class="text-amber-300 font-mono font-black" title="學業均分">📘${academicScore}</span>
-                <span class="${characterPoints > 0 ? 'text-emerald-400' : characterPoints < 0 ? 'text-rose-400' : 'text-slate-300'} font-mono font-black" title="品格常規點數">
+              <div class="flex items-center justify-between text-[11px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0">
+                <span class="text-amber-300 font-mono font-black shrink-0" title="學業均分">📘${academicScore}</span>
+                <span class="${characterPoints > 0 ? 'text-emerald-400' : characterPoints < 0 ? 'text-rose-400' : 'text-slate-300'} font-mono font-black shrink-0" title="品格常規點數">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
               </div>
             `
             : `
-              <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none pointer-events-none">
-                <span class="text-blue-700" title="學業均分">📘${academicScore}</span>
-                <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'}" title="品格常規點數">
+              <div class="flex items-center justify-between text-[11px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0">
+                <span class="text-blue-700 shrink-0" title="學業均分">📘${academicScore}</span>
+                <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'} shrink-0" title="品格常規點數">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
               </div>
@@ -715,19 +715,21 @@ class ClassroomMatrix {
           return `
             <div id="seat-card-${s.seatNo}"
                  data-seat-no="${s.seatNo}"
-                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-all shadow-sm ${isSelected ? 'selected' : ''}"
+                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-all shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
                  ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
               
               <!-- Seat Header: Seat No + Mascot / COTE Rank -->
-              <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center justify-between mb-1 min-w-0 gap-1">
                 ${seatNoBadgeHtml}
                 ${rankBadgeHtml}
               </div>
 
               <!-- Student Name -->
-              ${studentNameHtml}
+              <div class="min-w-0 my-0.5">
+                ${studentNameHtml}
+              </div>
 
               <!-- Unified Dual Score Summary -->
               ${dualScoreHtml}
@@ -791,7 +793,7 @@ class ClassroomMatrix {
                       class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
                       <div class="flex flex-col pr-1 overflow-hidden">
                         <span class="text-xs sm:text-base font-black truncate ${isOAA ? 'text-white drop-shadow' : 'text-slate-900'} leading-tight">${tag.name}</span>
-                        <span class="text-[10px] ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
+                        <span class="text-xs ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
                       </div>
                       <span class="text-xs sm:text-sm font-black px-3 py-1 rounded-xl border shrink-0 ${badgeClass}">
                         ${tag.delta > 0 ? '+' : ''}${tag.delta}
@@ -806,7 +808,7 @@ class ClassroomMatrix {
 
         <!-- Bottom Swipe Indicator Hint -->
         ${tagPages.length > 1 ? `
-          <div class="text-center text-[10px] text-slate-400 mt-2 font-bold flex items-center justify-center gap-1">
+          <div class="text-center text-xs text-slate-400 mt-2 font-bold flex items-center justify-center gap-1">
             <span>第 ${this.currentTagPage + 1} / ${tagPages.length} 頁（向左滑 或 點按 ◀ ▶ 翻頁）</span>
           </div>
         ` : ''}

@@ -16,11 +16,15 @@ class RetroLogView {
     this.customNote = '';
   }
 
-  render(containerId, classId) {
+  render(containerId, classId = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    if (classId) this.currentClassId = classId;
+    if (classId) {
+      this.currentClassId = classId;
+    } else if (window.appState?.currentClassId) {
+      this.currentClassId = window.appState.currentClassId;
+    }
     const classes = this.store.getClasses();
     const currentClass = this.store.getClass(this.currentClassId) || Object.values(classes)[0];
     if (currentClass) this.currentClassId = currentClass.id;
@@ -284,7 +288,11 @@ class RetroLogView {
   switchClass(classId) {
     this.currentClassId = classId;
     this.selectedSeats.clear();
-    this.render('retro-log-view');
+    if (window.appState && window.appState.currentClassId !== classId) {
+      window.appState.handleManualClassChange(classId);
+    } else {
+      this.render('retro-log-view');
+    }
   }
 
   setDate(date) {

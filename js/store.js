@@ -715,6 +715,17 @@ class Store {
     this.saveToStorage();
   }
 
+  // --- Font Size Management ---
+  getFontSize() {
+    return this.data.settings?.fontSize || 'large';
+  }
+
+  setFontSize(size) {
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings.fontSize = size;
+    this.saveToStorage();
+  }
+
   // --- NAS Settings ---
   getNasSettings() {
     return this.data.settings?.nasSettings || {
