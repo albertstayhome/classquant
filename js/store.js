@@ -166,7 +166,7 @@ class Store {
         students[cls.id].push({
           seatNo: seat,
           name: cls.type === 'homeroom' ? studentNames[seat - 1] || `座號 ${seat}` : `座號 ${seat} (${studentNames[seat - 1]?.[0] || '生'}生)`,
-          gender: seat % 2 === 1 ? 'M' : 'F',
+          gender: seat <= Math.ceil(cls.studentCount / 2) ? 'M' : 'F',
           baselineAbility: 60 + Math.floor(Math.random() * 35),
           notes: ''
         });
@@ -745,7 +745,32 @@ class Store {
   }
 
   getStudents(classId) {
-    return this.data.students[classId] || [];
+    const list = this.data.students[classId] || [];
+    const total = list.length;
+    list.forEach(s => {
+      if (!s.gender || (s.gender !== 'M' && s.gender !== 'F')) {
+        s.gender = s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F';
+      }
+    });
+    return list;
+  }
+
+  setStudentGender(classId, seatNo, gender) {
+    const student = this.getStudent(classId, seatNo);
+    if (student) {
+      student.gender = gender === 'F' ? 'F' : 'M';
+      this.saveToStorage();
+    }
+  }
+
+  toggleStudentGender(classId, seatNo) {
+    const student = this.getStudent(classId, seatNo);
+    if (student) {
+      student.gender = student.gender === 'F' ? 'M' : 'F';
+      this.saveToStorage();
+      return student.gender;
+    }
+    return 'M';
   }
 
   getStudent(classId, seatNo) {
@@ -927,6 +952,8 @@ class Store {
       if (students.length === 0) return {};
 
       const classEvents = this.getEvents(classId) || [];
+      const total = students.length;
+
       const scored = students.map(s => {
         let academicScore = 75;
         try {
@@ -938,9 +965,12 @@ class Store {
         const characterPoints = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
         // Composite rating = Academic score (weighted) + points delta
         const composite = (academicScore * 10) + characterPoints;
+        const gender = s.gender || (s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F');
+
         return {
           seatNo: s.seatNo,
           name: s.name,
+          gender: gender,
           composite: composite,
           academicScore: academicScore,
           characterPoints: characterPoints
@@ -953,10 +983,32 @@ class Store {
         return a.seatNo - b.seatNo;
       });
 
-      // Map seatNo -> 1-based rank (Rank 1 = Top student / Ayanokoji Kiyotaka)
+      // Map seatNo -> Rank Object with overallRank (1..N) and genderRank (1..M/F count)
+      let maleCount = 0;
+      let femaleCount = 0;
       const rankMap = {};
+
       scored.forEach((item, idx) => {
-        rankMap[item.seatNo] = idx + 1;
+        const overallRank = idx + 1;
+        let genderRank = 1;
+        if (item.gender === 'F') {
+          femaleCount++;
+          genderRank = femaleCount;
+        } else {
+          maleCount++;
+          genderRank = maleCount;
+        }
+
+        rankMap[item.seatNo] = {
+          seatNo: item.seatNo,
+          name: item.name,
+          gender: item.gender,
+          overallRank: overallRank,
+          genderRank: genderRank,
+          composite: item.composite,
+          academicScore: item.academicScore,
+          characterPoints: item.characterPoints
+        };
       });
 
       return rankMap;
@@ -966,6 +1018,11 @@ class Store {
     }
   }
 
+  getClassLeaderboard(classId) {
+    const rankMap = this.getClassStudentRanks(classId);
+    return Object.values(rankMap).sort((a, b) => a.overallRank - b.overallRank);
+  }
+
   getStudentEvents(classId, seatNo) {
     if (!classId) return [];
     return (this.data.events || []).filter(e => e.classId === classId && e.seatNo === parseInt(seatNo, 10));
@@ -973,7 +1030,16 @@ class Store {
 
   getStudentRankInClass(classId, seatNo) {
     const ranks = this.getClassStudentRanks(classId);
-    return ranks[seatNo] || 1;
+    return ranks[seatNo] || {
+      seatNo: parseInt(seatNo, 10),
+      name: '',
+      gender: 'M',
+      overallRank: 1,
+      genderRank: 1,
+      composite: 750,
+      academicScore: 75,
+      characterPoints: 0
+    };
   }
 }
 

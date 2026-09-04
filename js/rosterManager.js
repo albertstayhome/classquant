@@ -83,24 +83,29 @@ class RosterManager {
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[550px] overflow-y-auto pr-1">
-            ${students.map(s => `
+            ${students.map(s => {
+              const gender = s.gender || (s.seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F');
+              return `
               <div class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
-                <div class="flex items-center space-x-2.5">
-                  <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner">
+                <div class="flex items-center space-x-2">
+                  <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner shrink-0">
                     ${String(s.seatNo).padStart(2, '0')}
                   </span>
                   <input type="text" value="${s.name}" 
                     onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
-                    class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-28 bg-white">
+                    class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-24 sm:w-28 bg-white">
                 </div>
                 
-                <div class="flex items-center space-x-1">
+                <div class="flex items-center space-x-1.5 shrink-0">
+                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'}" title="點擊切換性別 (男 / 女)">
+                    ${gender === 'F' ? '👧 女' : '👦 男'}
+                  </button>
                   <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
       </div>
@@ -196,11 +201,13 @@ class RosterManager {
       return;
     }
 
-    // Build student objects
+    // Build student objects with first-half Male, second-half Female default
+    const totalCount = parsedNames.length;
+    const halfCount = Math.ceil(totalCount / 2);
     const newStudents = parsedNames.map((name, idx) => ({
       seatNo: idx + 1,
       name: name,
-      gender: 'M'
+      gender: (idx + 1) <= halfCount ? 'M' : 'F'
     }));
 
     // Create snapshot before overwriting roster
@@ -227,6 +234,15 @@ class RosterManager {
     window.appState.closeModal();
     this.render('roster-manager-view');
     if (window.matrixView) window.matrixView.render('classroom-matrix-view', classId);
+  }
+
+  toggleGender(classId, seatNo) {
+    const newGender = this.store.toggleStudentGender(classId, seatNo);
+    window.appState.showToast(`已將 ${seatNo} 號性別切換為【${newGender === 'F' ? '👧 女生' : '👦 男生'}】`, 'info');
+    this.render('roster-manager-view');
+    if (window.classroomMatrix) {
+      window.classroomMatrix.render('matrix-view', window.appState.currentClassId);
+    }
   }
 
   updateStudentName(classId, seatNo, newName) {

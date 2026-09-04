@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.15';
+    this.appVersion = '1.9.16';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -441,6 +441,17 @@ class AppState {
     ];
     this.currentSilhouetteIdx = 0;
     this.silhouetteTimeout = null;
+
+    // Split into canonical Male and Female rosters by story strength ranking
+    const maleIds = new Set([
+      'ayanokoji', 'koenji', 'nagumo', 'ryuen', 'yagami', 'hirata', 'sudo', 'katsuragi',
+      'kanzaki', 'hosen', 'utomiya', 'yukimura', 'miyake', 'ishizaki', 'ike', 'kiriyama', 'tsukishiro'
+    ]);
+    this.coteSilhouettes.forEach(c => {
+      c.gender = maleIds.has(c.id) ? 'M' : 'F';
+    });
+    this.coteMaleSilhouettes = this.coteSilhouettes.filter(c => c.gender === 'M');
+    this.coteFemaleSilhouettes = this.coteSilhouettes.filter(c => c.gender === 'F');
 
     this.init();
   }
@@ -1595,6 +1606,9 @@ class AppState {
       if (this.activeTab === 'matrix' && window.matrixView) {
         window.matrixView.render('classroom-matrix-view', activeClass);
       }
+      if (this.activeTab === 'dashboard' && window.dashboardCharts) {
+        window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
+      }
     } catch (e) {
       console.warn('Error refreshing views on theme apply:', e);
     }
@@ -1967,20 +1981,36 @@ class AppState {
     } catch(e) {}
   }
 
-  // Retrieve canonical COTE character based on student rank in class
-  getCoteCharacterByRank(rank) {
+  // Retrieve canonical COTE character based on student gender and rank
+  getCoteCharacterByGenderAndRank(gender, genderRank) {
+    const isFemale = gender === 'F';
+    const roster = isFemale ? this.coteFemaleSilhouettes : this.coteMaleSilhouettes;
+    if (!genderRank || genderRank < 1) genderRank = 1;
+    const idx = (genderRank - 1) % roster.length;
+    return roster[idx] || roster[0];
+  }
+
+  // Retrieve canonical COTE character based on student rank in class (with optional gender support)
+  getCoteCharacterByRank(rank, gender = null) {
+    if (gender === 'M' || gender === 'F') {
+      return this.getCoteCharacterByGenderAndRank(gender, rank);
+    }
     if (!rank || rank < 1) rank = 1;
     const idx = (rank - 1) % this.coteSilhouettes.length;
     return this.coteSilhouettes[idx] || this.coteSilhouettes[0];
   }
 
   // --- Dramatic Anime Character Silhouette Easter Egg (Non-Q Cut-In) ---
-  triggerSilhouetteCutIn(charIdxOrRank) {
+  triggerSilhouetteCutIn(charOrRankOrIdx, gender = null) {
     this.playCinematicBoomSFX();
 
     let char;
-    if (typeof charIdxOrRank === 'number') {
-      const idx = Math.max(0, charIdxOrRank) % this.coteSilhouettes.length;
+    if (charOrRankOrIdx && typeof charOrRankOrIdx === 'object' && charOrRankOrIdx.name) {
+      char = charOrRankOrIdx;
+    } else if (gender === 'M' || gender === 'F') {
+      char = this.getCoteCharacterByGenderAndRank(gender, charOrRankOrIdx || 1);
+    } else if (typeof charOrRankOrIdx === 'number') {
+      const idx = Math.max(0, charOrRankOrIdx) % this.coteSilhouettes.length;
       char = this.coteSilhouettes[idx] || this.coteSilhouettes[0];
     } else {
       char = this.coteSilhouettes[this.currentSilhouetteIdx % this.coteSilhouettes.length];

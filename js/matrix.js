@@ -406,8 +406,10 @@ class ClassroomMatrix {
     const currentClassId = window.appState.currentClassId;
     const students = this.store.getStudents(currentClassId);
     this.selectedSeats.clear();
+    const total = students.length;
     students.forEach(s => {
-      if (s.gender === gender || (gender === 'M' && s.seatNo % 2 === 1) || (gender === 'F' && s.seatNo % 2 === 0)) {
+      const studentGender = s.gender || (s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F');
+      if (studentGender === gender) {
         this.selectedSeats.add(s.seatNo);
       }
     });
@@ -654,13 +656,19 @@ class ClassroomMatrix {
             else if (academicScore >= 60) rank = 'C';
             else rank = 'D';
 
-            const studentRank = classRanks[s.seatNo] || 1;
-            const coteChar = window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(studentRank) : null;
-            const coteAvatar = coteChar?.avatar || this.coteAvatars[0];
-            const charName = coteChar?.name || '綾小路 清隆';
+            const rankInfo = classRanks[s.seatNo] || { overallRank: 1, genderRank: 1, gender: s.gender || 'M' };
+            const studentGender = s.gender || rankInfo.gender || 'M';
+            const genderRank = rankInfo.genderRank || 1;
+            const overallRank = rankInfo.overallRank || 1;
+
+            const coteChar = window.appState?.getCoteCharacterByGenderAndRank 
+              ? window.appState.getCoteCharacterByGenderAndRank(studentGender, genderRank)
+              : (window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(overallRank) : null);
+            const coteAvatar = coteChar?.avatar || (studentGender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
+            const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
 
             rankBadgeHtml = `
-              <div class="flex items-center space-x-1 shrink-0 pointer-events-none" title="班級排名 第${studentRank}名 // 對應角色：${charName}">
+              <div class="flex items-center space-x-1 shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName}">
                 <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="${charName}">
                 <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
               </div>

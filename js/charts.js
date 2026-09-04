@@ -9,6 +9,7 @@ class DashboardCharts {
     this.stats = stats;
     this.chartInstances = {};
     this.currentViewMode = 'single'; // 'single' or 'multi'
+    this.leaderboardFilter = 'all';
   }
 
   destroyChart(chartId) {
@@ -153,12 +154,195 @@ class DashboardCharts {
           </div>
         </div>
       </div>
+
+      <!-- 🏆 Class Ranking Leaderboard (班級綜合實力天梯排行榜) -->
+      <div id="class-leaderboard-card"></div>
     `;
 
     if (window.lucide) window.lucide.createIcons();
 
     this.renderQuadrantScatter('chart-quadrant', overview, classId);
     this.renderScoreDistribution('chart-distribution', overview);
+    this.renderLeaderboardContent('class-leaderboard-card', classId);
+  }
+
+  // --- 🏆 CLASS RANKING LEADERBOARD (WAR ROOM) ---
+  renderLeaderboardContent(containerIdOrElement, classId, filter = null) {
+    if (filter) this.leaderboardFilter = filter;
+    const currentFilter = this.leaderboardFilter || 'all';
+    const container = typeof containerIdOrElement === 'string' ? document.getElementById(containerIdOrElement) : containerIdOrElement;
+    if (!container) return;
+
+    const isOAA = window.appStore?.getTheme() === 'oaa' || document.documentElement.classList.contains('oaa');
+    const fullLeaderboard = this.store.getClassLeaderboard ? this.store.getClassLeaderboard(classId) : [];
+    
+    let displayList = fullLeaderboard;
+    if (currentFilter === 'M') {
+      displayList = fullLeaderboard.filter(s => s.gender === 'M');
+    } else if (currentFilter === 'F') {
+      displayList = fullLeaderboard.filter(s => s.gender === 'F');
+    }
+
+    const maleCount = fullLeaderboard.filter(s => s.gender === 'M').length;
+    const femaleCount = fullLeaderboard.filter(s => s.gender === 'F').length;
+
+    container.className = isOAA
+      ? "rounded-3xl p-5 sm:p-6 bg-[#240d1a] border-2 border-amber-500/50 shadow-xl text-white mb-6"
+      : "glass-card rounded-3xl p-5 sm:p-6 border border-pink-200 bg-white shadow-sm mb-6";
+
+    container.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-100'}">
+        <div class="flex items-center space-x-3">
+          ${isOAA ? `
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center font-mono font-black text-xl text-white shadow-md shrink-0">
+              👑
+            </div>
+          ` : `
+            <div class="sanrio-twinstars-badge !w-10 !h-10 shrink-0"></div>
+          `}
+          <div>
+            <h3 class="text-base sm:text-lg font-black ${isOAA ? 'text-amber-200' : 'text-slate-800'} flex items-center gap-2">
+              <span>🏆 班級綜合實力天梯排行榜</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}">
+                共 ${fullLeaderboard.length} 位同學
+              </span>
+            </h3>
+            <p class="text-xs ${isOAA ? 'text-amber-300/70' : 'text-slate-500'} font-medium">
+              綜合實力 = 學業均分 (70%) + 品格常規 (30%) • 點選任一同學可直達專屬個人檔案
+            </p>
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl ${isOAA ? 'bg-[#1a0713] border border-amber-500/40' : 'bg-pink-50 border border-pink-200'}">
+          <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'all')" 
+            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${currentFilter === 'all' ? (isOAA ? 'bg-amber-500 text-[#1a0713] shadow' : 'bg-pink-500 text-white shadow') : (isOAA ? 'text-amber-200/80 hover:text-white' : 'text-slate-600 hover:text-slate-900')}">
+            全部 (${fullLeaderboard.length})
+          </button>
+          <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'M')" 
+            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'M' ? 'bg-blue-600 text-white shadow' : (isOAA ? 'text-blue-300 hover:text-white' : 'text-slate-600 hover:text-blue-600')}">
+            <span>👦 男生</span>
+            <span class="text-[10px] opacity-80">(${maleCount})</span>
+          </button>
+          <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'F')" 
+            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'F' ? 'bg-pink-600 text-white shadow' : (isOAA ? 'text-pink-300 hover:text-white' : 'text-slate-600 hover:text-pink-600')}">
+            <span>👧 女生</span>
+            <span class="text-[10px] opacity-80">(${femaleCount})</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Leaderboard Rows -->
+      <div class="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
+        ${displayList.length === 0 ? `
+          <div class="text-center py-12 text-slate-400 text-sm">此篩選條件下暫無學生資料</div>
+        ` : displayList.map((item) => {
+          const rank = currentFilter === 'all' ? item.overallRank : item.genderRank;
+          const isTop1 = rank === 1;
+          const isTop2 = rank === 2;
+          const isTop3 = rank === 3;
+          
+          let rankBadge = '';
+          if (isTop1) {
+            rankBadge = `<span class="w-8 h-8 rounded-xl bg-amber-400 text-amber-950 font-black text-sm flex items-center justify-center shadow shrink-0">🥇</span>`;
+          } else if (isTop2) {
+            rankBadge = `<span class="w-8 h-8 rounded-xl bg-slate-300 text-slate-900 font-black text-sm flex items-center justify-center shadow shrink-0">🥈</span>`;
+          } else if (isTop3) {
+            rankBadge = `<span class="w-8 h-8 rounded-xl bg-amber-700 text-amber-100 font-black text-sm flex items-center justify-center shadow shrink-0">🥉</span>`;
+          } else {
+            rankBadge = `<span class="w-8 h-8 rounded-xl ${isOAA ? 'bg-[#351425] text-amber-300' : 'bg-slate-100 text-slate-600'} font-black text-xs flex items-center justify-center font-mono shrink-0">#${rank}</span>`;
+          }
+
+          const studentGender = item.gender || 'M';
+          let charInfo = null;
+          if (isOAA && window.appState?.getCoteCharacterByGenderAndRank) {
+            charInfo = window.appState.getCoteCharacterByGenderAndRank(studentGender, item.genderRank);
+          }
+
+          return `
+            <div onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${item.seatNo})" 
+              class="group p-3 rounded-2xl border transition duration-200 cursor-pointer flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 ${
+                isOAA 
+                  ? (isTop1 ? 'bg-[#3b152b] border-amber-400/80 hover:bg-[#481a35]' : 'bg-[#290e1d]/80 border-amber-500/30 hover:bg-[#381328]')
+                  : (isTop1 ? 'bg-amber-50/70 border-amber-300 hover:bg-amber-100/70' : 'bg-slate-50/70 border-slate-200 hover:bg-pink-50/60 hover:border-pink-300')
+              }">
+              
+              <!-- Left: Rank + Avatar + Name -->
+              <div class="flex items-center space-x-3 min-w-[200px]">
+                ${rankBadge}
+
+                ${isOAA && charInfo ? `
+                  <div class="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/60 bg-black/40 shrink-0 relative">
+                    <img src="${charInfo.avatar}" alt="${charInfo.name}" class="w-full h-full object-cover object-top">
+                  </div>
+                ` : `
+                  <div class="w-9 h-9 rounded-xl ${studentGender === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'} font-black text-xs flex items-center justify-center shrink-0">
+                    ${String(item.seatNo).padStart(2, '0')}
+                  </div>
+                `}
+
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition">
+                      ${item.name}
+                    </span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
+                      ${studentGender === 'F' ? '👧 女' : '👦 男'}
+                    </span>
+                  </div>
+                  <div class="text-[11px] ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-medium flex items-center gap-2">
+                    <span>座號 ${String(item.seatNo).padStart(2, '0')}</span>
+                    ${isOAA && charInfo ? `
+                      <span class="text-amber-300 font-bold">• 實力對應：${charInfo.name}</span>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Scores & Composite -->
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap text-xs font-bold">
+                <div class="text-right">
+                  <div class="text-[10px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'}">學業均分</div>
+                  <div class="font-black ${isOAA ? 'text-cyan-300' : 'text-blue-700'}">${item.academicScore} 分</div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-[10px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'}">品格常規</div>
+                  <div class="font-black ${item.characterPoints >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
+                    ${item.characterPoints > 0 ? '+' : ''}${item.characterPoints} 點
+                  </div>
+                </div>
+
+                <div class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'} shadow-sm text-right shrink-0">
+                  <div class="text-[9px] uppercase tracking-wider opacity-80 font-bold">綜合實力</div>
+                  <div class="text-sm sm:text-base font-black font-mono leading-tight">${item.composite}</div>
+                </div>
+
+                <div class="text-slate-400 group-hover:translate-x-1 transition hidden sm:block">
+                  <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  setLeaderboardFilter(classId, filter) {
+    this.leaderboardFilter = filter;
+    this.renderLeaderboardContent('class-leaderboard-card', classId, filter);
+  }
+
+  jumpToStudentDossier(classId, seatNo) {
+    if (window.appState) {
+      window.appState.switchTab('student-dossier');
+      if (window.studentDossierView) {
+        window.studentDossierView.render('student-dossier-view', classId, seatNo);
+      }
+    }
   }
 
   // --- 2. MULTI-CLASS COMPARATIVE BENCHMARK & STRATEGY DASHBOARD ---

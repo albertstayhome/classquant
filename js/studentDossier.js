@@ -253,8 +253,12 @@ class StudentDossierView {
         <div class="flex items-center space-x-4">
           <div class="${mascotClass} !w-14 !h-14 bg-white p-1 rounded-2xl shadow-sm border border-pink-200" title="${mascotTitle}"></div>
           <div>
-            <div class="flex items-center space-x-2.5">
+            <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-2xl sm:text-3xl font-black text-slate-900">${student.name}</h2>
+              <button type="button" onclick="studentDossierView.toggleStudentGender()" class="text-xs px-2.5 py-1 rounded-xl font-black transition flex items-center gap-1 shadow-sm cursor-pointer ${student.gender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'}" title="點擊切換性別 (男 / 女)">
+                <span>${student.gender === 'F' ? '👧 女生' : '👦 男生'}</span>
+                <span class="text-[9px] opacity-70">✎切換</span>
+              </button>
               <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300">
                 ${this.currentClassId} 班 • 座號 ${String(student.seatNo).padStart(2, '0')}
               </span>
@@ -387,12 +391,15 @@ class StudentDossierView {
       'E': 'text-rose-500'
     };
 
-    const studentRank = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : 1;
-    const coteChar = window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(studentRank) : null;
-    const charFullImage = coteChar?.image || './assets/cote/official/ayanokoji_full.webp';
-    const charAvatar = coteChar?.avatar || './assets/cote/official/ayanokoji.webp';
-    const charName = coteChar?.name || '綾小路 清隆';
-    const charClassTitle = coteChar?.classTitle || '高度育成 2年D班 // 白室最頂點';
+    const rankInfo = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : { overallRank: 1, genderRank: 1, gender: 'M' };
+    const overallRank = rankInfo?.overallRank || 1;
+    const studentGender = student.gender || rankInfo?.gender || 'M';
+    const genderRank = rankInfo?.genderRank || 1;
+    const coteChar = window.appState?.getCoteCharacterByGenderAndRank ? window.appState.getCoteCharacterByGenderAndRank(studentGender, genderRank) : (window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(overallRank) : null);
+    const charFullImage = coteChar?.image || (studentGender === 'F' ? './assets/cote/official/sakayanagi_full.webp' : './assets/cote/official/ayanokoji_full.webp');
+    const charAvatar = coteChar?.avatar || (studentGender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
+    const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
+    const charClassTitle = coteChar?.classTitle || (studentGender === 'F' ? '高度育成 2年A班 // A班司令塔' : '高度育成 2年D班 // 白室最頂點');
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
@@ -440,7 +447,7 @@ class StudentDossierView {
                 <img src="${charFullImage}" class="w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" alt="${charName}" title="高度育成生徒立繪 - ${charName}">
                 <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 text-center">
                   <div class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                    高度育成生徒立繪 // 階位 #${studentRank}
+                    高度育成生徒立繪 // ${studentGender === 'F' ? '女生' : '男生'}階位 #${genderRank} (總 #${overallRank})
                   </div>
                   <div class="text-sm font-black text-white truncate">
                     ${charName}
@@ -450,7 +457,7 @@ class StudentDossierView {
 
               <!-- Easter Egg Summon Button -->
               <div class="max-w-[240px] mx-auto mb-4">
-                <button onclick="window.appState.triggerSilhouetteCutIn(${studentRank - 1})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="召喚第 ${studentRank} 名實力者【${charName}】本格動漫降臨">
+                <button onclick="window.appState.triggerSilhouetteCutIn(${genderRank - 1}, '${studentGender}')" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="召喚${studentGender === 'F' ? '女' : '男'}生第 ${genderRank} 名實力者【${charName}】本格動漫降臨">
                   <span>⚡</span>
                   <span>召喚【${charName}】本格降臨</span>
                 </button>
@@ -463,8 +470,12 @@ class StudentDossierView {
                   <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')} 號 (${this.currentClassId}班)</span>
                 </div>
                 <div class="flex justify-between border-b border-amber-500/20 pb-1">
+                  <span class="text-amber-400/80">性別</span>
+                  <span class="font-bold text-amber-300">${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
+                </div>
+                <div class="flex justify-between border-b border-amber-500/20 pb-1">
                   <span class="text-amber-400/80">班級實力排名</span>
-                  <span class="font-black text-amber-300">第 ${studentRank} 名</span>
+                  <span class="font-black text-amber-300">總第 ${overallRank} 名 (${studentGender === 'F' ? '女' : '男'}生第 ${genderRank} 名)</span>
                 </div>
                 <div class="flex justify-between border-b border-amber-500/20 pb-1">
                   <span class="text-amber-400/80">實力對應角色</span>
@@ -489,13 +500,17 @@ class StudentDossierView {
               <!-- Row 1: Student Name & ID Card Headers -->
               <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                 <div>
-                  <div class="flex items-center space-x-2 mb-1">
+                  <div class="flex items-center space-x-2 mb-1 flex-wrap gap-2">
                     <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-950 text-amber-300 border border-amber-500/50">
                       名前
                     </span>
                     <h1 class="text-2xl sm:text-4xl font-black tracking-wide text-white drop-shadow">
                       ${student.name}
                     </h1>
+                    <button type="button" onclick="studentDossierView.toggleStudentGender()" class="text-xs px-2.5 py-1 rounded-xl font-black transition flex items-center gap-1 shadow-md border cursor-pointer ${studentGender === 'F' ? 'bg-pink-900/80 text-pink-200 border-pink-500 hover:bg-pink-800' : 'bg-blue-900/80 text-blue-200 border-blue-500 hover:bg-blue-800'}" title="點擊切換性別 (男 / 女)">
+                      <span>${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
+                      <span class="text-[9px] opacity-70">✎切換</span>
+                    </button>
                   </div>
                   <div class="text-xs font-mono tracking-wider text-amber-300/80 pl-1">
                     STUDENT DOSSIER // SEAT ${String(student.seatNo).padStart(2, '0')}
@@ -509,12 +524,12 @@ class StudentDossierView {
                     <span class="font-bold text-white font-mono tracking-wider">${studentIdStr}</span>
                   </div>
                   <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-amber-400 uppercase font-bold">所屬</span>
-                    <span class="font-bold text-white">${this.currentClassId} 班 (${oaa.isHomeroom ? '導師班' : '數學科任'})</span>
+                    <span class="text-[10px] text-amber-400 uppercase font-bold">全班位階</span>
+                    <span class="font-bold text-amber-200">#${overallRank} (${studentGender === 'F' ? '女' : '男'}生 #${genderRank})</span>
                   </div>
                   <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
                     <span class="text-[10px] text-amber-400 uppercase font-bold">實力對應</span>
-                    <span class="font-bold text-amber-200">#${studentRank} ${charName}</span>
+                    <span class="font-bold text-amber-200">${charName}</span>
                   </div>
                 </div>
               </div>
@@ -611,6 +626,17 @@ class StudentDossierView {
       recommendation = '學習狀態維持常態，建議保持課前預習與確實訂正習慣，持續肯定其常規穩定性。';
     }
     return { recommendation };
+  }
+
+  toggleStudentGender() {
+    if (!this.currentClassId || !this.currentSeatNo) return;
+    const newGender = this.store.toggleStudentGender(this.currentClassId, this.currentSeatNo);
+    window.appState.showToast(`已將座號 ${this.currentSeatNo} 切換為【${newGender === 'F' ? '👧 女生' : '👦 男生'}】`, 'success');
+    this.render('student-dossier-view', this.currentClassId, this.currentSeatNo);
+    // If matrix view is active or rendered, update it
+    if (window.classroomMatrix) {
+      window.classroomMatrix.render('matrix-view', this.currentClassId);
+    }
   }
 
   switchClass(classId) {
