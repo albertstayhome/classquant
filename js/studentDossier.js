@@ -195,11 +195,21 @@ class StudentDossierView {
     if (!container) return;
 
     if (classId) this.currentClassId = classId;
+    if (!this.currentClassId) {
+      this.currentClassId = window.appState?.currentClassId || Object.keys(this.store.getClasses())[0] || '801';
+    }
     if (seatNo) this.currentSeatNo = parseInt(seatNo, 10);
 
     const classes = this.store.getClasses();
-    const students = this.store.getStudents(this.currentClassId);
-    const student = this.store.getStudent(this.currentClassId, this.currentSeatNo) || students[0];
+    let students = this.store.getStudents(this.currentClassId);
+    if (!students || students.length === 0) {
+      const fallbackId = Object.keys(classes)[0];
+      if (fallbackId && fallbackId !== this.currentClassId) {
+        this.currentClassId = fallbackId;
+        students = this.store.getStudents(this.currentClassId);
+      }
+    }
+    const student = this.store.getStudent(this.currentClassId, this.currentSeatNo) || (students && students[0]);
 
     if (!student) {
       container.innerHTML = `<div class="p-12 text-center text-slate-500 font-bold">查無學生資料</div>`;

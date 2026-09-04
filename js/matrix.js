@@ -439,7 +439,20 @@ class ClassroomMatrix {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const cls = this.store.getClass(currentClassId);
+    if (!currentClassId) {
+      currentClassId = window.appState?.currentClassId || this.currentClassId || Object.keys(this.store.getClasses())[0] || '801';
+    }
+    this.currentClassId = currentClassId;
+
+    let cls = this.store.getClass(currentClassId);
+    if (!cls) {
+      const fallbackId = Object.keys(this.store.getClasses())[0];
+      if (fallbackId) {
+        currentClassId = fallbackId;
+        this.currentClassId = currentClassId;
+        cls = this.store.getClass(currentClassId);
+      }
+    }
     if (!cls) {
       container.innerHTML = `
         <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">

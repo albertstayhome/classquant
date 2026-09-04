@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.14';
+    this.appVersion = '1.9.15';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -446,13 +446,13 @@ class AppState {
   }
 
   init() {
-    // 1. Initialize Theme
+    // 1. Initial Class detection
+    const active = window.timetableEngine ? window.timetableEngine.getActiveClassId() : { classId: '801' };
+    this.currentClassId = active?.classId || '801';
+
+    // 2. Initialize Theme
     const currentTheme = window.appStore.getTheme();
     this.applyTheme(currentTheme);
-
-    // 2. Initial Class detection
-    const active = window.timetableEngine.getActiveClassId();
-    this.currentClassId = active.classId || '801';
 
     // 3. Listen to Timetable Engine changes
     window.timetableEngine.onClassChange((newClassId, context) => {
@@ -1586,12 +1586,17 @@ class AppState {
     window.appStore.setTheme(themeName);
     this.updateThemeButtonUI(themeName);
 
-    // Refresh active views to sync OAA mode immediately
-    if (this.activeTab === 'student-dossier' && window.studentDossierView) {
-      window.studentDossierView.render('student-dossier-view');
-    }
-    if (this.activeTab === 'matrix' && window.matrixView) {
-      window.matrixView.render('classroom-matrix-view');
+    // Refresh active views to sync OAA mode immediately with explicit current class
+    try {
+      const activeClass = this.currentClassId || '801';
+      if (this.activeTab === 'student-dossier' && window.studentDossierView) {
+        window.studentDossierView.render('student-dossier-view', activeClass);
+      }
+      if (this.activeTab === 'matrix' && window.matrixView) {
+        window.matrixView.render('classroom-matrix-view', activeClass);
+      }
+    } catch (e) {
+      console.warn('Error refreshing views on theme apply:', e);
     }
   }
 

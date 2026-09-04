@@ -921,36 +921,54 @@ class Store {
 
   // --- Student Ranking & OAA Performance Tier Engine ---
   getClassStudentRanks(classId) {
-    const students = this.getStudents(classId) || [];
-    const scored = students.map(s => {
-      const profile = window.statisticsEngine?.getStudentProfile ? window.statisticsEngine.getStudentProfile(classId, s.seatNo) : null;
-      const academicScore = profile && profile.scoreMean > 0 ? profile.scoreMean : 75;
-      const events = this.getStudentEvents(classId, s.seatNo) || [];
-      const characterPoints = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
-      // Composite rating = Academic score (weighted) + points delta
-      const composite = (academicScore * 10) + characterPoints;
-      return {
-        seatNo: s.seatNo,
-        name: s.name,
-        composite: composite,
-        academicScore: academicScore,
-        characterPoints: characterPoints
-      };
-    });
+    try {
+      if (!classId) classId = '801';
+      const students = this.getStudents(classId) || [];
+      if (students.length === 0) return {};
 
-    // Sort descending by composite score, ties broken deterministically by seatNo ascending
-    scored.sort((a, b) => {
-      if (b.composite !== a.composite) return b.composite - a.composite;
-      return a.seatNo - b.seatNo;
-    });
+      const classEvents = this.getEvents(classId) || [];
+      const scored = students.map(s => {
+        let academicScore = 75;
+        try {
+          const profile = window.statisticsEngine?.getStudentProfile ? window.statisticsEngine.getStudentProfile(classId, s.seatNo) : null;
+          if (profile && profile.scoreMean > 0) academicScore = profile.scoreMean;
+        } catch (e) {}
 
-    // Map seatNo -> 1-based rank (Rank 1 = Top student / Ayanokoji Kiyotaka)
-    const rankMap = {};
-    scored.forEach((item, idx) => {
-      rankMap[item.seatNo] = idx + 1;
-    });
+        const events = classEvents.filter(e => e.seatNo === s.seatNo);
+        const characterPoints = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
+        // Composite rating = Academic score (weighted) + points delta
+        const composite = (academicScore * 10) + characterPoints;
+        return {
+          seatNo: s.seatNo,
+          name: s.name,
+          composite: composite,
+          academicScore: academicScore,
+          characterPoints: characterPoints
+        };
+      });
 
-    return rankMap;
+      // Sort descending by composite score, ties broken deterministically by seatNo ascending
+      scored.sort((a, b) => {
+        if (b.composite !== a.composite) return b.composite - a.composite;
+        return a.seatNo - b.seatNo;
+      });
+
+      // Map seatNo -> 1-based rank (Rank 1 = Top student / Ayanokoji Kiyotaka)
+      const rankMap = {};
+      scored.forEach((item, idx) => {
+        rankMap[item.seatNo] = idx + 1;
+      });
+
+      return rankMap;
+    } catch (err) {
+      console.error('Error calculating student ranks:', err);
+      return {};
+    }
+  }
+
+  getStudentEvents(classId, seatNo) {
+    if (!classId) return [];
+    return (this.data.events || []).filter(e => e.classId === classId && e.seatNo === parseInt(seatNo, 10));
   }
 
   getStudentRankInClass(classId, seatNo) {
