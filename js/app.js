@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.13';
+    this.appVersion = '1.9.14';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -51,84 +51,92 @@ class AppState {
     ];
     this.currentCoteQuoteIdx = 0;
 
-    // Official COTE Characters Database for Dramatic Cut-In Easter Egg (100% Verified 11-Character Roster)
+    // Official COTE Characters Database for Dramatic Cut-In Easter Egg (35-Character Full Hierarchy)
     this.coteSilhouettes = [
       {
         id: 'ayanokoji',
         name: '綾小路 清隆',
         kana: 'AYANOKOJI KIYOTAKA',
-        classTitle: '高度育成高等學校 2年D班 // 學生編號 S01T004721',
-        image: './assets/cote/ayanokoji_cutin.jpg',
+        classTitle: '白色房間最高傑作 // 幕後支配者',
+        image: './assets/cote/official/ayanokoji_full.webp',
+        avatar: './assets/cote/official/ayanokoji.webp',
         shoutedQuote: '「世上所謂的『平等』只不過是虛妄。所有人對我來說，都只不過是道具而已！」',
         subQuote: '只要最後贏的人是我，過程怎樣都無所謂。',
         auraColor: '#ef4444'
       },
       {
-        id: 'horikita',
-        name: '堀北 鈴音',
-        kana: 'HORIKITA SUZUNE',
-        classTitle: '高度育成高等學校 2年D班 // 孤高的銳刃',
-        image: './assets/cote/ic-2-2.jpg',
-        shoutedQuote: '「我絕不會向任何人低頭！我要用自己的雙手，帶領班級登上 A 班頂點！」',
-        subQuote: '無須同情，也不需要藉口，實力自會證明一切。',
-        auraColor: '#3b82f6'
+        id: 'sakayanagi',
+        name: '坂柳 有栖',
+        kana: 'SAKAYANAGI ARISU',
+        classTitle: '高度育成 2年A班 // 天賦領袖・天才棋手',
+        image: './assets/cote/official/sakayanagi_full.webp',
+        avatar: './assets/cote/official/sakayanagi.webp',
+        shoutedQuote: '「呵呵……天才與凡人的差距，可不是靠努力就能彌補的呢。」',
+        subQuote: '偽物終究只是偽物，就由我來親自粉碎你的幻想。',
+        auraColor: '#a855f7'
       },
       {
-        id: 'karuizawa',
-        name: '輕井澤 惠',
-        kana: 'KARUIZAWA KEI',
-        classTitle: '高度育成高等學校 2年D班 // 女生核心領袖',
-        image: './assets/cote/karuizawa_cutin.jpg',
-        shoutedQuote: '「保護我……這是我們之間的契約吧？清隆君……我相信你！」',
-        subQuote: '即使被所有人背叛，我也絕不會出賣你。',
-        auraColor: '#f43f5e'
+        id: 'koenji',
+        name: '高圓寺 六助',
+        kana: 'KOENJI ROKUSUKE',
+        classTitle: '高度育成 2年D班 // 規格外全能超人・唯我獨尊',
+        image: './assets/cote/official/koenji_full.webp',
+        avatar: './assets/cote/official/koenji.webp',
+        shoutedQuote: '「哈哈哈哈！世俗的規矩對美麗的我毫無意義，唯有我才是極致的真理！」',
+        subQuote: '任何人想命令我，都還太早了一百年呢，Girl～',
+        auraColor: '#f59e0b'
       },
       {
-        id: 'kushida',
-        name: '櫛田 桔梗',
-        kana: 'KUSHIDA KIKYO',
-        classTitle: '高度育成高等學校 2年D班 // 天使的面具',
-        image: './assets/cote/ic-2-4.jpg',
-        shoutedQuote: '「大家都最喜歡我了對吧？……（切換冷笑）嘖，別得意忘形了，找死嗎？」',
-        subQuote: '敢阻礙我的人，我會不惜一切代價徹底毀掉。',
-        auraColor: '#e11d48'
+        id: 'nagumo',
+        name: '南雲 雅',
+        kana: 'NAGUMO MIYABI',
+        classTitle: '生徒會長 // 3年A班絕對霸者',
+        image: './assets/cote/official/nagumo_full.webp',
+        avatar: './assets/cote/official/nagumo.webp',
+        shoutedQuote: '「我要把這所學校徹底改造成由實力支配的真正戰場！」',
+        subQuote: '實力弱小的傢伙，連站在我面前的資格都沒有。',
+        auraColor: '#eab308'
       },
       {
         id: 'ryuen',
         name: '龍園 翔',
         kana: 'RYUEN KAKERU',
-        classTitle: '高度育成高等學校 2年C班 // 暴君統率者',
-        image: './assets/cote/ic-2-5.jpg',
-        shoutedQuote: '「規則？規矩就是用來打破的！在我的字典裡只有獲勝與臣服，給我跪下吧！」',
+        classTitle: '高度育成 2年C班 // 暴君統率・無情破局者',
+        image: './assets/cote/official/ryuen_full.webp',
+        avatar: './assets/cote/official/ryuen.webp',
+        shoutedQuote: '「規則？規矩就是用來打破的！在我的字典裡只有獲勝與臣服！」',
         subQuote: '只要能贏，用什麼骯髒手段我都奉陪到底！',
         auraColor: '#dc2626'
       },
       {
-        id: 'nanase',
-        name: '七瀨 翼',
-        kana: 'NANASE TSUBASA',
-        classTitle: '高度育成高等學校 1年D班 // 正義與執念',
-        image: './assets/cote/ic-1-1.jpg',
-        shoutedQuote: '「我不會允許卑劣的手段！綾小路前輩，我一定會看清你的真實實力！」',
-        subQuote: '為了那個人的願望，我不能在這裡止步。',
-        auraColor: '#0ea5e9'
+        id: 'ichinose',
+        name: '一之瀨 帆波',
+        kana: 'ICHINOSE HONAMI',
+        classTitle: '高度育成 2年B班 // 信任與博愛的核心領袖',
+        image: './assets/cote/official/ichinose_full.webp',
+        avatar: './assets/cote/official/ichinose.webp',
+        shoutedQuote: '「只要大家同心協力、彼此信任，B 班一定能全員一起升上 A 班！」',
+        subQuote: '我絕對不會放棄任何一個同伴！',
+        auraColor: '#ec4899'
       },
       {
-        id: 'hosen',
-        name: '寶泉 和臣',
-        kana: 'HOSEN KAZUOMI',
-        classTitle: '高度育成高等學校 1年D班 // 絕對暴君',
-        image: './assets/cote/ic-1-2.jpg',
-        shoutedQuote: '「管你是二年級還是前輩，惹到老子照樣打得你滿地找牙！」',
-        subQuote: '實力？拳頭硬就是這間學校最大的實力！',
-        auraColor: '#b91c1c'
+        id: 'horikita',
+        name: '堀北 鈴音',
+        kana: 'HORIKITA SUZUNE',
+        classTitle: '高度育成 2年D班 // 實權領袖・孤高的銳刃',
+        image: './assets/cote/official/horikita_full.webp',
+        avatar: './assets/cote/official/horikita.webp',
+        shoutedQuote: '「我絕不會向任何人低頭！我要用自己的雙手，帶領班級登上 A 班頂點！」',
+        subQuote: '無須同情，也不需要藉口，實力自會證明一切。',
+        auraColor: '#3b82f6'
       },
       {
         id: 'amasawa',
         name: '天澤 一夏',
         kana: 'AMASAWA ICHIKA',
-        classTitle: '高度育成高等學校 1年A班 // 白室惡魔小惡魔',
-        image: './assets/cote/ic-1-3.jpg',
+        classTitle: '高度育成 1年A班 // 五期白室小惡魔刺客',
+        image: './assets/cote/official/amasawa_full.webp',
+        avatar: './assets/cote/official/amasawa.webp',
         shoutedQuote: '「前輩真敏銳呢～不過，稍微玩得太過火的話，可是會受傷的喔～」',
         subQuote: '在崇拜你之前，先讓我測測前輩有沒有那個資格吧～',
         auraColor: '#f97316'
@@ -137,18 +145,108 @@ class AppState {
         id: 'yagami',
         name: '八神 拓也',
         kana: 'YAGAMI TAKUYA',
-        classTitle: '高度育成高等學校 1年B班 // 隱匿的刺客',
-        image: './assets/cote/ic-1-4.jpg',
-        shoutedQuote: '「我一直都在看著你……綾小路清隆，我才是最優秀的！」',
+        classTitle: '高度育成 1年B班 // 五期白室生・生徒會書記',
+        image: './assets/cote/official/yagami_full.webp',
+        avatar: './assets/cote/official/yagami.webp',
+        shoutedQuote: '「我一直都在注視著你……綾小路清隆，我才是最優秀的存在。」',
         subQuote: '所有的光環，都該由我親手奪回來。',
         auraColor: '#6366f1'
+      },
+      {
+        id: 'karuizawa',
+        name: '輕井澤 惠',
+        kana: 'KARUIZAWA KEI',
+        classTitle: '高度育成 2年D班 // 女生核心領袖・契約之鎖',
+        image: './assets/cote/official/karuizawa_full.webp',
+        avatar: './assets/cote/official/karuizawa.webp',
+        shoutedQuote: '「保護我……這是我們之間的契約吧？清隆君……我相信你！」',
+        subQuote: '即使被所有人背叛，我也絕不會出賣你。',
+        auraColor: '#f43f5e'
+      },
+      {
+        id: 'hirata',
+        name: '平田 洋介',
+        kana: 'HIRATA YOSUKE',
+        classTitle: '高度育成 2年D班 // 文武雙全・秩序幹部',
+        image: './assets/cote/official/hirata_full.webp',
+        avatar: './assets/cote/official/hirata.webp',
+        shoutedQuote: '「我不會再讓任何人受到傷害！大家一定要一起笑著畢業！」',
+        subQuote: '為了守護大家，我願意承擔所有的痛苦。',
+        auraColor: '#14b8a6'
+      },
+      {
+        id: 'sudo',
+        name: '須藤 健',
+        kana: 'SUDO KEN',
+        classTitle: '高度育成 2年D班 // 體能怪物・籃球王牌',
+        image: './assets/cote/official/sudo_full.webp',
+        avatar: './assets/cote/official/sudo.webp',
+        shoutedQuote: '「老子可不是只會用拳頭的笨蛋！我要用真正的實力得到認可！」',
+        subQuote: '鈴音……我一定會證明給你看的！',
+        auraColor: '#ea580c'
+      },
+      {
+        id: 'katsuragi',
+        name: '葛城 康平',
+        kana: 'KATSURAGI KOHEI',
+        classTitle: '高度育成 2年A班 // 穩健防禦型智謀策士',
+        image: './assets/cote/official/katsuragi_full.webp',
+        avatar: './assets/cote/official/katsuragi.webp',
+        shoutedQuote: '「冒險往往伴隨著毀滅。沉穩行事才是通往最終勝利的唯一正途。」',
+        subQuote: '我不做沒有把握的賭局。',
+        auraColor: '#78716c'
+      },
+      {
+        id: 'shiina',
+        name: '椎名 日和',
+        kana: 'SHIINA HIYORI',
+        classTitle: '高度育成 2年C班 // 知性書蟲・幕後智囊',
+        image: './assets/cote/official/shiina_full.webp',
+        avatar: './assets/cote/official/shiina.webp',
+        shoutedQuote: '「平靜地閱讀是最好的享受……不過這本書的結局，我早就猜到了呢。」',
+        subQuote: '只要能看透動機，對手的行動就一目了然。',
+        auraColor: '#cbd5e1'
+      },
+      {
+        id: 'kanzaki',
+        name: '神崎 隆二',
+        kana: 'KANZAKI RYUJI',
+        classTitle: '高度育成 2年B班 // 冷靜參謀・副領袖',
+        image: './assets/cote/official/kanzaki_full.webp',
+        avatar: './assets/cote/official/kanzaki.webp',
+        shoutedQuote: '「光憑天真是無法在殘酷的考試中生存的。我們必須做出改變。」',
+        subQuote: '為了守護一之瀨，我必須成為冷澈的影子。',
+        auraColor: '#0284c7'
+      },
+      {
+        id: 'hosen',
+        name: '寶泉 和臣',
+        kana: 'HOSEN KAZUOMI',
+        classTitle: '高度育成 1年D班 // 暴力怪物暴君',
+        image: './assets/cote/official/hosen_full.webp',
+        avatar: './assets/cote/official/hosen.webp',
+        shoutedQuote: '「管你是二年級還是前輩，惹到老子照樣打得你滿地找牙！」',
+        subQuote: '實力？拳頭硬就是這間學校最大的實力！',
+        auraColor: '#b91c1c'
+      },
+      {
+        id: 'nanase',
+        name: '七瀨 翼',
+        kana: 'NANASE TSUBASA',
+        classTitle: '高度育成 1年D班 // 正義與執念的代行者',
+        image: './assets/cote/official/nanase_full.webp',
+        avatar: './assets/cote/official/nanase.webp',
+        shoutedQuote: '「我不會允許卑劣的手段！綾小路前輩，我一定會看清你的真實實力！」',
+        subQuote: '為了那個人的願望，我不能在這裡止步。',
+        auraColor: '#0ea5e9'
       },
       {
         id: 'tsubaki',
         name: '椿 櫻子',
         kana: 'TSUBAKI SAKURAKO',
-        classTitle: '高度育成高等學校 1年C班 // 冷靜策士',
-        image: './assets/cote/ic-1-5.jpg',
+        classTitle: '高度育成 1年C班 // 冷澈幕後操盤手',
+        image: './assets/cote/official/tsubaki_full.webp',
+        avatar: './assets/cote/official/tsubaki.webp',
         shoutedQuote: '「棒棒糖很甜呢……只要按部就班，勝利自然會落入手中。」',
         subQuote: '不要小看一年C班的決心。',
         auraColor: '#8b5cf6'
@@ -157,11 +255,188 @@ class AppState {
         id: 'utomiya',
         name: '宇都宮 陸',
         kana: 'UTOMIYA RIKU',
-        classTitle: '高度育成高等學校 1年C班 // 實權領袖',
-        image: './assets/cote/ic-1-6.jpg',
+        classTitle: '高度育成 1年C班 // 武術實權統率',
+        image: './assets/cote/official/utomiya_full.webp',
+        avatar: './assets/cote/official/utomiya.webp',
         shoutedQuote: '「一年C班有自己的行事方針，任何人休想隨意干涉！」',
         subQuote: '為了守護班級同伴，我不會有任何猶豫。',
         auraColor: '#10b981'
+      },
+      {
+        id: 'ibuki',
+        name: '伊吹 澪',
+        kana: 'IBUKI MIO',
+        classTitle: '高度育成 2年C班 // 格鬥孤狼刺客',
+        image: './assets/cote/official/ibuki_full.webp',
+        avatar: './assets/cote/official/ibuki.webp',
+        shoutedQuote: '「別跟在我後面晃悠，煩死了！我只靠自己的實力說話。」',
+        subQuote: '堀北鈴音，下次我一定會打敗你！',
+        auraColor: '#64748b'
+      },
+      {
+        id: 'kushida',
+        name: '櫛田 桔梗',
+        kana: 'KUSHIDA KIKYO',
+        classTitle: '高度育成 2年D班 // 天使的面具與暗黑本性',
+        image: './assets/cote/official/kushida_full.webp',
+        avatar: './assets/cote/official/kushida.webp',
+        shoutedQuote: '「大家都最喜歡我了對吧？……（切換冷笑）別得意忘形了，找死嗎？」',
+        subQuote: '敢阻礙我的人，我會不惜一切代價徹底毀掉。',
+        auraColor: '#e11d48'
+      },
+      {
+        id: 'yukimura',
+        name: '幸村 輝彥',
+        kana: 'YUKIMURA TERUHIKO',
+        classTitle: '高度育成 2年D班 // 頂尖學力策士',
+        image: './assets/cote/official/yukimura_full.webp',
+        avatar: './assets/cote/official/yukimura.webp',
+        shoutedQuote: '「叫我啟誠就好。在學術考試上，我絕對不會輸給任何其他班級！」',
+        subQuote: '冷靜分析，找出破綻，這才是致勝法門。',
+        auraColor: '#2563eb'
+      },
+      {
+        id: 'matsushita',
+        name: '松下 千秋',
+        kana: 'MATSUSHITA CHIAKI',
+        classTitle: '高度育成 2年D班 // 隱藏實力敏銳觀察者',
+        image: './assets/cote/official/matsushita_full.webp',
+        avatar: './assets/cote/official/matsushita.webp',
+        shoutedQuote: '「大家都在隱藏實力呢……特別是綾小路同學，你究竟藏到了哪種程度？」',
+        subQuote: '在看清全貌之前，我會保持安靜。',
+        auraColor: '#d97706'
+      },
+      {
+        id: 'hasebe',
+        name: '長谷部 波瑠加',
+        kana: 'HASEBE HARUKA',
+        classTitle: '高度育成 2年D班 // 綾小路組核心夥伴',
+        image: './assets/cote/official/hasebe_full.webp',
+        avatar: './assets/cote/official/hasebe.webp',
+        shoutedQuote: '「清隆、幸村、三宅、愛里……大家聚在一起的時光，比升上A班更重要！」',
+        subQuote: '敢欺負我組裡的人，我可饒不了你喔！',
+        auraColor: '#ec4899'
+      },
+      {
+        id: 'miyake',
+        name: '三宅 明人',
+        kana: 'MIYAKE AKITO',
+        classTitle: '高度育成 2年D班 // 弓道沉穩守護者',
+        image: './assets/cote/official/miyake_full.webp',
+        avatar: './assets/cote/official/miyake.webp',
+        shoutedQuote: '「只要瞄準目標，心無雜念，箭矢就絕不會偏離方向。」',
+        subQuote: '綾小路組是我最想守護的地方。',
+        auraColor: '#059669'
+      },
+      {
+        id: 'sato',
+        name: '佐藤 麻耶',
+        kana: 'SATO MAYA',
+        classTitle: '高度育成 2年D班 // 積極開朗同儕',
+        image: './assets/cote/official/sato_full.webp',
+        avatar: './assets/cote/official/sato.webp',
+        shoutedQuote: '「就算成績不拔尖，只要拼盡全力，我們也能跟上大家的腳步！」',
+        subQuote: '今天也要元氣滿滿地加油！',
+        auraColor: '#f472b6'
+      },
+      {
+        id: 'sakura',
+        name: '佐倉 愛里',
+        kana: 'SAKURA AIRI',
+        classTitle: '高度育成 2年D班 // 前網路偶像少女',
+        image: './assets/cote/official/sakura_full.webp',
+        avatar: './assets/cote/official/sakura.webp',
+        shoutedQuote: '「我也想……成為對大家有用的人！清隆同學……我會努力鼓起勇氣的！」',
+        subQuote: '謝謝你一直在背後默默守護著我。',
+        auraColor: '#fb7185'
+      },
+      {
+        id: 'asahina',
+        name: '朝比奈 なずな',
+        kana: 'ASAHINA NAZUNA',
+        classTitle: '高度育成 3年A班 // 御守副官情報線',
+        image: './assets/cote/official/asahina_full.webp',
+        avatar: './assets/cote/official/asahina.webp',
+        shoutedQuote: '「學弟，這枚御守會為你帶來好運喔～三年級的局勢，可沒那麼簡單呢。」',
+        subQuote: '南雲君有時候確實太過火了呢。',
+        auraColor: '#a855f7'
+      },
+      {
+        id: 'ishizaki',
+        name: '石崎 大地',
+        kana: 'ISHIZAKI DAICHI',
+        classTitle: '高度育成 2年C班 // 突擊特攻先鋒',
+        image: './assets/cote/official/ishizaki_full.webp',
+        avatar: './assets/cote/official/ishizaki.webp',
+        shoutedQuote: '「少瞧不起人了！為了龍園老大的計畫，我們C班什麼都幹得出來！」',
+        subQuote: '雖然打不過你，但我可不會輕易認輸！',
+        auraColor: '#ef4444'
+      },
+      {
+        id: 'ike',
+        name: '池 寬治',
+        kana: 'IKE KANJI',
+        classTitle: '高度育成 2年D班 // 戶外生存達人',
+        image: './assets/cote/official/ike_full.webp',
+        avatar: './assets/cote/official/ike.webp',
+        shoutedQuote: '「在野外生存考核，我可是專家！大家跟著我準沒錯啦！」',
+        subQuote: '就算是吊車尾，我也要證明自己的用處！',
+        auraColor: '#eab308'
+      },
+      {
+        id: 'shinohara',
+        name: '篠原 さつき',
+        kana: 'SHINOHARA SATSUKI',
+        classTitle: '高度育成 2年D班 // 班級常態骨幹',
+        image: './assets/cote/official/shinohara_full.webp',
+        avatar: './assets/cote/official/shinohara.webp',
+        shoutedQuote: '「池！你又在偷懶了是不是！大家都在努力，你也給我認真點啦！」',
+        subQuote: '雖然常常吵架，但我們D班一個都不能少。',
+        auraColor: '#f43f5e'
+      },
+      {
+        id: 'kiriyama',
+        name: '桐山 生叶',
+        kana: 'KIRIYAMA IKUTO',
+        classTitle: '高度育成 3年B班 // 前生徒會副會長',
+        image: './assets/cote/official/kiriyama_full.webp',
+        avatar: './assets/cote/official/kiriyama.webp',
+        shoutedQuote: '「為了打破南雲雅的獨裁體系，我們必須繼承前會長堀北學的意志。」',
+        subQuote: '實力主義的學校，不應淪為私慾的玩物。',
+        auraColor: '#3b82f6'
+      },
+      {
+        id: 'chabashira',
+        name: '茶柱 佐枝',
+        kana: 'CHABASHIRA SAE',
+        classTitle: '高度育成 2年D班導師 // 冷澈的引導者',
+        image: './assets/cote/official/chabashira_full.webp',
+        avatar: './assets/cote/official/chabashira.webp',
+        shoutedQuote: '「歡迎來到實力至上主義教室。在這裡，點數就是一切，實力決定命運。」',
+        subQuote: '能登上A班的，只有真正跨越極限的人。',
+        auraColor: '#991b1b'
+      },
+      {
+        id: 'hoshinomiya',
+        name: '星之宮 知惠',
+        kana: 'HOSHINOMIYA CHIE',
+        classTitle: '高度育成 2年B班導師 // 隨和的監視者',
+        image: './assets/cote/official/hoshinomiya_full.webp',
+        avatar: './assets/cote/official/hoshinomiya.webp',
+        shoutedQuote: '「哎呀～佐枝醬的班級最近真厲害呢！不過我們B班的孩子們可不會輸喔～」',
+        subQuote: '老師我也會一直看著你們的成長呢～',
+        auraColor: '#db2777'
+      },
+      {
+        id: 'tsukishiro',
+        name: '月城 理事長代理',
+        kana: 'TSUKISHIRO',
+        classTitle: '高度育成 理事長代理 // 白室特派刺客',
+        image: './assets/cote/official/tsukishiro_full.webp',
+        avatar: './assets/cote/official/tsukishiro.webp',
+        shoutedQuote: '「綾小路清隆君，白色房間不會允許有自由的造物。請做好退學準備吧。」',
+        subQuote: '規則在我手中，勝負早就已經注定。',
+        auraColor: '#475569'
       }
     ];
     this.currentSilhouetteIdx = 0;
@@ -1687,13 +1962,21 @@ class AppState {
     } catch(e) {}
   }
 
+  // Retrieve canonical COTE character based on student rank in class
+  getCoteCharacterByRank(rank) {
+    if (!rank || rank < 1) rank = 1;
+    const idx = (rank - 1) % this.coteSilhouettes.length;
+    return this.coteSilhouettes[idx] || this.coteSilhouettes[0];
+  }
+
   // --- Dramatic Anime Character Silhouette Easter Egg (Non-Q Cut-In) ---
-  triggerSilhouetteCutIn(charIdx) {
+  triggerSilhouetteCutIn(charIdxOrRank) {
     this.playCinematicBoomSFX();
 
     let char;
-    if (typeof charIdx === 'number' && this.coteSilhouettes[charIdx]) {
-      char = this.coteSilhouettes[charIdx];
+    if (typeof charIdxOrRank === 'number') {
+      const idx = Math.max(0, charIdxOrRank) % this.coteSilhouettes.length;
+      char = this.coteSilhouettes[idx] || this.coteSilhouettes[0];
     } else {
       char = this.coteSilhouettes[this.currentSilhouetteIdx % this.coteSilhouettes.length];
       this.currentSilhouetteIdx++;

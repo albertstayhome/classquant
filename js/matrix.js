@@ -18,19 +18,43 @@ class ClassroomMatrix {
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
 
-    // Official COTE Character Avatars for OAA Mode (100% Verified 11-Character Roster)
+    // Official COTE Character Avatars for OAA Mode (Official non-Q bust assets)
     this.coteAvatars = [
-      './assets/cote/ic-2-1.jpg', // 綾小路 清隆 [2年D班]
-      './assets/cote/ic-2-2.jpg', // 堀北 鈴音 [2年D班]
-      './assets/cote/ic-2-3.jpg', // 輕井澤 惠 [2年D班]
-      './assets/cote/ic-2-4.jpg', // 櫛田 桔梗 [2年D班]
-      './assets/cote/ic-2-5.jpg', // 龍園 翔 [2年C班]
-      './assets/cote/ic-1-1.jpg', // 七瀨 翼 [1年D班]
-      './assets/cote/ic-1-2.jpg', // 寶泉 和臣 [1年D班]
-      './assets/cote/ic-1-3.jpg', // 天澤 一夏 [1年A班]
-      './assets/cote/ic-1-4.jpg', // 八神 拓也 [1年B班]
-      './assets/cote/ic-1-5.jpg', // 椿 櫻子 [1年C班]
-      './assets/cote/ic-1-6.jpg'  // 宇都宮 陸 [1年C班]
+      './assets/cote/official/ayanokoji.webp',
+      './assets/cote/official/sakayanagi.webp',
+      './assets/cote/official/koenji.webp',
+      './assets/cote/official/nagumo.webp',
+      './assets/cote/official/ryuen.webp',
+      './assets/cote/official/ichinose.webp',
+      './assets/cote/official/horikita.webp',
+      './assets/cote/official/amasawa.webp',
+      './assets/cote/official/yagami.webp',
+      './assets/cote/official/karuizawa.webp',
+      './assets/cote/official/hirata.webp',
+      './assets/cote/official/sudo.webp',
+      './assets/cote/official/katsuragi.webp',
+      './assets/cote/official/shiina.webp',
+      './assets/cote/official/kanzaki.webp',
+      './assets/cote/official/hosen.webp',
+      './assets/cote/official/nanase.webp',
+      './assets/cote/official/tsubaki.webp',
+      './assets/cote/official/utomiya.webp',
+      './assets/cote/official/ibuki.webp',
+      './assets/cote/official/kushida.webp',
+      './assets/cote/official/yukimura.webp',
+      './assets/cote/official/matsushita.webp',
+      './assets/cote/official/hasebe.webp',
+      './assets/cote/official/miyake.webp',
+      './assets/cote/official/sato.webp',
+      './assets/cote/official/sakura.webp',
+      './assets/cote/official/asahina.webp',
+      './assets/cote/official/ishizaki.webp',
+      './assets/cote/official/ike.webp',
+      './assets/cote/official/shinohara.webp',
+      './assets/cote/official/kiriyama.webp',
+      './assets/cote/official/chabashira.webp',
+      './assets/cote/official/hoshinomiya.webp',
+      './assets/cote/official/tsukishiro.webp'
     ];
 
     // iOS-Style Long-Press Drag & Drop State
@@ -440,6 +464,7 @@ class ClassroomMatrix {
     const sortedTags = this.store.getTagsSorted(currentClassId);
     const isHomeroom = cls.type === 'homeroom';
     const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+    const classRanks = (isOAA && this.store.getClassStudentRanks) ? this.store.getClassStudentRanks(currentClassId) : {};
 
     // Chunk tags into pages of 4 (2 cols x 2 rows, large comfortable readable cards)
     const pageSize = 4;
@@ -616,12 +641,13 @@ class ClassroomMatrix {
             else if (academicScore >= 60) rank = 'C';
             else rank = 'D';
 
-            const avatarIndex = (s.seatNo - 1) % this.coteAvatars.length;
-            const coteAvatar = this.coteAvatars[avatarIndex];
-            const charName = this.getCoteCharName(avatarIndex);
+            const studentRank = classRanks[s.seatNo] || 1;
+            const coteChar = window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(studentRank) : null;
+            const coteAvatar = coteChar?.avatar || this.coteAvatars[0];
+            const charName = coteChar?.name || '綾小路 清隆';
 
             rankBadgeHtml = `
-              <div class="flex items-center space-x-1 shrink-0 pointer-events-none">
+              <div class="flex items-center space-x-1 shrink-0 pointer-events-none" title="班級排名 第${studentRank}名 // 對應角色：${charName}">
                 <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="${charName}">
                 <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
               </div>
@@ -1325,20 +1351,10 @@ class ClassroomMatrix {
   }
 
   getCoteCharName(index) {
-    const names = [
-      '綾小路 清隆', // ic-2-1
-      '堀北 鈴音',   // ic-2-2
-      '輕井澤 惠',   // ic-2-3
-      '櫛田 桔梗',   // ic-2-4
-      '龍園 翔',     // ic-2-5
-      '七瀨 翼',     // ic-1-1
-      '寶泉 和臣',   // ic-1-2
-      '天澤 一夏',   // ic-1-3
-      '八神 拓也',   // ic-1-4
-      '椿 櫻子',     // ic-1-5
-      '宇都宮 陸'    // ic-1-6
-    ];
-    return names[index] || '綾小路 清隆';
+    if (window.appState?.getCoteCharacterByRank) {
+      return window.appState.getCoteCharacterByRank(index + 1)?.name || '綾小路 清隆';
+    }
+    return '綾小路 清隆';
   }
 }
 

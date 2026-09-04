@@ -377,21 +377,12 @@ class StudentDossierView {
       'E': 'text-rose-500'
     };
 
-    const coteAvatarsList = [
-      './assets/cote/ic-2-1.jpg', // 綾小路 清隆 [2年D班]
-      './assets/cote/ic-2-2.jpg', // 堀北 鈴音 [2年D班]
-      './assets/cote/ic-2-3.jpg', // 輕井澤 惠 [2年D班]
-      './assets/cote/ic-2-4.jpg', // 櫛田 桔梗 [2年D班]
-      './assets/cote/ic-2-5.jpg', // 龍園 翔 [2年C班]
-      './assets/cote/ic-1-1.jpg', // 七瀨 翼 [1年D班]
-      './assets/cote/ic-1-2.jpg', // 寶泉 和臣 [1年D班]
-      './assets/cote/ic-1-3.jpg', // 天澤 一夏 [1年A班]
-      './assets/cote/ic-1-4.jpg', // 八神 拓也 [1年B班]
-      './assets/cote/ic-1-5.jpg', // 椿 櫻子 [1年C班]
-      './assets/cote/ic-1-6.jpg'  // 宇都宮 陸 [1年C班]
-    ];
-    const avatarIndex = (student.seatNo - 1) % coteAvatarsList.length;
-    const coteAvatar = coteAvatarsList[avatarIndex];
+    const studentRank = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : 1;
+    const coteChar = window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(studentRank) : null;
+    const charFullImage = coteChar?.image || './assets/cote/official/ayanokoji_full.webp';
+    const charAvatar = coteChar?.avatar || './assets/cote/official/ayanokoji.webp';
+    const charName = coteChar?.name || '綾小路 清隆';
+    const charClassTitle = coteChar?.classTitle || '高度育成 2年D班 // 白室最頂點';
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
@@ -434,39 +425,43 @@ class StudentDossierView {
           <!-- Left Column: Character Silhouette / Photo Card -->
           <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-amber-500/30 pb-5 lg:pb-0 lg:pr-6">
             <div>
-              <!-- Silhouette / Official Photo Card -->
-              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-2 rounded-2xl bg-[#1b0812] border-2 border-amber-500/60 overflow-hidden shadow-md relative group">
-                <img src="${coteAvatar}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${student.name}" title="高度育成生徒証明">
-                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-center">
-                  <div class="text-xs font-bold text-amber-300 uppercase tracking-widest">
-                    高度育成生徒証明
+              <!-- Silhouette / Official Photo Card (Official Non-Q Standing Portrait) -->
+              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-2 rounded-2xl bg-gradient-to-b from-[#1b0812] via-[#2a0e1c] to-[#12050c] border-2 border-amber-500/60 overflow-hidden shadow-md relative group flex items-center justify-center p-2">
+                <img src="${charFullImage}" class="w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" alt="${charName}" title="高度育成生徒立繪 - ${charName}">
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 text-center">
+                  <div class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                    高度育成生徒立繪 // 階位 #${studentRank}
                   </div>
-                  <div class="text-sm font-black text-white">
-                    NO. ${String(student.seatNo).padStart(2, '0')}
+                  <div class="text-sm font-black text-white truncate">
+                    ${charName}
                   </div>
                 </div>
               </div>
 
               <!-- Easter Egg Summon Button -->
               <div class="max-w-[240px] mx-auto mb-4">
-                <button onclick="window.appState.triggerSilhouetteCutIn(${(student.seatNo - 1) % 11})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="觸發此角色本格動漫降臨彩蛋">
+                <button onclick="window.appState.triggerSilhouetteCutIn(${studentRank - 1})" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950 via-red-900 to-amber-950 hover:from-rose-900 hover:to-amber-900 border border-amber-500/60 text-amber-300 hover:text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer" title="召喚第 ${studentRank} 名實力者【${charName}】本格動漫降臨">
                   <span>⚡</span>
-                  <span>實力者本格降臨</span>
+                  <span>召喚【${charName}】本格降臨</span>
                 </button>
               </div>
 
               <!-- Clean Technical Metadata -->
               <div class="px-2 space-y-1 text-[11px] text-amber-200/90 font-medium">
                 <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/70">座號</span>
-                  <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')}</span>
+                  <span class="text-amber-400/80">座號 / 班級</span>
+                  <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')} 號 (${this.currentClassId}班)</span>
                 </div>
                 <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/70">班級</span>
-                  <span class="font-bold text-white">${this.currentClassId} 班</span>
+                  <span class="text-amber-400/80">班級實力排名</span>
+                  <span class="font-black text-amber-300">第 ${studentRank} 名</span>
                 </div>
                 <div class="flex justify-between border-b border-amber-500/20 pb-1">
-                  <span class="text-amber-400/70">類別</span>
+                  <span class="text-amber-400/80">實力對應角色</span>
+                  <span class="font-black text-white truncate max-w-[130px] text-right">${charName}</span>
+                </div>
+                <div class="flex justify-between border-b border-amber-500/20 pb-1">
+                  <span class="text-amber-400/80">班級類別</span>
                   <span class="font-bold text-white">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
                 </div>
               </div>
@@ -506,6 +501,10 @@ class StudentDossierView {
                   <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
                     <span class="text-[10px] text-amber-400 uppercase font-bold">所屬</span>
                     <span class="font-bold text-white">${this.currentClassId} 班 (${oaa.isHomeroom ? '導師班' : '數學科任'})</span>
+                  </div>
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                    <span class="text-[10px] text-amber-400 uppercase font-bold">實力對應</span>
+                    <span class="font-bold text-amber-200">#${studentRank} ${charName}</span>
                   </div>
                 </div>
               </div>
