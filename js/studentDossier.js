@@ -387,36 +387,39 @@ class StudentDossierView {
       'B': 'text-emerald-400',
       'C+': 'text-slate-200',
       'C': 'text-slate-300',
-      'D': 'text-orange-400',
+      'D': 'text-amber-400',
       'E': 'text-rose-500'
     };
 
+    const avatarIndex = (student.seatNo - 1) % 11;
+    const coteAvatar = `./assets/cote/ic-${Math.floor(avatarIndex / 6) + 1}-${(avatarIndex % 6) + 1}.jpg`;
+
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
-      <div class="rounded-2xl p-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#0d1d28] border border-cyan-800/60 shadow-lg text-white">
+      <div class="rounded-2xl p-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
         <div class="flex items-center space-x-3">
-          <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+          <img src="./assets/cote/cote_logo.webp" alt="ようこそ実力至上主義の教室へ" class="h-8 sm:h-9 object-contain">
           <div>
-            <h2 class="text-base sm:text-lg font-black tracking-widest text-cyan-200 uppercase font-mono">
-              O.A.A. // OVERALL ABILITY ASSESSMENT
+            <h2 class="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase">
+              OAA 學生綜合能力評估卡
             </h2>
-            <p class="text-[11px] text-cyan-400/80 font-mono">高度育成高等學校 學生能力量化評定卡</p>
+            <p class="text-[11px] text-amber-300/80">高度育成高等學校 官方學生檔案</p>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
           <button onclick="studentDossierView.toggleDossierMode()" class="px-3.5 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-black transition flex items-center gap-1.5 shadow active:scale-95">
             <span>🌸</span>
-            <span>返回預設模式</span>
+            <span>返回三麗鷗模式</span>
           </button>
 
-          <select onchange="studentDossierView.switchClass(this.value)" class="bg-[#142e40] border border-cyan-600/60 text-cyan-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold focus:outline-none">
+          <select onchange="studentDossierView.switchClass(this.value)" class="bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
             `).join('')}
           </select>
 
-          <select onchange="studentDossierView.switchStudent(this.value)" class="bg-[#142e40] border border-cyan-600/60 text-cyan-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold focus:outline-none">
+          <select onchange="studentDossierView.switchStudent(this.value)" class="bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${students.map(s => `
               <option value="${s.seatNo}" ${this.currentSeatNo === s.seatNo ? 'selected' : ''}>
                 No.${String(s.seatNo).padStart(2, '0')} ${s.name}
@@ -427,115 +430,106 @@ class StudentDossierView {
       </div>
 
       <!-- 🌟 Authentic COTE Student Card (Replica of the Official Reference Image) -->
-      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#0c1e2b] via-[#102737] to-[#0a1823] border-2 border-cyan-600/50 shadow-2xl text-white mb-6">
-        <!-- Background Grid & Accents -->
-        <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-        <!-- Right Side Vertical Watermark Text (Faithfully matching the reference image) -->
-        <div class="absolute top-8 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-cyan-400/30 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
-          ADVANCED TRAINING HIGH SCHOOL TOOL
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#290e1b] via-[#381224] to-[#1c0712] border-2 border-amber-500/50 shadow-2xl text-white mb-6">
+        <!-- Right Side Vertical Watermark Text (Faithfully matching the official light novel) -->
+        <div class="absolute top-8 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
+          ADVANCED NURTURING HIGH SCHOOL // OAA
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-          <!-- Left Column: Character Silhouette / Quote (Matching Left Side of Reference) -->
-          <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-cyan-800/50 pb-5 lg:pb-0 lg:pr-6">
+          <!-- Left Column: Character Silhouette / Photo Card -->
+          <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-amber-500/30 pb-5 lg:pb-0 lg:pr-6">
             <div>
-              <!-- Silhouette / Photo Card -->
-              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-4 rounded-2xl bg-gradient-to-b from-[#18394e] to-[#0d1d28] border-2 border-cyan-500/40 p-4 flex flex-col items-center justify-center relative overflow-hidden shadow-inner group">
-                <div class="absolute inset-0 bg-cyan-400/5 group-hover:bg-cyan-400/10 transition"></div>
-                <div class="text-6xl sm:text-7xl mb-2 filter drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-                  ${student.gender === 'female' ? '👩‍🎓' : '🧑‍🎓'}
-                </div>
-                <div class="text-xs font-mono tracking-widest text-cyan-300/80 uppercase font-black">
-                  CLASS ${this.currentClassId}
-                </div>
-                <div class="text-sm font-mono font-bold text-white tracking-widest">
-                  NO. ${String(student.seatNo).padStart(2, '0')}
-                </div>
-                <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] font-mono text-cyan-400/60 px-2 py-0.5 border-t border-cyan-500/20">
-                  <span>STATUS</span>
-                  <span class="text-emerald-400 font-bold">ACTIVE</span>
+              <!-- Silhouette / Official Photo Card -->
+              <div class="w-full aspect-[4/5] max-w-[240px] mx-auto mb-4 rounded-2xl bg-[#1b0812] border-2 border-amber-500/60 overflow-hidden shadow-md relative group">
+                <img src="${coteAvatar}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${student.name}" title="高度育成生徒証明">
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-center">
+                  <div class="text-xs font-bold text-amber-300 uppercase tracking-widest">
+                    高度育成生徒証明
+                  </div>
+                  <div class="text-sm font-black text-white">
+                    NO. ${String(student.seatNo).padStart(2, '0')}
+                  </div>
                 </div>
               </div>
 
               <!-- Clean Technical Metadata -->
-              <div class="px-2 space-y-1 font-mono text-[11px] text-cyan-300/80">
-                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
-                  <span class="text-cyan-400/60">座號</span>
+              <div class="px-2 space-y-1 text-[11px] text-amber-200/90 font-medium">
+                <div class="flex justify-between border-b border-amber-500/20 pb-1">
+                  <span class="text-amber-400/70">座號</span>
                   <span class="font-bold text-white">${String(student.seatNo).padStart(2, '0')}</span>
                 </div>
-                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
-                  <span class="text-cyan-400/60">班級</span>
+                <div class="flex justify-between border-b border-amber-500/20 pb-1">
+                  <span class="text-amber-400/70">班級</span>
                   <span class="font-bold text-white">${this.currentClassId} 班</span>
                 </div>
-                <div class="flex justify-between border-b border-cyan-800/40 pb-1">
-                  <span class="text-cyan-400/60">類別</span>
+                <div class="flex justify-between border-b border-amber-500/20 pb-1">
+                  <span class="text-amber-400/70">類別</span>
                   <span class="font-bold text-white">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
                 </div>
               </div>
             </div>
 
-            <div class="mt-4 pt-3 border-t border-cyan-800/40 text-[11px] font-mono text-cyan-400/60 flex items-center justify-between">
-              <span>EVALUATION PROTOCOL</span>
-              <span>VER. 2026</span>
+            <div class="mt-4 pt-3 border-t border-amber-500/20 text-[11px] text-amber-300/70 flex items-center justify-between font-mono">
+              <span>OVERALL ABILITY ASSESSMENT</span>
+              <span>VER. 2.0</span>
             </div>
           </div>
 
-          <!-- Right Column: Student Metadata, OAA Evaluation Box & Stats (Matching Right Side of Reference) -->
+          <!-- Right Column: Student Metadata, OAA Evaluation Box & Stats -->
           <div class="lg:col-span-8 flex flex-col justify-between">
             <div>
               <!-- Row 1: Student Name & ID Card Headers -->
               <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                 <div>
                   <div class="flex items-center space-x-2 mb-1">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-cyan-950 text-cyan-300 border border-cyan-600/40">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-950 text-amber-300 border border-amber-500/50">
                       名前
                     </span>
-                    <h1 class="text-2xl sm:text-4xl font-black tracking-widest text-white drop-shadow">
+                    <h1 class="text-2xl sm:text-4xl font-black tracking-wide text-white drop-shadow">
                       ${student.name}
                     </h1>
                   </div>
-                  <div class="text-xs font-mono tracking-widest text-cyan-400/70 pl-1">
+                  <div class="text-xs font-mono tracking-wider text-amber-300/80 pl-1">
                     STUDENT DOSSIER // SEAT ${String(student.seatNo).padStart(2, '0')}
                   </div>
                 </div>
 
                 <!-- Info Badges -->
-                <div class="flex flex-col sm:flex-row gap-2 font-mono text-xs">
-                  <div class="bg-[#132c3d]/80 border border-cyan-700/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-cyan-400 uppercase">學籍番号</span>
-                    <span class="font-bold text-white tracking-wider">${studentIdStr}</span>
+                <div class="flex flex-col sm:flex-row gap-2 text-xs">
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                    <span class="text-[10px] text-amber-400 uppercase font-bold">學籍番号</span>
+                    <span class="font-bold text-white font-mono tracking-wider">${studentIdStr}</span>
                   </div>
-                  <div class="bg-[#132c3d]/80 border border-cyan-700/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                    <span class="text-[10px] text-cyan-400 uppercase">所屬</span>
+                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                    <span class="text-[10px] text-amber-400 uppercase font-bold">所屬</span>
                     <span class="font-bold text-white">${this.currentClassId} 班 (${oaa.isHomeroom ? '導師班' : '數學科任'})</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Row 2: Character Evaluation Box (Matching Central Translucent Box in Reference) -->
-              <div class="mb-6 p-4 sm:p-5 rounded-2xl bg-[#142e40]/70 border border-cyan-500/30 text-xs sm:text-sm text-cyan-100/90 leading-relaxed font-medium backdrop-blur-sm relative">
-                <div class="text-[10px] font-mono text-cyan-400/70 tracking-widest uppercase mb-1 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                  <span>SYSTEM ASSESSMENT PROFILE // 能力特性摘要</span>
+              <!-- Row 2: Character Evaluation Box -->
+              <div class="mb-6 p-4 sm:p-5 rounded-2xl bg-[#1e0a15]/80 border border-amber-500/30 text-xs sm:text-sm text-slate-100 leading-relaxed font-medium backdrop-blur-sm relative">
+                <div class="text-[10px] text-amber-300 tracking-wider uppercase mb-1.5 flex items-center gap-1.5 font-bold">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span>能力特性與綜合評語</span>
                 </div>
                 <p class="whitespace-pre-wrap">${oaa.oaaSummary}</p>
                 ${oaa.gatingNote ? `
-                  <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-300 text-xs flex items-center gap-2 font-mono">
+                  <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-500 text-rose-200 text-xs flex items-center gap-2">
                     <i data-lucide="shield-alert" class="w-4 h-4 shrink-0 text-rose-400"></i>
-                    <span><strong>【硬核卡階限制】</strong> ${oaa.gatingNote}</span>
+                    <span><strong>【實力考核限制】</strong> ${oaa.gatingNote}</span>
                   </div>
                 ` : ''}
               </div>
 
-              <!-- Row 3: Four / Three Dimensions Stats Bar (Matching Dotted Connecting Line in Reference) -->
+              <!-- Row 3: Four / Three Dimensions Stats Bar -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                 ${oaa.metrics.map(m => `
                   <div class="flex items-center group cursor-pointer" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
-                    <span class="font-mono font-bold text-sm sm:text-base text-cyan-200 whitespace-nowrap">${m.label}</span>
-                    <span class="text-[10px] font-mono text-cyan-500/60 ml-1.5">(${m.weight})</span>
-                    <span class="flex-1 border-b border-cyan-400/30 mx-3 group-hover:border-cyan-400 transition"></span>
+                    <span class="font-bold text-sm sm:text-base text-amber-100 whitespace-nowrap">${m.label}</span>
+                    <span class="text-[10px] text-amber-400/80 ml-1.5">(${m.weight})</span>
+                    <span class="flex-1 border-b border-amber-500/30 mx-3 group-hover:border-amber-400 transition"></span>
                     <span class="font-mono font-black text-sm sm:text-base ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap">
                       ${m.grade} (${m.score})
                     </span>
@@ -544,23 +538,23 @@ class StudentDossierView {
               </div>
             </div>
 
-            <!-- Row 4: Giant Overall Rating (総合評價) (Matching Bottom Rating in Reference) -->
-            <div class="pt-4 border-t-2 border-cyan-500/40 flex flex-wrap items-center justify-between gap-4">
+            <!-- Row 4: Giant Overall Rating (総合評價) -->
+            <div class="pt-4 border-t-2 border-amber-500/40 flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-baseline space-x-3">
-                <span class="text-sm sm:text-base font-mono font-bold tracking-widest text-cyan-300 uppercase">
+                <span class="text-sm sm:text-base font-bold tracking-wider text-amber-300 uppercase">
                   総合 ：
                 </span>
                 <span class="text-3xl sm:text-5xl font-mono font-black tracking-wider ${gradeColorMap[oaa.overallGrade] || 'text-white'}">
                   ${oaa.overallGrade} (${oaa.finalScore})
                 </span>
-                <span class="text-xs font-mono text-cyan-400/60 ml-2">
-                  (原始加權: ${oaa.rawWeighted.toFixed(1)})
+                <span class="text-xs text-amber-300/70 ml-2">
+                  (加權值: ${oaa.rawWeighted.toFixed(1)})
                 </span>
               </div>
 
               <div class="flex items-center space-x-2">
-                <span class="text-[10px] font-mono text-cyan-400/60 hidden sm:inline">DATA GROUNDED & VERIFIED</span>
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-mono font-black text-lg text-slate-900 shadow-md">
+                <span class="text-xs text-amber-300/80 hidden sm:inline font-bold">OAA VERIFIED</span>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center font-mono font-black text-lg text-white shadow-md">
                   ${oaa.overallGrade.charAt(0)}
                 </div>
               </div>
@@ -570,19 +564,19 @@ class StudentDossierView {
       </div>
 
       <!-- OAA Dimension Source Inspector (Transparency) -->
-      <div class="rounded-2xl p-5 bg-[#0d1d28] border border-cyan-800/60 text-white mb-6">
-        <h3 class="text-sm font-bold font-mono tracking-wider text-cyan-300 mb-3 flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+      <div class="rounded-2xl p-5 bg-[#200b17] border border-amber-500/50 text-white mb-6">
+        <h3 class="text-sm font-bold tracking-wide text-amber-300 mb-3 flex items-center gap-2">
+          <i data-lucide="database" class="w-4 h-4 text-amber-400"></i>
           <span>數值來源透明稽核（有理有據）</span>
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${oaa.metrics.length} gap-3 text-xs">
           ${oaa.metrics.map(m => `
-            <div class="p-3 rounded-xl bg-[#132c3d]/70 border border-cyan-800/40">
-              <div class="flex items-center justify-between font-bold mb-1 font-mono">
-                <span class="text-cyan-200">${m.label}</span>
+            <div class="p-3 rounded-xl bg-[#2d1020]/80 border border-amber-500/30">
+              <div class="flex items-center justify-between font-bold mb-1">
+                <span class="text-amber-100">${m.label}</span>
                 <span class="${gradeColorMap[m.grade] || 'text-white'}">${m.grade} (${m.score})</span>
               </div>
-              <p class="text-[11px] text-cyan-300/80 leading-normal font-sans">${m.detail}</p>
+              <p class="text-[11px] text-amber-200/80 leading-normal font-sans">${m.detail}</p>
             </div>
           `).join('')}
         </div>

@@ -1,128 +1,268 @@
-/* Classroom of the Elite (高度育成高等學校) OAA Sci-Fi Dark Theme */
+/* ==========================================================================
+   《ようこそ実力至上主義の教室へ》高度育成高等學校 官方本格風格主題 (COTE Theme)
+   視覺核心：官方制服深酒紅 (#881337 / #9f1239)、校徽金色滾邊 (#f59e0b / #fbbf24)、
+   輕小說高對比白色標題 (#ffffff) 與高彩度鮮明數據字體
+   ========================================================================== */
 
+/* 1. 頁面背景：以官方美術掛畫/壁紙搭配暗酒紅半透明高校氛圍 */
 html[data-theme="oaa"] body {
-  background-color: #0b1822;
+  background-color: #13070d !important;
   background-image: 
-    radial-gradient(rgba(56, 189, 248, 0.18) 1px, transparent 1px),
-    linear-gradient(to right, rgba(14, 30, 44, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(14, 30, 44, 0.35) 1px, transparent 1px);
-  background-size: 24px 24px, 48px 48px, 48px 48px;
-  color: #e2e8f0;
+    linear-gradient(rgba(18, 8, 14, 0.90), rgba(24, 10, 18, 0.93)),
+    url('../assets/cote/cote_wp_1.jpg') !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  color: #ffffff !important;
 }
 
-/* OAA High-Tech Metal Glass Card */
-html[data-theme="oaa"] .glass-card {
-  background: rgba(14, 30, 44, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(56, 189, 248, 0.28);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(56, 189, 248, 0.15);
-  border-radius: 1.25rem;
-  color: #f1f5f9;
+/* 2. 徹底隱藏所有三麗鷗卡通元素 (Kitty、小雙星、酷洛米、粉紅蝴蝶結) */
+html[data-theme="oaa"] .kitty-bow,
+html[data-theme="oaa"] .kitty-cat-mini,
+html[data-theme="oaa"] .kitty-cat-avatar,
+html[data-theme="oaa"] .sanrio-kitty-badge,
+html[data-theme="oaa"] .sanrio-twinstars-badge,
+html[data-theme="oaa"] .sanrio-kuromi-badge,
+html[data-theme="oaa"] .sanrio-sticker-kitty,
+html[data-theme="oaa"] .sanrio-sticker-twinstars {
+  display: none !important;
 }
 
-html[data-theme="oaa"] .glass-card-hover:hover {
-  border-color: rgba(56, 189, 248, 0.6);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
-  transform: translateY(-2px);
+html[data-theme="oaa"] #header-mascots-box {
+  display: none !important;
 }
 
-/* Header & Nav */
+html[data-theme="oaa"] #header-cote-logo-box {
+  display: flex !important;
+}
+
+/* 3. 頂部導覽列與標題 */
 html[data-theme="oaa"] header,
 html[data-theme="oaa"] nav,
-html[data-theme="oaa"] footer {
-  background: rgba(10, 22, 33, 0.95);
-  border-color: rgba(56, 189, 248, 0.25);
+html[data-theme="oaa"] #top-bar-sticky-container {
+  background: rgba(22, 9, 16, 0.96) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
 }
 
-/* Navigation Tabs */
+html[data-theme="oaa"] #app-title-text {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+html[data-theme="oaa"] #header-version-badge {
+  background: rgba(159, 18, 57, 0.4) !important;
+  color: #fef08a !important;
+  border: 1px solid #f59e0b !important;
+  font-weight: 900 !important;
+}
+
+/* 4. 分頁導覽列 (徹底修復所有文字對比度，無任何看不清的按鈕) */
 html[data-theme="oaa"] .nav-tab-btn {
-  color: #94a3b8;
-  border-radius: 0.875rem;
-}
-html[data-theme="oaa"] .nav-tab-btn:hover {
-  background-color: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
-}
-html[data-theme="oaa"] .tab-active {
-  color: #38bdf8 !important;
-  background-color: rgba(14, 116, 144, 0.35) !important;
-  border: 1px solid rgba(56, 189, 248, 0.5) !important;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3) !important;
+  color: #f1f5f9 !important;
+  background: rgba(40, 16, 26, 0.85) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border-radius: 0.875rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Classroom Seat Cards */
+/* 強制修復淺色模式中原本寫死的淺黃/淺粉背景按鈕 */
+html[data-theme="oaa"] .nav-tab-btn[data-tab="retro"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="roster"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="guide"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="feedback-board"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="dashboard"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="timetable"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="events"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="student-dossier"],
+html[data-theme="oaa"] .nav-tab-btn[data-tab="ai-hub"] {
+  color: #ffffff !important;
+  background-color: rgba(40, 16, 26, 0.85) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme="oaa"] .nav-tab-btn:hover {
+  background-color: rgba(159, 18, 57, 0.6) !important;
+  color: #fef08a !important;
+  border-color: rgba(245, 158, 11, 0.7) !important;
+}
+
+/* 選中分頁：官方制服深紅漸層 + 金色高亮邊框 */
+html[data-theme="oaa"] .tab-active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #9f1239 0%, #881337 50%, #4c0519 100%) !important;
+  border: 2px solid #fbbf24 !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  font-weight: 900 !important;
+}
+
+/* 5. 卡片面板 (Glass Cards) */
+html[data-theme="oaa"] .glass-card {
+  background: rgba(30, 13, 21, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+  border-radius: 1.25rem !important;
+  color: #ffffff !important;
+}
+
+/* 6. 學生座位卡 (100% 高對比、官方動漫頭貼、深紅高校風) */
 html[data-theme="oaa"] .student-seat-card,
 html[data-theme="oaa"] .compact-seat-tile {
-  background: rgba(15, 33, 48, 0.9);
-  border: 1.5px solid rgba(56, 189, 248, 0.22);
-  color: #f1f5f9;
-  border-radius: 1rem;
-}
-html[data-theme="oaa"] .student-seat-card:hover,
-html[data-theme="oaa"] .compact-seat-tile:hover {
-  border-color: #38bdf8;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-}
-html[data-theme="oaa"] .student-seat-card.selected,
-html[data-theme="oaa"] .compact-seat-tile.selected {
-  border-color: #38bdf8 !important;
-  background-color: rgba(14, 116, 144, 0.4) !important;
-  box-shadow: 0 0 0 2px #38bdf8, 0 0 15px rgba(56, 189, 248, 0.5) !important;
+  background: rgba(36, 15, 25, 0.95) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  color: #ffffff !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Input Fields */
+html[data-theme="oaa"] .student-seat-card:hover,
+html[data-theme="oaa"] .compact-seat-tile:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* 選中座位高亮 */
+html[data-theme="oaa"] .student-seat-card.selected,
+html[data-theme="oaa"] .compact-seat-tile.selected {
+  background: rgba(120, 20, 45, 0.95) !important;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 0 2px #fbbf24, 0 0 20px rgba(245, 158, 11, 0.6) !important;
+}
+
+/* 學生姓名與數字高對比規範 */
+html[data-theme="oaa"] .student-seat-card .text-slate-900 {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+html[data-theme="oaa"] .student-seat-card .text-blue-700 {
+  color: #fef08a !important; /* 鮮明亮金色，黑底一清二楚 */
+  font-weight: 900 !important;
+}
+
+html[data-theme="oaa"] .student-seat-card .border-pink-100 {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* 7. OAA 階級徽章 (S / A / B / C / D) */
+.oaa-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  border-radius: 0.375rem;
+  line-height: 1;
+}
+
+.oaa-rank-S {
+  background: #3b1704;
+  color: #fde047;
+  border: 1.5px solid #f59e0b;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.oaa-rank-A {
+  background: #1e1b4b;
+  color: #a5b4fc;
+  border: 1.5px solid #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+}
+
+.oaa-rank-B {
+  background: #062217;
+  color: #6ee7b7;
+  border: 1.5px solid #10b981;
+}
+
+.oaa-rank-C {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1.5px solid #64748b;
+}
+
+.oaa-rank-D,
+.oaa-rank-E {
+  background: #3f0a10;
+  color: #fca5a5;
+  border: 1.5px solid #ef4444;
+}
+
+/* 8. 講台與黑板方位條 */
+html[data-theme="oaa"] .classroom-podium-bar {
+  background: linear-gradient(90deg, #1c0a12 0%, #3d1220 50%, #1c0a12 100%) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+  color: #fef08a !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 9. 輸入框與下拉選單 */
 html[data-theme="oaa"] input,
 html[data-theme="oaa"] select,
 html[data-theme="oaa"] textarea {
-  background-color: #0d1e2b !important;
-  border-color: rgba(56, 189, 248, 0.3) !important;
-  color: #f1f5f9 !important;
+  background-color: #1e0b15 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  color: #ffffff !important;
 }
+
 html[data-theme="oaa"] input:focus,
 html[data-theme="oaa"] select:focus,
 html[data-theme="oaa"] textarea:focus {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3) !important;
 }
 
-/* Text Overrides */
+/* 10. 全域文字顏色覆蓋 (全面清除暗色文字在深色主題隱形問題) */
 html[data-theme="oaa"] .text-slate-900,
 html[data-theme="oaa"] .text-slate-800 {
-  color: #f1f5f9 !important;
+  color: #ffffff !important;
 }
+
 html[data-theme="oaa"] .text-slate-700,
 html[data-theme="oaa"] .text-slate-600 {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="oaa"] .text-slate-500 {
   color: #cbd5e1 !important;
 }
-html[data-theme="oaa"] .text-slate-500 {
-  color: #94a3b8 !important;
+
+html[data-theme="oaa"] .text-pink-600,
+html[data-theme="oaa"] .text-pink-700,
+html[data-theme="oaa"] .text-pink-800 {
+  color: #fb7185 !important;
 }
 
-/* Modal Overlay */
+/* 彈出視窗 */
 html[data-theme="oaa"] #global-modal-content {
-  background: #0f2434 !important;
-  border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
-  color: #f1f5f9 !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+  background: #1d0b15 !important;
+  border: 2px solid rgba(245, 158, 11, 0.55) !important;
+  color: #ffffff !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9) !important;
 }
 
-/* Background Utility Replacements */
+/* 全域淺色背景替換為暗酒紅高校底色 */
 html[data-theme="oaa"] .bg-white {
-  background-color: #0f2434 !important;
+  background-color: #240e1b !important;
 }
+
 html[data-theme="oaa"] .bg-pink-50,
-html[data-theme="oaa"] .bg-pink-50\/50,
-html[data-theme="oaa"] .bg-pink-50\/60,
-html[data-theme="oaa"] .bg-pink-50\/80,
-html[data-theme="oaa"] .bg-pink-50\/40,
+html[data-theme="oaa"] .bg-pink-100,
 html[data-theme="oaa"] .bg-slate-50 {
-  background-color: rgba(14, 30, 44, 0.7) !important;
+  background-color: rgba(45, 18, 30, 0.8) !important;
 }
+
 html[data-theme="oaa"] .border-pink-200,
 html[data-theme="oaa"] .border-pink-300,
 html[data-theme="oaa"] .border-pink-100,
 html[data-theme="oaa"] .border-slate-200,
 html[data-theme="oaa"] .border-slate-300 {
-  border-color: rgba(56, 189, 248, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
 }

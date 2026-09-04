@@ -18,6 +18,21 @@ class ClassroomMatrix {
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
 
+    // Official COTE Character Avatars for OAA Mode
+    this.coteAvatars = [
+      './assets/cote/ic-1-1.jpg', // 綾小路 清隆
+      './assets/cote/ic-1-2.jpg', // 堀北 鈴音
+      './assets/cote/ic-1-3.jpg', // 輕井澤 惠
+      './assets/cote/ic-1-4.jpg', // 一之瀨 帆波
+      './assets/cote/ic-1-5.jpg', // 坂柳 有栖
+      './assets/cote/ic-1-6.jpg', // 櫛田 桔梗
+      './assets/cote/ic-2-1.jpg', // 龍園 翔
+      './assets/cote/ic-2-2.jpg', // 須藤 健
+      './assets/cote/ic-2-3.jpg', // 平田 洋介
+      './assets/cote/ic-2-4.jpg', // 佐倉 愛里
+      './assets/cote/ic-2-5.jpg'  // 高圓寺 六助
+    ];
+
     // iOS-Style Long-Press Drag & Drop State
     this.isJiggleMode = false;
     this.isDragging = false;
@@ -424,6 +439,7 @@ class ClassroomMatrix {
     const sortMode = this.store.getTagSortMode();
     const sortedTags = this.store.getTagsSorted(currentClassId);
     const isHomeroom = cls.type === 'homeroom';
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
 
     // Chunk tags into pages of 4 (2 cols x 2 rows, large comfortable readable cards)
     const pageSize = 4;
@@ -436,21 +452,29 @@ class ClassroomMatrix {
     this.maxTagPages = tagPages.length;
     if (this.currentTagPage >= this.maxTagPages) this.currentTagPage = 0;
 
+    // Dynamic Header Metadata (COTE vs Sanrio)
+    const classNameDisplay = isOAA ? `高度育成 ${cls.name}` : cls.name;
+    const classBadgeHtml = isOAA
+      ? `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black bg-rose-900 text-amber-200 border border-amber-500/60 shadow-sm">${isHomeroom ? '高度育成 • 導師班' : '高度育成 • 數學班'} (${cls.studentCount}名)</span>`
+      : `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">${isHomeroom ? '🎀 導師本班' : '📘 數學科任'} (${cls.studentCount}人)</span>`;
+
+    const statsOverviewHtml = isOAA
+      ? `學業均分: <strong class="text-amber-300 font-black font-mono">${overview.classAvgScore}</strong> • 常規點數: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-black font-mono">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`
+      : `學業均分: <strong class="text-blue-700">${overview.classAvgScore}</strong> • 常規: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`;
+
     container.innerHTML = `
       <!-- Top Slim Header -->
-      <div class="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-pink-200 shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
+      <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'bg-[#220d18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <!-- Class Meta Badge -->
         <div class="flex items-center space-x-2">
-          <div class="kitty-cat-mini"></div>
+          ${isOAA ? '<span class="text-xl">🏛️</span>' : '<div class="kitty-cat-mini"></div>'}
           <div>
             <div class="flex items-center gap-1.5">
-              <h2 class="text-base sm:text-xl font-black ${isHomeroom ? 'text-pink-600' : 'text-blue-600'} tracking-wide">${cls.name}</h2>
-              <span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">
-                ${isHomeroom ? '🎀 導師本班' : '📘 數學科任'} (${cls.studentCount}人)
-              </span>
+              <h2 class="text-base sm:text-xl font-black ${isOAA ? 'text-white' : (isHomeroom ? 'text-pink-600' : 'text-blue-600')} tracking-wide">${classNameDisplay}</h2>
+              ${classBadgeHtml}
             </div>
-            <div class="text-[10px] sm:text-xs text-slate-600 font-bold">
-              學業均分: <strong class="text-blue-700">${overview.classAvgScore}</strong> • 常規: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>
+            <div class="text-[10px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-600'} font-bold">
+              ${statsOverviewHtml}
             </div>
           </div>
         </div>
@@ -458,63 +482,63 @@ class ClassroomMatrix {
         <!-- Quick Top Action Buttons -->
         <div class="flex flex-wrap items-center space-x-1.5">
           <!-- Selection Count Badge -->
-          <div id="selection-status-badge" class="text-xs px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-300 font-bold text-slate-800 flex items-center gap-1">
-            <span>已選: <strong id="selected-count" class="text-pink-600 font-black text-sm">${this.selectedSeats.size}</strong></span>
-            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-600 underline font-bold text-xs ml-0.5">清空</button>
+          <div id="selection-status-badge" class="text-xs px-2.5 py-1 rounded-xl ${isOAA ? 'bg-[#290e1b] border border-amber-500/60 text-amber-200' : 'bg-pink-50 border border-pink-300 text-slate-800'} font-bold flex items-center gap-1">
+            <span>已選: <strong id="selected-count" class="${isOAA ? 'text-amber-300 font-mono' : 'text-pink-600'} font-black text-sm">${this.selectedSeats.size}</strong></span>
+            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-400 underline font-bold text-xs ml-0.5">清空</button>
           </div>
 
           <!-- iOS Jiggle / Reorder Toggle Button -->
-          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'} rounded-xl shadow-sm transition flex items-center gap-1">
+          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : (isOAA ? 'bg-amber-700/30 border border-amber-500/70 text-amber-200 hover:bg-amber-700/50' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl shadow-sm transition flex items-center gap-1">
             ${this.isJiggleMode ? '<span>✅ 完成排位</span>' : '<i data-lucide="move" class="w-3.5 h-3.5"></i> <span>🪑 拖曳排位</span>'}
           </button>
 
-          <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold bg-pink-50 text-pink-800 border border-pink-300 rounded-xl hover:bg-pink-100 shadow-sm transition flex items-center gap-1">
+          <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#2b0f1d] border border-amber-500/50 text-amber-200 hover:bg-[#3d1529]' : 'bg-pink-50 text-pink-800 border border-pink-300 hover:bg-pink-100'} rounded-xl shadow-sm transition flex items-center gap-1">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
           </button>
 
-          <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold bg-white border border-pink-300 rounded-xl hover:bg-pink-50 text-slate-800 shadow-sm">
+          <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#1a0812] border border-slate-600 text-slate-200 hover:bg-[#280d1c]' : 'bg-white border border-pink-300 hover:bg-pink-50 text-slate-800'} rounded-xl shadow-sm">
             全選
           </button>
           
-          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
+          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-amber-600 hover:bg-amber-500 border border-amber-400' : 'bg-amber-500 hover:bg-amber-600'} text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
             <i data-lucide="clock" class="w-3.5 h-3.5"></i> 事後補記
           </button>
 
-          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-pink-500 text-white rounded-xl shadow-sm">
+          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-rose-700 hover:bg-rose-600 border border-rose-500' : 'bg-pink-500'} text-white rounded-xl shadow-sm">
             抽籤
           </button>
 
-          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black bg-rose-600 text-white rounded-xl shadow-sm">
+          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm">
             事件
           </button>
         </div>
       </div>
 
-      <!-- iOS Jiggle Helper Drawer (When Jiggle Mode is Active) -->
+      <!-- iOS Jiggle Helper Drawer -->
       ${this.isJiggleMode ? `
-        <div id="ios-jiggle-done-bar" class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md mb-3 animate-fade-in-up">
+        <div id="ios-jiggle-done-bar" class="p-3 rounded-2xl ${isOAA ? 'bg-[#29101e] border-2 border-amber-500/60' : 'bg-amber-50 border-2 border-amber-300'} shadow-md mb-3 animate-fade-in-up">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
               <span class="text-2xl animate-bounce">📱</span>
               <div>
-                <strong class="text-amber-900 font-black text-xs sm:text-sm">【iOS 桌面級拖曳排位模式】</strong>
-                <p class="text-[11px] text-amber-800 font-bold">
+                <strong class="${isOAA ? 'text-amber-300' : 'text-amber-900'} font-black text-xs sm:text-sm">【iOS 桌面級拖曳排位模式】</strong>
+                <p class="text-[11px] ${isOAA ? 'text-amber-200' : 'text-amber-800'} font-bold">
                   💡 按住任一位學生卡片即可隨意拖動，移至目標座位放開即自動對調！
                 </p>
               </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-1.5">
-              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'normal')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'normal')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1b0812] border border-amber-600 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} rounded-xl shadow-sm">
                 📐 常規直排
               </button>
-              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'snake_s')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'snake_s')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1b0812] border border-amber-600 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} rounded-xl shadow-sm">
                 🔄 S型蛇行
               </button>
-              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'col_first')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'col_first')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1b0812] border border-amber-600 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} rounded-xl shadow-sm">
                 📊 左至右排
               </button>
-              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'random')" class="px-2.5 py-1 text-xs font-black bg-white border border-amber-300 rounded-xl hover:bg-amber-100 text-amber-900 shadow-sm">
+              <button onclick="matrixView.applyAutoArrange('${currentClassId}', 'random')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1b0812] border border-amber-600 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} rounded-xl shadow-sm">
                 🎲 隨機換位
               </button>
               <button onclick="matrixView.exitJiggleMode('${currentClassId}')" class="px-4 py-1.5 text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-md hover:brightness-110 active:scale-95 transition flex items-center gap-1">
@@ -526,36 +550,50 @@ class ClassroomMatrix {
       ` : ''}
 
       <!-- Quick Group / Row / Gender Select Drawer -->
-      <div id="matrix-quick-select-drawer" class="${this.showQuickSelectBar ? '' : 'hidden'} p-2 rounded-2xl bg-pink-50 border border-pink-200 mb-2.5 flex flex-wrap items-center justify-between gap-1.5 text-xs">
+      <div id="matrix-quick-select-drawer" class="${this.showQuickSelectBar ? '' : 'hidden'} p-2 rounded-2xl ${isOAA ? 'bg-[#240e1b] border border-amber-500/40 text-slate-200' : 'bg-pink-50 border border-pink-200 text-slate-800'} mb-2.5 flex flex-wrap items-center justify-between gap-1.5 text-xs">
         <div class="flex items-center space-x-1">
-          <span class="font-bold text-pink-900 text-[11px]">橫排選取：</span>
-          <button onclick="matrixView.selectRow(1)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第1排</button>
-          <button onclick="matrixView.selectRow(2)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第2排</button>
-          <button onclick="matrixView.selectRow(3)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第3排</button>
-          <button onclick="matrixView.selectRow(4)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第4排</button>
-          <button onclick="matrixView.selectRow(5)" class="px-2 py-0.5 rounded-lg bg-white border border-pink-200 hover:bg-pink-100 font-bold">第5排</button>
+          <span class="font-bold ${isOAA ? 'text-amber-300' : 'text-pink-900'} text-[11px]">橫排選取：</span>
+          <button onclick="matrixView.selectRow(1)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第1排</button>
+          <button onclick="matrixView.selectRow(2)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第2排</button>
+          <button onclick="matrixView.selectRow(3)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第3排</button>
+          <button onclick="matrixView.selectRow(4)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第4排</button>
+          <button onclick="matrixView.selectRow(5)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第5排</button>
         </div>
         <div class="flex items-center space-x-1">
-          <span class="font-bold text-pink-900 text-[11px]">性別：</span>
-          <button onclick="matrixView.selectGender('M')" class="px-2 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 font-bold">全體男生</button>
-          <button onclick="matrixView.selectGender('F')" class="px-2 py-0.5 rounded-lg bg-pink-100 text-pink-800 border border-pink-200 hover:bg-pink-200 font-bold">全體女生</button>
+          <span class="font-bold ${isOAA ? 'text-amber-300' : 'text-pink-900'} text-[11px]">性別：</span>
+          <button onclick="matrixView.selectGender('M')" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#101b38] text-blue-200 border border-blue-500' : 'bg-blue-50 text-blue-800 border border-blue-200'} font-bold">全體男生</button>
+          <button onclick="matrixView.selectGender('F')" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#3b0d21] text-pink-200 border border-pink-500' : 'bg-pink-100 text-pink-800 border border-pink-200'} font-bold">全體女生</button>
         </div>
       </div>
 
-      <!-- Blackboard / Podium Real Classroom Visual Anchor -->
-      <div class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none">
-        <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
-          🪟 靠窗側
-        </span>
-        <div class="flex items-center gap-2">
-          <span class="kitty-bow !w-3.5 !h-3.5"></span>
-          <span class="tracking-widest text-emerald-100 font-black sm:text-sm">【 🏫 講台 / 黑板 】</span>
-          <span class="kitty-bow !w-3.5 !h-3.5"></span>
+      <!-- Blackboard / Podium Classroom Visual Anchor -->
+      ${isOAA ? `
+        <div class="classroom-podium-bar p-2 rounded-2xl flex items-center justify-between text-xs font-bold mb-2.5 px-4 select-none">
+          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-amber-200 font-bold">
+            🪟 靠窗側
+          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-amber-300 font-black sm:text-sm tracking-wider">【 🏫 講台 / 黑板 】</span>
+          </div>
+          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-amber-200 font-bold">
+            靠門側 🚪
+          </span>
         </div>
-        <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
-          靠門側 🚪
-        </span>
-      </div>
+      ` : `
+        <div class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none">
+          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
+            🪟 靠窗側
+          </span>
+          <div class="flex items-center gap-2">
+            <span class="kitty-bow !w-3.5 !h-3.5"></span>
+            <span class="tracking-widest text-emerald-100 font-black sm:text-sm">【 🏫 講台 / 黑板 】</span>
+            <span class="kitty-bow !w-3.5 !h-3.5"></span>
+          </div>
+          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
+            靠門側 🚪
+          </span>
+        </div>
+      `}
 
       <!-- Zero-Scroll Responsive Student Grid in Actual Seating Order -->
       <div class="grid grid-cols-${cols} sm:grid-cols-${cols} md:grid-cols-${cols} lg:grid-cols-${cols} gap-1.5 sm:gap-2.5 mb-4 ${this.isJiggleMode ? 'ios-jiggle-active' : ''}" id="seat-grid-container">
@@ -568,66 +606,116 @@ class ClassroomMatrix {
           const characterPoints = profile ? profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social : 0;
           const academicScore = profile ? profile.scoreMean : 70;
 
-          // Determine Sanrio Mascot
-          let mascotClass = 'sanrio-kitty-badge';
-          let mascotTitle = 'Hello Kitty (穩健良好)';
+          // Rank / Mascot logic
+          let rankBadgeHtml = '';
+          if (isOAA) {
+            let rank = 'B';
+            if (academicScore >= 90) rank = 'S';
+            else if (academicScore >= 80) rank = 'A';
+            else if (academicScore >= 70) rank = 'B';
+            else if (academicScore >= 60) rank = 'C';
+            else rank = 'D';
 
-          if ((academicScore >= 80 && characterPoints >= 0) || (profile && profile.scoreSlope >= 1.5)) {
-            mascotClass = 'sanrio-twinstars-badge';
-            mascotTitle = '小雙星 (優良拔尖)';
-          } else if (characterPoints < 0 || academicScore < 60) {
-            mascotClass = 'sanrio-kuromi-badge';
-            mascotTitle = '酷洛米 (需關懷)';
+            const avatarIndex = (s.seatNo - 1) % this.coteAvatars.length;
+            const coteAvatar = this.coteAvatars[avatarIndex];
+
+            rankBadgeHtml = `
+              <div class="flex items-center space-x-1 shrink-0">
+                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="COTE" title="實力至上主義角色頭像">
+                <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
+              </div>
+            `;
+          } else {
+            let mascotClass = 'sanrio-kitty-badge';
+            let mascotTitle = 'Hello Kitty (穩健良好)';
+            if ((academicScore >= 80 && characterPoints >= 0) || (profile && profile.scoreSlope >= 1.5)) {
+              mascotClass = 'sanrio-twinstars-badge';
+              mascotTitle = '小雙星 (優良拔尖)';
+            } else if (characterPoints < 0 || academicScore < 60) {
+              mascotClass = 'sanrio-kuromi-badge';
+              mascotTitle = '酷洛米 (需關懷)';
+            }
+            rankBadgeHtml = `<div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>`;
           }
 
-          return `
-            <div id="seat-card-${s.seatNo}"
-                 data-seat-no="${s.seatNo}"
-                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 bg-white border-pink-200 cursor-pointer select-none relative transition-all shadow-sm hover:border-pink-300 ${isSelected ? 'selected' : ''}"
-                 ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
-                 onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
-                 onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
-              
-              <!-- Seat Header: Seat No + Mascot -->
-              <div class="flex items-center justify-between mb-0.5 pointer-events-none">
-                <span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">
-                  ${String(s.seatNo).padStart(2, '0')}
+          const seatNoBadgeHtml = isOAA
+            ? `<span class="w-5 h-5 rounded-lg bg-[#2d0f19] text-amber-300 border border-amber-500/70 font-mono font-black text-[11px] sm:text-xs flex items-center justify-center shadow-sm">${String(s.seatNo).padStart(2, '0')}</span>`
+            : `<span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner">${String(s.seatNo).padStart(2, '0')}</span>`;
+
+          const studentNameHtml = isOAA
+            ? `<div class="text-xs sm:text-sm font-black truncate text-white text-center my-0.5 leading-tight tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
+            : `<div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">${s.name}</div>`;
+
+          const dualScoreHtml = isOAA
+            ? `
+              <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none">
+                <span class="text-amber-300 font-mono font-black" title="學業均分">📘${academicScore}</span>
+                <span class="${characterPoints > 0 ? 'text-emerald-400' : characterPoints < 0 ? 'text-rose-400' : 'text-slate-300'} font-mono font-black" title="品格常規點數">
+                  ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
-                <div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>
               </div>
-
-              <!-- Student Name -->
-              <div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">
-                ${s.name}
-              </div>
-
-              <!-- Unified Dual Score Summary -->
+            `
+            : `
               <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-black pt-0.5 border-t border-pink-100 leading-none pointer-events-none">
                 <span class="text-blue-700" title="學業均分">📘${academicScore}</span>
                 <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'}" title="品格常規點數">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
               </div>
+            `;
+
+          return `
+            <div id="seat-card-${s.seatNo}"
+                 data-seat-no="${s.seatNo}"
+                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-all shadow-sm ${isSelected ? 'selected' : ''}"
+                 ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
+                 onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
+                 onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
+              
+              <!-- Seat Header: Seat No + Mascot / COTE Rank -->
+              <div class="flex items-center justify-between mb-0.5 pointer-events-none">
+                ${seatNoBadgeHtml}
+                ${rankBadgeHtml}
+              </div>
+
+              <!-- Student Name -->
+              ${studentNameHtml}
+
+              <!-- Unified Dual Score Summary -->
+              ${dualScoreHtml}
             </div>
           `;
         }).join('')}
       </div>
 
-      <!-- IN-FLOW SPACIOUS 4-TAG PAGED DOCK (Directly Below Seats, No Screen Clutter) -->
-      <div class="glass-card rounded-3xl p-3 sm:p-4 border-2 border-pink-300 bg-white/95 shadow-md mb-6">
-        <!-- Dock Header: Title + Per-Class Note + Page Controls -->
-        <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2 px-1">
+      <!-- IN-FLOW SPACIOUS 4-TAG PAGED DOCK -->
+      <div class="glass-card rounded-3xl p-3 sm:p-4 ${isOAA ? 'border-2 border-amber-500/50 bg-[#250f1c]/95 text-white' : 'border-2 border-pink-300 bg-white/95'} shadow-md mb-6">
+        <!-- Dock Header -->
+        <div class="flex items-center justify-between text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-2 px-1">
           <div class="flex items-center gap-1.5">
-            <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span class="font-black text-slate-900 text-xs sm:text-sm">課堂快速標籤</span>
-            <button onclick="matrixView.toggleTagSortMode('${currentClassId}')" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold transition ${sortMode === 'custom' ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-700 border border-blue-300'}" title="點擊切換排序方式">
+            ${isOAA ? '<span class="text-sm">⚜️</span>' : '<span class="kitty-bow !w-3.5 !h-3.5"></span>'}
+            <span class="font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'} text-xs sm:text-sm">${isOAA ? '高度育成 • 課堂考評標籤' : '課堂快速標籤'}</span>
+            <button onclick="matrixView.toggleTagSortMode('${currentClassId}')" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold transition ${sortMode === 'custom' ? (isOAA ? 'bg-amber-950 text-amber-200 border border-amber-500/60' : 'bg-pink-100 text-pink-700 border border-pink-300') : (isOAA ? 'bg-rose-950 text-rose-200 border border-rose-500/60' : 'bg-blue-100 text-blue-700 border border-blue-300')}" title="點擊切換排序方式">
               ${sortMode === 'custom' ? '📌 依自訂順序' : '📊 依使用頻率'}
             </button>
           </div>
 
           <div class="flex items-center space-x-2">
             <!-- Prev Page Button -->
-            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="上一頁">
+            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="上一頁">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            
+            <span class="text-xs font-mono font-bold ${isOAA ? 'text-amber-300' : 'text-slate-600'}">
+              ${this.currentTagPage + 1} / ${this.maxTagPages}
+            </span>
+
+            <!-- Next Page Button -->
+            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm" title="下一頁">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
               ◀
             </button>
 

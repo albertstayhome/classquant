@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.8';
+    this.appVersion = '1.9.9';
     this.init();
   }
 
@@ -255,6 +255,21 @@ class AppState {
           <div class="text-xs font-black text-slate-800 flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 text-pink-600"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.9 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-500 bg-[#250d1a] text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-800 to-amber-700 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.9 (《實力至上主義教室》本格高校風格全面實裝 • 官方動漫頭貼 & 100% 高對比文字修復)
+              </span>
+              <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-04</span>
+            </div>
+            <ul class="text-xs text-amber-100 space-y-1.5 font-medium pl-1">
+              <li>• 【官方本格高校風格】揚棄生硬科技與軍事感，回歸《實力至上》深酒紅制服與金色滾邊高校視覺，導入官方高清 Logo 與校園美術壁紙！</li>
+              <li>• 【官方動漫角色頭貼】徹底告別三麗鷗貼紙！學生座位卡全面實裝綾小路清隆、堀北鈴音、輕井澤惠、一之瀨帆波、坂柳有栖等 11 位官方角色頭像與 OAA 階級徽章！</li>
+              <li>• 【文字高對比度 100% 修復】全面重構文字色盤！學生姓名白字清晰、學業與常規數據採用高對比金與翡翠綠，導覽列各分頁文字在深色背景下字字銳利分明！</li>
+            </ul>
           </div>
 
           <!-- v1.9.8 -->
@@ -1088,9 +1103,12 @@ class AppState {
     window.appStore.setTheme(themeName);
     this.updateThemeButtonUI(themeName);
 
-    // Refresh active student dossier if visible to sync OAA mode
+    // Refresh active views to sync OAA mode immediately
     if (this.activeTab === 'student-dossier' && window.studentDossierView) {
       window.studentDossierView.render('student-dossier-view');
+    }
+    if (this.activeTab === 'matrix' && window.matrixView) {
+      window.matrixView.render('classroom-matrix-view');
     }
   }
 
@@ -1098,20 +1116,20 @@ class AppState {
     const current = window.appStore.getTheme();
     const next = current === 'kitty' ? 'oaa' : 'kitty';
     this.applyTheme(next);
-    this.showToast(`已切換至：${next === 'kitty' ? '🎀 三麗鷗粉嫩主題' : '🕶️ [OAA] 高度育成科技模式'}`, 'info');
+    this.showToast(`已切換至：${next === 'kitty' ? '🎀 三麗鷗粉嫩主題' : '🏛️ 《歡迎來到實力至上主義的教室》本格風格'}`, 'info');
   }
 
   updateThemeButtonUI(themeName) {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
       if (themeName === 'oaa') {
-        btn.innerHTML = '<span class="text-xs">🕶️</span><span class="text-xs font-mono font-black text-cyan-300 ml-0.5 hidden md:inline">OAA</span>';
-        btn.className = "px-2.5 py-1.5 rounded-xl border border-cyan-500 bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 transition active:scale-95 flex items-center gap-1 shrink-0 shadow-sm cursor-pointer";
-        btn.title = "目前為 OAA 高度育成科技模式，點擊切換為三麗鷗主題";
+        btn.innerHTML = '<span class="text-xs">🏛️</span><span class="text-xs font-black text-amber-200 ml-0.5 hidden md:inline">高度育成 OAA</span>';
+        btn.className = "px-2.5 py-1.5 rounded-xl border border-amber-500 bg-rose-950/80 hover:bg-rose-900 text-amber-200 transition active:scale-95 flex items-center gap-1 shrink-0 shadow-sm cursor-pointer";
+        btn.title = "目前為《實力至上主義教室》高度育成 OAA 主題，點擊切換為三麗鷗主題";
       } else {
         btn.innerHTML = '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">三麗鷗</span>';
         btn.className = "px-2.5 py-1.5 rounded-xl border border-pink-300 hover:bg-pink-100 transition active:scale-95 flex items-center gap-1 shrink-0 cursor-pointer";
-        btn.title = "目前為三麗鷗主題，點擊切換為 OAA 模式";
+        btn.title = "目前為三麗鷗主題，點擊切換為《實力至上主義教室》OAA 模式";
       }
       if (window.lucide) window.lucide.createIcons();
     }
