@@ -261,46 +261,65 @@ class DashboardCharts {
 
           return `
             <div onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${item.seatNo})" 
-              class="group p-3 rounded-2xl border transition duration-200 cursor-pointer flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 ${
+              class="group p-3 rounded-2xl border transition duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 ${
                 isOAA 
                   ? (isTop1 ? 'bg-[#3b152b] border-amber-400/80 hover:bg-[#481a35]' : 'bg-[#290e1d]/80 border-amber-500/30 hover:bg-[#381328]')
                   : (isTop1 ? 'bg-amber-50/70 border-amber-300 hover:bg-amber-100/70' : 'bg-slate-50/70 border-slate-200 hover:bg-pink-50/60 hover:border-pink-300')
               }">
               
-              <!-- Left: Rank + Avatar + Name -->
-              <div class="flex items-center space-x-3 min-w-0 flex-1">
-                ${rankBadge}
+              <!-- Main Row: Rank + Avatar + Name & Gender + (Mobile Composite Badge) -->
+              <div class="flex items-center justify-between gap-2 min-w-0 flex-1">
+                <!-- Left: Rank + Avatar + Name -->
+                <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+                  ${rankBadge}
 
-                ${isOAA && charInfo ? `
-                  <div class="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/60 bg-black/40 shrink-0 relative">
-                    <img src="${charInfo.avatar}" alt="${charInfo.name}" class="w-full h-full object-cover object-top">
-                  </div>
-                ` : `
-                  <div class="w-9 h-9 rounded-xl ${studentGender === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'} font-black text-xs flex items-center justify-center shrink-0">
-                    ${String(item.seatNo).padStart(2, '0')}
-                  </div>
-                `}
+                  ${isOAA && charInfo ? `
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-amber-500/60 bg-black/40 shrink-0 relative">
+                      <img src="${charInfo.avatar}" alt="${charInfo.name}" class="w-full h-full object-cover object-top">
+                    </div>
+                  ` : `
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl ${studentGender === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'} font-black text-xs flex items-center justify-center shrink-0">
+                      ${String(item.seatNo).padStart(2, '0')}
+                    </div>
+                  `}
 
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition truncate">
-                      ${item.name}
-                    </span>
-                    <span class="text-xs px-1.5 py-0.5 rounded font-bold shrink-0 ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
-                      ${studentGender === 'F' ? '👧 女' : '👦 男'}
-                    </span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition whitespace-nowrap">
+                        ${item.name}
+                      </span>
+                      <span class="text-xs px-1.5 py-0.5 rounded font-bold shrink-0 ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
+                        ${studentGender === 'F' ? '👧 女' : '👦 男'}
+                      </span>
+                    </div>
+                    <!-- Desktop Subtitle -->
+                    <div class="hidden sm:flex text-[11px] ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-medium items-center gap-2 min-w-0 mt-0.5">
+                      <span class="shrink-0">座號 ${String(item.seatNo).padStart(2, '0')}</span>
+                      ${isOAA && charInfo ? `
+                        <span class="text-amber-300 font-bold truncate">• 實力對應：${charInfo.name}</span>
+                      ` : ''}
+                    </div>
                   </div>
-                  <div class="text-[11px] ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-medium flex items-center gap-2 min-w-0">
-                    <span class="shrink-0">座號 ${String(item.seatNo).padStart(2, '0')}</span>
-                    ${isOAA && charInfo ? `
-                      <span class="text-amber-300 font-bold truncate">• 實力對應：${charInfo.name}</span>
-                    ` : ''}
-                  </div>
+                </div>
+
+                <!-- Right (Mobile Composite Score Badge Only) -->
+                <div class="sm:hidden px-2.5 py-1 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'} shadow-sm text-right shrink-0">
+                  <div class="text-[9px] uppercase tracking-wider opacity-90 font-bold leading-none">綜合實力</div>
+                  <div class="text-sm font-black font-mono leading-tight">${item.composite}</div>
                 </div>
               </div>
 
-              <!-- Right: Scores & Composite -->
-              <div class="flex items-center gap-3 sm:gap-4 shrink-0 text-xs font-bold">
+              <!-- Mobile Dedicated Subline: Full Width Scores Bar (Never Wraps!) -->
+              <div class="sm:hidden flex items-center justify-between text-xs font-bold pt-2 border-t ${isOAA ? 'border-amber-500/20 text-slate-300' : 'border-pink-100 text-slate-600'} leading-none">
+                <span class="shrink-0 font-medium">座號 ${String(item.seatNo).padStart(2, '0')}</span>
+                <span class="shrink-0 font-bold ${isOAA ? 'text-cyan-300' : 'text-blue-700'}">📘 學業 ${item.academicScore} 分</span>
+                <span class="shrink-0 font-bold ${item.characterPoints >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
+                  🎀 常規 ${item.characterPoints > 0 ? '+' : ''}${item.characterPoints} 點
+                </span>
+              </div>
+
+              <!-- Desktop Scores & Composite (Columns on the Right) -->
+              <div class="hidden sm:flex items-center gap-3 sm:gap-4 shrink-0 text-xs font-bold">
                 <div class="text-right shrink-0">
                   <div class="text-[11px] ${isOAA ? 'text-amber-400/80' : 'text-slate-400'} font-bold">學業均分</div>
                   <div class="font-black ${isOAA ? 'text-cyan-300' : 'text-blue-700'}">${item.academicScore} 分</div>
@@ -318,7 +337,7 @@ class DashboardCharts {
                   <div class="text-sm sm:text-base font-black font-mono leading-tight">${item.composite}</div>
                 </div>
 
-                <div class="text-slate-400 group-hover:translate-x-1 transition hidden sm:block">
+                <div class="text-slate-400 group-hover:translate-x-1 transition">
                   <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </div>
               </div>

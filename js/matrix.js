@@ -448,11 +448,24 @@ class ClassroomMatrix {
 
     let cls = this.store.getClass(currentClassId);
     if (!cls) {
-      const fallbackId = Object.keys(this.store.getClasses())[0];
-      if (fallbackId) {
-        currentClassId = fallbackId;
+      const classKeys = Object.keys(this.store.getClasses());
+      if (classKeys.length > 0) {
+        currentClassId = classKeys[0];
         this.currentClassId = currentClassId;
         cls = this.store.getClass(currentClassId);
+      } else {
+        // Self-heal: initialize demo data so user is never stuck on an unrecoverable blank screen
+        this.store.initDemoData();
+        const freshKeys = Object.keys(this.store.getClasses());
+        if (freshKeys.length > 0) {
+          currentClassId = freshKeys[0];
+          this.currentClassId = currentClassId;
+          cls = this.store.getClass(currentClassId);
+        }
+      }
+      if (cls && window.appState) {
+        window.appState.currentClassId = currentClassId;
+        window.appState.populateClassDropdown();
       }
     }
     if (!cls) {
@@ -460,6 +473,9 @@ class ClassroomMatrix {
         <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">
           <div class="sanrio-sticker-twinstars mb-3"></div>
           <div class="text-base font-bold text-slate-700">尚未選擇班級或查無班級資料</div>
+          <button onclick="appStore.initDemoData(); matrixView.render('${containerId}')" class="mt-4 px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold shadow-sm cursor-pointer transition">
+            ✨ 自動建立並載入示範班級
+          </button>
         </div>
       `;
       return;
@@ -668,9 +684,9 @@ class ClassroomMatrix {
             const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
 
             rankBadgeHtml = `
-              <div class="flex items-center space-x-1 shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName}">
+              <div class="relative shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName} // 評級: ${rank}">
                 <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="${charName}">
-                <span class="oaa-rank-badge oaa-rank-${rank} w-5 h-5 text-[10px] sm:text-xs" title="OAA 評定: ${rank} 級">${rank}</span>
+                <span class="oaa-rank-badge oaa-rank-${rank} absolute -bottom-1 -right-1 !w-3.5 !h-3.5 sm:!w-4 sm:!h-4 text-[9px] sm:text-[10px] flex items-center justify-center font-black rounded-full border border-black/60">${rank}</span>
               </div>
             `;
           } else {
@@ -683,7 +699,7 @@ class ClassroomMatrix {
               mascotClass = 'sanrio-kuromi-badge';
               mascotTitle = '酷洛米 (需關懷)';
             }
-            rankBadgeHtml = `<div class="${mascotClass} !w-5 !h-5 sm:!w-7 sm:!h-7 shrink-0" title="${mascotTitle}"></div>`;
+            rankBadgeHtml = `<div class="${mascotClass} !w-5 !h-5 sm:!w-6 sm:!h-6 shrink-0" title="${mascotTitle}"></div>`;
           }
 
           const seatNoBadgeHtml = isOAA
@@ -694,19 +710,20 @@ class ClassroomMatrix {
             ? `<div class="text-xs sm:text-sm font-black truncate text-white text-center my-0.5 leading-tight tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
             : `<div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">${s.name}</div>`;
 
+          const displayAcademic = Math.round(academicScore);
           const dualScoreHtml = isOAA
             ? `
-              <div class="flex items-center justify-between text-[11px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0">
-                <span class="text-amber-300 font-mono font-black shrink-0" title="學業均分">📘${academicScore}</span>
-                <span class="${characterPoints > 0 ? 'text-emerald-400' : characterPoints < 0 ? 'text-rose-400' : 'text-slate-300'} font-mono font-black shrink-0" title="品格常規點數">
+              <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
+                <span class="text-amber-300 font-mono font-black shrink-0" title="學業均分：${academicScore}分">📘${displayAcademic}</span>
+                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-black shrink-0 ${characterPoints > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : characterPoints < 0 ? 'bg-rose-950/80 text-rose-400 border border-rose-500/40' : 'bg-black/30 text-slate-400'}" title="品格常規點數：${characterPoints}點">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
               </div>
             `
             : `
-              <div class="flex items-center justify-between text-[11px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0">
-                <span class="text-blue-700 shrink-0" title="學業均分">📘${academicScore}</span>
-                <span class="${characterPoints > 0 ? 'text-emerald-700' : characterPoints < 0 ? 'text-rose-700' : 'text-slate-500'} shrink-0" title="品格常規點數">
+              <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
+                <span class="text-blue-700 shrink-0" title="學業均分：${academicScore}分">📘${displayAcademic}</span>
+                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black shrink-0 ${characterPoints > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : characterPoints < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}" title="品格常規點數：${characterPoints}點">
                   ${characterPoints > 0 ? '+' : ''}${characterPoints}
                 </span>
               </div>
