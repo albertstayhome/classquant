@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.20';
+    this.appVersion = '1.9.21';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -724,6 +724,21 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.21 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 bg-[#2b0e1e] text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-700 via-amber-600 to-rose-800 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.21 (排行榜大字模式防擠壓重構 • 消除性別標籤與綜合實力重疊 • 班級下拉文字防截斷)
+              </span>
+              <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-05</span>
+            </div>
+            <ul class="text-xs text-amber-100 space-y-1.5 font-medium pl-1">
+              <li>• 【排行榜卡片防擠壓自適應重構】全面修復在大字模式與窄螢幕下，學生姓名/性別標籤與右側「綜合實力」分數膠囊重疊碰撞的 Bug！採用自適應流式換行、精準內距縮減與截斷保護，確保任何字體縮放下 100% 留有安全間隔。</li>
+              <li>• 【性別篩選列均等三欄化】將排行榜頂部篩選按鈕重構為等寬三欄（全部 / 👦男 / 👧女），確保人數標籤永遠單行對齊，杜絕斷行擠壓。</li>
+              <li>• 【班級選單文字防截斷】優化頂部班級下拉選單標籤與最大寬度，根除窄螢幕下「801 班 (...」省略截斷問題。</li>
+            </ul>
           </div>
 
           <!-- v1.9.20 -->
@@ -1801,7 +1816,7 @@ class AppState {
       html += `<optgroup label="🎀 導師本班 (常規與生活)">`;
       html += homeroomClasses.map(c => `
         <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
-          ${c.name} (導師本班)
+          ${c.name} (導師)
         </option>
       `).join('');
       html += `</optgroup>`;
@@ -1811,7 +1826,7 @@ class AppState {
       html += `<optgroup label="📘 數學科任班 (解題與作業)">`;
       html += subjectClasses.map(c => `
         <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
-          ${c.name} (數學科任)
+          ${c.name} (科任)
         </option>
       `).join('');
       html += `</optgroup>`;

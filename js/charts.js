@@ -213,21 +213,22 @@ class DashboardCharts {
           </div>
         </div>
 
-        <!-- Filter Pills -->
-        <div class="flex items-center gap-1.5 p-1 rounded-2xl ${isOAA ? 'bg-[#1a0713] border border-amber-500/40' : 'bg-pink-50 border border-pink-200'}">
+        <!-- Filter Pills: Equal 3 Columns with Clean Single-Line Alignment -->
+        <div class="grid grid-cols-3 gap-1 p-1 rounded-2xl ${isOAA ? 'bg-[#1a0713] border border-amber-500/40' : 'bg-pink-50 border border-pink-200'} w-full">
           <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'all')" 
-            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${currentFilter === 'all' ? (isOAA ? 'bg-amber-500 text-[#1a0713] shadow' : 'bg-pink-500 text-white shadow') : (isOAA ? 'text-amber-200/80 hover:text-white' : 'text-slate-600 hover:text-slate-900')}">
-            全部 (${fullLeaderboard.length})
+            class="py-2 px-1 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${currentFilter === 'all' ? (isOAA ? 'bg-amber-500 text-[#1a0713] shadow' : 'bg-pink-500 text-white shadow') : (isOAA ? 'text-amber-200/80 hover:text-white' : 'text-slate-600 hover:text-slate-900')}">
+            <span>全部</span>
+            <span class="text-[11px] opacity-85 font-mono">(${fullLeaderboard.length})</span>
           </button>
           <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'M')" 
-            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'M' ? 'bg-blue-600 text-white shadow' : (isOAA ? 'text-blue-300 hover:text-white' : 'text-slate-600 hover:text-blue-600')}">
-            <span>👦 男生</span>
-            <span class="text-xs opacity-80">(${maleCount})</span>
+            class="py-2 px-1 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${currentFilter === 'M' ? (isOAA ? 'bg-blue-600 text-white shadow' : 'bg-blue-600 text-white shadow') : (isOAA ? 'text-blue-300 hover:text-white' : 'text-slate-600 hover:text-blue-600')}">
+            <span>👦 男</span>
+            <span class="text-[11px] opacity-85 font-mono">(${maleCount})</span>
           </button>
           <button type="button" onclick="dashboardCharts.setLeaderboardFilter('${classId}', 'F')" 
-            class="px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${currentFilter === 'F' ? 'bg-pink-600 text-white shadow' : (isOAA ? 'text-pink-300 hover:text-white' : 'text-slate-600 hover:text-pink-600')}">
-            <span>👧 女生</span>
-            <span class="text-xs opacity-80">(${femaleCount})</span>
+            class="py-2 px-1 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${currentFilter === 'F' ? (isOAA ? 'bg-rose-600 text-white shadow' : 'bg-pink-600 text-white shadow') : (isOAA ? 'text-pink-300 hover:text-white' : 'text-slate-600 hover:text-pink-600')}">
+            <span>👧 女</span>
+            <span class="text-[11px] opacity-85 font-mono">(${femaleCount})</span>
           </button>
         </div>
       </div>
@@ -259,6 +260,10 @@ class DashboardCharts {
             charInfo = window.appState.getCoteCharacterByGenderAndRank(studentGender, item.genderRank);
           }
 
+          const genderBadgeClass = isOAA
+            ? (studentGender === 'F' ? 'bg-rose-950 text-pink-300 border border-pink-500/60' : 'bg-blue-950 text-cyan-300 border border-cyan-500/60')
+            : (studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200');
+
           return `
             <div onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${item.seatNo})" 
               class="group p-3 rounded-2xl border transition duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 ${
@@ -269,8 +274,8 @@ class DashboardCharts {
               
               <!-- Main Row: Rank + Avatar + Name & Gender + (Mobile Composite Badge) -->
               <div class="flex items-center justify-between gap-2 min-w-0 flex-1">
-                <!-- Left: Rank + Avatar + Name -->
-                <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+                <!-- Left: Rank + Avatar + Name & Gender -->
+                <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
                   ${rankBadge}
 
                   ${isOAA && charInfo ? `
@@ -284,11 +289,11 @@ class DashboardCharts {
                   `}
 
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5 min-w-0">
-                      <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition whitespace-nowrap">
+                    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 min-w-0">
+                      <span class="font-black text-sm sm:text-base ${isOAA ? 'text-white' : 'text-slate-900'} group-hover:text-pink-600 transition truncate max-w-[120px] sm:max-w-none">
                         ${item.name}
                       </span>
-                      <span class="text-xs px-1.5 py-0.5 rounded font-bold shrink-0 ${studentGender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}">
+                      <span class="text-[11px] px-1.5 py-0.5 rounded font-bold shrink-0 ${genderBadgeClass}">
                         ${studentGender === 'F' ? '👧 女' : '👦 男'}
                       </span>
                     </div>
@@ -303,9 +308,9 @@ class DashboardCharts {
                 </div>
 
                 <!-- Right (Mobile Composite Score Badge Only) -->
-                <div class="sm:hidden px-2.5 py-1 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'} shadow-sm text-right shrink-0">
-                  <div class="text-[9px] uppercase tracking-wider opacity-90 font-bold leading-none">綜合實力</div>
-                  <div class="text-sm font-black font-mono leading-tight">${item.composite}</div>
+                <div class="sm:hidden px-2 py-1 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white'} shadow-sm text-right shrink-0">
+                  <div class="text-[8.5px] uppercase font-bold leading-none tracking-tight opacity-90">綜合實力</div>
+                  <div class="text-xs sm:text-sm font-black font-mono leading-tight mt-0.5">${item.composite}</div>
                 </div>
               </div>
 
