@@ -861,4 +861,56 @@ html[data-theme="oaa"] #header-unhide-pill:hover {
   background: rgba(159, 18, 57, 1) !important;
 }
 
+/* 浮動圖文手冊按鈕 OAA 配色 */
+html[data-theme="oaa"] .floating-guide-btn {
+  background: linear-gradient(135deg, #881337 0%, #4c0519 100%) !important;
+  border: 1.5px solid #f59e0b !important;
+  color: #fef08a !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7), 0 0 15px rgba(245, 158, 11, 0.3) !important;
+}
+html[data-theme="oaa"] .floating-guide-btn:hover {
+  background: linear-gradient(135deg, #9f1239 0%, #700b25 100%) !important;
+  border-color: #fbbf24 !important;
+  color: #ffffff !important;
+}
+
+/* 班級名單 (Roster Manager) OAA 主題徹底防禦 (防止手機觸控殘留白底) */
+html[data-theme="oaa"] #roster-manager-view .hover\:bg-pink-50:hover,
+html[data-theme="oaa"] #roster-manager-view .hover\:bg-pink-100:hover {
+  background-color: #301224 !important;
+}
+html[data-theme="oaa"] #roster-manager-view .bg-pink-50\/40 {
+  background-color: #240e1b !important;
+}
+
+/* 圖文說明書 (User Guide) OAA 主題徹底防禦 */
+html[data-theme="oaa"] #user-guide-view .bg-pink-50,
+html[data-theme="oaa"] #user-guide-view .bg-pink-50\/70,
+html[data-theme="oaa"] #user-guide-view .bg-slate-50 {
+  background-color: #14050d !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+html[data-theme="oaa"] #user-guide-view .bg-sky-50\/70 {
+  background-color: #0a1526 !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: #cffafe !important;
+}
+html[data-theme="oaa"] #user-guide-view .bg-emerald-50\/70 {
+  background-color: #071d14 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #d1fae5 !important;
+}
+html[data-theme="oaa"] #user-guide-view .bg-blue-50\/70 {
+  background-color: #09152b !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: #dbeafe !important;
+}
+html[data-theme="oaa"] #user-guide-view .bg-purple-50\/70 {
+  background-color: #1b0b2e !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #f3e8ff !important;
+}
+
+
 

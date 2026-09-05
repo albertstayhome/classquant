@@ -12,7 +12,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.19';
+    this.appVersion = '1.9.20';
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -719,11 +719,26 @@ class AppState {
           </div>
         </div>
 
-        <!-- Section 2: Full Changelog History -->
+          <!-- Section 2: Full Changelog History -->
         <div class="space-y-3.5 mb-5">
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.20 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 bg-[#2b0e1e] text-white shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-700 via-amber-600 to-rose-800 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.20 (班級名單與圖文說明書本格深色重構 • 消除手機觸控殘留白底 • 全頁面字體放大防切邊)
+              </span>
+              <span class="text-[11px] text-amber-300 font-mono font-bold">2026-09-05</span>
+            </div>
+            <ul class="text-xs text-amber-100 space-y-1.5 font-medium pl-1">
+              <li>• 【班級名單本格高校重構】徹底重構班級名單在 OAA 模式下的視覺表現！全面採用深酒紅（#240e1b）高質感底板與燙金邊框，性別切換按鈕提供高對比藍紫與粉金標章，徹底清除原先白底淡字與視覺反差不良問題。</li>
+              <li>• 【手機觸控殘留白底防禦】針對手機觸控時 :hover 狀態持續殘留導致學生卡片變為純白的現象，加入全域防禦規則與深色 active/hover 樣式，點擊觸控平滑順暢零白光。</li>
+              <li>• 【圖文說明書本格 OAA 實裝】全 8 大操作核心步驟全面支援雙主題！在 OAA 模式下切換為高度育成操作指南與 S-SYSTEM 手冊，配備深色高對比指引方塊與動漫專屬符號，三麗鷗與本格風格兩相宜。</li>
+            </ul>
           </div>
 
           <!-- v1.9.11 -->
@@ -1613,6 +1628,12 @@ class AppState {
       }
       if (this.activeTab === 'dashboard' && window.dashboardCharts) {
         window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
+      }
+      if (this.activeTab === 'roster' && window.rosterManager) {
+        window.rosterManager.render('roster-manager-view');
+      }
+      if (this.activeTab === 'guide' && window.userGuideView) {
+        window.userGuideView.render('user-guide-view');
       }
     } catch (e) {
       console.warn('Error refreshing views on theme apply:', e);

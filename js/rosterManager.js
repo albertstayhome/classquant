@@ -32,36 +32,44 @@ class RosterManager {
       }
     }
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     container.innerHTML = `
-      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-6 border border-pink-200 shadow-sm bg-gradient-to-r from-pink-50/70 via-white to-sky-50/70">
+      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-6 border shadow-sm ${
+        isOAA 
+          ? 'bg-gradient-to-br from-[#240e1b] via-[#2f1122] to-[#1a0813] border-amber-500/40 text-white' 
+          : 'border-pink-200 bg-gradient-to-r from-pink-50/70 via-white to-sky-50/70'
+      }">
         <!-- Header -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div class="flex items-center space-x-3">
-            <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+            ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
             <div>
-              <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                👥 班級與學生名單管理中心
-                <span class="kitty-bow"></span>
+              <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
+                <span>${isOAA ? '👥 高度育成 • 生徒名簿與班級編成中心' : '👥 班級與學生名單管理中心'}</span>
+                ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
               </h2>
-              <p class="text-xs sm:text-sm text-slate-600 font-medium">支援「1秒批次貼上全班名單」、自由新增/編輯班級、調整座號與姓名</p>
+              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium">
+                ${isOAA ? '高度育成高等學校 生徒性別登錄、座號編成與名單導入協定' : '支援「1秒批次貼上全班名單」、自由新增/編輯班級、調整座號與姓名'}
+              </p>
             </div>
           </div>
 
           <div class="flex items-center space-x-2">
-            <button onclick="appState.switchTab('matrix')" class="px-3.5 py-2 rounded-2xl bg-white border border-pink-300 hover:bg-pink-50 text-pink-700 text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5">
-              <i data-lucide="layout-grid" class="w-4 h-4 text-pink-500"></i> 🏫 前往課堂點記板
+            <button onclick="appState.switchTab('matrix')" class="px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1e0a15] border border-amber-500/40 hover:bg-[#2d0f20] text-amber-200' : 'bg-white border border-pink-300 hover:bg-pink-50 text-pink-700'} text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="layout-grid" class="w-4 h-4 ${isOAA ? 'text-amber-400' : 'text-pink-500'}"></i> ${isOAA ? '🏫 前往 OAA 實力點記板' : '🏫 前往課堂點記板'}
             </button>
-            <button onclick="rosterManager.openNewClassModal()" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
+            <button onclick="rosterManager.openNewClassModal()" class="px-4 py-2 rounded-2xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 hover:from-amber-500 hover:to-rose-600 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'} text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
               <i data-lucide="plus" class="w-4 h-4"></i> ➕ 新增班級
             </button>
           </div>
         </div>
 
         <!-- Class Selector & Quick Actions -->
-        <div class="p-4 rounded-2xl bg-white border border-pink-200 shadow-sm flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div class="p-4 rounded-2xl ${isOAA ? 'bg-[#1c0a14] border border-amber-500/30' : 'bg-white border border-pink-200'} shadow-sm flex flex-wrap items-center justify-between gap-3 mb-6">
           <div class="flex items-center space-x-3">
-            <label class="text-xs sm:text-sm font-bold text-slate-700">當前編輯班級：</label>
-            <select id="roster-class-select" onchange="rosterManager.switchClass(this.value)" class="border-2 border-pink-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-black focus:outline-none bg-pink-50 text-pink-900">
+            <label class="text-xs sm:text-sm font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">當前編輯班級：</label>
+            <select id="roster-class-select" onchange="rosterManager.switchClass(this.value)" class="border-2 ${isOAA ? 'border-amber-500/60 bg-[#280c1c] text-amber-200' : 'border-pink-300 bg-pink-50 text-pink-900'} rounded-xl px-3 py-1.5 text-xs sm:text-sm font-black focus:outline-none cursor-pointer">
               ${Object.values(classes).map(c => `
                 <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
                   ${c.name} (${c.type === 'homeroom' ? '導師班' : '數學科任'} • ${c.studentCount}人)
@@ -71,64 +79,73 @@ class RosterManager {
           </div>
 
           <div class="flex items-center space-x-2">
-            <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-pink-100 text-pink-800 border border-pink-300 text-xs sm:text-sm font-black hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="clipboard-paste" class="w-4 h-4 text-pink-600"></i> 📋 1秒批次貼上名單
+            <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white border border-amber-400 hover:from-amber-500 hover:to-rose-600' : 'bg-pink-100 text-pink-800 border border-pink-300 hover:bg-pink-200'} text-xs sm:text-sm font-black transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+              <i data-lucide="clipboard-paste" class="w-4 h-4 ${isOAA ? 'text-amber-200' : 'text-pink-600'}"></i> 📋 1秒批次貼上名單
             </button>
-            <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs sm:text-sm font-bold hover:bg-slate-200 transition flex items-center gap-1">
+            <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-3.5 py-1.5 rounded-xl ${isOAA ? 'bg-[#290d1c] text-slate-200 border border-slate-600 hover:bg-[#381327]' : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'} text-xs sm:text-sm font-bold transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> 修改班名/屬性
             </button>
-            <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1">
+            <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/80 text-rose-300 border border-rose-800/80 hover:bg-rose-900' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'} text-xs font-bold transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 刪除班級
             </button>
           </div>
         </div>
 
         <!-- Gender Configuration Bar (One-time Class Setup) -->
-        <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-pink-50/90 border border-purple-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="mb-5 p-4 rounded-2xl ${
+          isOAA 
+            ? 'bg-gradient-to-br from-[#290e1c] via-[#351224] to-[#1a0712] border border-amber-500/50 shadow-md text-white' 
+            : 'bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-pink-50/90 border border-purple-200/80 shadow-sm'
+        } flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center space-x-3">
-            <span class="text-2xl select-none">⚧️</span>
+            <span class="text-2xl select-none ${isOAA ? 'p-1.5 rounded-xl bg-black/40 border border-amber-500/40' : ''}">⚧️</span>
             <div>
-              <div class="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
-                <span>班級性別一次性設定</span>
-                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">👦 男生 ${maleCount} 人</span>
-                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">👧 女生 ${femaleCount} 人</span>
+              <div class="text-xs sm:text-sm font-black ${isOAA ? 'text-white' : 'text-slate-800'} flex items-center gap-2">
+                <span>${isOAA ? '班級生徒性別一次性設定' : '班級性別一次性設定'}</span>
+                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-blue-950/90 text-cyan-300 border border-cyan-500/50' : 'bg-blue-100 text-blue-700 border border-blue-200'}">👦 男生 ${maleCount} 人</span>
+                <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-rose-950/90 text-pink-300 border border-pink-500/50' : 'bg-pink-100 text-pink-700 border border-pink-200'}">👧 女生 ${femaleCount} 人</span>
               </div>
-              <p class="text-[11px] text-slate-500 mt-0.5">自訂前 N 號為男生（如 1~14 或 1~15 號），其餘為女生；下方亦可個別點擊學生切換。</p>
+              <p class="text-[11px] ${isOAA ? 'text-amber-200/80' : 'text-slate-500'} mt-0.5">
+                自訂前 N 號為男生（如 1~14 或 1~15 號），其餘為女生；下方亦可個別點擊學生切換。
+              </p>
             </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-purple-200 text-xs font-bold text-slate-700 shadow-sm">
+            <div class="flex items-center gap-1.5 ${isOAA ? 'bg-[#15060f] border-amber-500/50 text-amber-200' : 'bg-white border-purple-200 text-slate-700'} px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm">
               <span>前</span>
               <input type="number" id="roster-gender-split-input" min="0" max="${students.length}" value="${defaultSplit}" 
-                class="w-12 text-center font-black text-blue-700 border-b-2 border-blue-400 focus:outline-none bg-transparent">
+                class="w-12 text-center font-black ${isOAA ? 'text-amber-300 border-amber-400' : 'text-blue-700 border-blue-400'} border-b-2 focus:outline-none bg-transparent font-mono">
               <span>號為男生</span>
               <button type="button" onclick="rosterManager.applyGenderSplit('${this.currentClassId}')" 
-                class="ml-1 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs transition shadow-sm cursor-pointer flex items-center gap-1">
+                class="ml-1 px-3 py-1 rounded-lg ${isOAA ? 'bg-gradient-to-r from-rose-900 via-red-900 to-amber-700 hover:from-rose-800 hover:to-amber-600 text-amber-200 border border-amber-400/80' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'} font-black text-xs transition shadow-sm cursor-pointer flex items-center gap-1">
                 <span>⚡ 一鍵劃分</span>
               </button>
             </div>
 
-            <button type="button" onclick="rosterManager.resetHalfGender('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 text-xs font-black transition cursor-pointer" title="重設為前半男、後半女（各半）">
+            <button type="button" onclick="rosterManager.resetHalfGender('${this.currentClassId}')" 
+              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-[#290d1c] hover:bg-[#381327] text-amber-200 border border-amber-500/50' : 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300'} text-xs font-black transition cursor-pointer" title="重設為前半男、後半女（各半）">
               各半重設
             </button>
-            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'M')" class="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 text-xs font-black transition cursor-pointer" title="全班全設為男生">
+            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'M')" 
+              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-blue-950/90 hover:bg-blue-900 text-cyan-300 border border-cyan-500/60' : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300'} text-xs font-black transition cursor-pointer" title="全班全設為男生">
               全男
             </button>
-            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'F')" class="px-3 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300 text-xs font-black transition cursor-pointer" title="全班全設為女生">
+            <button type="button" onclick="rosterManager.applyAllGender('${this.currentClassId}', 'F')" 
+              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/90 hover:bg-rose-900 text-pink-300 border border-pink-500/60' : 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300'} text-xs font-black transition cursor-pointer" title="全班全設為女生">
               全女
             </button>
           </div>
         </div>
 
         <!-- Student Roster Grid -->
-        <div class="bg-white rounded-2xl p-5 border border-pink-200 shadow-sm">
+        <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-5 border shadow-sm">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-black text-slate-800 flex items-center gap-2">
+            <h3 class="text-base font-black ${isOAA ? 'text-white' : 'text-slate-800'} flex items-center gap-2">
               <span>${currentClass ? currentClass.name : ''} 學生名冊清單</span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 font-bold">共 ${students.length} 位學生</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${isOAA ? 'bg-rose-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}">共 ${students.length} 位學生</span>
             </h3>
-            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition flex items-center gap-1">
+            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'} text-xs font-black transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
             </button>
           </div>
@@ -137,21 +154,37 @@ class RosterManager {
             ${students.map(s => {
               const gender = s.gender || (s.seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F');
               return `
-              <div class="p-3 rounded-2xl border border-pink-100 bg-pink-50/40 flex items-center justify-between hover:bg-pink-50 transition">
+              <div class="p-3 rounded-2xl border ${
+                isOAA 
+                  ? 'border-amber-500/30 bg-[#240e1b] hover:bg-[#301224] text-white' 
+                  : 'border-pink-100 bg-pink-50/40 hover:bg-pink-50 text-slate-900'
+              } flex items-center justify-between transition shadow-sm">
                 <div class="flex items-center space-x-2">
-                  <span class="w-8 h-8 rounded-xl bg-pink-200 text-pink-800 font-black text-xs sm:text-sm flex items-center justify-center shadow-inner shrink-0">
+                  <span class="w-8 h-8 rounded-xl ${
+                    isOAA 
+                      ? 'bg-[#12050d] text-amber-300 border border-amber-500/50' 
+                      : 'bg-pink-200 text-pink-800'
+                  } font-black text-xs sm:text-sm flex items-center justify-center shadow-inner shrink-0 font-mono">
                     ${String(s.seatNo).padStart(2, '0')}
                   </span>
                   <input type="text" value="${s.name}" 
                     onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
-                    class="border border-pink-200 rounded-lg px-2 py-1 text-sm font-black text-slate-900 focus:outline-none focus:border-pink-500 w-24 sm:w-28 bg-white">
+                    class="border ${
+                      isOAA 
+                        ? 'border-amber-500/40 bg-[#14060e] text-white focus:border-amber-400' 
+                        : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'
+                    } rounded-lg px-2 py-1 text-sm font-black focus:outline-none w-24 sm:w-28">
                 </div>
                 
                 <div class="flex items-center space-x-1.5 shrink-0">
-                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'}" title="點擊切換性別 (男 / 女)">
+                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${
+                    isOAA
+                      ? (gender === 'F' ? 'bg-rose-950 text-pink-300 border-pink-500/60 hover:bg-rose-900' : 'bg-blue-950 text-cyan-300 border-cyan-500/60 hover:bg-blue-900')
+                      : (gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200')
+                  }" title="點擊切換性別 (男 / 女)">
                     ${gender === 'F' ? '👧 女' : '👦 男'}
                   </button>
-                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此學生">
+                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1.5 ${isOAA ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-950/50' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'} rounded-lg transition cursor-pointer" title="刪除此學生">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
@@ -181,35 +214,37 @@ class RosterManager {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     modalContent.innerHTML = `
-      <div class="p-6">
+      <div class="p-6 ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
         <div class="flex items-center space-x-3 mb-4">
-          <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+          ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner">📋</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
           <div>
-            <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">
-              📋 1秒批次貼上學生名單
-              <span class="kitty-bow"></span>
+            <h3 class="text-xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
+              <span>📋 1秒批次貼上學生名單</span>
+              ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
             </h3>
-            <p class="text-xs text-slate-600 font-medium">為【${cls ? cls.name : classId}】快速導入名單，系統會自動按順序分配座號</p>
+            <p class="text-xs ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium">為【${cls ? cls.name : classId}】快速導入名單，系統會自動按順序分配座號</p>
           </div>
         </div>
 
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1.5">
             請直接貼上學生姓名（支援一行一個名字、以空格隔開、或帶有座號如「1. 王小明」）：
           </label>
-          <textarea id="batch-roster-textarea" rows="10" placeholder="例如直接複製 Excel、Word 或通訊錄：\n王小明\n李小華\n陳美麗\n張建國\n..." class="w-full border-2 border-pink-200 rounded-2xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500 bg-white font-mono"></textarea>
+          <textarea id="batch-roster-textarea" rows="10" placeholder="例如直接複製 Excel、Word 或通訊錄：\n王小明\n李小華\n陳美麗\n張建國\n..." class="w-full border-2 ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'} rounded-2xl p-3 text-sm font-bold focus:outline-none font-mono"></textarea>
         </div>
 
-        <div class="p-3 rounded-xl bg-pink-50 border border-pink-200 text-xs text-pink-900 mb-4">
+        <div class="p-3 rounded-xl ${isOAA ? 'bg-[#15050e] border border-amber-500/30 text-amber-200' : 'bg-pink-50 border border-pink-200 text-pink-900'} text-xs mb-4">
           💡 <strong>貼心提示</strong>：若直接貼上 <code>1. 王小明 2. 李小美</code>，系統會自動辨識並去掉數字前綴，純粹提取姓名！
         </div>
 
         <div class="flex items-center justify-end space-x-3">
-          <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+          <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'} transition cursor-pointer">
             取消
           </button>
-          <button type="button" onclick="rosterManager.applyBatchPaste('${classId}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+          <button type="button" onclick="rosterManager.applyBatchPaste('${classId}')" class="px-5 py-2.5 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 hover:from-amber-500 hover:to-rose-600 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'} text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="check" class="w-4 h-4"></i> 一鍵覆蓋並儲存名冊
           </button>
         </div>
@@ -384,36 +419,38 @@ class RosterManager {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     modalContent.innerHTML = `
-      <div class="p-6">
-        <h3 class="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
-          ➕ 新增授課班級
-          <span class="kitty-bow"></span>
+      <div class="p-6 ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
+        <h3 class="text-xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} mb-4 flex items-center gap-2">
+          <span>➕ 新增授課班級</span>
+          ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
         </h3>
 
         <form onsubmit="rosterManager.saveNewClass(event)" class="space-y-4">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">班級代碼 (如 804)</label>
-              <input type="text" id="new-class-id" required placeholder="804" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-sm font-bold bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級代碼 (如 804)</label>
+              <input type="text" id="new-class-id" required placeholder="804" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">班級全名 (如 八年四班)</label>
-              <input type="text" id="new-class-name" required placeholder="八年四班" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-sm font-bold bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級全名 (如 八年四班)</label>
+              <input type="text" id="new-class-name" required placeholder="八年四班" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">班級性質</label>
-            <select id="new-class-type" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-sm font-bold bg-white">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級性質</label>
+            <select id="new-class-type" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
               <option value="subject">數學科任班</option>
               <option value="homeroom">導師班 (本班)</option>
             </select>
           </div>
 
           <div class="flex items-center justify-end space-x-3 pt-3">
-            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
-            <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-black text-xs shadow-md">建立班級</button>
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-400 hover:text-white' : 'text-slate-600'} transition cursor-pointer">取消</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 hover:from-amber-500 hover:to-rose-600 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'} text-white font-black text-xs shadow-md transition cursor-pointer">建立班級</button>
           </div>
         </form>
       </div>
@@ -461,24 +498,29 @@ class RosterManager {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     modalContent.innerHTML = `
-      <div class="p-6">
-        <h3 class="text-xl font-black text-slate-900 mb-4">修改班級名稱與性質 (${classId} 班)</h3>
+      <div class="p-6 ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
+        <h3 class="text-xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} mb-4 flex items-center justify-between">
+          <span>修改班級名稱與性質 (${classId} 班)</span>
+          ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">S-SYSTEM</span>' : ''}
+        </h3>
         <form onsubmit="rosterManager.saveEditClass(event, '${classId}')" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">班級名稱</label>
-            <input type="text" id="edit-class-name" value="${cls.name}" required class="w-full border border-pink-300 rounded-xl px-3 py-2 text-sm font-bold bg-white">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級名稱</label>
+            <input type="text" id="edit-class-name" value="${cls.name}" required class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">班級性質</label>
-            <select id="edit-class-type" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-sm font-bold bg-white">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級性質</label>
+            <select id="edit-class-type" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
               <option value="subject" ${cls.type === 'subject' ? 'selected' : ''}>數學科任班</option>
               <option value="homeroom" ${cls.type === 'homeroom' ? 'selected' : ''}>導師班 (本班)</option>
             </select>
           </div>
           <div class="flex items-center justify-end space-x-3 pt-3">
-            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-black text-xs">儲存修改</button>
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-400 hover:text-white' : 'text-slate-600'} transition cursor-pointer">取消</button>
+            <button type="submit" class="px-5 py-2 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 hover:from-amber-500 hover:to-rose-600 border border-amber-400' : 'bg-pink-600 hover:bg-pink-700'} text-white font-black text-xs transition cursor-pointer">儲存修改</button>
           </div>
         </form>
       </div>
