@@ -12,7 +12,9 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.21';
+    this.appVersion = '1.9.23';
+    this.toastTimer = null;
+    this.lastTimetableSlotKey = null;
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -471,12 +473,23 @@ class AppState {
 
     // 3. Listen to Timetable Engine changes
     window.timetableEngine.onClassChange((newClassId, context) => {
-      if (newClassId && newClassId !== this.currentClassId) {
+      const classChanged = Boolean(newClassId && newClassId !== this.currentClassId);
+      const slotKey = context ? `${context.status || ''}:${context.slotIndex ?? ''}:${context.classId ?? ''}` : '';
+      const slotChanged = this.lastTimetableSlotKey !== null && slotKey !== this.lastTimetableSlotKey;
+      this.lastTimetableSlotKey = slotKey;
+
+      if (classChanged) {
         this.currentClassId = newClassId;
         this.showToast(`課表自動感知切換至：${newClassId} 班`, 'info');
       }
       this.updateHeaderStatus();
-      this.refreshActiveTab();
+
+      const activeTag = document.activeElement?.tagName;
+      const isEditingInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT';
+      const formTabs = new Set(['roster', 'retro', 'timetable', 'feedback', 'ai-hub']);
+      if (classChanged || (slotChanged && !isEditingInput && !formTabs.has(this.activeTab))) {
+        this.refreshActiveTab();
+      }
     });
 
     // 4. Setup clock ticker
@@ -497,6 +510,12 @@ class AppState {
       this.updateNetworkBadge(true);
       this.showToast('網路連線已恢復 🌐', 'success');
       this.checkForUpdates(true);
+      if (window.feedbackBoard) {
+        window.feedbackBoard.syncFeedbacks(true);
+      }
+      if (window.appStore?.checkAndRunScheduledBackup) {
+        window.appStore.checkAndRunScheduledBackup('連線恢復定期備份');
+      }
     });
     window.addEventListener('offline', () => {
       this.updateNetworkBadge(false);
@@ -504,14 +523,26 @@ class AppState {
     });
     this.updateNetworkBadge(navigator.onLine);
 
-    // 7. Initial OTA check & tab resume check
+    // 7. Initial OTA check, Scheduled Cloud Backup & tab resume check
     setTimeout(() => {
       this.checkForUpdates(true);
     }, 1500);
 
+    setTimeout(() => {
+      if (window.appStore?.checkAndRunScheduledBackup) {
+        window.appStore.checkAndRunScheduledBackup('啟動定期備份');
+      }
+    }, 4000);
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         this.checkForUpdates(true);
+        if (window.feedbackBoard) {
+          window.feedbackBoard.syncFeedbacks(true);
+        }
+        if (window.appStore?.checkAndRunScheduledBackup) {
+          window.appStore.checkAndRunScheduledBackup('返回前景定期備份');
+        }
       }
     });
 
@@ -584,7 +615,11 @@ class AppState {
       const res = await fetch(`./version.json?t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const info = await res.json();
+        const lastSeenVersion = localStorage.getItem('classquant_last_seen_version');
         if (info.version && info.version !== this.appVersion) {
+          if (silent && lastSeenVersion === info.version) return;
+          const modal = document.getElementById('global-modal');
+          if (silent && modal && !modal.classList.contains('hidden')) return;
           this.showReleaseNotesModal(info, false);
         } else if (!silent) {
           this.showToast(`✅ 目前已是最新版本 (v${this.appVersion})`, 'success');
@@ -631,8 +666,12 @@ class AppState {
         </div>
 
         <div class="flex items-center justify-center gap-3">
+          <button onclick="localStorage.setItem('classquant_last_seen_version', '${info.version}'); appState.closeModal()"
+            class="px-4 py-3 rounded-2xl font-bold text-xs sm:text-sm ${isOAA ? 'bg-[#2a0f1f] text-amber-300 border border-amber-500/40 hover:bg-[#3a152b]' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} transition shrink-0 cursor-pointer">
+            稍後提醒
+          </button>
           <button onclick="appState.dismissReleaseNotes('${info.version}')" 
-            class="w-full py-3 rounded-2xl font-black text-white ${isOAA ? 'bg-gradient-to-r from-rose-900 via-rose-800 to-amber-700 hover:from-rose-800 hover:to-amber-600 border border-amber-400/60 shadow-lg text-amber-100 shadow-rose-950/50' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25'} transition text-sm flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+            class="flex-1 py-3 rounded-2xl font-black text-white ${isOAA ? 'bg-gradient-to-r from-rose-900 via-rose-800 to-amber-700 hover:from-rose-800 hover:to-amber-600 border border-amber-400/60 shadow-lg text-amber-100 shadow-rose-950/50' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25'} transition text-sm flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
             ${isOAA ? '<span>⚡ 確認系統升級並重載終端</span>' : '<span class="kitty-bow !w-3.5 !h-3.5"></span><span>✨ 立即更新並體驗最新功能！</span>'}
           </button>
         </div>
@@ -724,6 +763,20 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v1.9.23 -->
+          <div class="p-3.5 rounded-2xl border-2 border-emerald-400 ${isOAA ? 'bg-[#1a1829] text-white' : 'bg-emerald-50/70 text-slate-900'} shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs shadow-sm font-mono">
+                v1.9.23 (全站 19 項穩定性修復 • Google 試算表／表單定期雲端備份 • 既有老師資料 100% 完整保留)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-emerald-300' : 'text-emerald-700'} font-mono font-bold">2026-11-14</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【Google 雲端定期＆隨時備份中心】支援「Google 試算表 Apps Script（雙向分塊雲端快照＋一鍵還原）」與「Google 表單 formResponse 自動歸檔」兩種模式；可設定每天／每週自動排程備份、資料變動防抖自動備份，與手動立即備份，完整保存自訂標籤、班級名單、分數與記事。</li>
+              <li>• 【地毯式全站修復與現有資料保護】修復清晨 UTC 跨日、名單連行/空格解析與刪除串聯、成績單 CSV 匯入保留備註與引號跳脫、事後補記與記事檢索節次對齊、OAA 學生檔案五維雷達/EWMA 走勢圖補齊與 1-based 角色立繪、Toast 防閃爍、課表編輯器/標籤管理員高對比主題、以及本機 serve.ps1 UTF-8 中文解析與單筆 JSON 陣列問題，並嚴格確保現任老師已存檔資料零遺失。</li>
+            </ul>
           </div>
 
           <!-- v1.9.21 -->
@@ -1798,6 +1851,7 @@ class AppState {
       window.aiHub.render('ai-hub-view');
     } else if (this.activeTab === 'feedback-board' && window.feedbackBoard) {
       window.feedbackBoard.render('feedback-board-view');
+      window.feedbackBoard.syncFeedbacks(true);
     } else if (this.activeTab === 'guide') {
       window.userGuideView.render('user-guide-view');
     }
@@ -1944,8 +1998,10 @@ class AppState {
     toast.innerHTML = `<span>${message}</span>`;
     toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
 
-    setTimeout(() => {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
       toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      this.toastTimer = null;
     }, 3200);
   }
 

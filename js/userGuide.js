@@ -1,7 +1,7 @@
 /**
  * Visual Illustrated User Guide (圖文操作說明書)
  * Complete illustrated step-by-step manual including Roster Management,
- * Mobile 1-Second Zero-Scroll Mode, Timetable auto-switch, and NAS sync.
+ * Mobile 1-Second Zero-Scroll Mode, Timetable auto-switch, and Google Cloud backup.
  */
 
 class UserGuideView {
@@ -76,7 +76,7 @@ class UserGuideView {
                   <span class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">COTE VER.</span>
                 </div>
                 <p class="text-xs sm:text-sm text-amber-200/80 mt-1 font-medium">
-                  以實力至上主義為核心設計 • 課堂零滑動極速記點、S-SYSTEM 名冊匯入、學業品格雙軌量化與 NAS 資料流通
+                  以實力至上主義為核心設計 • 課堂零滑動極速記點、S-SYSTEM 名冊匯入、學業品格雙軌量化與 Google 雲端定期備份
                 </p>
               </div>
             </div>
@@ -100,7 +100,7 @@ class UserGuideView {
                   <span class="kitty-bow"></span>
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-                  以「人本」為核心設計 • 課堂 1~2 秒隨手記、全班名冊 1 秒批次導入、家長晤談與 NAS 家用同步
+                  以「人本」為核心設計 • 課堂 1~2 秒隨手記、全班名冊 1 秒批次導入、家長晤談與 Google 雲端定期備份
                 </p>
               </div>
             </div>
@@ -233,20 +233,20 @@ class UserGuideView {
           </div>
         </div>
 
-        <!-- Step 7: 家用 NAS 資料流通 -->
+        <!-- Step 7: Google 雲端定期備份 & JSON 本地同步 -->
         <div class="${isOAA ? cardClass : 'glass-card rounded-3xl p-6 border border-blue-200 flex flex-col justify-between bg-white shadow-sm'}">
           <div>
             <div class="flex items-center justify-between mb-3">
-              ${badgeStep('07', '資料同步', 'bg-blue-600')}
-              <i data-lucide="hard-drive" class="w-4 h-4 ${isOAA ? 'text-cyan-400' : 'text-blue-600'}"></i>
+              ${badgeStep('07', '雲端備份', 'bg-blue-600')}
+              <i data-lucide="cloud-upload" class="w-4 h-4 ${isOAA ? 'text-cyan-400' : 'text-blue-600'}"></i>
             </div>
-            <h3 class="${titleClass}">家用 NAS 資料同步與流通</h3>
+            <h3 class="${titleClass}">Google 雲端定期備份與 JSON 同步</h3>
             <p class="${subDescClass}">
-              在校用手機快速記點，回家利用 NAS 傳輸至電腦大螢幕：
+              在校用手機快速記點，自動定期備份至 Google 試算表／Google 表單，完整保護自訂標籤、名單與分數：
             </p>
             <div class="${innerBlueBoxClass}">
-              <div>• <strong>WebDAV 自動連線</strong>：設定群暉/威聯通網址，連上 Wi-Fi 一鍵同步。</div>
-              <div>• <strong>共享資料夾檔案流通</strong>：一鍵匯出同步包，存入 NAS 網路硬碟直接載入。</div>
+              <div>• <strong>Google 表單／試算表備份</strong>：支援手動立即備份、變動自動防抖備份，與每日／每週定期排程備份。</div>
+              <div>• <strong>完整雙向還原與 JSON 匯出</strong>：更換裝置時可一鍵從雲端快照或 .json 檔案無痛還原。</div>
             </div>
           </div>
         </div>

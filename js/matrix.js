@@ -395,9 +395,9 @@ class ClassroomMatrix {
   }
 
   toggleTagSortMode(classId) {
-    const currentMode = this.store.getTagSortMode();
+    const currentMode = this.store.getTagSortMode(classId);
     const newMode = currentMode === 'custom' ? 'frequency' : 'custom';
-    this.store.setTagSortMode(newMode);
+    this.store.setTagSortMode(newMode, classId);
     window.appState.showToast(`標籤排序已切換為：「${newMode === 'custom' ? '📌 依自訂清單順序' : '📊 依班級使用頻率'}」`, 'info');
     this.render('classroom-matrix-view', classId);
   }
@@ -447,14 +447,15 @@ class ClassroomMatrix {
     this.currentClassId = currentClassId;
 
     let cls = this.store.getClass(currentClassId);
+    const hasClearedAll = Boolean(this.store.data?.hasClearedAll || localStorage.getItem('classquant_user_cleared') === 'true');
     if (!cls) {
       const classKeys = Object.keys(this.store.getClasses());
       if (classKeys.length > 0) {
         currentClassId = classKeys[0];
         this.currentClassId = currentClassId;
         cls = this.store.getClass(currentClassId);
-      } else {
-        // Self-heal: initialize demo data so user is never stuck on an unrecoverable blank screen
+      } else if (!hasClearedAll) {
+        // Self-heal only on first-run empty storage (not after explicit user clearAll)
         this.store.initDemoData();
         const freshKeys = Object.keys(this.store.getClasses());
         if (freshKeys.length > 0) {
@@ -465,17 +466,24 @@ class ClassroomMatrix {
       }
       if (cls && window.appState) {
         window.appState.currentClassId = currentClassId;
-        window.appState.populateClassDropdown();
+        window.appState.renderClassDropdown();
       }
     }
     if (!cls) {
+      const isOAAEmpty = window.appStore && window.appStore.getTheme() === 'oaa';
       container.innerHTML = `
-        <div class="p-12 text-center text-slate-500 glass-card rounded-3xl">
-          <div class="sanrio-sticker-twinstars mb-3"></div>
-          <div class="text-base font-bold text-slate-700">尚未選擇班級或查無班級資料</div>
-          <button onclick="appStore.initDemoData(); matrixView.render('${containerId}')" class="mt-4 px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold shadow-sm cursor-pointer transition">
-            ✨ 自動建立並載入示範班級
-          </button>
+        <div class="p-10 sm:p-12 text-center glass-card rounded-3xl border ${isOAAEmpty ? 'bg-[#240e1b] border-amber-500/40 text-white' : 'bg-white border-pink-200 text-slate-600'}">
+          ${isOAAEmpty ? '<div class="text-4xl mb-3">🏛️</div>' : '<div class="sanrio-sticker-twinstars mb-3"></div>'}
+          <div class="text-base sm:text-lg font-black ${isOAAEmpty ? 'text-amber-300' : 'text-slate-800'}">目前尚無班級資料（已清空為新學年模式）</div>
+          <p class="text-xs ${isOAAEmpty ? 'text-amber-100/80' : 'text-slate-500'} mt-1.5 font-medium">您可以前往「👥 班級名單」新增自己的班級與名單，或重新載入示範資料體驗</p>
+          <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button onclick="appState.switchTab('roster')" class="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl font-black text-xs sm:text-sm shadow-md cursor-pointer transition">
+              ➕ 前往建立我的班級
+            </button>
+            <button onclick="appStore.resetToDemo(); appState.renderClassDropdown(); matrixView.render('${containerId}')" class="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl font-bold text-xs shadow-sm cursor-pointer transition">
+              ✨ 載入示範班級
+            </button>
+          </div>
         </div>
       `;
       return;
@@ -490,8 +498,8 @@ class ClassroomMatrix {
     const seatOrder = layout.seatOrder || students.map(s => s.seatNo);
     const overview = this.stats.getClassOverview(currentClassId);
     
-    // Tag Sorting
-    const sortMode = this.store.getTagSortMode();
+    // Tag Sorting (Pass currentClassId for Homeroom vs Subject isolation)
+    const sortMode = this.store.getTagSortMode(currentClassId);
     const sortedTags = this.store.getTagsSorted(currentClassId);
     const isHomeroom = cls.type === 'homeroom';
     const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
@@ -607,13 +615,12 @@ class ClassroomMatrix {
 
       <!-- Quick Group / Row / Gender Select Drawer -->
       <div id="matrix-quick-select-drawer" class="${this.showQuickSelectBar ? '' : 'hidden'} p-2 rounded-2xl ${isOAA ? 'bg-[#240e1b] border border-amber-500/40 text-slate-200' : 'bg-pink-50 border border-pink-200 text-slate-800'} mb-2.5 flex flex-wrap items-center justify-between gap-1.5 text-xs">
-        <div class="flex items-center space-x-1">
+        <div class="flex flex-wrap items-center gap-1">
           <span class="font-bold ${isOAA ? 'text-amber-300' : 'text-pink-900'} text-[11px]">橫排選取：</span>
-          <button onclick="matrixView.selectRow(1)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第1排</button>
-          <button onclick="matrixView.selectRow(2)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第2排</button>
-          <button onclick="matrixView.selectRow(3)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第3排</button>
-          <button onclick="matrixView.selectRow(4)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第4排</button>
-          <button onclick="matrixView.selectRow(5)" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第5排</button>
+          ${Array.from({ length: Math.max(5, Math.ceil(seatOrder.length / cols)) }, (_, idx) => {
+            const rowNum = idx + 1;
+            return `<button onclick="matrixView.selectRow(${rowNum})" class="px-2 py-0.5 rounded-lg ${isOAA ? 'bg-[#180711] border border-amber-700 text-amber-200' : 'bg-white border border-pink-200 text-slate-800'} font-bold">第${rowNum}排</button>`;
+          }).join('')}
         </div>
         <div class="flex items-center space-x-1">
           <span class="font-bold ${isOAA ? 'text-amber-300' : 'text-pink-900'} text-[11px]">性別：</span>
@@ -973,34 +980,41 @@ class ClassroomMatrix {
     const activeSlot = this.timetable.detectActiveSlot();
     const period = activeSlot.period !== null ? activeSlot.period : 1;
 
-    let appliedCount = 0;
-    this.selectedSeats.forEach(seatNo => {
-      this.store.addEvent({
-        classId,
-        seatNo,
-        period,
-        tagId: tag.id,
-        tagName: tag.name,
-        category: tag.category,
-        delta: tag.delta,
-        severity: tag.severity,
-        note: `課堂記點：${tag.name}`
+    try {
+      let appliedCount = 0;
+      const seatsToProcess = Array.from(this.selectedSeats);
+
+      seatsToProcess.forEach(seatNo => {
+        this.store.addEvent({
+          classId,
+          seatNo,
+          period,
+          tagId: tag.id,
+          tagName: tag.name,
+          category: tag.category,
+          delta: tag.delta,
+          severity: tag.severity,
+          note: `課堂記點：${tag.name}`
+        });
+
+        appliedCount++;
       });
 
-      this.showFloatingBubble(seatNo, tag.delta);
-      appliedCount++;
-    });
+      // Sound effect
+      if (tag.delta > 0 && window.appState?.playChime) {
+        window.appState.playChime();
+      } else if (tag.delta < 0 && window.appState?.playWarning) {
+        window.appState.playWarning();
+      }
 
-    // Sound effect
-    if (tag.delta > 0 && window.appState?.playChime) {
-      window.appState.playChime();
-    } else if (tag.delta < 0 && window.appState?.playWarning) {
-      window.appState.playWarning();
+      window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+    } catch (err) {
+      console.error('[ClassroomMatrix] applyTagToSelected error:', err);
+    } finally {
+      this.clearSelection(classId);
+      this.render('classroom-matrix-view', classId);
+      seatsToProcess.forEach(seatNo => this.showFloatingBubble(seatNo, tag.delta));
     }
-
-    window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
-    this.clearSelection();
-    this.render('classroom-matrix-view', classId);
   }
 
   showFloatingBubble(seatNo, delta) {
@@ -1029,18 +1043,19 @@ class ClassroomMatrix {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = window.getLocalDateStr();
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
 
     modalContent.innerHTML = `
-      <div class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
+      <div class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
         <div class="flex items-center space-x-3 mb-4">
-          <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+          ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">⏰</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
           <div>
-            <h3 class="text-xl font-black text-slate-900 flex items-center gap-1.5">
+            <h3 class="text-xl font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
               ⏰ 課堂事後快速補記助手
-              <span class="kitty-bow"></span>
+              ${isOAA ? '' : '<span class="kitty-bow"></span>'}
             </h3>
-            <p class="text-xs text-slate-600">上課當下無法分心操作？放學或下課後，在此一次快速回憶補登學生事件與點數！</p>
+            <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'}">上課當下無法分心操作？放學或下課後，在此一次快速回憶補登學生事件與點數！</p>
           </div>
         </div>
 
@@ -1048,12 +1063,12 @@ class ClassroomMatrix {
           <!-- When (Date & Period) -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">發生日期</label>
-              <input type="date" id="retro-date" value="${today}" required class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">發生日期</label>
+              <input type="date" id="retro-date" value="${today}" required class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">課堂節次</label>
-              <select id="retro-period" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">課堂節次</label>
+              <select id="retro-period" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
                 <option value="0">早自習 / 晨讀</option>
                 <option value="1">第 1 節</option>
                 <option value="2" selected>第 2 節</option>
@@ -1063,6 +1078,7 @@ class ClassroomMatrix {
                 <option value="5">第 5 節</option>
                 <option value="6">第 6 節</option>
                 <option value="7">第 7 節</option>
+                <option value="clean">整潔活動</option>
                 <option value="8">第 8 節 / 放學</option>
               </select>
             </div>
@@ -1071,14 +1087,14 @@ class ClassroomMatrix {
           <!-- Who (Select multiple students) -->
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700">選擇學生 (可多選)</label>
-              <span class="text-[11px] text-pink-600 font-bold">點選學生頭像或姓名</span>
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">選擇學生 (可多選)</label>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-pink-600'} font-bold">點選學生頭像或姓名</span>
             </div>
-            <div class="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl border border-pink-200 bg-pink-50/50">
+            <div class="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
               ${students.map(s => `
-                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-1 rounded-lg hover:bg-pink-100 transition">
+                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-1 rounded-lg ${isOAA ? 'hover:bg-rose-950/80' : 'hover:bg-pink-100'} transition">
                   <input type="checkbox" name="retro_seats" value="${s.seatNo}" class="rounded text-pink-600 focus:ring-pink-500">
-                  <span class="font-black text-slate-900">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
+                  <span class="font-black ${isOAA ? 'text-white' : 'text-slate-900'}">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
                 </label>
               `).join('')}
             </div>
@@ -1086,8 +1102,8 @@ class ClassroomMatrix {
 
           <!-- What (Tag Selection) -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">選擇行為標籤</label>
-            <select id="retro-tag" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-bold bg-white">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">選擇行為標籤</label>
+            <select id="retro-tag" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
               ${tags.map(t => `
                 <option value="${t.id}" data-name="${t.name}" data-delta="${t.delta}" data-category="${t.category}" data-severity="${t.severity}">
                   ${t.name} (${t.delta > 0 ? '+' : ''}${t.delta} 分)
@@ -1098,12 +1114,12 @@ class ClassroomMatrix {
 
           <!-- Detail Note -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">詳細事證或回憶備忘 (選填)</label>
-            <input type="text" id="retro-note" placeholder="如：第2節解出三角幾何難題 / 吵鬧制止後配合良好..." class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:border-pink-500">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">詳細事證或回憶備忘 (選填)</label>
+            <input type="text" id="retro-note" placeholder="如：第2節解出三角幾何難題 / 吵鬧制止後配合良好..." class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-pink-500">
           </div>
 
           <div class="flex items-center justify-end space-x-3 pt-2">
-            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-300 hover:text-white' : 'text-slate-600'}">取消</button>
             <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl shadow-md flex items-center gap-1.5">
               <i data-lucide="check" class="w-4 h-4"></i> 快速批次補記
             </button>
@@ -1171,28 +1187,30 @@ class ClassroomMatrix {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     modalContent.innerHTML = `
-      <div class="text-center p-6">
+      <div class="text-center p-6 ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
         <div class="flex justify-center mb-3">
-          <div class="sanrio-twinstars-badge !w-16 !h-16"></div>
+          ${isOAA ? '<span class="text-4xl p-3 rounded-2xl bg-black/40 border border-amber-500/50">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-16 !h-16"></div>'}
         </div>
-        <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 text-pink-600">
-          三麗鷗幸運抽籤點名
-          <span class="kitty-bow"></span>
+        <h3 class="text-xl sm:text-2xl font-black mb-1 flex items-center justify-center gap-2 ${isOAA ? 'text-amber-300' : 'text-pink-600'}">
+          ${isOAA ? 'S-SYSTEM 隨機指派抽取' : '三麗鷗幸運抽籤點名'}
+          ${isOAA ? '' : '<span class="kitty-bow"></span>'}
         </h3>
-        <p class="text-xs text-slate-600 mb-5 font-medium">隨機抽取一位同學上台解題或口頭回答</p>
+        <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'} mb-5 font-medium">隨機抽取一位同學上台解題或口頭回答</p>
 
         <!-- Big Display Card -->
-        <div id="picker-result-box" class="glass-card rounded-2xl p-5 border-2 border-dashed border-pink-300 mb-5 flex flex-col items-center justify-center min-h-[140px] bg-pink-50/50">
-          <span class="text-slate-500 text-sm font-bold">點擊下方開始抽取</span>
+        <div id="picker-result-box" class="glass-card rounded-2xl p-5 border-2 border-dashed ${isOAA ? 'border-amber-500/50 bg-[#12050c]' : 'border-pink-300 bg-pink-50/50'} mb-5 flex flex-col items-center justify-center min-h-[140px]">
+          <span class="${isOAA ? 'text-amber-200/70' : 'text-slate-500'} text-sm font-bold">點擊下方開始抽取</span>
         </div>
 
         <div class="flex items-center justify-center gap-3">
           <button id="btn-start-pick" onclick="matrixView.runPickerAnimation('${classId}')" 
-            class="px-6 py-2.5 rounded-2xl font-black text-white bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 shadow-lg shadow-pink-500/25 transition flex items-center gap-2 text-sm">
+            class="px-6 py-2.5 rounded-2xl font-black text-white ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 hover:from-amber-500 hover:to-rose-600 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'} shadow-lg shadow-pink-500/25 transition flex items-center gap-2 text-sm">
             <i data-lucide="play" class="w-4 h-4"></i> 開始抽籤
           </button>
-          <button onclick="window.appState.closeModal()" class="px-5 py-2.5 rounded-2xl font-bold border border-pink-300 text-slate-700 hover:bg-pink-50 transition text-sm">
+          <button onclick="window.appState.closeModal()" class="px-5 py-2.5 rounded-2xl font-bold border ${isOAA ? 'border-amber-500/50 text-amber-200 hover:bg-rose-950' : 'border-pink-300 text-slate-700 hover:bg-pink-50'} transition text-sm">
             關閉
           </button>
         </div>
@@ -1217,9 +1235,10 @@ class ClassroomMatrix {
     const interval = setInterval(() => {
       const randIdx = Math.floor(Math.random() * students.length);
       const tempStudent = students[randIdx];
+      const isOAARun = window.appStore && window.appStore.getTheme() === 'oaa';
       box.innerHTML = `
-        <div class="text-3xl font-black text-pink-600 animate-pulse">${String(tempStudent.seatNo).padStart(2, '0')} 號</div>
-        <div class="text-lg font-black mt-1 text-slate-800">${tempStudent.name}</div>
+        <div class="text-3xl font-black ${isOAARun ? 'text-amber-300' : 'text-pink-600'} animate-pulse">${String(tempStudent.seatNo).padStart(2, '0')} 號</div>
+        <div class="text-lg font-black mt-1 ${isOAARun ? 'text-white' : 'text-slate-800'}">${tempStudent.name}</div>
       `;
       count++;
 
@@ -1230,12 +1249,12 @@ class ClassroomMatrix {
 
         const chosenStudent = students[Math.floor(Math.random() * students.length)];
         box.innerHTML = `
-          <div class="text-4xl font-black text-pink-600 drop-shadow-sm">🌟 ${String(chosenStudent.seatNo).padStart(2, '0')} 號</div>
-          <div class="text-xl font-black mt-1 text-slate-900">${chosenStudent.name}</div>
+          <div class="text-4xl font-black ${isOAARun ? 'text-amber-300' : 'text-pink-600'} drop-shadow-sm">🌟 ${String(chosenStudent.seatNo).padStart(2, '0')} 號</div>
+          <div class="text-xl font-black mt-1 ${isOAARun ? 'text-white' : 'text-slate-900'}">${chosenStudent.name}</div>
           
           <div class="flex items-center gap-2 mt-4">
-            <button onclick="matrixView.quickAwardPicker('${classId}', ${chosenStudent.seatNo}, 2, '抽籤解題優異')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition shadow-sm">
-              +2 解題優異
+            <button onclick="matrixView.quickAwardPicker('${classId}', ${chosenStudent.seatNo}, 1, '抽籤解題優異')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black hover:bg-emerald-100 transition shadow-sm">
+              +1 解題優異
             </button>
             <button onclick="matrixView.quickAwardPicker('${classId}', ${chosenStudent.seatNo}, -1, '抽籤分心未答')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-300 text-xs font-black hover:bg-rose-100 transition shadow-sm">
               -1 分心/未答
@@ -1279,24 +1298,26 @@ class ClassroomMatrix {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+
     modalContent.innerHTML = `
-      <div class="p-6 max-h-[85vh] overflow-y-auto">
+      <div class="p-6 max-h-[85vh] overflow-y-auto ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
         <div class="flex items-center space-x-3 mb-4">
-          <div class="sanrio-kuromi-badge !w-12 !h-12"></div>
+          ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">⚠️</span>' : '<div class="sanrio-kuromi-badge !w-12 !h-12"></div>'}
           <div>
-            <h3 class="text-xl font-black text-slate-900">重大常規 / 同儕衝突事件記錄</h3>
-            <p class="text-xs text-slate-600">客觀記錄違紀或推擠衝突，作為日後家長晤談與輔導之具體事證</p>
+            <h3 class="text-xl font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'}">重大常規 / 同儕衝突事件記錄</h3>
+            <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'}">客觀記錄違紀或推擠衝突，作為日後家長晤談與輔導之具體事證</p>
           </div>
         </div>
 
         <form id="conflict-form" onsubmit="matrixView.saveConflictEvent(event, '${classId}')" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">涉事學生 (可複選)</label>
-            <div class="grid grid-cols-5 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl border border-pink-200 bg-pink-50/50">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">涉事學生 (可複選)</label>
+            <div class="grid grid-cols-5 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
               ${students.map(s => `
                 <label class="flex items-center space-x-1 text-xs cursor-pointer">
                   <input type="checkbox" name="involved_seats" value="${s.seatNo}" class="rounded text-rose-600 focus:ring-rose-500">
-                  <span class="font-bold text-slate-800">${String(s.seatNo).padStart(2, '0')} ${s.name.slice(0, 2)}</span>
+                  <span class="font-bold ${isOAA ? 'text-white' : 'text-slate-800'}">${String(s.seatNo).padStart(2, '0')} ${s.name.slice(0, 2)}</span>
                 </label>
               `).join('')}
             </div>
@@ -1304,8 +1325,8 @@ class ClassroomMatrix {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">事件類型</label>
-              <select id="conflict-type" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs focus:outline-none bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">事件類型</label>
+              <select id="conflict-type" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-200 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs focus:outline-none">
                 <option value="soc_phys_fight">肢體衝突 / 推擠打架 (-5分)</option>
                 <option value="soc_verbal_fight">同儕重大言語口角 (-3分)</option>
                 <option value="soc_property_damage">毀損公物 / 破壞私物 (-5分)</option>
@@ -1313,8 +1334,8 @@ class ClassroomMatrix {
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">發生節次</label>
-              <select id="conflict-period" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs focus:outline-none bg-white">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">發生節次</label>
+              <select id="conflict-period" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-200 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs focus:outline-none">
                 <option value="0">早自習</option>
                 <option value="1">第 1 節</option>
                 <option value="2">第 2 節</option>
@@ -1330,12 +1351,12 @@ class ClassroomMatrix {
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">事證詳細記錄</label>
-            <textarea id="conflict-notes" rows="3" required placeholder="例：午休因借球起口角推擠，雙方帶至辦公室冷靜..." class="w-full border border-pink-200 rounded-xl p-3 text-xs focus:outline-none bg-white"></textarea>
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">事證詳細記錄</label>
+            <textarea id="conflict-notes" rows="3" required placeholder="例：午休因借球起口角推擠，雙方帶至辦公室冷靜..." class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-200 bg-white text-slate-900'} rounded-xl p-3 text-xs focus:outline-none"></textarea>
           </div>
 
           <div class="flex items-center justify-end space-x-3 pt-2">
-            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
+            <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-300 hover:text-white' : 'text-slate-600'}">取消</button>
             <button type="submit" class="px-5 py-2 text-xs font-black text-white bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 rounded-xl shadow-md">確實記錄並扣點</button>
           </div>
         </form>
@@ -1380,7 +1401,6 @@ class ClassroomMatrix {
         severity: 'critical',
         note: `[重大事件] ${notes} (涉案座號: ${seats.join(', ')})`
       });
-      this.showFloatingBubble(seatNo, tag.delta);
     });
 
     if (window.appState?.playWarning) window.appState.playWarning();
@@ -1388,6 +1408,7 @@ class ClassroomMatrix {
     window.appState.showToast(`已確實記錄座號 ${seats.join(', ')} 重大事件`, 'success');
     window.appState.closeModal();
     this.render('classroom-matrix-view', classId);
+    seats.forEach(seatNo => this.showFloatingBubble(seatNo, tag.delta));
   }
 
   getCoteCharName(index) {

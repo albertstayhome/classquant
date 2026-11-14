@@ -2,7 +2,7 @@
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v131';
+const CACHE_NAME = 'classquant-hub-v135';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -119,6 +119,8 @@ const ASSETS_TO_CACHE = [
   './js/onboardingWizard.js',
   './js/userGuide.js',
   './js/app.js',
+  './data/cloud_config.json',
+  './data/feedback.json',
   './assets/images/twin_stars.png',
   './使用指南_圖文說明書.html'
 ];
@@ -128,7 +130,9 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map((assetUrl) => cache.add(assetUrl).catch(() => null))
+      );
     })
   );
 });
@@ -154,6 +158,7 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Strategy: Network-First for HTML/JSON & versioned assets (Instant OTA), Stale-While-Revalidate for unversioned static
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   const isHtmlOrJson = url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname.endsWith('/');
   const hasVersionParam = url.searchParams.has('v');
@@ -169,7 +174,11 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request, { ignoreSearch: true }).then(res => res || (isHtmlOrJson ? caches.match('./index.html') : null)))
+        .catch(() => caches.match(event.request, { ignoreSearch: true }).then((res) => {
+          if (res) return res;
+          if (isHtmlOrJson) return caches.match('./index.html').then((idx) => idx || new Response('Offline', { status: 503, statusText: 'Offline' }));
+          return new Response('', { status: 503, statusText: 'Offline' });
+        }))
     );
   } else {
     // Stale-While-Revalidate: Return cache immediately with ignoreSearch, fetch fresh copy in background
@@ -181,7 +190,7 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
           }
           return networkResponse;
-        }).catch(() => null);
+        }).catch(() => cachedResponse || new Response('', { status: 503, statusText: 'Offline' }));
 
         return cachedResponse || fetchPromise;
       })

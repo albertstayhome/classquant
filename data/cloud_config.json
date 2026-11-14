@@ -1,0 +1,11 @@
+{
+  "configVersion": 2,
+  "webhookUrl": "https://script.google.com/macros/s/AKfycbzpsAJC6OG1eDDHxW3ElG0PcAg4wq6VCOyvxT5bl6nEXbKlcIv2aWspGWFNLxt7B1nbmQ/exec",
+  "googleFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSfOJ33leYejNB1dtQXTO-x73v4rXJTBG5f4OortphXkauqx9Q/formResponse",
+  "formEntryId": "entry.1168380196",
+  "formSummaryEntryId": "entry.1438513778",
+  "defaultBackupMode": "form",
+  "defaultSchedule": "daily",
+  "autoSyncOnLoad": true,
+  "lastSyncTime": "2026-11-14T23:15:30+08:00"
+}

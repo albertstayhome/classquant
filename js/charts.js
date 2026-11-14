@@ -39,16 +39,17 @@ class DashboardCharts {
   renderSingleClassDashboard(container, classId) {
     const overview = this.stats.getClassOverview(classId);
     const cls = this.store.getClass(classId);
+    const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
     container.innerHTML = `
       <!-- Sub-Tab Mode Switcher -->
-      <div class="flex items-center justify-between gap-3 mb-5 p-2 rounded-2xl bg-white border border-pink-200 shadow-sm">
+      <div class="flex items-center justify-between gap-3 mb-5 p-2 rounded-2xl ${isOAA ? 'bg-[#240b18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm">
         <div class="flex items-center space-x-2">
-          <button onclick="dashboardCharts.switchDashboardMode('single', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-pink-500 text-white shadow-md transition flex items-center gap-1.5">
+          <button onclick="dashboardCharts.switchDashboardMode('single', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black ${isOAA ? 'bg-amber-500 text-[#1a0713]' : 'bg-pink-500 text-white'} shadow-md transition flex items-center gap-1.5">
             <i data-lucide="user" class="w-4 h-4"></i> 📌 單班深度診斷 (${cls ? cls.name : classId})
           </button>
-          <button onclick="dashboardCharts.switchDashboardMode('multi', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-pink-50 hover:bg-pink-100 text-pink-900 border border-pink-200 transition flex items-center gap-1.5">
-            <i data-lucide="layers" class="w-4 h-4 text-pink-600"></i> 🌐 跨班級橫向比較 & 作業教學建議
+          <button onclick="dashboardCharts.switchDashboardMode('multi', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold ${isOAA ? 'bg-[#351425] hover:bg-[#481a35] text-amber-200 border border-amber-500/30' : 'bg-pink-50 hover:bg-pink-100 text-pink-900 border border-pink-200'} transition flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-4 h-4 ${isOAA ? 'text-amber-300' : 'text-pink-600'}"></i> 🌐 跨班級橫向比較 & 作業教學建議
           </button>
         </div>
       </div>
@@ -208,7 +209,7 @@ class DashboardCharts {
               </span>
             </h3>
             <p class="text-xs ${isOAA ? 'text-amber-300/70' : 'text-slate-500'} font-medium">
-              綜合實力 = 學業均分 (70%) + 品格常規 (30%) • 點選任一同學可直達專屬個人檔案
+              綜合評比 = 學業均分×10 + 品格常規淨積分 • 點選任一同學可直達專屬個人檔案
             </p>
           </div>
         </div>
@@ -375,20 +376,21 @@ class DashboardCharts {
     const sortedByAvg = [...multi.strategies].sort((a, b) => b.avgScore - a.avgScore);
     const topClass = sortedByAvg[0] || {};
     const mostEngagedClass = [...multi.strategies].sort((a, b) => b.avgEng - a.avgEng)[0] || {};
+    const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
     container.innerHTML = `
       <!-- Sub-Tab Mode Switcher -->
-      <div class="flex items-center justify-between gap-3 mb-5 p-2 rounded-2xl bg-white border border-pink-200 shadow-sm">
+      <div class="flex items-center justify-between gap-3 mb-5 p-2 rounded-2xl ${isOAA ? 'bg-[#240b18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm flex-wrap">
         <div class="flex items-center space-x-2">
-          <button onclick="dashboardCharts.switchDashboardMode('single', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-pink-50 hover:bg-pink-100 text-pink-900 border border-pink-200 transition flex items-center gap-1.5">
-            <i data-lucide="user" class="w-4 h-4 text-pink-600"></i> 📌 單班深度診斷
+          <button onclick="dashboardCharts.switchDashboardMode('single', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold ${isOAA ? 'bg-[#351425] hover:bg-[#481a35] text-amber-200 border border-amber-500/30' : 'bg-pink-50 hover:bg-pink-100 text-pink-900 border border-pink-200'} transition flex items-center gap-1.5">
+            <i data-lucide="user" class="w-4 h-4 ${isOAA ? 'text-amber-300' : 'text-pink-600'}"></i> 📌 單班深度診斷
           </button>
-          <button onclick="dashboardCharts.switchDashboardMode('multi', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-pink-500 text-white shadow-md transition flex items-center gap-1.5">
+          <button onclick="dashboardCharts.switchDashboardMode('multi', '${classId}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black ${isOAA ? 'bg-amber-500 text-[#1a0713]' : 'bg-pink-500 text-white'} shadow-md transition flex items-center gap-1.5">
             <i data-lucide="layers" class="w-4 h-4"></i> 🌐 跨班級橫向比較 & 作業教學建議
           </button>
         </div>
 
-        <button onclick="dashboardCharts.copyTeachingStrategyReport()" class="px-3.5 py-1.5 rounded-xl bg-pink-100 text-pink-800 border border-pink-300 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1">
+        <button onclick="dashboardCharts.copyTeachingStrategyReport()" class="px-3.5 py-1.5 rounded-xl ${isOAA ? 'bg-[#351425] text-amber-300 border border-amber-500/40 hover:bg-[#481a35]' : 'bg-pink-100 text-pink-800 border border-pink-300 hover:bg-pink-200'} text-xs font-bold transition flex items-center gap-1">
           <i data-lucide="copy" class="w-3.5 h-3.5"></i> 一鍵複製跨班教學決策報告
         </button>
       </div>
@@ -561,22 +563,36 @@ class DashboardCharts {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: (this.store?.getTheme() === 'oaa') ? '#fde68a' : '#475569',
+              font: { size: 11, weight: 'bold' }
+            }
+          }
+        },
         scales: {
-          x: { grid: { display: false } },
+          x: {
+            grid: { display: false },
+            ticks: { color: (this.store?.getTheme() === 'oaa') ? '#e2e8f0' : '#475569' }
+          },
           y: {
             type: 'linear',
             display: true,
             position: 'left',
             min: 0,
             max: 100,
-            title: { display: true, text: '學業均分 (分)', color: '#2563eb', font: { size: 11, weight: 'bold' } }
+            ticks: { color: (this.store?.getTheme() === 'oaa') ? '#93c5fd' : '#2563eb' },
+            grid: { color: (this.store?.getTheme() === 'oaa') ? 'rgba(245, 158, 11, 0.14)' : 'rgba(148, 163, 184, 0.15)' },
+            title: { display: true, text: '學業均分 (分)', color: (this.store?.getTheme() === 'oaa') ? '#60a5fa' : '#2563eb', font: { size: 11, weight: 'bold' } }
           },
           y1: {
             type: 'linear',
             display: true,
             position: 'right',
+            ticks: { color: (this.store?.getTheme() === 'oaa') ? '#fda4af' : '#ff4d6d' },
             grid: { drawOnChartArea: false },
-            title: { display: true, text: '常規積分 (點)', color: '#ff4d6d', font: { size: 11, weight: 'bold' } }
+            title: { display: true, text: '常規積分 (點)', color: (this.store?.getTheme() === 'oaa') ? '#fb7185' : '#ff4d6d', font: { size: 11, weight: 'bold' } }
           }
         }
       }
@@ -587,6 +603,7 @@ class DashboardCharts {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
     this.destroyChart(canvasId);
+    const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
     const colors = [
       { bg: 'rgba(255, 77, 109, 0.2)', border: '#ff4d6d' },
@@ -625,12 +642,19 @@ class DashboardCharts {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: isOAA ? '#fde68a' : '#475569', font: { size: 11, weight: 'bold' } }
+          }
+        },
         scales: {
           r: {
             min: 0,
             max: 100,
+            angleLines: { color: isOAA ? 'rgba(245, 158, 11, 0.25)' : 'rgba(148, 163, 184, 0.2)' },
+            grid: { color: isOAA ? 'rgba(245, 158, 11, 0.2)' : 'rgba(148, 163, 184, 0.2)' },
             ticks: { display: false },
-            pointLabels: { font: { size: 11, weight: 'bold' } }
+            pointLabels: { color: isOAA ? '#fde68a' : '#475569', font: { size: 11, weight: 'bold' } }
           }
         }
       }
@@ -648,8 +672,12 @@ class DashboardCharts {
       report += `• 教學節奏改良：${s.teachingStyle}\n\n`;
     });
 
-    navigator.clipboard.writeText(report);
-    window.appState.showToast('已複製跨班教學決策報告至剪貼簿！', 'success');
+    if (window.copyTextSafe) {
+      window.copyTextSafe(report, '已複製跨班教學決策報告至剪貼簿！');
+    } else {
+      navigator.clipboard.writeText(report);
+      window.appState?.showToast('已複製跨班教學決策報告至剪貼簿！', 'success');
+    }
   }
 
   renderQuadrantScatter(canvasId, overview, classId) {
@@ -691,7 +719,9 @@ class DashboardCharts {
           if (elements.length > 0) {
             const idx = elements[0].index;
             const pt = dataPoints[idx];
-            matrixView.openStudentDetail(classId, pt.seatNo);
+            if (pt) {
+              this.jumpToStudentDossier(classId, pt.seatNo);
+            }
           }
         },
         plugins: {
@@ -725,6 +755,7 @@ class DashboardCharts {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
     this.destroyChart(canvasId);
+    const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
     const scores = overview.studentProfiles.map(p => p.scoreMean);
     const bins = ['0-59 (需補救)', '60-69 (基礎)', '70-79 (穩健)', '80-89 (優良)', '90-100 (頂尖)'];
@@ -760,11 +791,14 @@ class DashboardCharts {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false } },
+          x: {
+            grid: { display: false },
+            ticks: { color: isOAA ? '#fde68a' : '#475569' }
+          },
           y: {
             beginAtZero: true,
-            ticks: { stepSize: 1 },
-            grid: { color: 'rgba(255, 117, 143, 0.1)' }
+            ticks: { stepSize: 1, color: isOAA ? '#e2e8f0' : '#475569' },
+            grid: { color: isOAA ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 117, 143, 0.1)' }
           }
         }
       }
@@ -772,6 +806,7 @@ class DashboardCharts {
   }
 
   renderStudentDetailCharts(radarCanvasId, ewmaCanvasId, profile) {
+    const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
     const radarCtx = document.getElementById(radarCanvasId);
     if (radarCtx) {
       this.destroyChart(radarCanvasId);
@@ -788,12 +823,12 @@ class DashboardCharts {
               profile.radar.discipline,
               profile.radar.socialEmotional
             ],
-            backgroundColor: 'rgba(255, 117, 143, 0.3)',
-            borderColor: '#ff4d6d',
-            pointBackgroundColor: '#c9184a',
+            backgroundColor: isOAA ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 117, 143, 0.3)',
+            borderColor: isOAA ? '#f59e0b' : '#ff4d6d',
+            pointBackgroundColor: isOAA ? '#fde047' : '#c9184a',
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: '#c9184a'
+            pointHoverBorderColor: isOAA ? '#f59e0b' : '#c9184a'
           }]
         },
         options: {
@@ -802,9 +837,9 @@ class DashboardCharts {
           plugins: { legend: { display: false } },
           scales: {
             r: {
-              angleLines: { color: 'rgba(255, 117, 143, 0.2)' },
-              grid: { color: 'rgba(255, 117, 143, 0.15)' },
-              pointLabels: { color: '#475569', font: { size: 11, weight: '700' } },
+              angleLines: { color: isOAA ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 117, 143, 0.2)' },
+              grid: { color: isOAA ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 117, 143, 0.15)' },
+              pointLabels: { color: isOAA ? '#fde68a' : '#475569', font: { size: 11, weight: '700' } },
               ticks: { display: false, min: 0, max: 100 }
             }
           }
@@ -825,7 +860,7 @@ class DashboardCharts {
             {
               label: '原始小考分數',
               data: profile.rawScores,
-              borderColor: 'rgba(148, 163, 184, 0.8)',
+              borderColor: isOAA ? 'rgba(203, 213, 225, 0.8)' : 'rgba(148, 163, 184, 0.8)',
               backgroundColor: 'rgba(148, 163, 184, 0.2)',
               borderDash: [4, 4],
               pointRadius: 4,
@@ -835,11 +870,11 @@ class DashboardCharts {
             {
               label: 'EWMA 平滑走勢線',
               data: profile.ewmaScores,
-              borderColor: '#ff4d6d',
-              backgroundColor: 'rgba(255, 117, 143, 0.15)',
+              borderColor: isOAA ? '#f59e0b' : '#ff4d6d',
+              backgroundColor: isOAA ? 'rgba(245, 158, 11, 0.18)' : 'rgba(255, 117, 143, 0.15)',
               borderWidth: 3,
               pointRadius: 5,
-              pointBackgroundColor: '#ff4d6d',
+              pointBackgroundColor: isOAA ? '#fbbf24' : '#ff4d6d',
               fill: true,
               tension: 0.3
             }
@@ -850,15 +885,19 @@ class DashboardCharts {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              labels: { color: '#475569', font: { size: 11, weight: '600' } }
+              labels: { color: isOAA ? '#fde68a' : '#475569', font: { size: 11, weight: '600' } }
             }
           },
           scales: {
-            x: { grid: { color: 'rgba(255, 117, 143, 0.1)' } },
+            x: {
+              ticks: { color: isOAA ? '#e2e8f0' : '#475569' },
+              grid: { color: isOAA ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 117, 143, 0.1)' }
+            },
             y: {
               min: 0,
               max: 100,
-              grid: { color: 'rgba(255, 117, 143, 0.1)' }
+              ticks: { color: isOAA ? '#e2e8f0' : '#475569' },
+              grid: { color: isOAA ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 117, 143, 0.1)' }
             }
           }
         }

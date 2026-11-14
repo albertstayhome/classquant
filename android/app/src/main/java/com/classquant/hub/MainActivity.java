@@ -2,16 +2,22 @@ package com.classquant.hub;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -19,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ValueCallback<Uri[]> filePathCallback;
+    private ActivityResultLauncher<Intent> fileChooserLauncher;
 
     // Remote Hosted URL for Instant OTA Live Updates (or local fallback)
     // Replace with your GitHub Pages URL, Vercel, or NAS Web URL:
@@ -30,9 +38,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        fileChooserLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (filePathCallback == null) return;
+                Uri[] uris = WebChromeClient.FileChooserParams.parseResult(result.getResultCode(), result.getData());
+                filePathCallback.onReceiveValue(uris);
+                filePathCallback = null;
+            }
+        );
+
         webView = new WebView(this);
         swipeRefreshLayout = new SwipeRefreshLayout(this);
         swipeRefreshLayout.addView(webView);
+        swipeRefreshLayout.setOnChildScrollUpCallback((parent, child) -> webView.getScrollY() > 0);
         setContentView(swipeRefreshLayout);
 
         // Configure WebView Settings
@@ -53,12 +72,36 @@ public class MainActivity extends AppCompatActivity {
             settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK); // Use local offline cache
         }
 
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams fileChooserParams) {
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
+                }
+                filePathCallback = callback;
+                try {
+                    Intent intent = fileChooserParams.createIntent();
+                    fileChooserLauncher.launch(intent);
+                } catch (Exception e) {
+                    filePathCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if (request != null && request.isForMainFrame() && REMOTE_OTA_URL.equals(request.getUrl().toString()) && !isNetworkAvailable()) {
+                    view.loadUrl(LOCAL_FALLBACK_URL);
+                }
             }
 
             @Override
@@ -72,16 +115,12 @@ public class MainActivity extends AppCompatActivity {
             webView.reload();
         });
 
-        // Load entry point
+        // Load entry point (keep consistent origin for localStorage persistence)
         loadAppEntryPoint();
     }
 
     private void loadAppEntryPoint() {
-        if (isNetworkAvailable()) {
-            webView.loadUrl(REMOTE_OTA_URL);
-        } else {
-            webView.loadUrl(LOCAL_FALLBACK_URL);
-        }
+        webView.loadUrl(REMOTE_OTA_URL);
     }
 
     private boolean isNetworkAvailable() {

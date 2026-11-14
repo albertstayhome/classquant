@@ -192,20 +192,21 @@ class AIImportExportHub {
     const currentClassId = window.appState.currentClassId || (classes[0] ? classes[0].id : '801');
     const isFamilyAuth = window.aiService.isFamilyAuthorized();
     const hasKey = this.hasApiKey();
-    const today = new Date().toISOString().split('T')[0];
+    const today = window.getLocalDateStr();
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
 
     container.innerHTML = `
       <!-- Top Title -->
-      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-5 border border-pink-200 bg-white shadow-sm">
+      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-5 border ${isOAA ? 'border-amber-500/40 bg-[#240e1b] text-white' : 'border-pink-200 bg-white'} shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center space-x-3.5">
-            <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+            ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
             <div>
-              <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                AI 數據轉換規範 & 外部資料匯入中心
-                <span class="kitty-bow"></span>
+              <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
+                AI 數據轉換規範 & 雲端自動備份中心
+                ${isOAA ? '' : '<span class="kitty-bow"></span>'}
               </h2>
-              <p class="text-xs sm:text-sm text-slate-600 font-medium">支援內建 Google Gemini 2.5 Flash 免費極速雲端算力自動解析，或定義標準資料格式供外部 AI 轉換</p>
+              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium">支援 Google 試算表／表單定期自動備份還原、Gemini 2.5 Flash 成績解析與 JSON/CSV 匯入</p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
@@ -218,6 +219,9 @@ class AIImportExportHub {
           </div>
         </div>
       </div>
+
+      <!-- ☁️ Google 表單／試算表 定期＆隨時雲端備份中心 -->
+      ${this.renderGoogleBackupCard(isOAA)}
 
       <!-- 🌟 Flagship Feature: Direct Gemini 2.5 Flash AI Grade Converter (Online Only) -->
       <div class="glass-card rounded-3xl p-5 sm:p-6 border-2 border-pink-400 bg-gradient-to-br from-pink-50/50 via-white to-purple-50/30 shadow-md mb-6">
@@ -500,7 +504,7 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
   "type": "assessment",
   "class_id": "801",
   "assessment_name": "第X次小考：單元名稱",
-  "date": "${new Date().toISOString().split('T')[0]}",
+  "date": "${window.getLocalDateStr()}",
   "max_score": 100,
   "records": [
     { "seat_no": 1, "score": 85, "note": "計算題粗心" },
@@ -510,8 +514,7 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
 
 【欲轉換的成績資料如下】：
 `;
-    navigator.clipboard.writeText(prompt);
-    window.appState.showToast('已複製小考 AI 提示詞！請貼給 ChatGPT / Claude 並附上成績單', 'success');
+    window.copyTextSafe(prompt, '已複製小考 AI 提示詞！請貼給 ChatGPT / Claude 並附上成績單');
   }
 
   copyEventsAIPrompt() {
@@ -525,8 +528,31 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
 
 【欲轉換的事件記錄如下】：
 `;
-    navigator.clipboard.writeText(prompt);
-    window.appState.showToast('已複製事件 AI 提示詞！', 'success');
+    window.copyTextSafe(prompt, '已複製事件 AI 提示詞！');
+  }
+
+  parseCsvLine(line) {
+    const cols = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let j = 0; j < line.length; j++) {
+      const ch = line[j];
+      if (ch === '"') {
+        if (inQuotes && line[j + 1] === '"') {
+          cur += '"';
+          j++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        cols.push(cur.trim());
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    cols.push(cur.trim());
+    return cols;
   }
 
   executeImport() {
@@ -545,15 +571,20 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
         if (parsed.type === 'assessment' || parsed.records) {
           const classId = parsed.class_id || window.appState.currentClassId;
           const scoresMap = {};
+          const notesMap = {};
           (parsed.records || []).forEach(r => {
             scoresMap[r.seat_no] = Number(r.score);
+            if (r.note && String(r.note).trim()) {
+              notesMap[r.seat_no] = String(r.note).trim();
+            }
           });
 
           this.store.addAssessment(classId, {
             name: parsed.assessment_name || '外部匯入小考',
-            date: parsed.date || new Date().toISOString().split('T')[0],
+            date: parsed.date || window.getLocalDateStr(),
             maxScore: parsed.max_score || 100,
-            scores: scoresMap
+            scores: scoresMap,
+            notes: notesMap
           });
 
           window.appState.showToast(`🎉 成功匯入【${parsed.assessment_name || '小考'}】成績（共 ${Object.keys(scoresMap).length} 位學生）！`, 'success');
@@ -583,17 +614,19 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
 
     // Try CSV Parsing
     try {
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length > 1) {
         let importedCount = 0;
         // Check if header exists
         const startIdx = lines[0].toLowerCase().includes('date') ? 1 : 0;
         for (let i = startIdx; i < lines.length; i++) {
-          const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+          const cols = this.parseCsvLine(lines[i]);
           if (cols.length >= 6) {
+            const pVal = cols[1];
+            const parsedPeriod = /^\d+$/.test(pVal) ? parseInt(pVal, 10) : pVal;
             this.store.addEvent({
               date: cols[0],
-              period: cols[1],
+              period: parsedPeriod,
               classId: cols[2],
               seatNo: parseInt(cols[3], 10),
               category: cols[4] || 'discipline',
@@ -636,10 +669,371 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(this.store.exportAllData());
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href", dataStr);
-    const date = new Date().toISOString().split('T')[0];
+    const date = window.getLocalDateStr();
     dlAnchorElem.setAttribute("download", `ClassQuant_FullBackup_${date}.json`);
     dlAnchorElem.click();
     window.appState.showToast('已下載完整系統備份 JSON', 'success');
+  }
+
+  // --- ☁️ Google Sheets / Google Forms Scheduled & Manual Cloud Backup UI & Actions ---
+  renderGoogleBackupCard(isOAA) {
+    const cfg = this.store.getGoogleBackupSettings();
+    const summary = this.store.getBackupSummary();
+    const isSheets = cfg.mode !== 'form';
+    const isConnected = isSheets
+      ? Boolean(cfg.effectiveAppsScriptUrl)
+      : Boolean(cfg.effectiveFormUrl && cfg.effectiveFormEntryId);
+
+    const statusBadge = cfg.inheritedSource === 'feedback_webhook'
+      ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">✅ 已自動沿用既有的 Google 試算表連線</span>'
+      : cfg.inheritedSource === 'cloud_config'
+      ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">✅ 已自動載入系統預設雲端端點</span>'
+      : isConnected
+      ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">🟢 雲端備份已綁定就緒</span>'
+      : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-black">⚠️ 尚未綁定（依下方 3 步驟即可設定）</span>';
+
+    return `
+      <div class="glass-card rounded-3xl p-5 sm:p-6 border-2 ${isOAA ? 'border-amber-500/60 bg-gradient-to-br from-[#230c19] via-[#1b0812] to-[#2c1020] text-white' : 'border-emerald-300 bg-gradient-to-br from-emerald-50/60 via-white to-sky-50/50'} shadow-md mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b ${isOAA ? 'border-amber-500/30' : 'border-emerald-200'}">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="text-base sm:text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
+                <span>☁️ Google 表單／試算表 定期＆隨時雲端備份</span>
+              </h3>
+              ${statusBadge}
+            </div>
+            <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'} font-medium mt-1">
+              完整備份您已自訂好的【自訂標籤 (${summary.tagCount}個)、班級名單 (${summary.classCount}班 ${summary.studentCount}人)、學生分數 (${summary.assessmentCount}次評量 ${summary.eventCount}筆事件)、座位與課表】，絕不遺失。
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="aiHub.runGoogleBackupNow()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-black shadow-md transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="cloud-upload" class="w-4 h-4"></i> 立即備份至雲端
+            </button>
+            ${isSheets ? `
+              <button onclick="aiHub.openCloudRestoreModal()" class="px-3.5 py-2 rounded-xl ${isOAA ? 'bg-[#1a0711] hover:bg-rose-950 text-amber-200 border border-amber-500/50' : 'bg-white hover:bg-sky-50 text-sky-800 border border-sky-300'} text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="history" class="w-4 h-4"></i> 從 Google 還原
+              </button>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Backup Status & Mode Selector -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">備份模式：</label>
+            <select id="gb-mode" onchange="aiHub.switchGoogleBackupMode(this.value)" class="w-full rounded-xl px-3 py-2 text-xs font-bold border ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-emerald-300 text-slate-800'} focus:outline-none">
+              <option value="sheets" ${isSheets ? 'selected' : ''}>📊 Google 試算表 Apps Script（推薦：支援定期備份＋一鍵還原）</option>
+              <option value="form" ${!isSheets ? 'selected' : ''}>📝 Google 表單直接傳送（單向存檔進 Google 表單回覆）</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">定期自動備份排程：</label>
+            <select id="gb-schedule" onchange="aiHub.saveGoogleBackupConfig(true)" class="w-full rounded-xl px-3 py-2 text-xs font-bold border ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-emerald-300 text-slate-800'} focus:outline-none">
+              <option value="daily" ${cfg.schedule === 'daily' ? 'selected' : ''}>📅 每天自動備份一次（開啟 App 且資料有變動時）</option>
+              <option value="hourly" ${cfg.schedule === 'hourly' ? 'selected' : ''}>⏱️ 每小時自動備份一次</option>
+              <option value="on_change" ${cfg.schedule === 'on_change' ? 'selected' : ''}>⚡ 每次分數/名單/標籤異動自動備份（15秒整合）</option>
+              <option value="weekly" ${cfg.schedule === 'weekly' ? 'selected' : ''}>📆 每週自動備份一次</option>
+              <option value="manual" ${cfg.schedule === 'manual' ? 'selected' : ''}>🖐️ 僅手動備份（關閉自動排程）</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-700'}">老師/裝置暱稱（辨識備份來源）：</label>
+              <span class="text-[10px] font-mono font-black px-1.5 py-0.5 rounded ${isOAA ? 'bg-amber-950/70 text-amber-300 border border-amber-500/40' : 'bg-emerald-100 text-emerald-800'}" title="每台裝置自動產生的永久識別碼，不登入也能區分不同使用者">${cfg.deviceId || ''}</span>
+            </div>
+            <input type="text" id="gb-label" onchange="aiHub.saveGoogleBackupConfig(true)" value="${this.escapeAttr(cfg.teacherLabel || '')}" placeholder="例：王老師 / 801導師電腦"
+              class="w-full rounded-xl px-3 py-2 text-xs font-bold border ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-emerald-300 text-slate-800'} focus:outline-none">
+          </div>
+        </div>
+
+        ${isSheets ? `
+          <div class="p-4 rounded-2xl border ${isOAA ? 'bg-[#14060d] border-amber-500/35' : 'bg-white border-emerald-200'} space-y-3">
+            <div>
+              <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-800'} mb-1">
+                Google Apps Script 網頁應用程式網址（Web App URL）：
+              </label>
+              <div class="flex flex-wrap sm:flex-nowrap gap-2">
+                <input type="url" id="gb-apps-script-url" value="${this.escapeAttr(cfg.effectiveAppsScriptUrl || '')}"
+                  placeholder="https://script.google.com/macros/s/...../exec"
+                  class="flex-1 min-w-[220px] rounded-xl px-3 py-2 text-xs font-mono font-bold border ${isOAA ? 'bg-[#0c0308] border-amber-500/50 text-amber-100' : 'bg-slate-50 border-slate-300 text-slate-900'} focus:outline-none">
+                <button onclick="aiHub.saveGoogleBackupConfig()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition cursor-pointer">
+                  💾 儲存設定
+                </button>
+                <button onclick="aiHub.testGoogleBackupConnection()" class="px-3.5 py-2 rounded-xl ${isOAA ? 'bg-[#2a0f1e] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300'} text-xs font-black transition cursor-pointer">
+                  🔌 測試連線
+                </button>
+              </div>
+              <div id="gb-status-msg" class="text-[11px] mt-1.5 ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-bold">
+                ${cfg.lastBackupStatus ? `最近雲端備份：${cfg.lastBackupStatus}` : '尚未進行過雲端備份'}
+              </div>
+            </div>
+
+            <details class="text-xs ${isOAA ? 'text-amber-100/90' : 'text-slate-700'} bg-black/5 rounded-xl p-3 border ${isOAA ? 'border-amber-500/20 bg-black/30' : 'border-emerald-100'}">
+              <summary class="font-black cursor-pointer select-none flex items-center justify-between">
+                <span>📖 第一次使用？點這裡看「3 分鐘免費串接 Google 試算表／雲端備份」教學</span>
+                <button type="button" onclick="event.stopPropagation(); aiHub.copyAppsScriptForBackup()" class="px-2.5 py-1 rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-black transition">
+                  📋 複製後端程式碼
+                </button>
+              </summary>
+              <ol class="list-decimal pl-5 mt-2.5 space-y-1 leading-relaxed">
+                <li>用老師的 Google 帳號在 Google 雲端硬碟建立一份新試算表（或打開原本留言板那張試算表）。</li>
+                <li>點選上方選單 <strong>「擴充功能」➔「Apps Script」</strong>，清空舊程式後貼上上方複製的後端程式碼並按 Ctrl+S 儲存（若曾設定過舊版留言板，選「部署」➔「管理部署作業」➔ 編輯選「新版本」，原本網址免重填！）。</li>
+                <li>點右上角 <strong>「部署」➔「新增部署作業」</strong>，類型選「網頁應用程式」、執行身分選「我」、誰可以存取務必選 <strong>「所有人 (Anyone)」</strong>。</li>
+                <li>將產生的 <code>https://script.google.com/macros/s/.../exec</code> 網址貼入上方欄位按「儲存設定」，之後就會自動幫您分片存進試算表的 <strong>Backups</strong> 分頁，可隨時跨裝置一鍵還原！</li>
+              </ol>
+            </details>
+          </div>
+        ` : `
+          <div class="p-4 rounded-2xl border ${isOAA ? 'bg-[#14060d] border-amber-500/35' : 'bg-white border-emerald-200'} space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-800'} mb-1">
+                  Google 表單網址（貼上預先填入連結或表單網址皆可）：
+                </label>
+                <input type="url" id="gb-form-url" value="${this.escapeAttr(cfg.effectiveFormUrl || '')}"
+                  oninput="aiHub.autoParseGoogleFormInput(this.value)"
+                  placeholder="https://docs.google.com/forms/d/e/.../viewform?usp=pp_url&entry.123456=..."
+                  class="w-full rounded-xl px-3 py-2 text-xs font-mono font-bold border ${isOAA ? 'bg-[#0c0308] border-amber-500/50 text-amber-100' : 'bg-slate-50 border-slate-300 text-slate-900'} focus:outline-none">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-800'} mb-1">備份資料欄位 ID（必填）：</label>
+                  <input type="text" id="gb-form-entry" value="${this.escapeAttr(cfg.effectiveFormEntryId || '')}"
+                    placeholder="例：entry.123456789"
+                    class="w-full rounded-xl px-3 py-2 text-xs font-mono font-bold border ${isOAA ? 'bg-[#0c0308] border-amber-500/50 text-amber-100' : 'bg-slate-50 border-slate-300 text-slate-900'} focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-800'} mb-1">摘要欄位 ID（選填）：</label>
+                  <input type="text" id="gb-form-summary-entry" value="${this.escapeAttr(cfg.effectiveFormSummaryEntryId || '')}"
+                    placeholder="例：entry.987654321"
+                    class="w-full rounded-xl px-3 py-2 text-xs font-mono font-bold border ${isOAA ? 'bg-[#0c0308] border-amber-500/50 text-amber-100' : 'bg-slate-50 border-slate-300 text-slate-900'} focus:outline-none">
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div id="gb-status-msg" class="text-[11px] ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-bold">
+                ${cfg.lastBackupStatus ? `最近表單備份：${cfg.lastBackupStatus}` : '提示：Google 表單為單向存檔（系統會依排程自動提交最新資料），還原時請從表單回覆複製貼回下方 JSON 匯入。'}
+              </div>
+              <button onclick="aiHub.saveGoogleBackupConfig()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition cursor-pointer">
+                💾 儲存表單設定
+              </button>
+            </div>
+            <details class="text-xs ${isOAA ? 'text-amber-100/90' : 'text-slate-700'} bg-black/5 rounded-xl p-3 border ${isOAA ? 'border-amber-500/20 bg-black/30' : 'border-emerald-100'}">
+              <summary class="font-black cursor-pointer select-none">📖 如何 30 秒取得專屬 Google 表單與欄位代碼 (entry.xxxxxx)？</summary>
+              <ol class="list-decimal pl-5 mt-2 space-y-1 leading-relaxed">
+                <li>到 Google 表單建立新表單，新增 1 題「段落 (長答案)」問題（例如命名為「備份JSON資料」，不要設登入限制）。</li>
+                <li>點右上角「⋮」➔「取得預先填入的連結」，在答案欄隨便打一個字 <code>test</code> 後按底部「取得連結」並複製。</li>
+                <li>直接把整串「預先填入的連結」貼進上方 Google 表單網址欄，系統會自動幫您擷取表單網址與 <code>entry.xxxxxx</code> 代碼！</li>
+              </ol>
+            </details>
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  switchGoogleBackupMode(mode) {
+    this.store.updateGoogleBackupSettings({
+      mode: mode === 'form' ? 'form' : 'sheets',
+      modeExplicit: true
+    });
+    this.render('ai-hub-view');
+  }
+
+  autoParseGoogleFormInput(rawVal) {
+    const parsed = this.store.parseGoogleFormUrl(rawVal);
+    if (parsed.entryId) {
+      const entryInput = document.getElementById('gb-form-entry');
+      if (entryInput && !entryInput.value.trim()) {
+        entryInput.value = parsed.entryId;
+        window.appState.showToast(`已自動擷取表單欄位代碼：${parsed.entryId}`, 'info');
+      }
+    }
+    if (parsed.summaryEntryId) {
+      const summaryInput = document.getElementById('gb-form-summary-entry');
+      if (summaryInput && !summaryInput.value.trim()) {
+        summaryInput.value = parsed.summaryEntryId;
+      }
+    }
+  }
+
+  saveGoogleBackupConfig(silentRender = false) {
+    const mode = document.getElementById('gb-mode')?.value || 'sheets';
+    const schedule = document.getElementById('gb-schedule')?.value || 'daily';
+    const teacherLabel = document.getElementById('gb-label')?.value.trim() || '';
+
+    const patch = { mode, modeExplicit: true, schedule, scheduleExplicit: true, teacherLabel };
+    const cloudPatch = {
+      defaultBackupMode: mode,
+      defaultSchedule: schedule,
+      lastSyncTime: new Date().toISOString()
+    };
+
+    if (mode === 'form') {
+      const rawFormUrl = document.getElementById('gb-form-url')?.value.trim() || '';
+      const parsed = this.store.parseGoogleFormUrl(rawFormUrl);
+      const entryId = document.getElementById('gb-form-entry')?.value.trim() || parsed.entryId;
+      const summaryEntryId = document.getElementById('gb-form-summary-entry')?.value.trim() || parsed.summaryEntryId || '';
+      patch.googleFormUrl = parsed.actionUrl || rawFormUrl;
+      patch.formEntryId = entryId;
+      patch.formSummaryEntryId = summaryEntryId;
+
+      if (patch.googleFormUrl) cloudPatch.googleFormUrl = patch.googleFormUrl;
+      if (patch.formEntryId) cloudPatch.formEntryId = patch.formEntryId;
+      if (patch.formSummaryEntryId) cloudPatch.formSummaryEntryId = patch.formSummaryEntryId;
+    } else {
+      const appsUrl = document.getElementById('gb-apps-script-url')?.value.trim() || '';
+      patch.appsScriptUrl = appsUrl;
+      if (appsUrl) cloudPatch.webhookUrl = appsUrl;
+    }
+
+    this.store.updateGoogleBackupSettings(patch);
+    if (location.protocol.startsWith('http')) {
+      fetch('./api/cloud-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cloudPatch)
+      }).catch(() => {});
+    }
+    window.appState.showToast('✅ Google 雲端備份設定已儲存', 'success');
+    if (!silentRender) this.render('ai-hub-view');
+  }
+
+  async testGoogleBackupConnection() {
+    const appsUrl = document.getElementById('gb-apps-script-url')?.value.trim();
+    const statusEl = document.getElementById('gb-status-msg');
+    if (!appsUrl) {
+      window.appState.showToast('請先填入 Google Apps Script 網址', 'warning');
+      return;
+    }
+    this.store.updateGoogleBackupSettings({ appsScriptUrl: appsUrl });
+    if (statusEl) statusEl.innerHTML = '<span class="text-amber-500">⏳ 正在連線測試 Google Apps Script...</span>';
+    try {
+      const sep = appsUrl.includes('?') ? '&' : '?';
+      const res = await fetch(`${appsUrl}${sep}action=ping&t=${Date.now()}`);
+      const data = await res.json();
+      if (data && data.supportsBackups) {
+        if (statusEl) statusEl.innerHTML = '<span class="text-emerald-600">✅ 連線成功！支援新版定期雲端備份與一鍵還原 (Backups v2.0)</span>';
+        window.appState.showToast('✅ Google 試算表雲端備份連線正常！', 'success');
+      } else if (Array.isArray(data)) {
+        if (statusEl) statusEl.innerHTML = '<span class="text-amber-600">⚠️ 已連通舊版試算表腳本，請複製最新版後端程式碼並「管理部署➔新版本」即可開啟備份分頁</span>';
+        window.appState.showToast('偵測到舊版 Apps Script，建議升級為新版程式碼以啟用 Backups 分頁', 'warning');
+      } else {
+        if (statusEl) statusEl.innerHTML = '<span class="text-amber-600">⚠️ 回應格式異常，請確認部署權限已設為「所有人 (Anyone)」</span>';
+      }
+    } catch (e) {
+      if (statusEl) statusEl.innerHTML = `<span class="text-rose-600">❌ 連線失敗：${e.message}</span>`;
+    }
+  }
+
+  async runGoogleBackupNow() {
+    const modeEl = document.getElementById('gb-mode');
+    if (modeEl) this.saveGoogleBackupConfig(true);
+    const statusEl = document.getElementById('gb-status-msg');
+    if (statusEl) statusEl.innerHTML = '<span class="text-sky-600">⏳ 正在打包標籤、名單與成績並上傳 Google...</span>';
+
+    try {
+      const res = await this.store.uploadGoogleBackup({ reason: '手動立即備份', force: true, silent: false });
+      if (res.success) {
+        const s = res.payload.summary;
+        window.appState.showToast(`☁️ 雲端備份完成！（${s.classCount}班・${s.studentCount}人・${s.assessmentCount}次評量・${s.eventCount}筆事件）`, 'success');
+        this.render('ai-hub-view');
+      } else if (statusEl) {
+        statusEl.innerHTML = `<span class="text-amber-600">⚠️ 未完成備份：${res.error || '請檢查設定或網路狀態'}</span>`;
+      }
+    } catch (e) {
+      if (statusEl) statusEl.innerHTML = `<span class="text-rose-600">❌ 備份上傳失敗：${e.message}</span>`;
+      window.appState.showToast(`❌ 備份失敗：${e.message}`, 'danger');
+    }
+  }
+
+  async copyAppsScriptForBackup() {
+    try {
+      const res = await fetch('./data/google_apps_script.js?t=' + Date.now());
+      if (res.ok) {
+        const text = await res.text();
+        await window.copyTextSafe(text, '📋 已複製最新版 Google Apps Script 後端程式碼！請貼回 Google 試算表擴充功能');
+        return;
+      }
+    } catch (e) {}
+    window.appState.showToast('請查看專案中的 data/google_apps_script.js', 'info');
+  }
+
+  async openCloudRestoreModal() {
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    modalContent.innerHTML = `<div class="p-8 text-center text-sm font-bold text-slate-600">⏳ 正在讀取 Google 試算表雲端備份歷史...</div>`;
+    modal.classList.remove('hidden');
+
+    try {
+      const list = await this.store.fetchCloudBackupsList();
+      modalContent.innerHTML = `
+        <div class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-pink-100">
+            <div>
+              <h3 class="text-lg font-black text-slate-900">☁️ 從 Google 試算表還原備份</h3>
+              <p class="text-xs text-slate-500 font-bold">還原前系統會自動拍攝一份本機安全快照，絕不怕覆蓋錯失</p>
+            </div>
+            <button onclick="appState.closeModal()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-black">✕</button>
+          </div>
+
+          ${list.length === 0 ? `
+            <div class="text-center py-8 text-xs text-slate-500 font-bold">
+              雲端 Backups 分頁尚無備份記錄，請先點擊「立即備份至雲端」建立第一筆雲端存檔。
+            </div>
+          ` : `
+            <div class="space-y-2.5">
+              ${list.map(b => `
+                <div class="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/40 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div>
+                    <div class="font-black text-slate-900">${b.localTimeStr || b.timestamp} <span class="px-2 py-0.5 rounded-full bg-white border border-emerald-300 text-emerald-700 text-[10px] ml-1">${b.reason}</span></div>
+                    <div class="text-[11px] text-slate-600 mt-1 font-bold">
+                      ${b.deviceLabel ? `${b.deviceLabel} • ` : ''}${b.summary.classCount} 班 • ${b.summary.studentCount} 位學生 • ${b.summary.assessmentCount} 次測驗 • ${b.summary.eventCount} 筆事件
+                    </div>
+                  </div>
+                  <button onclick="aiHub.restoreCloudVersion('${b.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm transition cursor-pointer">
+                    ↩️ 還原此備份
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
+    } catch (e) {
+      modalContent.innerHTML = `
+        <div class="p-6 text-center space-y-3">
+          <div class="text-rose-600 font-black text-sm">❌ 無法讀取雲端備份清單</div>
+          <p class="text-xs text-slate-600">${e.message}</p>
+          <button onclick="appState.closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">關閉</button>
+        </div>
+      `;
+    }
+  }
+
+  async restoreCloudVersion(backupId) {
+    if (!confirm('確定要還原此 Google 雲端備份嗎？（系統會先自動把目前的資料拍一份本機快照）')) return;
+    try {
+      const res = await this.store.restoreFromCloudBackup(backupId);
+      if (res.success) {
+        window.appState.closeModal();
+        window.appState.showToast('🎉 已成功從 Google 試算表還原所有標籤、名單與成績！', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        window.appState.showToast(`還原失敗：${res.error}`, 'danger');
+      }
+    } catch (e) {
+      window.appState.showToast(`❌ 還原失敗：${e.message}`, 'danger');
+    }
   }
 
   exportClassStatsCsv() {
@@ -667,7 +1061,7 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
     const success = this.store.createSnapshot('手動拍攝快照');
     if (success) {
       window.appState.showToast('📸 已成功建立當前狀態本地快照！', 'success');
-      this.render('ai-import-export-view');
+      this.render('ai-hub-view');
     }
   }
 
@@ -1046,7 +1440,7 @@ date,period,class_id,seat_no,category,tag_name,delta,severity,note
 
     const classId = document.getElementById('ai-gemini-class-select')?.value || window.appState.currentClassId;
     const examName = document.getElementById('ai-gemini-exam-name')?.value.trim() || '隨堂測驗';
-    const examDate = document.getElementById('ai-gemini-exam-date')?.value || new Date().toISOString().split('T')[0];
+    const examDate = document.getElementById('ai-gemini-exam-date')?.value || window.getLocalDateStr();
     const maxScore = Number(document.getElementById('ai-gemini-max-score')?.value) || 100;
     const rawText = document.getElementById('ai-gemini-raw-text')?.value.trim();
 
@@ -1161,7 +1555,7 @@ ${rawText || '(請見所附成績單圖片)'}
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
-    const roster = this.store.getRoster(classId) || [];
+    const roster = this.store.getStudents(classId) || [];
     const cls = this.store.getClass(classId);
 
     // Calculate metrics
@@ -1250,7 +1644,7 @@ ${rawText || '(請見所附成績單圖片)'}
           <button onclick="aiHub.closeGlobalModal()" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-600 text-xs font-bold transition">
             ✕ 放棄重試
           </button>
-          <button onclick="aiHub.confirmAndSaveGrades('${classId}', '${encodeURIComponent(examName)}', '${examDate}', ${maxScore}, ${encodeURIComponent(JSON.stringify(records.map(r => r.seat_no)))})" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-black shadow-lg hover:shadow-xl transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+          <button onclick="aiHub.confirmAndSaveGrades('${classId}', '${encodeURIComponent(examName).replace(/'/g, '%27')}', '${examDate}', ${maxScore}, '${encodeURIComponent(JSON.stringify(records.map(r => r.seat_no)))}')" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-black shadow-lg hover:shadow-xl transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>✅ 確認寫入成績冊（自動建立安全快照）</span>
           </button>

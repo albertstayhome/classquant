@@ -89,8 +89,8 @@ class OnboardingTour {
         targetSelector: "#retro-odd-btn",
         fallbackSelector: "#retro-submit-btn",
         title: "9. 事後補記實戰 (單號快選 ➔ 評語 ➔ 1鍵送出)",
-        content: "請<strong>親手點擊「單號(男)」</strong>（或任意學生卡片）快速選取，再點選常用評語模組帶入聯絡簿評語，最後點擊「✨ 立即 1 鍵批次補記」完成提交！",
-        forceAction: "click",
+        content: "請先體驗點擊<strong>「單號(男)」</strong>（或任選學生卡片與常用評語標籤），完成並按下方「✨ 立即 1 鍵批次補記」後，再按<strong>「下一步 ➔」</strong>繼續導覽！",
+        forceAction: null,
         tab: "retro"
       },
       {
@@ -272,6 +272,14 @@ class OnboardingTour {
     const actionContainer = document.getElementById('tour-action-container');
 
     if (!spotlight || !popover || !el) return;
+
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+    popover.className = `fixed left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 w-auto sm:w-[360px] max-w-[94vw] rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto transition-all duration-200 z-[10001] animate-fade-in-up ${
+      isOAA ? 'bg-[#1a0712] border-2 border-amber-400/70 text-amber-100' : 'bg-white border-2 border-pink-300 text-slate-800'
+    }`;
+    if (titleEl) titleEl.className = `text-sm sm:text-base font-black mb-1 flex items-center gap-1.5 ${isOAA ? 'text-amber-300' : 'text-slate-900'}`;
+    if (contentEl) contentEl.className = `text-xs sm:text-sm leading-relaxed font-medium mb-3.5 ${isOAA ? 'text-amber-100/85' : 'text-slate-600'}`;
+    if (badgeEl) badgeEl.className = `text-[11px] font-black px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}`;
 
     const rect = el.getBoundingClientRect();
     const pad = 6;

@@ -9,8 +9,34 @@ class FeedbackBoard {
     this.currentFilter = 'all';
     this.feedbacks = [];
     this.storageKey = 'classquant_feedback_list';
+    this.deletedStorageKey = 'classquant_feedback_deleted_ids';
     this.webhookStorageKey = 'classquant_feedback_webhook_url';
-    this.init();
+    this.cloudConfig = null;
+    this.isSyncing = false;
+    this.lastSyncTime = null;
+    this.deletedIds = this.loadDeletedIds();
+    this._initPromise = this.init();
+  }
+
+  loadDeletedIds() {
+    try {
+      const raw = localStorage.getItem(this.deletedStorageKey);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  markDeletedId(id) {
+    if (!id) return;
+    if (!this.deletedIds.includes(id)) {
+      this.deletedIds.push(id);
+      if (this.deletedIds.length > 200) this.deletedIds = this.deletedIds.slice(-200);
+      try {
+        localStorage.setItem(this.deletedStorageKey, JSON.stringify(this.deletedIds));
+      } catch (e) {}
+    }
   }
 
   async init() {
@@ -22,8 +48,36 @@ class FeedbackBoard {
       this.saveToStorage();
     }
 
+    await this.loadCloudConfig();
+
     if (this.feedbacks.length === 0) {
       await this.loadInitialData();
+    }
+
+    // Auto-sync in background if online or on local server
+    if (navigator.onLine || location.protocol.startsWith('http')) {
+      this.syncFeedbacks(true);
+    }
+  }
+
+  async loadCloudConfig() {
+    try {
+      const res = await fetch('./data/cloud_config.json?t=' + Date.now());
+      if (res.ok) {
+        this.cloudConfig = await res.json();
+        if (this.cloudConfig && this.cloudConfig.webhookUrl) {
+          const localWh = localStorage.getItem(this.webhookStorageKey);
+          const remoteVer = Number(this.cloudConfig.configVersion || 1);
+          const savedVer = Number(localStorage.getItem('classquant_cloud_config_version') || 0);
+          const isCustom = localStorage.getItem('classquant_feedback_webhook_custom') === 'true';
+          if (!localWh || localWh.trim().length === 0 || (!isCustom && remoteVer > savedVer)) {
+            this.setWebhookUrl(this.cloudConfig.webhookUrl);
+            localStorage.setItem('classquant_cloud_config_version', String(remoteVer));
+          }
+        }
+      }
+    } catch (e) {
+      // Offline or file not found
     }
   }
 
@@ -64,11 +118,24 @@ class FeedbackBoard {
   }
 
   isDeveloper() {
-    return window.aiService && window.aiService.isFamilyAuthorized();
+    return localStorage.getItem('classquant_dev_mode') === 'true';
+  }
+
+  toggleDeveloperMode() {
+    const currentlyDev = this.isDeveloper();
+    if (currentlyDev) {
+      localStorage.removeItem('classquant_dev_mode');
+      window.appState?.showToast('已退出開發者模式', 'info');
+    } else {
+      if (!confirm('確定要啟用「開發者模式」（將顯示留言回覆與刪除管理按鈕）嗎？')) return;
+      localStorage.setItem('classquant_dev_mode', 'true');
+      window.appState?.showToast('已啟用開發者管理模式 🔐', 'success');
+    }
+    this.render('feedback-board-view');
   }
 
   getWebhookUrl() {
-    return localStorage.getItem(this.webhookStorageKey) || '';
+    return localStorage.getItem(this.webhookStorageKey) || (this.cloudConfig?.webhookUrl || '');
   }
 
   setWebhookUrl(url) {
@@ -76,6 +143,159 @@ class FeedbackBoard {
       localStorage.setItem(this.webhookStorageKey, url.trim());
     } else {
       localStorage.removeItem(this.webhookStorageKey);
+    }
+  }
+
+  // --- Two-Way Feedbacks Synchronization (Local Server + Cloud Google Sheets) ---
+  async syncFeedbacks(silent = true) {
+    if (this.isSyncing) return;
+    this.isSyncing = true;
+    this.updateSyncUIStatus('syncing');
+
+    let remoteItems = [];
+    let sourceUsed = '';
+
+    // 1. Try Local Dev Server API (serve.ps1: /api/feedback)
+    if (location.protocol.startsWith('http')) {
+      try {
+        const res = await fetch('./api/feedback?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            remoteItems = data;
+            sourceUsed = 'local_api';
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Try Google Apps Script Cloud Endpoint if Webhook is set and online
+    const webhookUrl = this.getWebhookUrl();
+    if (webhookUrl && navigator.onLine) {
+      try {
+        const sep = webhookUrl.includes('?') ? '&' : '?';
+        const res = await fetch(`${webhookUrl}${sep}action=get&t=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const map = new Map();
+            remoteItems.forEach(item => map.set(item.id, item));
+            data.forEach(item => map.set(item.id, item));
+            remoteItems = Array.from(map.values());
+            sourceUsed = 'cloud_api';
+          }
+        }
+      } catch (e) {
+        console.log('Cloud Webhook GET error:', e);
+      }
+    }
+
+    // 3. Fallback to static ./data/feedback.json if nothing fetched and local is empty
+    if (remoteItems.length === 0 && this.feedbacks.length === 0) {
+      await this.loadInitialData();
+    }
+
+    // 4. Merge remoteItems into this.feedbacks
+    if (remoteItems.length > 0) {
+      const mergedMap = new Map();
+      this.feedbacks.forEach(item => {
+        if (item && item.id && !this.deletedIds.includes(item.id)) {
+          mergedMap.set(item.id, item);
+        }
+      });
+      remoteItems.forEach(rem => {
+        if (!rem || !rem.id) return;
+        if (rem.deleted || rem.action === 'delete' || this.deletedIds.includes(rem.id)) {
+          mergedMap.delete(rem.id);
+          return;
+        }
+        const local = mergedMap.get(rem.id);
+        if (!local) {
+          mergedMap.set(rem.id, rem);
+        } else {
+          const remReplyTime = rem.replyTimestamp || '';
+          const localReplyTime = local.replyTimestamp || '';
+          const shouldTakeRemoteReply = (remReplyTime && remReplyTime > localReplyTime) || (rem.reply && !local.reply && !localReplyTime);
+          if (shouldTakeRemoteReply) {
+            local.reply = rem.reply || '';
+            local.replyAuthor = rem.replyAuthor || '';
+            local.replyTimestamp = rem.replyTimestamp || '';
+          }
+          if ((rem.likes || 0) > (local.likes || 0)) {
+            local.likes = rem.likes;
+          }
+          mergedMap.set(rem.id, local);
+        }
+      });
+      this.feedbacks = Array.from(mergedMap.values());
+      this.feedbacks = this.feedbacks.filter(f => !f.id || (!f.id.startsWith('fb-welcome-') && !f.id.startsWith('fb-sample-')));
+      this.saveToStorage();
+
+      // If on local server and we have items that server didn't have, push them to /api/feedback
+      if (location.protocol.startsWith('http') && this.feedbacks.length > 0) {
+        try {
+          await fetch('./api/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.feedbacks)
+          });
+        } catch (e) {}
+      }
+    }
+
+    this.lastSyncTime = new Date();
+    this.isSyncing = false;
+    this.updateSyncUIStatus('done');
+    this.render('feedback-board-view');
+
+    if (!silent) {
+      const srcName = sourceUsed === 'cloud_api' ? '雲端 Google 試算表' : (sourceUsed === 'local_api' ? '本機測試伺服器' : '快取');
+      window.appState.showToast(`✅ 已從【${srcName}】同步完成 (共 ${this.feedbacks.length} 則)`, 'success');
+    }
+  }
+
+  // --- Broadcast New or Updated Entry to All Endpoints ---
+  async broadcastEntry(entry) {
+    // 1. Send to Local Dev Server (serve.ps1 /api/feedback)
+    if (location.protocol.startsWith('http')) {
+      try {
+        await fetch('./api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        });
+      } catch (e) {
+        console.log('Local API broadcast error:', e);
+      }
+    }
+
+    // 2. Send to Google Apps Script Webhook
+    const webhookUrl = this.getWebhookUrl();
+    if (webhookUrl && navigator.onLine) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        });
+      } catch (e) {
+        console.log('Cloud Webhook broadcast error:', e);
+      }
+    }
+  }
+
+  updateSyncUIStatus(state) {
+    const el = document.getElementById('fb-sync-status-badge');
+    if (!el) return;
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
+    const webhookUrl = this.getWebhookUrl();
+    if (state === 'syncing') {
+      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span class="${isOAA ? 'text-amber-300' : 'text-amber-500'} font-bold text-[11px]">同步中...</span>`;
+    } else if (webhookUrl) {
+      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span class="${isOAA ? 'text-emerald-300' : 'text-emerald-700'} text-[11px] font-bold">雲端已連線</span>`;
+    } else {
+      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span class="${isOAA ? 'text-slate-300' : 'text-slate-500'} text-[11px] font-medium">本機模式</span>`;
     }
   }
 
@@ -137,19 +357,27 @@ class FeedbackBoard {
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap items-center gap-2">
+            <div id="fb-sync-status-badge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ${isOAA ? 'bg-[#180712] border border-amber-500/30' : 'bg-slate-100 border border-slate-200'}">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span class="${isOAA ? 'text-slate-300' : 'text-slate-500'} text-[11px] font-medium">本機模式</span>
+            </div>
             <button onclick="feedbackBoard.openPostModal()" class="px-4 py-2.5 rounded-2xl ${isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 hover:from-rose-800 hover:to-rose-700 text-amber-200 border border-amber-500/70' : 'bg-pink-600 hover:bg-pink-700 text-white'} text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm active:scale-95 cursor-pointer">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
               <span>✍️ 新增留言</span>
             </button>
-            <button onclick="feedbackBoard.refresh()" class="px-3 py-2 rounded-xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200'} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="重新整理">
-              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-              <span class="hidden sm:inline">重新整理</span>
+            <button onclick="feedbackBoard.syncFeedbacks(false)" class="px-3 py-2 rounded-xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200'} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="雙向同步">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 ${this.isSyncing ? 'animate-spin' : ''}"></i>
+              <span class="hidden sm:inline">雙向同步</span>
             </button>
             <button onclick="feedbackBoard.copyAllForDev()" class="px-3 py-2 rounded-xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="複製留言清單">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               <span class="hidden sm:inline">複製清單</span>
             </button>
-            <button onclick="feedbackBoard.openSyncSettingsModal()" class="px-2.5 py-2 rounded-xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200'} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="設定">
+            <button onclick="feedbackBoard.toggleDeveloperMode()" class="px-2.5 py-2 rounded-xl ${isDev ? (isOAA ? 'bg-amber-600 text-[#1a0713] border border-amber-300' : 'bg-purple-600 text-white border border-purple-700') : (isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200')} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="切換開發者管理權限">
+              <i data-lucide="${isDev ? 'unlock' : 'lock'}" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">${isDev ? '開發者 ON' : '開發者'}</span>
+            </button>
+            <button onclick="feedbackBoard.openSyncSettingsModal()" class="px-2.5 py-2 rounded-xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200'} text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow-sm cursor-pointer" title="雲端設定">
               <i data-lucide="settings" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -182,6 +410,7 @@ class FeedbackBoard {
       </div>
     `;
 
+    this.updateSyncUIStatus(this.isSyncing ? 'syncing' : (this.lastSyncTime ? 'done' : 'idle'));
     if (window.lucide) window.lucide.createIcons();
   }
 
@@ -305,7 +534,7 @@ class FeedbackBoard {
   }
 
   // --- Like Action ---
-  toggleLike(id) {
+  async toggleLike(id) {
     const item = this.feedbacks.find(f => f.id === id);
     if (!item) return;
 
@@ -316,6 +545,7 @@ class FeedbackBoard {
     if (el) el.innerText = item.likes;
 
     window.appState.showToast('已記錄。', 'info');
+    await this.broadcastEntry(item);
   }
 
   // --- Open Post Feedback Modal ---
@@ -436,19 +666,8 @@ class FeedbackBoard {
     this.feedbacks.unshift(newEntry);
     this.saveToStorage();
 
-    const webhookUrl = this.getWebhookUrl();
-    if (webhookUrl && navigator.onLine) {
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newEntry)
-        });
-      } catch (e) {
-        console.log('Webhook POST:', e);
-      }
-    }
+    // Broadcast new feedback to local dev server and cloud Google Sheets
+    await this.broadcastEntry(newEntry);
 
     window.appState.closeModal();
     this.render('feedback-board-view');
@@ -523,7 +742,7 @@ class FeedbackBoard {
   }
 
   // --- Save Developer Reply ---
-  saveReply(id) {
+  async saveReply(id) {
     const replyText = document.getElementById('dev-reply-input')?.value.trim();
     if (!replyText) {
       window.appState.showToast('請輸入回覆內容', 'danger');
@@ -538,20 +757,25 @@ class FeedbackBoard {
     item.replyTimestamp = new Date().toISOString();
     this.saveToStorage();
 
+    // Broadcast updated reply to local dev server and cloud Google Sheets
+    await this.broadcastEntry(item);
+
     window.appState.closeModal();
     this.render('feedback-board-view');
-    window.appState.showToast('已儲存回覆。', 'success');
+    window.appState.showToast('已儲存回覆並同步。', 'success');
   }
 
   // --- Delete Developer Reply ---
-  deleteReply(id) {
+  async deleteReply(id) {
     const item = this.feedbacks.find(f => f.id === id);
     if (!item) return;
 
     item.reply = "";
     item.replyAuthor = "";
-    item.replyTimestamp = "";
+    item.replyTimestamp = new Date().toISOString();
     this.saveToStorage();
+
+    await this.broadcastEntry(item);
 
     window.appState.closeModal();
     this.render('feedback-board-view');
@@ -559,12 +783,14 @@ class FeedbackBoard {
   }
 
   // --- Delete Feedback Card ---
-  deleteFeedback(id) {
+  async deleteFeedback(id) {
     if (!confirm('確定刪除此則留言？')) return;
+    this.markDeletedId(id);
     this.feedbacks = this.feedbacks.filter(f => f.id !== id);
     this.saveToStorage();
     this.render('feedback-board-view');
-    window.appState.showToast('已刪除留言。', 'info');
+    await this.broadcastEntry({ id, action: 'delete' });
+    window.appState.showToast('已刪除留言並同步移除。', 'info');
   }
 
   // --- Copy All Feedback Summary for Dev Planning ---
@@ -586,7 +812,9 @@ class FeedbackBoard {
       report += `------------------------------------\n`;
     });
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
+    if (window.copyTextSafe) {
+      window.copyTextSafe(report, '已複製留言清單。');
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(report).then(() => {
         window.appState.showToast('已複製留言清單。', 'success');
       }).catch(() => {
@@ -613,35 +841,77 @@ class FeedbackBoard {
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
 
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
     const currentWebhook = this.getWebhookUrl();
 
     modalContent.innerHTML = `
-      <div class="p-5 sm:p-6 animate-fade-in-up">
-        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+      <div class="p-5 sm:p-6 animate-fade-in-up ${isOAA ? 'text-white' : ''}">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b ${isOAA ? 'border-amber-500/40' : 'border-slate-200'}">
           <div>
-            <h3 class="font-bold text-slate-900 text-base">雲端試算表設定</h3>
-            <p class="text-xs text-slate-500">可串接 Google Sheets Webhook 接收留言。</p>
+            <h3 class="font-bold ${isOAA ? 'text-white' : 'text-slate-900'} text-base">
+              ${isOAA ? '🏛️ S-SYSTEM // 雲端同步與試算表設定' : '☁️ 雲端同步與試算表設定'}
+            </h3>
+            <p class="text-xs ${isOAA ? 'text-amber-300/80 font-mono' : 'text-slate-500'}">
+              支援本機 Dev 伺服器即時寫入與 Google 試算表 (Google Sheets) 雲端雙向串接。
+            </p>
           </div>
-          <button onclick="appState.closeModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+          <button onclick="appState.closeModal()" class="w-7 h-7 rounded-full ${isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40 hover:bg-rose-900' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'} flex items-center justify-center transition cursor-pointer">
             ✕
           </button>
         </div>
 
-        <div class="space-y-3.5 text-xs text-slate-700">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Google Apps Script Web App 網址</label>
-            <input type="url" id="fb-webhook-input" value="${this.escapeHtml(currentWebhook)}" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-slate-500">
+        <div class="space-y-4 text-xs ${isOAA ? 'text-slate-200' : 'text-slate-700'}">
+          <!-- Channel 1: Local Dev Server status -->
+          <div class="p-3 rounded-xl border ${isOAA ? 'border-amber-500/30 bg-[#160610]' : 'border-slate-200 bg-slate-50'} flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">💻</span>
+              <div>
+                <div class="font-bold ${isOAA ? 'text-white' : 'text-slate-900'}">本機測試伺服器 (Local Dev Server)</div>
+                <div class="text-[11px] ${isOAA ? 'text-slate-400' : 'text-slate-500'}">手機在同一 Wi-Fi 下連線測試，留言即時寫入 data/feedback.json</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${location.protocol.startsWith('http') ? (isOAA ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50' : 'bg-emerald-100 text-emerald-800') : (isOAA ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-600')}">
+              ${location.protocol.startsWith('http') ? '已就緒' : '離線/靜態'}
+            </span>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-            <button type="button" onclick="feedbackBoard.exportBackupJson()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition flex items-center gap-1">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> 匯出 JSON
-            </button>
+          <!-- Channel 2: Google Apps Script Webhook -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">Google Apps Script Web App 網址</label>
+              <button type="button" onclick="feedbackBoard.copyAppsScriptTemplate()" class="text-[11px] ${isOAA ? 'text-amber-300 hover:text-amber-200' : 'text-blue-600 hover:text-blue-800'} font-bold flex items-center gap-1 cursor-pointer">
+                <i data-lucide="code" class="w-3 h-3"></i> 一鍵複製 Apps Script 代碼
+              </button>
+            </div>
+            <input type="url" id="fb-webhook-input" value="${this.escapeHtml(currentWebhook)}" placeholder="https://script.google.com/macros/s/.../exec" class="w-full ${isOAA ? 'bg-[#180712] border-amber-500/50 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-500'} border rounded-xl px-3 py-2 text-xs font-mono focus:outline-none">
+            
+            <div class="flex items-center justify-between mt-1.5">
+              <div id="fb-test-conn-status" class="text-[11px] font-medium"></div>
+              <button type="button" onclick="feedbackBoard.testWebhookConnection()" class="px-2.5 py-1 rounded-lg ${isOAA ? 'bg-[#180712] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'} text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="zap" class="w-3 h-3"></i> 測試連線
+              </button>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl ${isOAA ? 'bg-[#1b0815] text-amber-200/80 border border-amber-500/20' : 'bg-amber-50 text-amber-900 border border-amber-200'} text-[11px] leading-relaxed">
+            💡 <strong>貼心提示</strong>：若您已於 Google 試算表部署好 Apps Script，只需貼上網址並儲存，手機無論在哪個網路環境都能即時雙向同步！
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t ${isOAA ? 'border-amber-500/30' : 'border-slate-100'}">
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="feedbackBoard.exportBackupJson()" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-[#180712] text-amber-200 border border-amber-500/40 hover:bg-rose-950' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'} font-medium transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> 匯出 JSON
+              </button>
+              <button type="button" onclick="document.getElementById('fb-import-file-input')?.click()" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-[#180712] text-emerald-300 border border-emerald-500/40 hover:bg-emerald-950/60' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'} font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> 匯入/遷移 JSON
+              </button>
+              <input type="file" id="fb-import-file-input" accept=".json" class="hidden" onchange="feedbackBoard.importAndMigrateJson(this)">
+            </div>
             <div class="flex items-center space-x-2">
-              <button type="button" onclick="appState.closeModal()" class="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition">
+              <button type="button" onclick="appState.closeModal()" class="px-3 py-1.5 rounded-xl ${isOAA ? 'text-slate-300 hover:bg-rose-950/60' : 'text-slate-600 hover:bg-slate-100'} font-medium transition cursor-pointer">
                 關閉
               </button>
-              <button type="button" onclick="feedbackBoard.saveWebhookUrl()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition shadow-sm">
+              <button type="button" onclick="feedbackBoard.saveWebhookUrl()" class="px-4 py-2 rounded-xl ${isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 hover:from-rose-800 hover:to-rose-700 text-amber-200 border border-amber-500 font-black' : 'bg-slate-900 hover:bg-slate-800 text-white font-bold'} transition shadow-sm cursor-pointer">
                 儲存設定
               </button>
             </div>
@@ -654,29 +924,154 @@ class FeedbackBoard {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  saveWebhookUrl() {
+  async saveWebhookUrl() {
     const input = document.getElementById('fb-webhook-input');
     if (!input) return;
-    this.setWebhookUrl(input.value);
+    const url = input.value.trim();
+    this.setWebhookUrl(url);
+    if (url) {
+      localStorage.setItem('classquant_feedback_webhook_custom', 'true');
+    } else {
+      localStorage.removeItem('classquant_feedback_webhook_custom');
+    }
+
+    // Save merged config to local server cloud_config.json if running via http
+    if (location.protocol.startsWith('http')) {
+      try {
+        const nextVer = Math.max(Number(this.cloudConfig?.configVersion || 1), 1) + (url && url !== this.cloudConfig?.webhookUrl ? 1 : 0);
+        const mergedPayload = {
+          ...(this.cloudConfig || {}),
+          configVersion: nextVer,
+          webhookUrl: url,
+          autoSyncOnLoad: true,
+          lastSyncTime: new Date().toISOString()
+        };
+        await fetch('./api/cloud-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(mergedPayload)
+        });
+        this.cloudConfig = mergedPayload;
+        localStorage.setItem('classquant_cloud_config_version', String(nextVer));
+      } catch (e) {}
+    }
+
     window.appState.closeModal();
-    window.appState.showToast('已儲存設定。', 'success');
+    window.appState.showToast('已儲存設定，開始雙向同步...', 'success');
+    await this.syncFeedbacks(false);
+  }
+
+  async testWebhookConnection() {
+    const input = document.getElementById('fb-webhook-input');
+    const statusEl = document.getElementById('fb-test-conn-status');
+    const url = input ? input.value.trim() : '';
+    if (!url) {
+      if (statusEl) statusEl.innerHTML = `<span class="text-rose-500 font-bold">請先輸入網址</span>`;
+      return;
+    }
+    if (statusEl) statusEl.innerHTML = `<span class="text-amber-500 font-bold">連線測試中...</span>`;
+    try {
+      const sep = url.includes('?') ? '&' : '?';
+      const res = await fetch(`${url}${sep}action=get&t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          if (statusEl) statusEl.innerHTML = `<span class="text-emerald-500 font-bold">✅ 連線成功 (讀取到 ${data.length} 筆留言)</span>`;
+          window.appState.showToast('✅ Google 試算表連線測試成功！', 'success');
+          return;
+        }
+      }
+      if (statusEl) statusEl.innerHTML = `<span class="text-amber-500 font-bold">⚠️ 回應非預期格式，請確認權限設為「所有人」</span>`;
+    } catch (e) {
+      if (statusEl) statusEl.innerHTML = `<span class="text-rose-500 font-bold">❌ 連線失敗 (${e.message})</span>`;
+    }
+  }
+
+  async copyAppsScriptTemplate() {
+    try {
+      const res = await fetch('./data/google_apps_script.js?t=' + Date.now());
+      if (res.ok) {
+        const text = await res.text();
+        if (window.copyTextSafe) {
+          await window.copyTextSafe(text, '已複製 Google Apps Script 範本程式碼！');
+          return;
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          window.appState.showToast('已複製 Google Apps Script 範本程式碼！', 'success');
+          return;
+        } else {
+          this.fallbackCopyText(text);
+          return;
+        }
+      }
+    } catch (e) {}
+    window.appState.showToast('無法讀取範本檔，請查看 data/google_apps_script.js', 'info');
   }
 
   exportBackupJson() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.feedbacks, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `classquant_feedbacks_${new Date().toISOString().split('T')[0]}.json`);
+    const todayStr = window.getLocalDateStr ? window.getLocalDateStr() : new Date().toISOString().split('T')[0];
+    downloadAnchor.setAttribute("download", `classquant_feedbacks_${todayStr}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
     window.appState.showToast('已匯出 JSON 檔。', 'success');
   }
 
+  async importAndMigrateJson(inputEl) {
+    const file = inputEl?.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) {
+        window.appState.showToast('JSON 格式不正確，應為留言陣列 []', 'danger');
+        return;
+      }
+      const existingMap = new Map(this.feedbacks.map(item => [item.id, item]));
+      let addedCount = 0;
+      const toUpload = [];
+      parsed.forEach(item => {
+        if (item && item.id && item.content && !existingMap.has(item.id)) {
+          existingMap.set(item.id, item);
+          toUpload.push(item);
+          addedCount++;
+        }
+      });
+      this.feedbacks = Array.from(existingMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      this.saveToStorage();
+      if (toUpload.length > 0) {
+        const webhookUrl = this.getWebhookUrl();
+        if (webhookUrl && navigator.onLine) {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(toUpload)
+          });
+        }
+        if (location.protocol.startsWith('http')) {
+          await fetch('./api/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(toUpload)
+          }).catch(() => {});
+        }
+      }
+      this.render('feedback-board-view');
+      window.appState.closeModal();
+      window.appState.showToast(`✅ 已成功匯入並遷移 ${addedCount} 筆留言！`, 'success');
+    } catch (e) {
+      window.appState.showToast(`❌ 匯入失敗：${e.message}`, 'danger');
+    } finally {
+      if (inputEl) inputEl.value = '';
+    }
+  }
+
   async refresh() {
-    await this.loadInitialData();
-    this.render('feedback-board-view');
-    window.appState.showToast('已重新整理。', 'info');
+    await this.syncFeedbacks(false);
   }
 
   // --- Utilities ---

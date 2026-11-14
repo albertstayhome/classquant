@@ -197,36 +197,37 @@ class OnboardingWizard {
     let mascotBadge = 'sanrio-kitty-badge';
     if (step.mascot === 'twinstars') mascotBadge = 'sanrio-twinstars-badge';
     if (step.mascot === 'kuromi') mascotBadge = 'sanrio-kuromi-badge';
+    const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
 
     modalContent.innerHTML = `
-      <div class="p-5 sm:p-7 max-h-[90vh] overflow-y-auto relative animate-fade-in-up">
+      <div class="p-5 sm:p-7 max-h-[90vh] overflow-y-auto relative animate-fade-in-up ${isOAA ? 'bg-[#180710] text-amber-100 rounded-3xl border border-amber-500/40' : ''}">
         
         <!-- Header: Mascot + Step Indicator + Close Button -->
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-pink-100">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-100'}">
           <div class="flex items-center space-x-3">
             <div class="${mascotBadge} !w-12 !h-12 shrink-0"></div>
             <div>
-              <span class="text-[11px] px-2.5 py-0.5 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300">
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full font-black ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-500/50' : 'bg-pink-100 text-pink-700 border border-pink-300'}">
                 ${step.badge} • 步驟 ${this.currentStep + 1} / ${this.totalSteps}
               </span>
-              <h3 class="text-base sm:text-xl font-black text-slate-900 mt-1">${step.title}</h3>
+              <h3 class="text-base sm:text-xl font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'} mt-1">${step.title}</h3>
             </div>
           </div>
 
-          <button onclick="onboardingWizard.close()" class="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold flex items-center justify-center transition" title="關閉引導">
+          <button onclick="onboardingWizard.close()" class="w-8 h-8 rounded-full ${isOAA ? 'bg-[#2a0f1f] hover:bg-[#3a152b] text-amber-300 border border-amber-500/40' : 'bg-pink-50 hover:bg-pink-100 text-pink-700'} font-bold flex items-center justify-center transition" title="關閉引導">
             ✕
           </button>
         </div>
 
         <!-- Step Progress Bar -->
-        <div class="w-full bg-pink-100 h-1.5 rounded-full mb-4 overflow-hidden">
-          <div class="bg-gradient-to-r from-pink-500 to-rose-600 h-full rounded-full transition-all duration-300" style="width: ${((this.currentStep + 1) / this.totalSteps) * 100}%"></div>
+        <div class="w-full ${isOAA ? 'bg-[#2a0f1f]' : 'bg-pink-100'} h-1.5 rounded-full mb-4 overflow-hidden">
+          <div class="bg-gradient-to-r ${isOAA ? 'from-amber-400 to-rose-500' : 'from-pink-500 to-rose-600'} h-full rounded-full transition-all duration-300" style="width: ${((this.currentStep + 1) / this.totalSteps) * 100}%"></div>
         </div>
 
-        <p class="text-xs text-slate-500 font-bold mb-3">${step.subtitle}</p>
+        <p class="text-xs ${isOAA ? 'text-amber-300/80' : 'text-slate-500'} font-bold mb-3">${step.subtitle}</p>
 
         <!-- Body Content -->
-        <div class="mb-5">
+        <div class="mb-5 ${isOAA ? 'oaa-wizard-body text-amber-100' : ''}">
           ${step.content}
         </div>
 
@@ -293,9 +294,12 @@ class OnboardingWizard {
     if (confirm('確定要清空示範資料，開始建立自己的全新班級嗎？')) {
       window.appStore.clearAll();
       this.close();
-      window.appState.switchTab('roster');
-      window.appState.showToast('已清空資料庫，請點擊「新增班級」開始建置名冊！🌱', 'info');
-      setTimeout(() => location.reload(), 600);
+      if (window.appState) {
+        window.appState.currentClassId = null;
+        window.appState.renderClassDropdown();
+        window.appState.switchTab('roster');
+        window.appState.showToast('已清空資料庫，請點擊「新增班級」開始建置名冊！🌱', 'info');
+      }
     }
   }
 }

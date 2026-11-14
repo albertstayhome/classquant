@@ -1,8 +1,53 @@
 /**
- * Data Store & State Management (Enhanced with Tag Management & NAS Sync)
+ * Data Store & State Management (Enhanced with Tag Management, Google Cloud Backup & NAS Sync)
  */
 
 const STORAGE_KEY = 'class_point_quant_hub_data_v1';
+
+// Shared Local Date Helper (YYYY-MM-DD in device local timezone, prevents UTC day shift before 08:00 AM TW)
+window.getLocalDateStr = function(d = new Date()) {
+  const dt = d instanceof Date ? d : new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const day = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+// Shared Safe Clipboard Helper (HTTPS Clipboard API + HTTP/LAN textarea fallback)
+window.copyTextSafe = async function(text, successMsg = '已複製到剪貼簿！') {
+  const content = String(text ?? '');
+  try {
+    if (navigator.clipboard && window.isSecureContext && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(content);
+      if (window.appState?.showToast && successMsg) window.appState.showToast(successMsg, 'success');
+      return true;
+    }
+  } catch (e) {}
+
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = content;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) {
+      if (window.appState?.showToast && successMsg) window.appState.showToast(successMsg, 'success');
+      return true;
+    }
+  } catch (e) {}
+
+  if (window.appState?.showToast) {
+    window.appState.showToast('瀏覽器限制無法自動複製，請手動選取文字複製', 'warning');
+  }
+  return false;
+};
 
 // Default Tag Categories and Definitions
 const DEFAULT_TAGS = [
@@ -61,11 +106,21 @@ const DEFAULT_WEEKLY_SCHEDULE = {
 
 class Store {
   constructor() {
+    this.cloudWebhookUrl = '';
+    this._autoBackupTimer = null;
     this.data = this.loadFromStorage();
-    if (!this.data || !this.data.classes || Object.keys(this.data.classes).length === 0) {
+    const hasClearedAll = Boolean(this.data?.hasClearedAll || localStorage.getItem('classquant_user_cleared') === 'true');
+
+    if (!this.data || (!hasClearedAll && (!this.data.classes || Object.keys(this.data.classes).length === 0))) {
       this.initDemoData();
     } else {
-      // Ensure settings & tags format compatibility
+      // Ensure structural compatibility WITHOUT overwriting existing user rosters, custom tags, or scores
+      if (!this.data.classes) this.data.classes = {};
+      if (!this.data.students) this.data.students = {};
+      if (!this.data.assessments) this.data.assessments = {};
+      if (!this.data.events) this.data.events = [];
+      if (!this.data.weeklySchedule) this.data.weeklySchedule = {};
+      if (!this.data.timetablePeriods) this.data.timetablePeriods = DEFAULT_TIMETABLE_PERIODS;
       if (!this.data.tags) this.data.tags = DEFAULT_TAGS;
       if (!this.data.settings) this.data.settings = {};
       if (!this.data.settings.theme) this.data.settings.theme = 'kitty';
@@ -77,6 +132,9 @@ class Store {
           remotePath: '/ClassData/class_data_sync.json',
           lastSyncTime: null
         };
+      }
+      if (!this.data.settings.googleBackup) {
+        this.data.settings.googleBackup = this.getDefaultGoogleBackupSettings();
       }
 
       // Seamlessly migrate legacy classTags if groupTags is missing
@@ -97,6 +155,51 @@ class Store {
         localStorage.setItem('classquant_last_auto_snapshot_ts', String(now));
       }
     }
+
+    this._cloudConfigReady = this.loadCloudConfigDefaults();
+  }
+
+  getDefaultGoogleBackupSettings() {
+    return {
+      mode: 'sheets', // 'sheets' (Apps Script 試算表雙向備份) or 'form' (Google 表單 formResponse 單向備份)
+      modeExplicit: false,
+      appsScriptUrl: '',
+      googleFormUrl: '',
+      formEntryId: '',
+      formSummaryEntryId: '',
+      schedule: 'daily', // 'manual' | 'on_change' | 'hourly' | 'daily' | 'weekly'
+      scheduleExplicit: false,
+      teacherLabel: '',
+      lastBackupTs: 0,
+      lastBackupHash: '',
+      lastBackupStatus: ''
+    };
+  }
+
+  async loadCloudConfigDefaults() {
+    try {
+      const res = await fetch('./data/cloud_config.json?t=' + Date.now());
+      if (res.ok) {
+        const cfg = await res.json();
+        if (cfg) {
+          this.cloudConfigVersion = Number(cfg.configVersion || 1);
+          if (cfg.webhookUrl) {
+            this.cloudWebhookUrl = cfg.webhookUrl.trim();
+          }
+          if (cfg.googleFormUrl) {
+            this.cloudFormUrl = cfg.googleFormUrl.trim();
+            this.cloudFormEntryId = (cfg.formEntryId || '').trim();
+            this.cloudFormSummaryEntryId = (cfg.formSummaryEntryId || '').trim();
+          }
+          if (cfg.defaultBackupMode) {
+            this.cloudDefaultBackupMode = cfg.defaultBackupMode.trim();
+          }
+          if (cfg.defaultSchedule) {
+            this.cloudDefaultSchedule = cfg.defaultSchedule.trim();
+          }
+        }
+      }
+    } catch (e) {}
   }
 
   loadFromStorage() {
@@ -113,6 +216,7 @@ class Store {
     try {
       this.data.lastModified = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+      this.scheduleAutoBackupOnChange();
     } catch (e) {
       console.error('Failed to save to storage:', e);
     }
@@ -813,6 +917,10 @@ class Store {
     return this.data.events.filter(e => e.classId === classId);
   }
 
+  getEventsByClass(classId = null) {
+    return this.getEvents(classId);
+  }
+
   getAssessments(classId) {
     return this.data.assessments[classId] || [];
   }
@@ -820,7 +928,7 @@ class Store {
   addEvent(event) {
     const newEvent = {
       id: 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-      date: event.date || new Date().toISOString().split('T')[0],
+      date: event.date || window.getLocalDateStr(),
       time: event.time || new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }),
       ...event
     };
@@ -933,6 +1041,10 @@ class Store {
       }
       this.createSnapshot('匯入全系統備份前');
       this.data = parsed;
+      if (Object.keys(this.data.classes).length > 0) {
+        localStorage.removeItem('classquant_user_cleared');
+        delete this.data.hasClearedAll;
+      }
       this.saveToStorage();
       return { success: true };
     } catch (e) {
@@ -940,29 +1052,68 @@ class Store {
     }
   }
 
+  deleteClassData(classId) {
+    if (!classId || !this.data.classes?.[classId]) return false;
+    this.createSnapshot(`刪除 ${classId} 班前`);
+    delete this.data.classes[classId];
+    if (this.data.students) delete this.data.students[classId];
+    if (this.data.assessments) delete this.data.assessments[classId];
+    if (this.data.seatingLayout) delete this.data.seatingLayout[classId];
+    if (Array.isArray(this.data.events)) {
+      this.data.events = this.data.events.filter(e => e.classId !== classId);
+    }
+    if (this.data.weeklySchedule) {
+      Object.keys(this.data.weeklySchedule).forEach(dayKey => {
+        const daySlots = this.data.weeklySchedule[dayKey];
+        if (!daySlots) return;
+        Object.keys(daySlots).forEach(periodKey => {
+          if (daySlots[periodKey] === classId) {
+            delete daySlots[periodKey];
+          }
+        });
+      });
+    }
+    if (this.data.currentClassOverride === classId) {
+      this.data.currentClassOverride = null;
+    }
+    this.saveToStorage();
+    return true;
+  }
+
   resetToDemo() {
     this.createSnapshot('重置展示資料前');
+    localStorage.removeItem('classquant_user_cleared');
     localStorage.removeItem(STORAGE_KEY);
     this.initDemoData();
   }
 
   clearAll() {
     this.createSnapshot('清空所有資料前');
+    localStorage.setItem('classquant_user_cleared', 'true');
+    const prevSettings = this.data.settings || {};
     this.data = {
+      hasClearedAll: true,
       classes: {},
       students: {},
       assessments: {},
       events: [],
+      seatingLayout: {},
       tags: DEFAULT_TAGS,
+      groupTags: {
+        homeroom: JSON.parse(JSON.stringify(DEFAULT_TAGS)),
+        subject: JSON.parse(JSON.stringify(DEFAULT_TAGS))
+      },
       timetablePeriods: DEFAULT_TIMETABLE_PERIODS,
       weeklySchedule: {},
       currentClassOverride: null,
       settings: {
-        theme: 'kitty',
+        theme: prevSettings.theme || 'kitty',
+        fontSize: prevSettings.fontSize || 'large',
         autoSwitchTimetable: true,
-        enableSound: true,
-        cliffDropSigmaThreshold: 1.8,
-        nasSettings: {
+        enableSound: prevSettings.enableSound !== undefined ? prevSettings.enableSound : true,
+        cliffDropSigmaThreshold: prevSettings.cliffDropSigmaThreshold || 1.8,
+        googleBackup: prevSettings.googleBackup || this.getDefaultGoogleBackupSettings(),
+        nasSettings: prevSettings.nasSettings || {
           serverUrl: 'http://192.168.1.100:5005',
           username: '',
           password: '',
@@ -972,6 +1123,336 @@ class Store {
       }
     };
     this.saveToStorage();
+  }
+
+  // --- Google Sheets / Google Forms Scheduled & On-Demand Backup Engine ---
+  getGoogleBackupSettings() {
+    const saved = this.data.settings?.googleBackup || this.getDefaultGoogleBackupSettings();
+    const feedbackWebhook = (localStorage.getItem('classquant_feedback_webhook_url') || '').trim();
+    const configWebhook = (this.cloudWebhookUrl || '').trim();
+
+    let effectiveUrl = (saved.appsScriptUrl || '').trim();
+    let inheritedSource = '';
+    if (!effectiveUrl && feedbackWebhook) {
+      effectiveUrl = feedbackWebhook;
+      inheritedSource = 'feedback_webhook';
+    } else if (!effectiveUrl && configWebhook) {
+      effectiveUrl = configWebhook;
+      inheritedSource = 'cloud_config';
+    } else if (effectiveUrl) {
+      inheritedSource = 'manual';
+    }
+
+    const effectiveFormUrl = (saved.googleFormUrl || this.cloudFormUrl || '').trim();
+    const effectiveFormEntryId = (saved.formEntryId || this.cloudFormEntryId || '').trim();
+    const effectiveFormSummaryEntryId = (saved.formSummaryEntryId || this.cloudFormSummaryEntryId || '').trim();
+
+    const hasExplicitMode = Boolean(
+      saved.modeExplicit ||
+      (saved.mode === 'sheets' && (saved.appsScriptUrl || '').trim()) ||
+      (saved.mode === 'form' && (saved.googleFormUrl || '').trim())
+    );
+    let effectiveMode = saved.mode || 'sheets';
+    if (!hasExplicitMode && this.cloudDefaultBackupMode === 'form' && effectiveFormUrl && effectiveFormEntryId) {
+      effectiveMode = 'form';
+    } else if (!hasExplicitMode && this.cloudDefaultBackupMode === 'sheets' && effectiveUrl) {
+      effectiveMode = 'sheets';
+    }
+
+    const effectiveSchedule = saved.scheduleExplicit
+      ? (saved.schedule || 'daily')
+      : (this.cloudDefaultSchedule || saved.schedule || 'daily');
+
+    return {
+      ...this.getDefaultGoogleBackupSettings(),
+      ...saved,
+      deviceId: this.getOrCreateDeviceId(),
+      mode: effectiveMode,
+      schedule: effectiveSchedule,
+      effectiveAppsScriptUrl: effectiveUrl,
+      inheritedSource,
+      effectiveFormUrl,
+      effectiveFormEntryId,
+      effectiveFormSummaryEntryId
+    };
+  }
+
+  getOrCreateDeviceId() {
+    const key = 'classquant_device_id';
+    let id = '';
+    try {
+      id = (localStorage.getItem(key) || '').trim();
+      if (!id) {
+        let hex = '';
+        if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+          hex = Array.from(window.crypto.getRandomValues(new Uint8Array(4)))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')
+            .toUpperCase();
+        } else {
+          hex = (Date.now().toString(36) + Math.random().toString(36).slice(2, 6)).toUpperCase();
+        }
+        id = 'CQ-' + hex.slice(0, 6);
+        localStorage.setItem(key, id);
+      }
+    } catch (e) {
+      id = 'CQ-LOCAL';
+    }
+    return id;
+  }
+
+  getDeviceSignatureLabel() {
+    const cfg = this.getGoogleBackupSettings();
+    const feedbackAuthor = (() => {
+      try { return (localStorage.getItem('classquant_feedback_author') || '').trim(); } catch (e) { return ''; }
+    })();
+    const displayName = (cfg.teacherLabel || '').trim() || feedbackAuthor || '未命名裝置';
+    const classNames = Object.values(this.data.classes || {})
+      .map(c => c?.name || c?.id)
+      .filter(Boolean);
+    const classPreview = classNames.length > 3
+      ? `${classNames.slice(0, 3).join('、')}等${classNames.length}班`
+      : classNames.join('、');
+    const deviceId = cfg.deviceId || this.getOrCreateDeviceId();
+    return `${displayName} [ID:${deviceId}${classPreview ? `｜班級:${classPreview}` : ''}]`;
+  }
+
+  updateGoogleBackupSettings(partial = {}) {
+    if (!this.data.settings) this.data.settings = {};
+    const current = this.data.settings.googleBackup || this.getDefaultGoogleBackupSettings();
+    this.data.settings.googleBackup = {
+      ...current,
+      ...partial
+    };
+    if (partial.appsScriptUrl && partial.appsScriptUrl.trim() && !localStorage.getItem('classquant_feedback_webhook_url')) {
+      localStorage.setItem('classquant_feedback_webhook_url', partial.appsScriptUrl.trim());
+    }
+    this.saveToStorage();
+    return this.getGoogleBackupSettings();
+  }
+
+  parseGoogleFormUrl(rawInput = '') {
+    const raw = (rawInput || '').trim();
+    if (!raw) return { actionUrl: '', entryId: '', entryIds: [] };
+    let actionUrl = raw.split('?')[0].trim();
+    actionUrl = actionUrl.replace(/\/(viewform|edit)\/?$/i, '/formResponse');
+    const entryIds = [];
+    try {
+      const urlObj = new URL(raw);
+      for (const [k] of urlObj.searchParams.entries()) {
+        if (/^entry\.\d+$/.test(k) && !entryIds.includes(k)) {
+          entryIds.push(k);
+        }
+      }
+    } catch (e) {}
+    const entryId = entryIds.length >= 2 ? entryIds[entryIds.length - 1] : (entryIds[0] || '');
+    const summaryEntryId = entryIds.length >= 2 ? entryIds[0] : '';
+    return { actionUrl, entryId, summaryEntryId, entryIds };
+  }
+
+  computeDataHash(str) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return `${(hash >>> 0).toString(16)}_${str.length}`;
+  }
+
+  getBackupSummary() {
+    const classes = Object.keys(this.data.classes || {});
+    let studentCount = 0;
+    classes.forEach(cId => {
+      studentCount += (this.data.students?.[cId]?.length || 0);
+    });
+    let assessmentCount = 0;
+    Object.values(this.data.assessments || {}).forEach(arr => {
+      assessmentCount += (arr?.length || 0);
+    });
+    const eventCount = (this.data.events || []).length;
+    const homeroomTags = this.data.groupTags?.homeroom?.length || 0;
+    const subjectTags = this.data.groupTags?.subject?.length || 0;
+    return {
+      classCount: classes.length,
+      studentCount,
+      assessmentCount,
+      eventCount,
+      tagCount: homeroomTags + subjectTags
+    };
+  }
+
+  buildCloudBackupPayload(reason = '手動備份') {
+    const cfg = this.getGoogleBackupSettings();
+    const coreSnapshot = {
+      classes: this.data.classes || {},
+      students: this.data.students || {},
+      assessments: this.data.assessments || {},
+      events: this.data.events || [],
+      tags: this.data.tags || DEFAULT_TAGS,
+      groupTags: this.data.groupTags || null,
+      seatingLayout: this.data.seatingLayout || {},
+      timetablePeriods: this.data.timetablePeriods || DEFAULT_TIMETABLE_PERIODS,
+      weeklySchedule: this.data.weeklySchedule || {}
+    };
+    const coreHash = this.computeDataHash(JSON.stringify(coreSnapshot));
+    const dataJson = JSON.stringify(this.data);
+    return {
+      type: 'backup',
+      id: 'bk_' + Date.now(),
+      timestamp: new Date().toISOString(),
+      localTimeStr: new Date().toLocaleString('zh-TW', { hour12: false }),
+      reason,
+      deviceId: cfg.deviceId || this.getOrCreateDeviceId(),
+      deviceLabel: this.getDeviceSignatureLabel(),
+      summary: this.getBackupSummary(),
+      hash: coreHash,
+      dataJson
+    };
+  }
+
+  async uploadGoogleBackup({ reason = '手動備份', force = false, silent = false } = {}) {
+    const cfg = this.getGoogleBackupSettings();
+    if (!navigator.onLine) {
+      if (!silent && window.appState?.showToast) {
+        window.appState.showToast('目前處於離線狀態，待連線後會自動執行雲端備份', 'warning');
+      }
+      return { success: false, error: 'OFFLINE' };
+    }
+
+    const payload = this.buildCloudBackupPayload(reason);
+    if (!force && cfg.lastBackupHash && cfg.lastBackupHash === payload.hash) {
+      return { success: true, skipped: true, reason: 'NO_CHANGES' };
+    }
+
+    if (cfg.mode === 'form') {
+      const formUrl = cfg.effectiveFormUrl;
+      const entryId = cfg.effectiveFormEntryId;
+      if (!formUrl || !entryId) {
+        if (!silent && window.appState?.showToast) {
+          window.appState.showToast('請先填入 Google 表單網址與欄位代碼 (entry.xxxxxx)', 'warning');
+        }
+        return { success: false, error: 'NO_FORM_CONFIG' };
+      }
+
+      const parsedForm = this.parseGoogleFormUrl(formUrl);
+      const targetUrl = parsedForm.actionUrl || formUrl;
+      const formData = new URLSearchParams();
+      formData.append(entryId, payload.dataJson);
+      const summaryEntryId = cfg.effectiveFormSummaryEntryId || '';
+      if (summaryEntryId && /^entry\.\d+$/.test(summaryEntryId)) {
+        const s = payload.summary;
+        formData.append(
+          summaryEntryId,
+          `[${payload.localTimeStr}] ${payload.deviceLabel} | ${reason} | ${s.classCount}班 ${s.studentCount}人 ${s.assessmentCount}次考 ${s.eventCount}事件`
+        );
+      }
+
+      await fetch(targetUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: formData.toString()
+      });
+
+      this._recordBackupSuccess(payload, '已送出至 Google 表單');
+      return { success: true, mode: 'form', payload };
+    }
+
+    // Default: Google Sheets via Apps Script (supports unlimited length chunking + 1-click two-way restore)
+    const url = cfg.effectiveAppsScriptUrl;
+    if (!url) {
+      if (!silent && window.appState?.showToast) {
+        window.appState.showToast('尚未設定 Google 試算表 Apps Script 網址，請先依引導完成一次性設定', 'warning');
+      }
+      return { success: false, error: 'NO_WEBHOOK' };
+    }
+
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    });
+
+    this._recordBackupSuccess(payload, '已雲端備份至 Google 試算表');
+    return { success: true, mode: 'sheets', payload };
+  }
+
+  _recordBackupSuccess(payload, statusLabel) {
+    if (!this.data.settings) this.data.settings = {};
+    if (!this.data.settings.googleBackup) {
+      this.data.settings.googleBackup = this.getDefaultGoogleBackupSettings();
+    }
+    this.data.settings.googleBackup.lastBackupTs = Date.now();
+    this.data.settings.googleBackup.lastBackupHash = payload.hash;
+    this.data.settings.googleBackup.lastBackupStatus = `${statusLabel} (${payload.localTimeStr})`;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+  }
+
+  scheduleAutoBackupOnChange() {
+    const cfg = this.getGoogleBackupSettings();
+    if (cfg.schedule !== 'on_change') return;
+    if (this._autoBackupTimer) clearTimeout(this._autoBackupTimer);
+    this._autoBackupTimer = setTimeout(() => {
+      this.checkAndRunScheduledBackup('資料異動自動備份');
+    }, 15000);
+  }
+
+  async checkAndRunScheduledBackup(reason = '定期自動備份') {
+    try {
+      if (this._cloudConfigReady) {
+        await this._cloudConfigReady;
+      }
+      const cfg = this.getGoogleBackupSettings();
+      if (!cfg.schedule || cfg.schedule === 'manual') return { skipped: true };
+      const hasEndpoint = cfg.mode === 'form'
+        ? Boolean(cfg.effectiveFormUrl && cfg.effectiveFormEntryId)
+        : Boolean(cfg.effectiveAppsScriptUrl);
+      if (!hasEndpoint || !navigator.onLine) return { skipped: true };
+
+      const intervalMap = {
+        on_change: 2 * 60 * 1000,
+        hourly: 3600 * 1000,
+        daily: 24 * 3600 * 1000,
+        weekly: 7 * 24 * 3600 * 1000
+      };
+      const minInterval = intervalMap[cfg.schedule] ?? (24 * 3600 * 1000);
+      const elapsed = Date.now() - (Number(cfg.lastBackupTs) || 0);
+      if (elapsed < minInterval) return { skipped: true };
+
+      return await this.uploadGoogleBackup({ reason, force: false, silent: true });
+    } catch (e) {
+      console.warn('Scheduled backup skipped:', e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async fetchCloudBackupsList() {
+    const cfg = this.getGoogleBackupSettings();
+    const url = cfg.effectiveAppsScriptUrl;
+    if (!url) throw new Error('尚未設定 Google 試算表 Apps Script 網址');
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(`${url}${sep}action=list_backups&t=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      throw new Error(data?.error || '雲端尚未更新為新版備份腳本（需支援 Backups 分頁）');
+    }
+    return data;
+  }
+
+  async restoreFromCloudBackup(backupId) {
+    const cfg = this.getGoogleBackupSettings();
+    const url = cfg.effectiveAppsScriptUrl;
+    if (!url) throw new Error('尚未設定 Google 試算表 Apps Script 網址');
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(`${url}${sep}action=get_backup&id=${encodeURIComponent(backupId)}&t=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const result = await res.json();
+    if (!result || !result.dataJson) {
+      throw new Error(result?.error || '找不到該筆備份內容');
+    }
+    return this.importAllData(result.dataJson);
   }
 
   // --- Student Ranking & OAA Performance Tier Engine ---
@@ -991,9 +1472,9 @@ class Store {
           if (profile && profile.scoreMean > 0) academicScore = profile.scoreMean;
         } catch (e) {}
 
-        const events = classEvents.filter(e => e.seatNo === s.seatNo);
+        const events = classEvents.filter(e => e.seatNo === s.seatNo && e.category !== 'academic' && e.category !== 'assessment');
         const characterPoints = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
-        // Composite rating = Academic score (weighted) + points delta
+        // Composite rating = Academic score (weighted) + character points net delta
         const composite = (academicScore * 10) + characterPoints;
         const gender = s.gender || (s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F');
 

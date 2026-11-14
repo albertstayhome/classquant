@@ -5,6 +5,8 @@
 
 html {
   font-size: calc(16px * var(--app-font-scale, 1.08));
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html[data-font-size="standard"] {
@@ -81,12 +83,13 @@ html[data-font-size="xlarge"] {
 /* Collapsible Header Transition */
 #global-header {
   transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease;
-  max-height: 220px;
-  overflow: hidden;
+  max-height: 360px;
+  overflow: visible;
 }
 
 #global-header.header-collapsed {
   max-height: 0 !important;
+  overflow: hidden !important;
   opacity: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;

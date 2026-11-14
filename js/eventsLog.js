@@ -17,6 +17,7 @@ class EventsLogView {
     this.dateFrom = '';
     this.dateTo = '';
     this.crossSelectedSeats = new Set();
+    this.lastInitialClassId = null;
   }
 
   switchViewMode(mode) {
@@ -26,7 +27,8 @@ class EventsLogView {
 
   quickFilter(type) {
     const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const targetDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = window.getLocalDateStr ? window.getLocalDateStr(targetDate) : targetDate.toISOString().split('T')[0];
 
     if (type === 'recent_neg') {
       this.dateFrom = sevenDaysAgo;
@@ -75,17 +77,8 @@ class EventsLogView {
     this.render('events-log-view');
   }
 
-  render(containerId, initialClassId = null) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (initialClassId && this.filterClass === 'all') {
-      this.filterClass = initialClassId;
-    }
-
-    const classes = this.store.getClasses();
+  getFilteredEvents() {
     let events = this.store.getEvents();
-    const students = this.filterClass !== 'all' ? this.store.getStudents(this.filterClass) : [];
 
     // Apply Standard Filters
     if (this.filterClass !== 'all') {
@@ -122,12 +115,39 @@ class EventsLogView {
       });
     }
 
-    // Sort Chronologically (Newest first)
+    // Sort Chronologically (Newest first across dates, named/numeric periods, and timestamps)
+    const periodOrder = { '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, 'lunch': 4.5, '5': 5, '6': 6, '7': 7, 'clean': 7.5, '8': 8, 'after': 9 };
+    const getPeriodRank = (p) => {
+      const k = String(p ?? '');
+      if (Object.prototype.hasOwnProperty.call(periodOrder, k)) return periodOrder[k];
+      const n = Number(p);
+      return Number.isFinite(n) ? n : 0;
+    };
+
     events.sort((a, b) => {
-      const dateDiff = new Date(b.date || '2026-01-01') - new Date(a.date || '2026-01-01');
-      if (dateDiff !== 0) return dateDiff;
-      return (b.period || 0) - (a.period || 0);
+      const dateCompare = String(b.date || '2026-01-01').localeCompare(String(a.date || '2026-01-01'));
+      if (dateCompare !== 0) return dateCompare;
+      const periodDiff = getPeriodRank(b.period) - getPeriodRank(a.period);
+      if (periodDiff !== 0) return periodDiff;
+      return String(b.time || '').localeCompare(String(a.time || ''));
     });
+
+    return events;
+  }
+
+  render(containerId, initialClassId = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (initialClassId && initialClassId !== this.lastInitialClassId) {
+      this.filterClass = initialClassId;
+      this.filterSeat = 'all';
+      this.lastInitialClassId = initialClassId;
+    }
+
+    const classes = this.store.getClasses();
+    const events = this.getFilteredEvents();
+    const students = this.filterClass !== 'all' ? this.store.getStudents(this.filterClass) : [];
 
     const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
 
@@ -519,6 +539,9 @@ class EventsLogView {
 
   setFilter(key, value) {
     this[key] = value;
+    if (key === 'filterClass') {
+      this.filterSeat = 'all';
+    }
     this.render('events-log-view');
   }
 
@@ -543,12 +566,7 @@ class EventsLogView {
   }
 
   exportFilteredSummary() {
-    let events = this.store.getEvents();
-    if (this.filterClass !== 'all') events = events.filter(e => e.classId === this.filterClass);
-    if (this.filterSeat !== 'all') events = events.filter(e => e.seatNo === parseInt(this.filterSeat, 10));
-    if (this.filterCategory !== 'all') events = events.filter(e => e.category === this.filterCategory);
-    if (this.dateFrom) events = events.filter(e => e.date >= this.dateFrom);
-    if (this.dateTo) events = events.filter(e => e.date <= this.dateTo);
+    const events = this.getFilteredEvents();
 
     let report = `【ClassQuant 學生事件與記事摘錄】\n篩選範圍：${this.filterClass === 'all' ? '所有班級' : this.filterClass + '班'} (共 ${events.length} 筆)\n\n`;
     events.forEach((e, idx) => {
@@ -556,8 +574,12 @@ class EventsLogView {
       report += `${idx + 1}. [${e.date} 節次:${e.period}] ${e.classId}班 ${String(e.seatNo).padStart(2, '0')}號 ${student ? student.name : '學生'}：【${e.tagName} (${e.delta > 0 ? '+' : ''}${e.delta})】${e.note ? ' - ' + e.note : ''}\n`;
     });
 
-    navigator.clipboard.writeText(report);
-    window.appState.showToast(`已複製 ${events.length} 筆事證至剪貼簿！`, 'success');
+    if (window.copyTextSafe) {
+      window.copyTextSafe(report, `已複製 ${events.length} 筆事證至剪貼簿！`);
+    } else {
+      navigator.clipboard.writeText(report);
+      window.appState.showToast(`已複製 ${events.length} 筆事證至剪貼簿！`, 'success');
+    }
   }
 }
 
