@@ -14,7 +14,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '2.2.0';
+    this.appVersion = '2.4.0';
     this.toastTimer = null;
     this.lastTimetableSlotKey = null;
     this._mascotTapCount = 0;
@@ -601,23 +601,14 @@ class AppState {
     safeRun('updateHeaderVersionBadge', () => this.updateHeaderVersionBadge());
     safeRun('switchTab', () => this.switchTab('matrix'));
 
-    // Signal anime cover & watchdog that core appState booted cleanly
+    // Signal anime cover & watchdog that core appState booted cleanly and drive real progress bar to 100% unlock
     try {
       window.__cqAppReady = true;
       const clsCount = Object.keys(window.appStore?.getClasses?.() || {}).length;
-      const statusEl = document.getElementById('cq-cover-status-text');
-      if (statusEl) {
-        statusEl.textContent = clsCount > 0
-          ? `✨ 已完整保留 ${clsCount} 個班級資料（${this.currentClassId} 班）• 準備進入`
-          : '✨ 系統準備就緒 • 點擊或稍候立即進入';
-      }
-      if (window.__cqDismissCover && !window.__cqCoverLocked) {
-        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        setTimeout(() => {
-          if (window.__cqDismissCover && !window.__cqCoverLocked) {
-            window.__cqDismissCover(false);
-          }
-        }, reduceMotion ? 60 : 1250);
+      if (window.__cqMarkSystemReady) {
+        window.__cqMarkSystemReady(clsCount, this.currentClassId);
+      } else if (window.__cqDismissCover && !window.__cqCoverLocked) {
+        window.__cqDismissCover(true);
       }
     } catch (e) {}
   }
@@ -839,6 +830,36 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v2.4.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-rose-50 via-pink-50/90 to-amber-50/80 text-slate-900'} shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-600 via-pink-500 to-amber-500 text-white font-black text-xs shadow-sm font-mono">
+                v2.4.0 (第 1 段主畫面聯名 PNG 升級 • 第 2 段載入完成一鍵登入閘門)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-rose-700'} font-mono font-bold">2026-11-15</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【第 1 段封面實質升級】新增高解析實教 × 三麗鷗 PNG 圖示（192px／512px／Maskable／Apple 180px 與 iOS 全螢幕啟動圖）並對齊背景色 #120612（Android 若之前已釘選主畫面，重加一次捷徑即可看到新圖示）。</li>
+              <li>• 【第 2 段封面改為「全部載入完成 ➔ 開放一鍵登入」】實時追蹤資料與動漫圖庫載入至 100% 後，按鈕自動亮起金紅光暈開放點擊登入（亦可至「⚙️ 系統設定」切換為自動進入或略過封面）。</li>
+            </ul>
+          </div>
+
+          <!-- v2.3.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-rose-50 via-pink-50/90 to-amber-50/80 text-slate-900'} shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-600 via-pink-500 to-amber-500 text-white font-black text-xs shadow-sm font-mono">
+                v2.3.0 (手機順暢滑動修復 • 1鍵復原/改分 • 同班導師/科任Excel分流 • 啟動提速)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-rose-700'} font-mono font-bold">2026-11-15</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【修復｜手機滑到底部難向上滑 &amp; 滑動卡頓】解除下方標籤匣 <code class="px-1 rounded bg-black/10">touch-action: pan-x</code> 對垂直手勢的鎖死、移除巢狀捲動陷阱與行動端卡片高耗能玻璃模糊，並調校座位長按防誤觸，從畫面最底部也能單手順暢往上滑動。</li>
+              <li>• 【優化｜誤按加錯分 1 秒復原 &amp; 即時改分】點記板新增「↩️ 復原誤按」橫幅、浮動選取列新增「✏️ 改分/備註」、事後補記與學生個人檔案皆支援單筆「✏️ 修改分數/備註」與立即「撤銷」。</li>
+              <li>• 【優化｜同名班級（如七年十四班 導師班 vs 數學課）Excel 自動區分】匯出 Excel 檔名與總表標題自動標註「班級(導師班) / 班級(數學課)」，並同步顯示於班級選單，再也不會互相同名覆蓋。</li>
+              <li>• 【優化｜啟動兩段式封面說明與提速】Chrome PWA 的第 1 段白底圖示為瀏覽器啟動 App 的原生轉場；第 2 段實教×三麗鷗動漫封面現已加速至 0.65 秒，並支援「下次略過此封面（直接進教室）」開關！</li>
+            </ul>
           </div>
 
           <!-- v2.2.0 -->
@@ -2070,17 +2091,17 @@ class AppState {
       html += `<optgroup label="🎀 導師本班 (常規與生活)">`;
       html += homeroomClasses.map(c => `
         <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
-          ${c.name} (導師)
+          ${window.appStore.getClassQualifiedName ? window.appStore.getClassQualifiedName(c.id) : `${c.name} (導師班)`}
         </option>
       `).join('');
       html += `</optgroup>`;
     }
 
     if (subjectClasses.length > 0) {
-      html += `<optgroup label="📘 數學科任班 (解題與作業)">`;
+      html += `<optgroup label="📘 科任班 (數學／學科)">`;
       html += subjectClasses.map(c => `
         <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
-          ${c.name} (科任)
+          ${window.appStore.getClassQualifiedName ? window.appStore.getClassQualifiedName(c.id) : `${c.name} (數學課)`}
         </option>
       `).join('');
       html += `</optgroup>`;
@@ -2425,13 +2446,163 @@ class AppState {
 
   replayAppCover() {
     if (window.__cqShowCover) {
-      window.__cqShowCover(5500);
+      window.__cqShowCover(0);
     }
   }
 
   dismissAppCover() {
     if (window.__cqDismissCover) {
       window.__cqDismissCover(true);
+    }
+  }
+
+  getCoverMode() {
+    try {
+      const m = localStorage.getItem('classquant_cover_mode');
+      if (m === 'gate' || m === 'auto' || m === 'skip') return m;
+      if (localStorage.getItem('classquant_skip_launch_cover') === 'true') return 'skip';
+    } catch (e) {}
+    return 'gate';
+  }
+
+  cycleCoverMode() {
+    const order = ['gate', 'auto', 'skip'];
+    const cur = this.getCoverMode();
+    const next = order[(order.indexOf(cur) + 1) % order.length];
+    try {
+      localStorage.setItem('classquant_cover_mode', next);
+      localStorage.setItem('classquant_skip_launch_cover', next === 'skip' ? 'true' : 'false');
+    } catch (e) {}
+    const msgMap = {
+      gate: '🔐 已切換為「全部載入完成後，開放一鍵登入教室」（預設）',
+      auto: '🎬 已切換為「展示動漫封面完成後自動進教室」',
+      skip: '⚡ 已切換為「下次略過動漫封面，直接進教室」'
+    };
+    this.showToast(msgMap[next], 'success');
+    return next;
+  }
+
+  isSkipLaunchCover() {
+    return this.getCoverMode() === 'skip';
+  }
+
+  toggleSkipLaunchCover() {
+    const next = !this.isSkipLaunchCover();
+    try {
+      const mode = next ? 'skip' : 'gate';
+      localStorage.setItem('classquant_cover_mode', mode);
+      localStorage.setItem('classquant_skip_launch_cover', next ? 'true' : 'false');
+    } catch (e) {}
+    this.showToast(
+      next
+        ? '⚡ 已設定「略過開機封面，直接進教室」（仍可於 ⋯ 更多隨時重播動漫封面）'
+        : '🔐 已恢復為「全部載入完成後開放一鍵登入」',
+      'success'
+    );
+    return next;
+  }
+
+  openEditEventModal(eventId, onAfterSave = null) {
+    const store = window.appStore;
+    const evt = (store?.data?.events || []).find(e => e.id === eventId);
+    if (!evt) {
+      this.showToast('找不到這筆點記紀錄，可能已被刪除', 'warning');
+      return;
+    }
+
+    this._onEditEventDone = typeof onAfterSave === 'function' ? onAfterSave : null;
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    const student = store.getStudent(evt.classId, evt.seatNo);
+    const qualifiedClass = store.getClassQualifiedName ? store.getClassQualifiedName(evt.classId) : evt.classId;
+    const isOAA = store.getTheme() === 'oaa';
+    const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    modalContent.innerHTML = `
+      <div class="p-5 sm:p-6 ${isOAA ? 'bg-[#1f0a16] text-white' : 'bg-white text-slate-900'}">
+        <div class="flex items-center justify-between gap-2 pb-3 mb-4 border-b ${isOAA ? 'border-amber-500/40' : 'border-pink-200'}">
+          <div>
+            <h3 class="text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'}">✏️ 修改單筆加減分紀錄</h3>
+            <p class="text-xs ${isOAA ? 'text-amber-200/75' : 'text-slate-500'} mt-0.5">
+              ${esc(qualifiedClass)} • ${String(evt.seatNo).padStart(2, '0')}號 ${esc(student ? student.name : '')} (${esc(evt.date || '')})
+            </p>
+          </div>
+          <button type="button" onclick="appState.closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black cursor-pointer ${isOAA ? 'bg-rose-950 text-amber-300' : 'bg-slate-100 text-slate-600'}">✕</button>
+        </div>
+
+        <form onsubmit="appState.saveEditedEvent(event, '${esc(evt.id)}')" class="space-y-4 text-xs sm:text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-black mb-1 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">事由 / 標籤名稱</label>
+              <input id="edit-evt-tagname" type="text" required value="${esc(evt.tagName)}" class="w-full px-3 py-2 rounded-xl border font-bold text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-pink-300 text-slate-900'}">
+            </div>
+            <div>
+              <label class="block font-black mb-1 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">點數增減 (可填正負數)</label>
+              <input id="edit-evt-delta" type="number" step="1" required value="${Number(evt.delta || 0)}" class="w-full px-3 py-2 rounded-xl border font-mono font-black text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-amber-300' : 'bg-pink-50/40 border-pink-300 text-slate-900'}">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-black mb-1 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">備註說明</label>
+            <input id="edit-evt-note" type="text" value="${esc(evt.note || '')}" placeholder="輸入或補充備註..." class="w-full px-3 py-2 rounded-xl border font-medium text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-pink-300 text-slate-900'}">
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+            <button type="button" onclick="appState.deleteEditedEvent('${esc(evt.id)}')" class="px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer ${isOAA ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}">
+              🗑️ 撤銷刪除此筆
+            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="appState.closeModal()" class="px-4 py-2 rounded-xl font-bold text-xs cursor-pointer ${isOAA ? 'bg-[#2a0e1d] text-amber-200 border border-amber-500/40' : 'bg-slate-100 text-slate-700'}">取消</button>
+              <button type="submit" class="px-5 py-2 rounded-xl font-black text-xs sm:text-sm text-white cursor-pointer shadow-md ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600'}">
+                💾 儲存修改
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+  }
+
+  _refreshViewsAfterEventMutation() {
+    try {
+      if (typeof this._onEditEventDone === 'function') this._onEditEventDone();
+      if (window.matrixView && document.getElementById('classroom-matrix-view') && !document.getElementById('classroom-matrix-view').classList.contains('hidden')) {
+        window.matrixView.render('classroom-matrix-view', this.currentClassId);
+      }
+      if (window.dashboardCharts && document.getElementById('dashboard-view') && !document.getElementById('dashboard-view').classList.contains('hidden')) {
+        window.dashboardCharts.renderClassDashboard('dashboard-view', this.currentClassId);
+      }
+    } catch (e) {}
+  }
+
+  saveEditedEvent(e, eventId) {
+    e.preventDefault();
+    const tagName = document.getElementById('edit-evt-tagname')?.value.trim();
+    const delta = Number(document.getElementById('edit-evt-delta')?.value);
+    const note = document.getElementById('edit-evt-note')?.value ?? '';
+    if (!Number.isFinite(delta)) {
+      this.showToast('請輸入有效的點數數字', 'warning');
+      return;
+    }
+    const updated = window.appStore?.updateEvent?.(eventId, { tagName, delta, note });
+    if (updated) {
+      if (this.playPop) this.playPop();
+      this.showToast(`✅ 已更新為「${updated.tagName} (${updated.delta > 0 ? '+' : ''}${updated.delta})」`, 'success');
+      this.closeModal();
+      this._refreshViewsAfterEventMutation();
+    }
+  }
+
+  deleteEditedEvent(eventId) {
+    if (window.appStore?.deleteEvent?.(eventId)) {
+      if (this.playPop) this.playPop();
+      this.showToast('🗑️ 已撤銷並刪除該筆加減分紀錄', 'info');
+      this.closeModal();
+      this._refreshViewsAfterEventMutation();
     }
   }
 

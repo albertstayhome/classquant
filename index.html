@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ClassQuant Hub • 國中導師與數學科任戰情室</title>
   
-  <!-- PWA Metadata -->
+  <!-- PWA Metadata & Stage-1 Native Splash Artwork -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#f43f5e">
+  <meta name="theme-color" content="#120612">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ClassQuant">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23180714'/%3E%3Cstop offset='0.49' stop-color='%23881337'/%3E%3Cstop offset='0.51' stop-color='%23fb7185'/%3E%3Cstop offset='1' stop-color='%23fdf2f8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' rx='28' fill='url(%23g1)'/%3E%3Cpath d='M16 112 L112 16' stroke='%23fbbf24' stroke-width='4' stroke-linecap='round' opacity='0.85'/%3E%3Ccircle cx='64' cy='64' r='36' fill='%23fff' stroke='%23fbbf24' stroke-width='3'/%3E%3Cpath d='M42 58 C42 48 52 41 64 41 C76 41 86 48 86 58 C86 73 76 82 64 82 C52 82 42 73 42 58 Z' fill='%23fff1f2' stroke='%23be185d' stroke-width='2'/%3E%3Cellipse cx='54' cy='59' rx='3.2' ry='4.5' fill='%231e293b'/%3E%3Cellipse cx='74' cy='59' rx='3.2' ry='4.5' fill='%231e293b'/%3E%3Cellipse cx='64' cy='67' rx='4' ry='2.8' fill='%23f59e0b'/%3E%3Cpath d='M75 40 C79 33 90 34 92 40 C94 45 89 51 83 49 C85 55 80 61 74 58 C69 55 71 46 75 40 Z' fill='%23e11d48' stroke='%23fbbf24' stroke-width='1.5'/%3E%3Ccircle cx='80' cy='46' r='3.5' fill='%23fef3c7'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/pwa-icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon-180.png">
+  <link rel="apple-touch-startup-image" href="./assets/icons/apple-splash-portrait.png">
 
   <!-- Critical Inline Cover Styles (Guarantees instant frame-0 paint before CDNs or external CSS complete) -->
   <style id="cq-cover-critical-css">
@@ -69,22 +71,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="./css/styles.css?v=2.2.0">
-  <link rel="stylesheet" href="./css/kitty-theme.css?v=2.2.0">
-  <link rel="stylesheet" href="./css/sanrio-characters.css?v=2.2.0">
-  <link rel="stylesheet" href="./css/oaa-theme.css?v=2.2.0">
+  <link rel="stylesheet" href="./css/styles.css?v=2.4.0">
+  <link rel="stylesheet" href="./css/kitty-theme.css?v=2.4.0">
+  <link rel="stylesheet" href="./css/sanrio-characters.css?v=2.4.0">
+  <link rel="stylesheet" href="./css/oaa-theme.css?v=2.4.0">
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300 font-sans selection:bg-pink-300 selection:text-pink-900">
 
-  <!-- 《歡迎來到實力至上主義教室 × Sanrio 三麗鷗》Anime Crossover Cover (Fail-Safe Non-Blocking) -->
-  <div id="anime-app-cover" role="dialog" aria-label="ClassQuant Hub 動漫聯名啟動封面" onclick="if (window.__cqDismissCover) window.__cqDismissCover(true)">
+  <!-- 《歡迎來到實力至上主義教室 × Sanrio 三麗鷗》Anime Crossover Cover (Full-Load Gate + Fail-Safe Non-Blocking) -->
+  <div id="anime-app-cover" role="dialog" aria-label="ClassQuant Hub 動漫聯名啟動封面" onclick="if (window.__cqGateReady && window.__cqDismissCover) window.__cqDismissCover(true)">
     <!-- Left Wing: COTE S-SYSTEM Crimson/Obsidian -->
     <div class="cq-cover-wing-cote">
       <div class="cq-cover-cote-grid"></div>
       <div class="cq-cover-cote-scanline"></div>
       <div class="cq-cover-cote-hud">
         <span>ANHS // S-SYSTEM</span>
-        <span>OAA TERMINAL v2.2</span>
+        <span>OAA TERMINAL v2.4</span>
       </div>
       <img src="./assets/cote/official/ayanokoji_full.webp" alt="" class="cq-cover-char cq-char-ayanokoji" loading="eager">
       <img src="./assets/cote/official/sakayanagi_full.webp" alt="" class="cq-cover-char cq-char-sakayanagi" loading="eager">
@@ -116,13 +118,13 @@
       <p class="cq-cover-subtitle">歡迎來到實力至上主義教室 × Sanrio 聯名教學戰情室</p>
 
       <div id="cq-cover-status-pill" class="cq-cover-status-pill">
-        <span class="cq-cover-pulse-dot"></span>
-        <span id="cq-cover-status-text">安全載入老師既有班級與成績資料中…</span>
+        <span id="cq-cover-pulse-dot" class="cq-cover-pulse-dot cq-dot-loading"></span>
+        <span id="cq-cover-status-text">系統初始化與載入教室模組中 (20%)…</span>
       </div>
 
-      <button id="cq-cover-enter-btn" type="button" onclick="window.__cqDismissCover(true)" class="cq-cover-enter-btn">
-        <span>⚡ 進入教室</span>
-        <span class="cq-cover-enter-en">ENTER CLASSROOM</span>
+      <button id="cq-cover-enter-btn" type="button" onclick="window.__cqTryEnterClassroom()" class="cq-cover-enter-btn cq-btn-loading" aria-busy="true">
+        <span id="cq-cover-enter-label">⏳ 系統資源載入中 (20%)</span>
+        <span id="cq-cover-enter-en" class="cq-cover-enter-en">SYNCING</span>
       </button>
 
       <!-- Emergency Cache Recovery Banner (Shown ONLY if boot watchdog detects stuck script/cache) -->
@@ -134,18 +136,84 @@
       </div>
 
       <div class="cq-cover-progress-track">
-        <div class="cq-cover-progress-fill"></div>
+        <div id="cq-cover-progress-fill" class="cq-cover-progress-fill" style="width: 20%;"></div>
       </div>
-      <div class="cq-cover-skip-hint">點擊畫面任意處或按鈕即可立即進入 • v2.2.0</div>
+      <div id="cq-cover-hint-line" class="cq-cover-skip-hint">載入完成後即開放一鍵登入教室 • v2.4.0</div>
+      <button id="cq-cover-skip-pref-btn" type="button" onclick="event.stopPropagation(); window.__cqEnableSkipCoverAndEnter()" class="cq-cover-skip-pref-btn">
+        ⚡ 下次略過此封面（直接進教室）
+      </button>
     </div>
   </div>
 
-  <!-- Fail-Safe Cover & Cache Boot Watchdog (Runs independently of external CDNs & bundled JS) -->
+  <!-- Fail-Safe Cover, Progress Tracker & Login Gate Controller (Runs independently of external CDNs) -->
   <script>
     (function() {
       window.__cqCoverLocked = false;
+      window.__cqGateReady = false;
+      window.__cqBootPct = 20;
       var coverEl = document.getElementById('anime-app-cover');
       var dismissed = false;
+
+      window.__cqGetCoverMode = function() {
+        try {
+          var mode = localStorage.getItem('classquant_cover_mode');
+          if (mode === 'gate' || mode === 'auto' || mode === 'skip') return mode;
+          if (localStorage.getItem('classquant_skip_launch_cover') === 'true') return 'skip';
+        } catch (e) {}
+        return 'gate';
+      };
+
+      window.__cqUpdateBootProgress = function(pct, msg) {
+        var fill = document.getElementById('cq-cover-progress-fill');
+        var statusEl = document.getElementById('cq-cover-status-text');
+        var labelEl = document.getElementById('cq-cover-enter-label');
+        var enEl = document.getElementById('cq-cover-enter-en');
+        var btn = document.getElementById('cq-cover-enter-btn');
+        var dot = document.getElementById('cq-cover-pulse-dot');
+        var hint = document.getElementById('cq-cover-hint-line');
+
+        if (typeof pct === 'number') {
+          window.__cqBootPct = Math.max(window.__cqBootPct || 0, Math.min(100, Math.round(pct)));
+        }
+        if (fill) fill.style.width = window.__cqBootPct + '%';
+        if (statusEl && msg) statusEl.textContent = msg;
+
+        if (window.__cqBootPct >= 100 && window.__cqGateReady) {
+          if (dot) dot.classList.remove('cq-dot-loading');
+          if (btn) {
+            btn.classList.remove('cq-btn-loading');
+            btn.classList.add('cq-btn-ready');
+            btn.setAttribute('aria-busy', 'false');
+          }
+          if (labelEl) labelEl.textContent = '🔓 全部載入完成 • ⚡ 一鍵登入系統';
+          if (enEl) enEl.textContent = 'LOGIN READY';
+          if (hint) hint.textContent = '✨ 所有圖庫、資料與樣式已就緒，點擊上方按鈕即可登入 • v2.4.0';
+        } else {
+          if (labelEl) labelEl.textContent = '⏳ 正在載入系統資源 (' + window.__cqBootPct + '%)';
+          if (enEl) enEl.textContent = 'LOADING';
+        }
+      };
+
+      // Respect persistent skip-cover preference before first paint so user enters workspace directly
+      try {
+        if (window.__cqGetCoverMode() === 'skip' && coverEl) {
+          dismissed = true;
+          coverEl.classList.add('cq-cover-hidden', 'cq-cover-removed');
+        }
+      } catch (e) {}
+
+      window.__cqTryEnterClassroom = function() {
+        if (!window.__cqGateReady) {
+          window.__cqUpdateBootProgress(Math.max(window.__cqBootPct, 55), '⏳ 正在完成最後資源檢查，馬上為您開啟登入…');
+          return;
+        }
+        try {
+          if (window.appState && window.appState.playEliteTerminalChime) {
+            window.appState.playEliteTerminalChime();
+          }
+        } catch (e) {}
+        window.__cqDismissCover(true);
+      };
 
       window.__cqDismissCover = function(forceImmediate) {
         if (dismissed && !forceImmediate) return;
@@ -158,13 +226,28 @@
           if (coverEl && coverEl.classList.contains('cq-cover-hidden')) {
             coverEl.classList.add('cq-cover-removed');
           }
-        }, forceImmediate ? 260 : 440);
+        }, forceImmediate ? 220 : 380);
+      };
+
+      window.__cqEnableSkipCoverAndEnter = function() {
+        try {
+          localStorage.setItem('classquant_cover_mode', 'skip');
+          localStorage.setItem('classquant_skip_launch_cover', 'true');
+        } catch (e) {}
+        window.__cqGateReady = true;
+        window.__cqDismissCover(true);
+        if (window.appState && window.appState.showToast) {
+          window.appState.showToast('⚡ 已記住：下次開啟將略過動漫封面，直接進教室！', 'success');
+        }
       };
 
       window.__cqShowCover = function(holdDurationMs) {
         if (!coverEl) coverEl = document.getElementById('anime-app-cover');
         if (!coverEl) return;
         dismissed = false;
+        window.__cqGateReady = true;
+        window.__cqBootPct = 100;
+        window.__cqUpdateBootProgress(100, '✨ 系統全部就緒 • 點擊下方按鈕一鍵登入教室');
         window.__cqCoverLocked = Boolean(holdDurationMs && holdDurationMs > 0);
         coverEl.classList.remove('cq-cover-removed');
         void coverEl.offsetWidth;
@@ -175,6 +258,67 @@
             window.__cqDismissCover(false);
           }, holdDurationMs);
         }
+      };
+
+      window.__cqMarkSystemReady = function(clsCount, currentClassId) {
+        if (dismissed) {
+          window.__cqGateReady = true;
+          return;
+        }
+        var dataMsg = clsCount > 0
+          ? '📦 已載入 ' + clsCount + ' 個班級（' + currentClassId + ' 班）• 檢查畫面圖庫中…'
+          : '📦 核心資料就緒 • 檢查畫面圖庫中…';
+        window.__cqUpdateBootProgress(78, dataMsg);
+
+        // Wait for cover artworks & key scripts (capped at 900ms offline grace so weak campus Wi-Fi never blocks!)
+        var imgs = Array.prototype.slice.call(document.querySelectorAll('#anime-app-cover img'));
+        var imgPromises = imgs.map(function(img) {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          return new Promise(function(resolve) {
+            img.addEventListener('load', resolve, { once: true });
+            img.addEventListener('error', resolve, { once: true });
+            setTimeout(resolve, 900);
+          });
+        });
+
+        var cdnWait = new Promise(function(resolve) {
+          var waited = 0;
+          var poll = function() {
+            var hasTw = Boolean(document.querySelector('style')) || typeof window.tailwind !== 'undefined';
+            var hasChart = typeof window.Chart !== 'undefined';
+            if ((hasTw && hasChart) || waited >= 850) {
+              resolve();
+              return;
+            }
+            waited += 80;
+            setTimeout(poll, 80);
+          };
+          poll();
+        });
+
+        Promise.race([
+          Promise.all(imgPromises.concat([cdnWait])),
+          new Promise(function(resolve) { setTimeout(resolve, 950); })
+        ]).then(function() {
+          window.__cqGateReady = true;
+          var readyMsg = clsCount > 0
+            ? '✨ 全部載入完成（已完整載入 ' + clsCount + ' 個班級）• 請一鍵登入系統'
+            : '✨ 全部系統資源載入完成 • 請一鍵登入系統';
+          window.__cqUpdateBootProgress(100, readyMsg);
+
+          var mode = window.__cqGetCoverMode();
+          if (mode === 'skip') {
+            window.__cqDismissCover(true);
+          } else if (mode === 'auto' && !window.__cqCoverLocked) {
+            var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            setTimeout(function() {
+              if (!dismissed && !window.__cqCoverLocked) {
+                window.__cqDismissCover(false);
+              }
+            }, reduceMotion ? 120 : 1200);
+          }
+          // In 'gate' mode (default), intentionally wait open with 100% READY glow until user clicks ⚡ 一鍵登入系統!
+        });
       };
 
       window.__cqRepairCachesAndReload = function() {
@@ -197,28 +341,26 @@
         });
       };
 
-      // Hard ceiling watchdog: cover NEVER freezes startup even if external networks or old caches fail
+      // Keyboard shortcut: Enter/Space logs in once 100% ready
+      document.addEventListener('keydown', function(evt) {
+        if (!dismissed && window.__cqGateReady && (evt.key === 'Enter' || evt.key === ' ')) {
+          var modal = document.getElementById('global-modal');
+          if (!modal || modal.classList.contains('hidden')) {
+            evt.preventDefault();
+            window.__cqTryEnterClassroom();
+          }
+        }
+      });
+
+      // Hard ceiling watchdog: show cache repair banner ONLY if core app failed to init after 3.2s
       setTimeout(function() {
         if (!window.__cqAppReady) {
-          var statusEl = document.getElementById('cq-cover-status-text');
+          window.__cqGateReady = true;
+          window.__cqUpdateBootProgress(100, '⚠️ 啟動耗時較長，可點擊修復快取或直接嘗試進入');
           var recoveryEl = document.getElementById('cq-cover-recovery');
-          if (statusEl) statusEl.textContent = '⚠️ 啟動耗時較長，可點擊下方修復快取或直接進入';
           if (recoveryEl) recoveryEl.style.display = 'block';
         }
-      }, 2400);
-
-      setTimeout(function() {
-        if (window.__cqAppReady && !window.__cqCoverLocked) {
-          window.__cqDismissCover(false);
-        }
-      }, 1550);
-
-      // Absolute fail-safe auto-reveal workspace at 3.8s if appState actually booted late
-      setTimeout(function() {
-        if (window.__cqAppReady && !window.__cqCoverLocked) {
-          window.__cqDismissCover(false);
-        }
-      }, 3800);
+      }, 3200);
     })();
   </script>
 
@@ -346,7 +488,7 @@
             <span class="kitty-bow !w-3 !h-3"></span>
             <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
             <span>選單</span>
-            <span class="text-[9px] px-1 py-0.2 rounded bg-pink-200/80 text-pink-900 font-mono font-bold">v2.1.0</span>
+            <span class="text-[9px] px-1 py-0.2 rounded bg-pink-200/80 text-pink-900 font-mono font-bold">v2.4.0</span>
           </button>
 
           <!-- 1. 🎯 課堂點記 (Live Scoring + Inline Retro Log) -->
@@ -357,7 +499,7 @@
 
           <!-- 2. 💯 平時成績 (Grades, Exam Settlement, Excel Export & History) -->
           <button onclick="appState.switchTab('grades')" data-tab="grades" class="nav-tab-btn px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-            <span>💯</span>
+            <svg class="cq-grade-crest w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 drop-shadow-xs" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/><rect x="5" y="4.4" width="14" height="2" rx="1" fill="#34d399"/><text x="12" y="15.8" text-anchor="middle" fill="#fde047" font-family="ui-monospace, SFMono-Regular, Arial, sans-serif" font-weight="900" font-size="9.5" letter-spacing="-0.5">100</text><rect x="5.5" y="18" width="13" height="1.6" rx="0.8" fill="#fbbf24"/></svg>
             <span>平時成績</span>
           </button>
 
@@ -457,7 +599,7 @@
         <span class="leading-tight whitespace-nowrap">點記</span>
       </button>
       <button type="button" onclick="appState.switchTab('grades')" data-tab="grades" class="nav-tab-btn mobile-nav-btn py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 min-h-[50px] text-[11px] font-black transition active:scale-95 cursor-pointer">
-        <span class="text-base leading-none">💯</span>
+        <svg class="cq-grade-crest w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/><rect x="5" y="4.4" width="14" height="2" rx="1" fill="#34d399"/><text x="12" y="15.8" text-anchor="middle" fill="#fde047" font-family="ui-monospace, SFMono-Regular, Arial, sans-serif" font-weight="900" font-size="9.5" letter-spacing="-0.5">100</text><rect x="5.5" y="18" width="13" height="1.6" rx="0.8" fill="#fbbf24"/></svg>
         <span class="leading-tight whitespace-nowrap">成績</span>
       </button>
       <button type="button" onclick="appState.switchTab('students')" data-tab="students" class="nav-tab-btn mobile-nav-btn py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 min-h-[50px] text-[11px] font-black transition active:scale-95 cursor-pointer">
@@ -500,7 +642,7 @@
           <span class="text-lg">🎬</span><span>重播實力教室 × 三麗鷗動漫封面</span>
         </button>
         <button type="button" onclick="appState.checkForUpdates(false); appState.closeMobileMoreSheet()" class="more-menu-item p-3 rounded-2xl border border-pink-200/70 text-left text-xs font-black flex items-center gap-2 min-h-[48px] cursor-pointer active:scale-95 col-span-2 justify-center">
-          <span class="text-base">🔄</span><span>檢查最新版本 (ClassQuant Hub v2.2.0)</span>
+          <span class="text-base">🔄</span><span>檢查最新版本 (ClassQuant Hub v2.4.0)</span>
         </button>
       </div>
     </div>
@@ -516,7 +658,7 @@
   <footer class="hidden md:flex glass-card border-t py-3.5 px-6 text-center text-xs items-center justify-between">
     <div class="flex items-center space-x-2">
       <span class="kitty-cat-mini"></span>
-      <span class="font-black text-pink-600">ClassQuant Hub v2.1.0</span>
+      <span class="font-black text-pink-600">ClassQuant Hub v2.4.0</span>
       <span class="text-slate-500">| 陪伴國中教師因材施教</span>
     </div>
     <div class="flex items-center space-x-2">
@@ -595,25 +737,25 @@
   </div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/xlsxExport.js?v=2.2.0"></script>
-  <script src="./js/store.js?v=2.2.0"></script>
-  <script src="./js/timetable.js?v=2.2.0"></script>
-  <script src="./js/statistics.js?v=2.2.0"></script>
-  <script src="./js/charts.js?v=2.2.0"></script>
-  <script src="./js/sortable.min.js?v=2.2.0"></script>
-  <script src="./js/tagManager.js?v=2.2.0"></script>
-  <script src="./js/matrix.js?v=2.2.0"></script>
-  <script src="./js/rosterManager.js?v=2.2.0"></script>
-  <script src="./js/retroLogView.js?v=2.2.0"></script>
-  <script src="./js/eventsLog.js?v=2.2.0"></script>
-  <script src="./js/studentDossier.js?v=2.2.0"></script>
-  <script src="./js/timetableEditor.js?v=2.2.0"></script>
-  <script src="./js/aiImportExport.js?v=2.2.0"></script>
-  <script src="./js/feedbackBoard.js?v=2.2.0"></script>
-  <script src="./js/onboardingTour.js?v=2.2.0"></script>
-  <script src="./js/onboardingWizard.js?v=2.2.0"></script>
-  <script src="./js/userGuide.js?v=2.2.0"></script>
-  <script src="./js/app.js?v=2.2.0"></script>
+  <script src="./js/xlsxExport.js?v=2.4.0"></script>
+  <script src="./js/store.js?v=2.4.0"></script>
+  <script src="./js/timetable.js?v=2.4.0"></script>
+  <script src="./js/statistics.js?v=2.4.0"></script>
+  <script src="./js/charts.js?v=2.4.0"></script>
+  <script src="./js/sortable.min.js?v=2.4.0"></script>
+  <script src="./js/tagManager.js?v=2.4.0"></script>
+  <script src="./js/matrix.js?v=2.4.0"></script>
+  <script src="./js/rosterManager.js?v=2.4.0"></script>
+  <script src="./js/retroLogView.js?v=2.4.0"></script>
+  <script src="./js/eventsLog.js?v=2.4.0"></script>
+  <script src="./js/studentDossier.js?v=2.4.0"></script>
+  <script src="./js/timetableEditor.js?v=2.4.0"></script>
+  <script src="./js/aiImportExport.js?v=2.4.0"></script>
+  <script src="./js/feedbackBoard.js?v=2.4.0"></script>
+  <script src="./js/onboardingTour.js?v=2.4.0"></script>
+  <script src="./js/onboardingWizard.js?v=2.4.0"></script>
+  <script src="./js/userGuide.js?v=2.4.0"></script>
+  <script src="./js/app.js?v=2.4.0"></script>
 
   <!-- Register Service Worker cleanly without reload deadlocks -->
   <script>

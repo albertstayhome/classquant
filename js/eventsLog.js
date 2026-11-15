@@ -524,9 +524,12 @@ class EventsLogView {
                     ${evt.note || '<span class="text-slate-400">無備註</span>'}
                   </td>
                   <td class="py-3 px-3 text-right whitespace-nowrap">
-                    <button onclick="eventsLogView.deleteEvent('${evt.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="刪除此筆記錄">
-                      <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" onclick="eventsLogView.editEvent('${evt.id}')" class="px-2 py-1 text-[11px] font-bold text-pink-700 bg-pink-50 hover:bg-pink-100 rounded-lg border border-pink-200 transition cursor-pointer" title="修改此筆分數或備註">✏️ 修改</button>
+                      <button type="button" onclick="eventsLogView.deleteEvent('${evt.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer" title="刪除此筆記錄">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               `;
@@ -548,6 +551,13 @@ class EventsLogView {
   setSearch(val) {
     this.searchQuery = val.trim();
     this.render('events-log-view');
+  }
+
+  editEvent(eventId) {
+    if (!eventId || !window.appState?.openEditEventModal) return;
+    window.appState.openEditEventModal(eventId, () => {
+      this.render('events-log-view');
+    });
   }
 
   deleteEvent(eventId) {

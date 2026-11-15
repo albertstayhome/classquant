@@ -686,8 +686,8 @@ class StudentDossierView {
             </div>
             
             <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm mt-2 font-bold">
-              <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
-                💯 本期平時成績: <strong class="text-blue-700 font-black text-sm">${regularScore}</strong> 分 (${tierBadge} 級)
+              <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 inline-flex items-center gap-1">
+                ${window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-3.5 h-3.5') : ''}<span>本期平時成績: <strong class="text-blue-700 font-black text-sm">${regularScore}</strong> 分 (${tierBadge} 級)</span>
               </span>
               <span class="px-2.5 py-0.5 rounded-lg ${netPoints >= 0 ? 'badge-character-pos' : 'badge-character-neg'}">
                 🎀 本期淨點: <strong class="${netPoints >= 0 ? 'text-pink-700' : 'text-rose-700'} font-black text-sm">${netPoints > 0 ? '+' : ''}${netPoints}</strong> 點
@@ -797,6 +797,7 @@ class StudentDossierView {
                     <span class="px-2 py-0.5 rounded-full text-xs font-black ${e.delta > 0 ? 'bg-emerald-100 text-emerald-800' : e.delta < 0 ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-700'}">
                       ${e.tagName} (${e.delta > 0 ? '+' : ''}${e.delta})
                     </span>
+                    <button type="button" onclick="studentDossierView.editStudentEvent('${e.id}')" class="px-1.5 py-0.5 rounded bg-white border border-pink-200 text-pink-700 hover:bg-pink-50 text-[10px] font-bold transition cursor-pointer" title="修改分數或備註">✏️ 修改</button>
                     <button type="button" onclick="studentDossierView.deleteStudentEvent('${e.id}')" class="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-300 text-[10px] font-bold transition cursor-pointer" title="撤銷這筆點記">撤銷</button>
                   </div>
                 </div>
@@ -1126,6 +1127,7 @@ class StudentDossierView {
                   <span class="px-2 py-0.5 rounded font-black font-mono ${Number(e.delta) >= 0 ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950 text-rose-300 border border-rose-500/40'}">
                     ${Number(e.delta) > 0 ? '+' : ''}${e.delta} 點
                   </span>
+                  <button type="button" onclick="studentDossierView.editStudentEvent('${e.id}')" class="px-1.5 py-0.5 rounded bg-[#16060f] border border-amber-500/40 text-amber-200 hover:border-amber-300 text-[10px] font-bold cursor-pointer" title="修改分數或備註">✏️ 修改</button>
                   <button type="button" onclick="studentDossierView.deleteStudentEvent('${e.id}')" class="px-1.5 py-0.5 rounded bg-[#16060f] border border-amber-500/30 text-amber-300/80 hover:text-rose-300 hover:border-rose-400 text-[10px] font-bold cursor-pointer" title="撤銷這筆點記">撤銷</button>
                 </div>
               </div>
@@ -1156,6 +1158,13 @@ class StudentDossierView {
       recommendation = '課堂常規與學習狀態維持穩健，建議持續以具體口頭讚美與加點鼓勵，保持良好參與節奏。';
     }
     return { recommendation };
+  }
+
+  editStudentEvent(eventId) {
+    if (!eventId || !window.appState?.openEditEventModal) return;
+    window.appState.openEditEventModal(eventId, () => {
+      this.render(this.lastContainerId || 'student-dossier-view', this.currentClassId, this.currentSeatNo);
+    });
   }
 
   deleteStudentEvent(eventId) {

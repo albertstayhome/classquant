@@ -5,7 +5,7 @@
  * - Completes core asset pre-caching before skipWaiting() to eliminate mixed-version cache crashes
  */
 
-const CACHE_NAME = 'classquant-hub-v139';
+const CACHE_NAME = 'classquant-hub-v142';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -126,6 +126,11 @@ const ASSETS_TO_CACHE = [
   './assets/images/kuromi.png',
   './assets/images/cinnamoroll.png',
   './assets/images/my_melody.png',
+  './assets/icons/pwa-icon-192.png',
+  './assets/icons/pwa-icon-512.png',
+  './assets/icons/pwa-icon-maskable-512.png',
+  './assets/icons/apple-touch-icon-180.png',
+  './assets/icons/apple-splash-portrait.png',
   './使用指南_圖文說明書.html'
 ];
 

@@ -14,6 +14,7 @@ class RetroLogView {
     this.selectedTagId = null;
     this.customDelta = 1;
     this.customNote = '';
+    this.lastBatch = null;
   }
 
   formatPeriodLabel(period) {
@@ -77,7 +78,7 @@ class RetroLogView {
                 <select id="retro-class-select" onchange="retroLogView.switchClass(this.value)" class="text-xs font-black bg-transparent focus:outline-none text-pink-900 cursor-pointer">
                   ${Object.values(classes).map(c => `
                     <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>
-                      ${c.name} (${c.type === 'homeroom' ? '導師班' : '科任班'})
+                      ${this.store.getClassQualifiedName ? this.store.getClassQualifiedName(c.id) : `${c.name} (${c.type === 'homeroom' ? '導師班' : '數學課'})`}
                     </option>
                   `).join('')}
                 </select>
@@ -252,12 +253,19 @@ class RetroLogView {
 
         <!-- Section 2: Recent Retro Logs Stream -->
         <div class="glass-card rounded-3xl p-5 border border-pink-200 bg-white shadow-sm">
-          <div class="flex items-center justify-between mb-3.5 pb-2.5 border-b border-pink-100">
+          <div class="flex items-center justify-between mb-3.5 pb-2.5 border-b border-pink-100 flex-wrap gap-2">
             <div class="flex items-center space-x-2">
               <i data-lucide="history" class="w-4 h-4 text-pink-600"></i>
               <h3 class="text-sm font-black text-slate-900">🕒 本班近期事後補記歷史記錄</h3>
             </div>
-            <span class="text-xs font-bold text-slate-400">共 ${retroEvents.length} 筆記錄</span>
+            <div class="flex items-center gap-2">
+              ${(this.lastBatch && this.lastBatch.classId === this.currentClassId && this.lastBatch.eventIds?.length > 0) ? `
+                <button type="button" onclick="retroLogView.undoLastBatch()" class="px-2.5 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-black transition cursor-pointer">
+                  ↩️ 復原剛才補記 (${this.lastBatch.eventIds.length} 人)
+                </button>
+              ` : ''}
+              <span class="text-xs font-bold text-slate-400">共 ${retroEvents.length} 筆記錄</span>
+            </div>
           </div>
 
           ${retroEvents.length === 0 ? `
@@ -278,11 +286,12 @@ class RetroLogView {
                       <span class="text-slate-500 truncate max-w-[200px] hidden sm:inline">${e.note || ''}</span>
                     </div>
 
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-1.5">
                       <span class="font-black px-2 py-0.5 rounded-lg border ${e.delta > 0 ? 'color-rule-pos-badge' : e.delta < 0 ? 'color-rule-neg-badge' : 'color-rule-zero-badge'}">
                         ${e.delta > 0 ? '+' : ''}${e.delta}
                       </span>
-                      <button onclick="retroLogView.deleteRetroEvent('${e.id}')" class="text-slate-400 hover:text-rose-600 transition" title="刪除記錄">
+                      <button type="button" onclick="retroLogView.editRetroEvent('${e.id}')" class="px-1.5 py-0.5 rounded-lg bg-pink-50 hover:bg-pink-100 border border-pink-200 text-pink-700 text-[11px] font-bold transition cursor-pointer" title="修改分數或備註">✏️ 修改</button>
+                      <button onclick="retroLogView.deleteRetroEvent('${e.id}')" class="text-slate-400 hover:text-rose-600 transition cursor-pointer" title="刪除記錄">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                       </button>
                     </div>
@@ -456,8 +465,9 @@ class RetroLogView {
     };
 
     const seatsArray = Array.from(this.selectedSeats);
+    const createdEventIds = [];
     seatsArray.forEach(seatNo => {
-      this.store.addEvent({
+      const created = this.store.addEvent({
         classId: this.currentClassId,
         seatNo,
         period: this.selectedPeriod,
@@ -469,7 +479,12 @@ class RetroLogView {
         note: `[事後補記] ${this.customNote}`.trim(),
         date: this.selectedDate
       });
+      if (created && created.id) createdEventIds.push(created.id);
     });
+
+    if (createdEventIds.length > 0) {
+      this.lastBatch = { classId: this.currentClassId, eventIds: createdEventIds, tagName: tag.name, delta: this.customDelta };
+    }
 
     if (this.customDelta > 0 && window.appState?.playChime) {
       window.appState.playChime();
@@ -483,6 +498,25 @@ class RetroLogView {
     this.selectedSeats.clear();
     this.customNote = '';
     this.render(this.lastContainerId || 'retro-log-view');
+  }
+
+  undoLastBatch() {
+    if (!this.lastBatch || !this.lastBatch.eventIds?.length) return;
+    const removed = this.store.deleteEventsBatch
+      ? this.store.deleteEventsBatch(this.lastBatch.eventIds)
+      : 0;
+    const summary = `${this.lastBatch.tagName} (${this.lastBatch.delta > 0 ? '+' : ''}${this.lastBatch.delta})`;
+    this.lastBatch = null;
+    if (window.appState?.playPop) window.appState.playPop();
+    window.appState?.showToast(`↩️ 已復原剛才事後補記「${summary}」（撤回 ${removed} 筆）`, 'info');
+    this.render(this.lastContainerId || 'retro-log-view');
+  }
+
+  editRetroEvent(eventId) {
+    if (!eventId || !window.appState?.openEditEventModal) return;
+    window.appState.openEditEventModal(eventId, () => {
+      this.render(this.lastContainerId || 'retro-log-view');
+    });
   }
 
   deleteRetroEvent(eventId) {

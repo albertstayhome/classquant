@@ -18,6 +18,7 @@ class ClassroomMatrix {
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
     this.scoringMode = 'live'; // 'live' | 'retro'
+    this.undoStack = []; // Recent batch actions for 1-tap mistake recovery
 
     // Official COTE Character Avatars for OAA Mode (Official non-Q bust assets)
     this.coteAvatars = [
@@ -130,36 +131,44 @@ class ClassroomMatrix {
 
     clearTimeout(this.longPressTimer);
 
-    // Natural scroll guard: cancel drag if finger moves >6px before 300ms
+    const cleanupGuards = () => {
+      clearTimeout(this.longPressTimer);
+      window.removeEventListener('touchmove', cancelMoveListener);
+      window.removeEventListener('mousemove', cancelMoveListener);
+      window.removeEventListener('scroll', cancelScrollListener, true);
+      window.removeEventListener('touchend', cancelEndListener);
+      window.removeEventListener('touchcancel', cancelEndListener);
+      window.removeEventListener('mouseup', cancelEndListener);
+    };
+
+    // Natural scroll guard: cancel long-press drag immediately on slight finger drift or page scroll
     const cancelMoveListener = (moveEvt) => {
       const moveTouch = moveEvt.touches ? moveEvt.touches[0] : moveEvt;
       const dx = Math.abs(moveTouch.clientX - this.dragStartCoords.x);
       const dy = Math.abs(moveTouch.clientY - this.dragStartCoords.y);
-      if (dx > 6 || dy > 6) {
-        clearTimeout(this.longPressTimer);
-        window.removeEventListener('touchmove', cancelMoveListener);
-        window.removeEventListener('mousemove', cancelMoveListener);
+      if (dx > 4 || dy > 4) {
+        cleanupGuards();
       }
     };
+    const cancelScrollListener = () => {
+      cleanupGuards();
+    };
+    const cancelEndListener = () => {
+      cleanupGuards();
+    };
+
     window.addEventListener('touchmove', cancelMoveListener, { passive: true });
     window.addEventListener('mousemove', cancelMoveListener, { passive: true });
-
-    const cancelEndListener = () => {
-      clearTimeout(this.longPressTimer);
-      window.removeEventListener('touchmove', cancelMoveListener);
-      window.removeEventListener('mousemove', cancelMoveListener);
-      window.removeEventListener('touchend', cancelEndListener);
-      window.removeEventListener('mouseup', cancelEndListener);
-    };
+    window.addEventListener('scroll', cancelScrollListener, { passive: true, capture: true });
     window.addEventListener('touchend', cancelEndListener, { once: true });
+    window.addEventListener('touchcancel', cancelEndListener, { once: true });
     window.addEventListener('mouseup', cancelEndListener, { once: true });
 
-    // 300ms long press to activate 1:1 hardware seat rearrangement
+    // 420ms deliberate long press to activate 1:1 hardware seat rearrangement without trapping quick vertical scrolls
     this.longPressTimer = setTimeout(() => {
-      window.removeEventListener('touchmove', cancelMoveListener);
-      window.removeEventListener('mousemove', cancelMoveListener);
+      cleanupGuards();
       this.startIOSDrag(touch, seatNo, classId);
-    }, 300);
+    }, 420);
   }
 
   startIOSDrag(touch, seatNo, classId) {
@@ -603,7 +612,21 @@ class ClassroomMatrix {
 
     // Dynamic Header Metadata (COTE vs Sanrio)
     const studentCountDisplay = cls.studentCount ?? students.length;
-    const classNameDisplay = isOAA ? `高度育成 ${cls.name}` : cls.name;
+    const qualifiedClassName = this.store.getClassQualifiedName ? this.store.getClassQualifiedName(currentClassId) : cls.name;
+    const classNameDisplay = isOAA ? `高度育成 ${qualifiedClassName}` : qualifiedClassName;
+    const latestUndo = this.getLatestUndoForClass(currentClassId);
+    const undoBannerHtml = latestUndo ? `
+      <div id="matrix-undo-banner" class="mb-2.5 px-3 py-2 rounded-2xl border flex items-center justify-between gap-2 text-xs shadow-sm ${isOAA ? 'bg-[#2a0f1d] border-amber-400/70 text-amber-100' : 'bg-amber-50 border-amber-300 text-amber-950'}">
+        <div class="min-w-0 truncate font-bold">
+          <span>↩️ 剛才記錄：</span>
+          <strong class="${latestUndo.delta >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-300' : 'text-rose-700')}">${latestUndo.tagName} (${latestUndo.delta > 0 ? '+' : ''}${latestUndo.delta})</strong>
+          <span class="opacity-80">• 共 ${latestUndo.seats.length} 人 (${latestUndo.seats.slice(0, 4).map(n => `${n}號`).join('、')}${latestUndo.seats.length > 4 ? '…' : ''})</span>
+        </div>
+        <button type="button" id="matrix-undo-btn" onclick="matrixView.undoLastAction('${currentClassId}')" class="shrink-0 min-h-[32px] px-3 py-1 rounded-xl font-black text-xs transition active:scale-95 cursor-pointer ${isOAA ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-white border border-amber-400 text-amber-900 hover:bg-amber-100 shadow-sm'}">
+          ↩️ 復原誤按
+        </button>
+      </div>
+    ` : '';
     const classBadgeHtml = isOAA
       ? `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black bg-rose-900 text-amber-200 border border-amber-500/60 shadow-sm">${isHomeroom ? '高度育成 • 導師班' : '高度育成 • 科任班'} (${studentCountDisplay}名)</span>`
       : `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">${isHomeroom ? '🎀 導師本班' : '📘 科任班'} (${studentCountDisplay}人)</span>`;
@@ -614,6 +637,7 @@ class ClassroomMatrix {
 
     container.innerHTML = `
       ${modeSwitchBarHtml}
+      ${undoBannerHtml}
       <!-- Top Slim Header -->
       <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'bg-[#220d18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <!-- Class Meta Badge -->
@@ -800,10 +824,11 @@ class ClassroomMatrix {
             : `<div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">${s.name}</div>`;
 
           const displayRegular = Math.round(regularScore);
+          const gradeCrestMini = window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-3.5 h-3.5') : '';
           const dualScoreHtml = isOAA
             ? `
               <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="text-amber-300 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">💯${displayRegular}</span>
+                <span class="inline-flex items-center gap-0.5 text-amber-300 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">${gradeCrestMini}<span>${displayRegular}</span></span>
                 <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-black shrink-0 ${netPts > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : netPts < 0 ? 'bg-rose-950/80 text-rose-400 border border-rose-500/40' : 'bg-black/30 text-slate-400'}" title="本期淨點：${netPts}點">
                   ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
@@ -811,7 +836,7 @@ class ClassroomMatrix {
             `
             : `
               <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="text-blue-700 shrink-0" title="本期平時成績：${regularScore}分">💯${displayRegular}</span>
+                <span class="inline-flex items-center gap-0.5 text-blue-700 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">${gradeCrestMini}<span>${displayRegular}</span></span>
                 <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}" title="本期淨點：${netPts}點">
                   ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
@@ -936,6 +961,9 @@ class ClassroomMatrix {
             🎯 已選 ${this.selectedSeats.size} 人
           </span>
           <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" id="floating-quick-adjust-btn" onclick="matrixView.openQuickAdjustModal('${currentClassId}')" class="min-h-[30px] px-2.5 py-1 rounded-lg text-[11px] font-black cursor-pointer ${isOAA ? 'bg-amber-900/60 text-amber-200 border border-amber-400/60' : 'bg-amber-50 text-amber-900 border border-amber-300'}">
+              ✏️ 改分/備註
+            </button>
             <button type="button" onclick="matrixView.scrollToTagDock()" class="min-h-[30px] px-2.5 py-1 rounded-lg text-[11px] font-black cursor-pointer ${isOAA ? 'bg-[#2c0e1e] text-amber-200 border border-amber-500/40' : 'bg-pink-50 text-pink-700 border border-pink-200'}">
               全部標籤 ▾
             </button>
@@ -1133,9 +1161,10 @@ class ClassroomMatrix {
 
     try {
       let appliedCount = 0;
+      const createdEventIds = [];
 
       seatsToProcess.forEach(seatNo => {
-        this.store.addEvent({
+        const created = this.store.addEvent({
           classId,
           seatNo,
           period,
@@ -1146,9 +1175,22 @@ class ClassroomMatrix {
           severity: tag.severity,
           note: `課堂記點：${tag.name}`
         });
+        if (created && created.id) {
+          createdEventIds.push(created.id);
+        }
 
         appliedCount++;
       });
+
+      if (createdEventIds.length > 0) {
+        this.pushUndoEntry({
+          classId,
+          eventIds: createdEventIds,
+          tagName: tag.name,
+          delta: tag.delta,
+          seats: [...seatsToProcess]
+        });
+      }
 
       if (tag.delta > 0 && this.store.getClassStudentRanks) {
         const afterRanks = this.store.getClassStudentRanks(classId);
@@ -1169,7 +1211,7 @@ class ClassroomMatrix {
       }
 
       const milestoneNote = milestoneSeats.size > 0 ? ' 💯 滿分里程碑達成！' : '';
-      window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」${milestoneNote}`, 'success');
+      window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」${milestoneNote}（誤按可點上方復原）`, 'success');
     } catch (err) {
       console.error('[ClassroomMatrix] applyTagToSelected error:', err);
     } finally {
@@ -1571,6 +1613,170 @@ class ClassroomMatrix {
     window.appState.closeModal();
     this.render('classroom-matrix-view', classId);
     seats.forEach(seatNo => this.showFloatingBubble(seatNo, tag.delta));
+  }
+
+  pushUndoEntry(entry) {
+    if (!entry || !Array.isArray(entry.eventIds) || entry.eventIds.length === 0) return;
+    if (!Array.isArray(this.undoStack)) this.undoStack = [];
+    this.undoStack.unshift({
+      id: 'undo_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      createdAt: Date.now(),
+      ...entry
+    });
+    if (this.undoStack.length > 12) this.undoStack.length = 12;
+  }
+
+  getLatestUndoForClass(classId) {
+    if (!Array.isArray(this.undoStack)) return null;
+    return this.undoStack.find(u => u.classId === classId && Array.isArray(u.eventIds) && u.eventIds.length > 0) || null;
+  }
+
+  undoLastAction(classId = null) {
+    const targetClass = classId || window.appState?.currentClassId;
+    if (!Array.isArray(this.undoStack) || this.undoStack.length === 0) {
+      window.appState?.showToast('目前沒有可復原的近期點記動作', 'info');
+      return false;
+    }
+    const idx = targetClass
+      ? this.undoStack.findIndex(u => u.classId === targetClass)
+      : 0;
+    if (idx === -1) {
+      window.appState?.showToast('本班目前沒有近期可復原的點記', 'info');
+      return false;
+    }
+
+    const entry = this.undoStack.splice(idx, 1)[0];
+    const removedCount = this.store.deleteEventsBatch
+      ? this.store.deleteEventsBatch(entry.eventIds)
+      : entry.eventIds.filter(id => { this.store.deleteEvent(id); return true; }).length;
+
+    if (window.appState?.playPop) window.appState.playPop();
+    window.appState?.showToast(
+      `↩️ 已復原誤按：「${entry.tagName} (${entry.delta > 0 ? '+' : ''}${entry.delta})」共 ${removedCount} 筆點記已撤回`,
+      'info'
+    );
+    this.render('classroom-matrix-view', entry.classId);
+    return removedCount > 0;
+  }
+
+  openQuickAdjustModal(classId) {
+    if (this.selectedSeats.size === 0) {
+      window.appState?.showToast('請先點選要修改或補加減分的學生座號', 'warning');
+      return;
+    }
+    const modal = document.getElementById('global-modal');
+    const modalContent = document.getElementById('global-modal-content');
+    if (!modal || !modalContent) return;
+
+    const seats = Array.from(this.selectedSeats).sort((a, b) => a - b);
+    const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
+    const presets = [-5, -3, -2, -1, 1, 2, 3, 5];
+
+    modalContent.innerHTML = `
+      <div class="p-5 sm:p-6 ${isOAA ? 'bg-[#1f0a16] text-white' : 'bg-white text-slate-900'}">
+        <div class="flex items-center justify-between gap-2 pb-3 mb-4 border-b ${isOAA ? 'border-amber-500/40' : 'border-pink-200'}">
+          <div>
+            <h3 class="text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'}">✏️ 自訂調分 / 誤按補扣修正</h3>
+            <p class="text-xs ${isOAA ? 'text-amber-200/75' : 'text-slate-500'} mt-0.5">
+              對象：已選 ${seats.length} 位同學（${seats.slice(0, 6).map(n => `${n}號`).join('、')}${seats.length > 6 ? '…' : ''}）
+            </p>
+          </div>
+          <button type="button" onclick="appState.closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black cursor-pointer ${isOAA ? 'bg-rose-950 text-amber-300' : 'bg-slate-100 text-slate-600'}">✕</button>
+        </div>
+
+        <form onsubmit="matrixView.saveQuickAdjust(event, '${classId}')" class="space-y-4 text-xs sm:text-sm">
+          <div>
+            <label class="block font-black mb-2 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">快速選擇增減點數：</label>
+            <div class="grid grid-cols-4 gap-2 mb-2.5">
+              ${presets.map(p => `
+                <button type="button" onclick="matrixView.setQuickAdjustDelta(${p})" class="min-h-[38px] rounded-xl font-black text-xs cursor-pointer border transition active:scale-95 ${p < 0 ? (isOAA ? 'bg-rose-950/70 border-rose-500/50 text-rose-300 hover:bg-rose-900' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100') : (isOAA ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100')}">
+                  ${p > 0 ? '+' : ''}${p} 點
+                </button>
+              `).join('')}
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs shrink-0">自訂數值：</span>
+              <input id="quick-adjust-delta" type="number" step="1" required value="-1" class="w-full px-3 py-2 rounded-xl border font-mono font-black text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/60 text-amber-300' : 'bg-pink-50/40 border-pink-300 text-slate-900'}">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-black mb-1 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">事由 / 標籤名稱：</label>
+            <input id="quick-adjust-tagname" type="text" required value="加扣分修正" placeholder="例如：誤按修正、訂正補分" class="w-full px-3 py-2 rounded-xl border font-bold text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-pink-300 text-slate-900'}">
+          </div>
+
+          <div>
+            <label class="block font-black mb-1 ${isOAA ? 'text-amber-200' : 'text-slate-800'}">詳細備註（選填）：</label>
+            <input id="quick-adjust-note" type="text" placeholder="例如：剛才誤觸加分，手動調整回來" class="w-full px-3 py-2 rounded-xl border font-medium text-sm focus:outline-none ${isOAA ? 'bg-[#12050c] border-amber-500/50 text-white' : 'bg-white border-pink-300 text-slate-900'}">
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onclick="appState.closeModal()" class="px-4 py-2 rounded-xl font-bold text-xs cursor-pointer ${isOAA ? 'bg-[#2a0e1d] text-amber-200 border border-amber-500/40' : 'bg-slate-100 text-slate-700'}">取消</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm text-white cursor-pointer shadow-md ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600'}">
+              ✅ 確認套用調分
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+  }
+
+  setQuickAdjustDelta(val) {
+    const el = document.getElementById('quick-adjust-delta');
+    if (el) el.value = String(val);
+    if (window.appState?.playPop) window.appState.playPop();
+  }
+
+  saveQuickAdjust(e, classId) {
+    e.preventDefault();
+    const delta = Number(document.getElementById('quick-adjust-delta')?.value);
+    const tagName = (document.getElementById('quick-adjust-tagname')?.value || '').trim() || '加扣分修正';
+    const note = (document.getElementById('quick-adjust-note')?.value || '').trim();
+    if (!Number.isFinite(delta) || delta === 0) {
+      window.appState?.showToast('請輸入非 0 的有效增減點數！', 'warning');
+      return;
+    }
+
+    const activeSlot = this.timetable.detectActiveSlot();
+    const period = activeSlot.period !== null ? activeSlot.period : 1;
+    const seatsToProcess = Array.from(this.selectedSeats);
+    const createdEventIds = [];
+
+    seatsToProcess.forEach(seatNo => {
+      const created = this.store.addEvent({
+        classId,
+        seatNo,
+        period,
+        tagId: 'custom_adjust',
+        tagName,
+        category: 'discipline',
+        delta,
+        severity: delta > 0 ? 'positive' : 'warning',
+        note: note || `手動調分：${tagName}`
+      });
+      if (created && created.id) createdEventIds.push(created.id);
+    });
+
+    if (createdEventIds.length > 0) {
+      this.pushUndoEntry({
+        classId,
+        eventIds: createdEventIds,
+        tagName,
+        delta,
+        seats: [...seatsToProcess]
+      });
+    }
+
+    if (delta > 0 && window.appState?.playChime) window.appState.playChime();
+    else if (delta < 0 && window.appState?.playWarning) window.appState.playWarning();
+
+    window.appState?.showToast(`✅ 已為 ${seatsToProcess.length} 位同學套用「${tagName} (${delta > 0 ? '+' : ''}${delta})」`, 'success');
+    window.appState?.closeModal();
+    this.clearSelection(classId);
+    this.render('classroom-matrix-view', classId);
+    seatsToProcess.forEach(seatNo => this.showFloatingBubble(seatNo, delta));
   }
 
   getCoteCharName(index) {

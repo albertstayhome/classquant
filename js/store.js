@@ -874,6 +874,39 @@ class Store {
     return this.data.classes;
   }
 
+  getClassRoleLabel(clsOrId) {
+    const cls = typeof clsOrId === 'string' ? this.getClass(clsOrId) : clsOrId;
+    if (!cls) return '班級';
+    if (cls.type === 'homeroom') return '導師班';
+    const subj = String(cls.subject || '').trim();
+    if (subj) return subj.endsWith('課') ? subj : `${subj}課`;
+    return '數學課';
+  }
+
+  getClassQualifiedName(classId) {
+    const cls = this.getClass(classId);
+    if (!cls) return String(classId || '班級');
+    const baseName = String(cls.name || classId || '班級').trim();
+    const roleLabel = this.getClassRoleLabel(cls);
+    const hasRoleInName = baseName.includes(roleLabel)
+      || (cls.type === 'homeroom' && baseName.includes('導師'))
+      || (cls.type !== 'homeroom' && cls.subject && baseName.includes(String(cls.subject).trim()));
+    const candidate = hasRoleInName ? baseName : `${baseName}(${roleLabel})`;
+
+    const allClasses = Object.values(this.data.classes || {});
+    const dupCount = allClasses.filter(other => {
+      if (!other) return false;
+      const ob = String(other.name || other.id || '').trim();
+      const orole = this.getClassRoleLabel(other);
+      const oHas = ob.includes(orole)
+        || (other.type === 'homeroom' && ob.includes('導師'))
+        || (other.type !== 'homeroom' && other.subject && ob.includes(String(other.subject).trim()));
+      return (oHas ? ob : `${ob}(${orole})`) === candidate;
+    }).length;
+
+    return dupCount > 1 ? `${candidate}[${cls.id}]` : candidate;
+  }
+
   getClass(classId) {
     return this.data.classes[classId] || null;
   }
@@ -957,8 +990,42 @@ class Store {
   }
 
   deleteEvent(eventId) {
+    const before = this.data.events.length;
     this.data.events = this.data.events.filter(e => e.id !== eventId);
+    const removed = this.data.events.length < before;
+    if (removed) this.saveToStorage();
+    return removed;
+  }
+
+  deleteEventsBatch(eventIds) {
+    const idSet = new Set(Array.isArray(eventIds) ? eventIds : []);
+    if (idSet.size === 0) return 0;
+    const before = this.data.events.length;
+    this.data.events = this.data.events.filter(e => !idSet.has(e.id));
+    const removedCount = before - this.data.events.length;
+    if (removedCount > 0) this.saveToStorage();
+    return removedCount;
+  }
+
+  updateEvent(eventId, patch = {}) {
+    const evt = (this.data.events || []).find(e => e.id === eventId);
+    if (!evt) return null;
+    if (patch.tagName !== undefined) {
+      const nextName = String(patch.tagName).trim();
+      if (nextName) evt.tagName = nextName;
+    }
+    if (patch.delta !== undefined) {
+      const num = Number(patch.delta);
+      if (Number.isFinite(num)) {
+        evt.delta = num;
+        evt.severity = num > 0 ? 'positive' : num < 0 ? 'warning' : 'neutral';
+      }
+    }
+    if (patch.note !== undefined) {
+      evt.note = String(patch.note);
+    }
     this.saveToStorage();
+    return evt;
   }
 
   addAssessment(classId, assessment) {
@@ -1887,6 +1954,7 @@ class Store {
 
   buildClassTermWorkbookSheets(classId, archiveEntry = null) {
     const cls = this.getClass(classId) || { id: classId, name: classId || '班級' };
+    const qualifiedClassName = this.getClassQualifiedName(classId);
     const isArchived = Boolean(archiveEntry);
     const cfg = archiveEntry?.gradeConfig || this.getRegularGradeConfig();
     const termTitle = archiveEntry
@@ -1908,7 +1976,7 @@ class Store {
     // Sheet 1: 平時成績總表 (Sorted by seat number ascending for direct gradebook entry)
     const sheet1Rows = [
       [
-        `${cls.name} 平時成績結算表`,
+        `${qualifiedClassName} 平時成績結算表`,
         termTitle,
         `規則：基準 ${cfg.baseScore} 分 / 每點 ×${cfg.pointsPerUnit}（${cfg.minScore}~${cfg.maxScore}分）`,
         `時間：${dateStamp}`
@@ -2056,7 +2124,7 @@ class Store {
       });
     }
 
-    const safeClass = String(cls.name || classId || '班級').replace(/[\\\/:\*\?"<>\|]/g, '_');
+    const safeClass = String(qualifiedClassName || cls.name || classId || '班級').replace(/[\\\/:\*\?"<>\|]/g, '_');
     const safeTerm = String(archiveEntry ? archiveEntry.termLabel : `${this.getDefaultTermLabel(classId)}_預覽`).replace(/[\\\/:\*\?"<>\|]/g, '_');
     const yyyymmdd = dateStamp.replace(/-/g, '');
     const filename = `${safeClass}_${safeTerm}_平時成績_${yyyymmdd}.xlsx`;
@@ -2211,6 +2279,14 @@ class Store {
     };
   }
 }
+
+/**
+ * Shared high-contrast Midnight-Navy × Imperial-Gold "100" Score Crest SVG.
+ * Designed so the grade icon pops clearly on white, pastel pink (Kitty), and crimson (OAA) backgrounds.
+ */
+window.cqGradeCrestSvg = function(sizeClass = 'w-4 h-4') {
+  return `<svg class="cq-grade-crest ${sizeClass} inline-block shrink-0" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/><rect x="5" y="4.4" width="14" height="2" rx="1" fill="#34d399"/><text x="12" y="15.8" text-anchor="middle" fill="#fde047" font-family="ui-monospace, SFMono-Regular, Arial, sans-serif" font-weight="900" font-size="9.5" letter-spacing="-0.5">100</text><rect x="5.5" y="18" width="13" height="1.6" rx="0.8" fill="#fbbf24"/></svg>`;
+};
 
 // Global Store Instance
 window.appStore = new Store();

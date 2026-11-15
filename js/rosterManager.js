@@ -71,7 +71,7 @@ class RosterManager {
                 ? (isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white border-amber-400 shadow-md ring-2 ring-amber-500/50' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white border-pink-400 shadow-md ring-2 ring-pink-300/50')
                 : (isOAA ? 'bg-[#1f0b16] border-amber-500/30 text-amber-100 hover:bg-[#2d1020]' : 'bg-white/80 border-pink-200 text-slate-700 hover:bg-pink-50')
             }">
-              <span>${c.name}</span>
+              <span>${this.store.getClassQualifiedName ? this.store.getClassQualifiedName(c.id) : c.name}</span>
               <span class="text-[10px] px-1.5 py-0.5 rounded-full ${c.id === this.currentClassId ? 'bg-black/20 text-white' : 'bg-pink-100 text-pink-700'}">${c.studentCount || (c.students ? c.students.length : 0)}人</span>
             </button>
           `).join('')}
@@ -496,9 +496,13 @@ class RosterManager {
           <div>
             <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級性質</label>
             <select id="new-class-type" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
-              <option value="subject">數學科任班</option>
+              <option value="subject">科任班（例如數學課）</option>
               <option value="homeroom">導師班 (本班)</option>
             </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">科別／區分標籤（選填，用來區分同班導師/科任 Excel 檔名）</label>
+            <input type="text" id="new-class-subject" value="數學" placeholder="導師班可留空，科任班如：數學、英文" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
           </div>
 
           <div class="flex items-center justify-end space-x-3 pt-3">
@@ -518,6 +522,7 @@ class RosterManager {
     const id = document.getElementById('new-class-id').value.trim();
     const name = document.getElementById('new-class-name').value.trim();
     const type = document.getElementById('new-class-type').value;
+    const subject = (document.getElementById('new-class-subject')?.value || '').trim();
 
     const fullData = this.store.data;
     if (fullData.classes[id]) {
@@ -525,7 +530,7 @@ class RosterManager {
       return;
     }
 
-    fullData.classes[id] = { id, name, type, studentCount: 0 };
+    fullData.classes[id] = { id, name, type, ...(type !== 'homeroom' && subject ? { subject } : {}), studentCount: 0 };
     fullData.students[id] = [];
     localStorage.removeItem('classquant_user_cleared');
     delete fullData.hasClearedAll;
@@ -569,9 +574,13 @@ class RosterManager {
           <div>
             <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">班級性質</label>
             <select id="edit-class-type" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
-              <option value="subject" ${cls.type === 'subject' ? 'selected' : ''}>數學科任班</option>
+              <option value="subject" ${cls.type === 'subject' ? 'selected' : ''}>科任班（例如數學課）</option>
               <option value="homeroom" ${cls.type === 'homeroom' ? 'selected' : ''}>導師班 (本班)</option>
             </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">科別／區分標籤（選填，用於區分同名班級 Excel）</label>
+            <input type="text" id="edit-class-subject" value="${cls.subject || (cls.type === 'subject' ? '數學' : '')}" placeholder="如：數學、英文（導師班可留空）" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-sm font-bold">
           </div>
           <div class="flex items-center justify-end space-x-3 pt-3">
             <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-400 hover:text-white' : 'text-slate-600'} transition cursor-pointer">取消</button>
@@ -606,11 +615,17 @@ class RosterManager {
     e.preventDefault();
     const name = document.getElementById('edit-class-name').value.trim();
     const type = document.getElementById('edit-class-type').value;
+    const subject = (document.getElementById('edit-class-subject')?.value || '').trim();
 
     const fullData = this.store.data;
     if (fullData.classes[classId]) {
       fullData.classes[classId].name = name;
       fullData.classes[classId].type = type;
+      if (type !== 'homeroom' && subject) {
+        fullData.classes[classId].subject = subject;
+      } else {
+        delete fullData.classes[classId].subject;
+      }
       this.store.save(fullData);
       window.appState.showToast('已更新班級設定', 'success');
       window.appState.closeModal();

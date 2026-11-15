@@ -90,6 +90,16 @@ class AIImportExportHub {
             <div class="text-[11px] font-bold ${isOAA ? 'text-amber-300/80' : 'text-slate-500'}">依課表節次自動切班</div>
             <div class="text-sm font-black mt-1 ${isOAA ? 'text-white' : 'text-slate-900'}">${autoSwitch ? '📅 自動依節次切換中' : '✋ 手動鎖定目前班級'}</div>
           </button>
+
+          <button type="button" id="pref-skip-cover-btn" onclick="appState.cycleCoverMode(); aiHub.render('ai-hub-view');" class="text-left p-3.5 rounded-2xl border transition active:scale-95 cursor-pointer ${isOAA ? 'bg-[#170710] border-amber-500/40 hover:border-amber-400' : 'bg-amber-50/70 border-amber-200 hover:bg-amber-100/70'}">
+            <div class="text-[11px] font-bold ${isOAA ? 'text-amber-300/80' : 'text-slate-500'}">App 啟動封面模式（點擊切換）</div>
+            <div class="text-sm font-black mt-1 ${isOAA ? 'text-white' : 'text-slate-900'}">${(() => {
+              const mode = window.appState?.getCoverMode ? window.appState.getCoverMode() : 'gate';
+              if (mode === 'skip') return '⚡ 略過動漫封面（直接進教室）';
+              if (mode === 'auto') return '🎬 載入完成後自動進教室';
+              return '🔐 全部載入完成 ➔ 一鍵登入';
+            })()}</div>
+          </button>
         </div>
       </div>
 

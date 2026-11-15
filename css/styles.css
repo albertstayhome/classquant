@@ -7,12 +7,10 @@ html {
   font-size: calc(16px * var(--app-font-scale, 1.08));
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: contain;
 }
 
 body {
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: none;
 }
 
 html[data-font-size="standard"] {
@@ -115,15 +113,15 @@ html[data-font-size="xlarge"] {
   backface-visibility: hidden;
 }
 
-/* Tag Pager Carousel (Strict Single-Page Scroll Snap) */
+/* Tag Pager Carousel (Strict Single-Page Scroll Snap, permits both horizontal swipe & vertical page scroll) */
 .tag-pager-container {
   display: flex;
   overflow-x: auto;
+  overflow-y: visible;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
 }
 
 .tag-page-slide {
@@ -205,6 +203,7 @@ html[data-font-size="xlarge"] {
 }
 
 .student-seat-card {
+  touch-action: manipulation;
   transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
   backface-visibility: hidden;
 }
@@ -451,7 +450,7 @@ html.dark .compact-seat-tile.selected {
 
 #classroom-matrix-view {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* --- v2.0.0 Unified Navigation, Sub-Tabs & More Dropdown --- */
@@ -913,6 +912,11 @@ html.oaa .more-menu-item:hover {
   animation: cqPulse 1.3s ease-in-out infinite;
 }
 
+.cq-cover-pulse-dot.cq-dot-loading {
+  background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
+}
+
 @keyframes cqPulse {
   0%, 100% { transform: scale(0.85); opacity: 0.7; }
   50% { transform: scale(1.25); opacity: 1; }
@@ -935,7 +939,24 @@ html.oaa .more-menu-item:hover {
   gap: 8px;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(225, 29, 72, 0.45);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.16s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.28s ease;
+}
+
+.cq-cover-enter-btn.cq-btn-loading {
+  background: linear-gradient(135deg, #331424 0%, #4c1d3d 100%);
+  border-color: rgba(251, 191, 36, 0.45);
+  color: #fde68a;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  cursor: progress;
+}
+
+.cq-cover-enter-btn.cq-btn-ready {
+  animation: cqReadyGlow 2.1s ease-in-out infinite;
+}
+
+@keyframes cqReadyGlow {
+  0%, 100% { box-shadow: 0 10px 24px rgba(225, 29, 72, 0.5), 0 0 0 0 rgba(253, 224, 71, 0.45); }
+  50% { box-shadow: 0 14px 32px rgba(244, 63, 94, 0.72), 0 0 0 6px rgba(253, 224, 71, 0.12); }
 }
 
 .cq-cover-enter-btn:hover {
@@ -997,15 +1018,10 @@ html.oaa .more-menu-item:hover {
 
 .cq-cover-progress-fill {
   height: 100%;
-  width: 0%;
+  width: 20%;
   border-radius: 9999px;
   background: linear-gradient(90deg, #fbbf24 0%, #f43f5e 55%, #f9a8d4 100%);
-  animation: cqProgressFill 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes cqProgressFill {
-  from { width: 6%; }
-  to { width: 100%; }
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cq-cover-skip-hint {
@@ -1013,4 +1029,38 @@ html.oaa .more-menu-item:hover {
   font-size: 10.5px;
   font-weight: 700;
   color: rgba(253, 230, 138, 0.78);
+}
+
+.cq-cover-skip-pref-btn {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(253, 230, 138, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.16s ease, transform 0.14s ease;
+}
+
+.cq-cover-skip-pref-btn:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 767px) {
+  html[data-theme="kitty"] .glass-card,
+  html[data-theme="oaa"] .glass-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .student-seat-card,
+  .tag-sort-card {
+    will-change: auto !important;
+  }
 }

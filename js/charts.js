@@ -47,6 +47,7 @@ class DashboardCharts {
     }
 
     const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
+    const displayClassName = this.store.getClassQualifiedName ? this.store.getClassQualifiedName(this.lastClassId) : cls.name;
     const overview = this.stats.getClassOverview(this.lastClassId);
     const cfg = this.store.getRegularGradeConfig ? this.store.getRegularGradeConfig() : { baseScore: 80, pointsPerUnit: 1, minScore: 0, maxScore: 100 };
     const nextTermLabel = this.store.getDefaultTermLabel ? this.store.getDefaultTermLabel(this.lastClassId) : '第 1 次段考';
@@ -58,10 +59,10 @@ class DashboardCharts {
       <div class="rounded-3xl p-4 sm:p-6 mb-5 border-2 shadow-sm ${isOAA ? 'bg-gradient-to-br from-[#270e1c] via-[#1c0813] to-[#2e1121] border-amber-500/50 text-white' : 'glass-card border-pink-200 bg-gradient-to-r from-pink-50/90 via-white to-sky-50/80 text-slate-900'}">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-200/80'}">
           <div class="flex items-start sm:items-center gap-3">
-            ${isOAA ? '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-700 flex items-center justify-center text-2xl shadow-md border border-amber-300 shrink-0">💯</div>' : '<div class="sanrio-twinstars-badge !w-12 !h-12 shrink-0"></div>'}
+            ${isOAA ? `<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#2e1026] flex items-center justify-center shadow-md border-2 border-amber-400/80 shrink-0">${window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-8 h-8') : '100'}</div>` : '<div class="sanrio-twinstars-badge !w-12 !h-12 shrink-0"></div>'}
             <div>
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'}">${cls.name} • 平時成績結算中心</h2>
+                <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'}">${displayClassName} • 平時成績結算中心</h2>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-black ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-400/60' : 'bg-pink-100 text-pink-800 border border-pink-300'}">
                   📅 ${nextTermLabel} 計算中
                 </span>
@@ -170,6 +171,7 @@ class DashboardCharts {
     if (!modal || !modalContent) return;
 
     const cls = this.store.getClass(classId);
+    const displayClassName = this.store.getClassQualifiedName ? this.store.getClassQualifiedName(classId) : (cls ? cls.name : classId);
     const defaultLabel = this.store.getDefaultTermLabel ? this.store.getDefaultTermLabel(classId) : '第 1 次段考';
     const activeEventCount = (this.store.getEvents(classId) || []).length;
     const overview = this.stats.getClassOverview(classId);
@@ -182,7 +184,7 @@ class DashboardCharts {
             <span class="text-2xl">🎓</span>
             <div>
               <h3 class="text-base sm:text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'}">
-                結算「${cls ? cls.name : classId}」本期平時成績
+                結算「${displayClassName}」本期平時成績
               </h3>
               <p class="text-xs ${isOAA ? 'text-amber-200/70' : 'text-slate-500'}">一鍵下載 Excel 並封存歷史累積成績，迎接下一次段考</p>
             </div>
@@ -197,9 +199,9 @@ class DashboardCharts {
           </div>
 
           <div class="p-3.5 rounded-2xl border space-y-1.5 text-xs ${isOAA ? 'bg-[#2a0e1e] border-amber-500/40 text-amber-100' : 'bg-amber-50 border-amber-200 text-amber-900'}">
-            <p class="font-black">📋 結算前確認摘要（僅影響「${cls ? cls.name : classId}」）：</p>
+            <p class="font-black">📋 結算前確認摘要（僅影響「${displayClassName}」）：</p>
             <p>• 目前班級平時均分：<strong>${overview.classAvgScore} 分</strong>（共 ${overview.totalStudents} 位學生，本期 ${activeEventCount} 筆點記明細）</p>
-            <p>• 系統將自動建立備份快照並立即下載 <strong>${cls ? cls.name : classId}_${defaultLabel}_平時成績.xlsx</strong></p>
+            <p>• 系統將自動建立備份快照並立即下載 <strong>${displayClassName}_${defaultLabel}_平時成績.xlsx</strong></p>
             <p>• 「歷史累積淨分」與本期全部明細會完整封存於「歷史段考與累積」，接著將本班本期加減點歸零，開啟下一次段考計算。</p>
             ${activeEventCount === 0 ? `<p class="font-black ${isOAA ? 'text-rose-300' : 'text-rose-700'}">⚠️ 提醒：本班本期目前尚無任何加減分點記（所有人為基準分），確定仍要建立此次段考封存嗎？</p>` : ''}
           </div>
@@ -404,6 +406,7 @@ class DashboardCharts {
   renderHistoryView(container, classId, isOAA) {
     if (!container) return;
     const cls = this.store.getClass(classId);
+    const displayClassName = this.store.getClassQualifiedName ? this.store.getClassQualifiedName(classId) : (cls ? cls.name : classId);
     const archives = this.store.getTermArchives ? this.store.getTermArchives(classId) : [];
     const leaderboard = this.store.getClassLeaderboard ? this.store.getClassLeaderboard(classId) : [];
     const rowsBySeat = [...leaderboard].sort((a, b) => Number(a.seatNo) - Number(b.seatNo));
@@ -415,7 +418,7 @@ class DashboardCharts {
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-100'}">
             <div>
               <h3 class="text-base sm:text-lg font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'}">
-                🗂️ ${cls ? cls.name : classId} 已結算段考紀錄庫
+                🗂️ ${displayClassName} 已結算段考紀錄庫
               </h3>
               <p class="text-xs ${isOAA ? 'text-amber-200/70' : 'text-slate-500'}">每次結算後永久封存全班成績與點記明細，隨時可重新匯出 Excel</p>
             </div>
