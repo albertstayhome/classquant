@@ -42,13 +42,13 @@ class RosterManager {
           : 'border-pink-200 bg-gradient-to-r from-pink-50/70 via-white to-sky-50/70'
       }">
         <!-- Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
-          <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-            ${isOAA ? '<span class="text-2xl sm:text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner shrink-0">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12 shrink-0"></div>'}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full md:flex-1">
+            ${isOAA ? '<span class="text-xl sm:text-3xl p-1.5 sm:p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner shrink-0">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-10 !h-10 sm:!w-12 sm:!h-12 shrink-0"></div>'}
             <div class="min-w-0 flex-1">
               <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex flex-wrap items-center gap-2">
-                <span>${isOAA ? '👥 高度育成 • 生徒名簿與班級編成中心' : '👥 班級與學生名單管理中心'}</span>
-                ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50 whitespace-nowrap shrink-0">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
+                <span>${isOAA ? '👥 高度育成 • 生徒名簿與班級編成中心' : '👥 班級與學生名單管理<span class="whitespace-nowrap">中心<span class="kitty-bow inline-block align-middle ml-1"></span></span>'}</span>
+                ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50 whitespace-nowrap shrink-0">S-SYSTEM</span>' : ''}
               </h2>
               <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium mt-0.5">
                 ${isOAA ? '高度育成高等學校 生徒性別登錄、座號編成與日常行為紀錄協定' : '支援「1秒批次貼上全班名單」、自由新增/編輯班級、直接日常行為記點'}
@@ -56,7 +56,7 @@ class RosterManager {
             </div>
           </div>
 
-          <div class="flex items-center gap-2 shrink-0">
+          <div class="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
             <button onclick="appState.switchTab('matrix')" class="min-h-[38px] px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1e0a15] border border-amber-500/40 hover:bg-[#2d0f20] text-amber-200' : 'bg-white border border-pink-300 hover:bg-pink-50 text-pink-700'} text-xs sm:text-sm font-black shadow-sm transition inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
               <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 ${isOAA ? 'text-amber-400' : 'text-pink-500'}"></i> <span>${isOAA ? '🏫 前往 OAA 實力點記板' : '🏫 前往課堂點記板'}</span>
             </button>

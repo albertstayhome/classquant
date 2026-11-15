@@ -29,22 +29,22 @@ class AIImportExportHub {
     container.innerHTML = `
       <!-- Top Title & Quick Exports -->
       <div class="${cardCls} mb-5">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center space-x-3.5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
             ${isOAA
-              ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">⚙️</span>'
-              : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
-            <div>
-              <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
-                雲端自動備份與系統設定中心
-                ${isOAA ? '' : '<span class="kitty-bow"></span>'}
+              ? '<span class="text-2xl sm:text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shrink-0 self-start sm:self-auto">⚙️</span>'
+              : '<div class="sanrio-twinstars-badge !w-10 !h-10 sm:!w-12 sm:!h-12 shrink-0 self-start sm:self-auto"></div>'}
+            <div class="min-w-0 flex-1">
+              <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex flex-wrap items-center gap-2">
+                <span>雲端自動備份與系統設定中心</span>
+                ${isOAA ? '' : '<span class="kitty-bow shrink-0"></span>'}
               </h2>
-              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium">
+              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium mt-0.5">
                 管理 Google 表單／試算表每日自動備份、系統外觀音效、本機還原快照與全系統資料匯出匯入
               </p>
             </div>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
             <button onclick="aiHub.downloadBackupJson()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm cursor-pointer">
               <i data-lucide="download" class="w-4 h-4"></i> 下載全系統備份 (JSON)
             </button>

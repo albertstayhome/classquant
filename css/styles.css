@@ -25,6 +25,36 @@ html[data-font-size="xlarge"] {
   --app-font-scale: 1.16;
 }
 
+/* Fix hidden modal override in theme CSS & cramped rem padding under zoomed font scales on small screens */
+#cote-terminal-modal.hidden {
+  display: none !important;
+}
+
+@media (max-width: 639px) {
+  html[data-font-size="large"] .p-6,
+  html[data-font-size="xlarge"] .p-6 {
+    padding: 0.9375rem;
+  }
+
+  html[data-font-size="large"] .p-5,
+  html[data-font-size="xlarge"] .p-5 {
+    padding: 0.8125rem;
+  }
+
+  html[data-font-size="large"] .gap-4,
+  html[data-font-size="xlarge"] .gap-4 {
+    gap: 0.625rem;
+  }
+
+  html[data-font-size="xlarge"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 0.5rem;
+  }
+
+  #global-modal-content {
+    max-width: calc(100vw - 1rem);
+  }
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;

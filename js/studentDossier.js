@@ -671,32 +671,32 @@ class StudentDossierView {
 
     container.innerHTML = `
       <!-- Top Selector Bar -->
-      <div class="glass-card rounded-3xl p-5 mb-5 flex flex-wrap items-center justify-between gap-4 border border-pink-200 shadow-sm bg-gradient-to-r from-pink-50/80 via-white to-sky-50/80">
-        <div class="flex items-center space-x-4">
-          <div class="${mascotClass} !w-14 !h-14 bg-white p-1 rounded-2xl shadow-sm border border-pink-200" title="${mascotTitle}"></div>
-          <div>
+      <div class="glass-card rounded-3xl p-4 sm:p-5 mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border border-pink-200 shadow-sm bg-gradient-to-r from-pink-50/80 via-white to-sky-50/80">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div class="${mascotClass} !w-12 !h-12 sm:!w-14 sm:!h-14 bg-white p-1 rounded-2xl shadow-sm border border-pink-200 shrink-0 self-start sm:self-auto" title="${mascotTitle}"></div>
+          <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-2xl sm:text-3xl font-black text-slate-900">${student.name}</h2>
-              <span class="text-xs px-2.5 py-1 rounded-xl font-black ${student.gender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-700 border border-blue-300'}">
+              <h2 class="text-xl sm:text-3xl font-black text-slate-900">${student.name}</h2>
+              <span class="text-xs px-2.5 py-1 rounded-xl font-black whitespace-nowrap shrink-0 ${student.gender === 'F' ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-700 border border-blue-300'}">
                 ${student.gender === 'F' ? '👧 女生' : '👦 男生'}
               </span>
-              <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300">
+              <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-black bg-pink-100 text-pink-700 border border-pink-300 whitespace-nowrap shrink-0">
                 ${this.currentClassId} 班 • 座號 ${String(student.seatNo).padStart(2, '0')}
               </span>
             </div>
             
             <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm mt-2 font-bold">
-              <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 inline-flex items-center gap-1">
+              <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 inline-flex items-center gap-1 whitespace-nowrap">
                 ${window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-3.5 h-3.5') : ''}<span>本期平時成績: <strong class="text-blue-700 font-black text-sm">${regularScore}</strong> 分 (${tierBadge} 級)</span>
               </span>
-              <span class="px-2.5 py-0.5 rounded-lg ${netPoints >= 0 ? 'badge-character-pos' : 'badge-character-neg'}">
+              <span class="px-2.5 py-0.5 rounded-lg whitespace-nowrap ${netPoints >= 0 ? 'badge-character-pos' : 'badge-character-neg'}">
                 🎀 本期淨點: <strong class="${netPoints >= 0 ? 'text-pink-700' : 'text-rose-700'} font-black text-sm">${netPoints > 0 ? '+' : ''}${netPoints}</strong> 點
               </span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200">
+              <span class="px-2.5 py-0.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 whitespace-nowrap">
                 📜 歷史總累積: <strong class="font-black">${histSummary.totalCumulativeNetDelta >= 0 ? '+' : ''}${histSummary.totalCumulativeNetDelta}</strong> 點
               </span>
-              <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2.5 py-0.5 rounded-lg bg-pink-100/80 hover:bg-pink-200 text-pink-800 border border-pink-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="查看等第與角色晉升條件">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-600"></i>
+              <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2.5 py-0.5 rounded-lg bg-pink-100/80 hover:bg-pink-200 text-pink-800 border border-pink-300 text-xs font-bold transition inline-flex items-center gap-1 whitespace-nowrap cursor-pointer" title="查看等第與角色晉升條件">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-600 shrink-0"></i>
                 <span>等第條件</span>
               </button>
             </div>
@@ -704,7 +704,7 @@ class StudentDossierView {
         </div>
 
         <!-- Class/Student Switchers -->
-        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
           <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[38px] border border-pink-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none bg-white">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -840,10 +840,10 @@ class StudentDossierView {
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
-      <div class="rounded-2xl p-3.5 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
-        <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-          <div class="bg-amber-50/95 px-2.5 py-1 rounded-xl border border-amber-400/75 shadow-sm shrink-0">
-            <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-7 sm:h-8 object-contain">
+      <div class="rounded-2xl p-3.5 sm:p-4 mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full lg:flex-1">
+          <div class="bg-amber-50/95 px-2.5 py-1 rounded-xl border border-amber-400/75 shadow-sm shrink-0 self-start sm:self-auto">
+            <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-6 sm:h-8 object-contain">
           </div>
           <div class="min-w-0 flex-1">
             <h2 class="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase">
@@ -859,7 +859,7 @@ class StudentDossierView {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
           <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[38px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -877,9 +877,9 @@ class StudentDossierView {
       </div>
 
       <!-- 🌟 Authentic COTE Student Card (Replica of the Official Reference Image) -->
-      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#290e1b] via-[#381224] to-[#1c0712] border-2 border-amber-500/50 shadow-2xl text-white mb-6">
+      <div class="relative overflow-hidden rounded-3xl p-4 sm:p-8 bg-gradient-to-br from-[#290e1b] via-[#381224] to-[#1c0712] border-2 border-amber-500/50 shadow-2xl text-white mb-6">
         <!-- Right Side Vertical Watermark Text (Faithfully matching the official light novel) -->
-        <div class="absolute top-8 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
+        <div class="hidden sm:block absolute top-8 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
           ADVANCED NURTURING HIGH SCHOOL // OAA
         </div>
 

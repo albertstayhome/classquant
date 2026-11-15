@@ -48,29 +48,29 @@ class TagManager {
     container.innerHTML = `
       <div class="flex flex-col max-h-[85vh] ${isOAA ? 'bg-[#1e0a15] text-white border-amber-500/50' : 'bg-white border-pink-300'} rounded-3xl overflow-hidden shadow-2xl border-2">
         <!-- Sticky Fixed Header at top with permanently visible X -->
-        <div class="px-5 py-3.5 ${isOAA ? 'bg-[#2a0f1e] border-amber-500/40' : 'bg-gradient-to-r from-pink-50 via-white to-pink-50 border-pink-200'} border-b flex items-center justify-between flex-shrink-0 z-30">
-          <div class="flex items-center space-x-2.5">
-            ${isOAA ? '<span class="text-2xl p-1.5 rounded-xl bg-black/40 border border-amber-500/50">🏛️</span>' : '<div class="sanrio-kitty-badge !w-9 !h-9"></div>'}
-            <div>
-              <h3 class="text-base sm:text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
-                ${isHomeroom ? '【導師班】快速標籤管理' : '【任教班/數學班】快速標籤管理'}
-                ${isOAA ? '' : '<span class="kitty-bow !w-3.5 !h-3.5"></span>'}
+        <div class="px-4 py-3 sm:px-5 sm:py-3.5 ${isOAA ? 'bg-[#2a0f1e] border-amber-500/40' : 'bg-gradient-to-r from-pink-50 via-white to-pink-50 border-pink-200'} border-b flex items-center justify-between gap-2 flex-shrink-0 z-30">
+          <div class="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+            ${isOAA ? '<span class="text-xl sm:text-2xl p-1.5 rounded-xl bg-black/40 border border-amber-500/50 shrink-0">🏛️</span>' : '<div class="sanrio-kitty-badge !w-8 !h-8 sm:!w-9 sm:!h-9 shrink-0"></div>'}
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm sm:text-lg font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex flex-wrap items-center gap-1.5 leading-snug">
+                <span>${isHomeroom ? '【導師班】快速標籤管理' : '【任教班/數學班】快速標籤管理'}</span>
+                ${isOAA ? '' : '<span class="kitty-bow !w-3.5 !h-3.5 shrink-0"></span>'}
               </h3>
-              <p class="text-[11px] ${isOAA ? 'text-amber-100/80' : 'text-pink-700'} font-bold">
+              <p class="text-[11px] ${isOAA ? 'text-amber-100/80' : 'text-pink-700'} font-bold leading-snug">
                 ${isHomeroom ? '【導師班專屬】標籤庫 • 長按拖曳氣泡擠開排序' : `【${className} 等全體任教班共用】標籤庫 • 長按拖曳排序`}
               </p>
             </div>
           </div>
           <!-- Permanently pinned close X button that never scrolls away -->
-          <button onclick="window.appState.closeModal()" class="w-8 h-8 rounded-full ${isOAA ? 'bg-rose-950 hover:bg-rose-900 text-amber-300 border-amber-500/40' : 'bg-white hover:bg-pink-100 text-pink-700 border-pink-200'} font-black text-base flex items-center justify-center transition active:scale-95 shadow border cursor-pointer" title="關閉標籤管理">
+          <button onclick="window.appState.closeModal()" class="w-8 h-8 rounded-full shrink-0 ${isOAA ? 'bg-rose-950 hover:bg-rose-900 text-amber-300 border-amber-500/40' : 'bg-white hover:bg-pink-100 text-pink-700 border-pink-200'} font-black text-base flex items-center justify-center transition active:scale-95 shadow border cursor-pointer" title="關閉標籤管理">
             ✕
           </button>
         </div>
 
         <!-- Scrollable Single Body -->
-        <div id="tag-manager-modal-scroll" class="p-5 overflow-y-auto flex-1 space-y-4">
+        <div id="tag-manager-modal-scroll" class="p-3.5 sm:p-5 overflow-y-auto flex-1 space-y-3.5 sm:space-y-4">
           <!-- Add New Tag Form Accordion -->
-          <div class="glass-card rounded-2xl p-4 border ${isOAA ? 'border-amber-500/40 bg-[#14060d]' : 'border-pink-300 bg-pink-50/50'}">
+          <div class="glass-card rounded-2xl p-3.5 sm:p-4 border ${isOAA ? 'border-amber-500/40 bg-[#14060d]' : 'border-pink-300 bg-pink-50/50'}">
             <h4 class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-pink-800'} mb-3 flex items-center gap-1.5">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> 為【${isHomeroom ? '導師班' : '任教班/數學班'}】新增自訂表現標籤
             </h4>
@@ -95,10 +95,10 @@ class TagManager {
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-1">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1">
                 <span class="text-[10px] ${isOAA ? 'text-amber-200/70' : 'text-slate-500'}">分值設為 0 可作為純日常記事標籤</span>
-                <button type="submit" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center gap-1">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增此標籤
+                <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 cursor-pointer">
+                  <i data-lucide="plus" class="w-3.5 h-3.5 shrink-0"></i> 新增此標籤
                 </button>
               </div>
             </form>
@@ -107,27 +107,27 @@ class TagManager {
           <!-- Current Tags List -->
           <div>
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div>
+              <div class="min-w-0">
                 <h4 class="text-xs font-black ${isOAA ? 'text-amber-200' : 'text-slate-700'} uppercase tracking-wider">【${isHomeroom ? '導師班' : '任教班/數學班'}】現有標籤 (${tags.length} 個)</h4>
                 <span class="text-[10px] ${isOAA ? 'text-amber-300' : 'text-pink-600'} font-bold">💡 排在前 4 個的標籤，會優先顯示在點記板第 1 頁</span>
               </div>
-              <div class="flex items-center space-x-2">
-                <select onchange="tagManager.handleSortModeChange(this.value)" class="text-xs font-black px-2.5 py-1 rounded-xl border ${isOAA ? 'border-amber-500/50 bg-[#14060d] text-amber-200' : 'border-pink-300 bg-pink-50 text-pink-900'} focus:outline-none">
+              <div class="flex flex-wrap items-center gap-2">
+                <select onchange="tagManager.handleSortModeChange(this.value)" class="text-xs font-black px-2.5 py-1.5 rounded-xl border ${isOAA ? 'border-amber-500/50 bg-[#14060d] text-amber-200' : 'border-pink-300 bg-pink-50 text-pink-900'} focus:outline-none">
                   <option value="custom" ${this.store.getTagSortMode(this.currentClassId) === 'custom' ? 'selected' : ''}>📌 依此清單自訂順序</option>
                   <option value="frequency" ${this.store.getTagSortMode(this.currentClassId) === 'frequency' ? 'selected' : ''}>📊 依班級使用頻率</option>
                 </select>
                 ${!isHomeroom ? `
-                  <button onclick="tagManager.copyHomeroomTags()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition flex items-center gap-0.5" title="將導師班標籤複製一份覆蓋至任教班">
+                  <button onclick="tagManager.copyHomeroomTags()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition flex items-center gap-0.5 whitespace-nowrap" title="將導師班標籤複製一份覆蓋至任教班">
                     📥 複製導師班標籤
                   </button>
                 ` : ''}
-                <button onclick="tagManager.restoreDefaults()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition">
+                <button onclick="tagManager.restoreDefaults()" class="text-xs text-slate-400 hover:text-pink-600 hover:underline font-bold transition whitespace-nowrap">
                   恢復預設
                 </button>
               </div>
             </div>
 
-            <div class="space-y-2 pr-1" id="tag-manager-drag-list">
+            <div class="space-y-2.5" id="tag-manager-drag-list">
               ${tags.map((tag, idx) => {
                 const isPos = tag.delta > 0;
                 const isZero = tag.delta === 0;
@@ -137,42 +137,42 @@ class TagManager {
                 return `
                   <div id="tag-item-${tag.id}"
                        data-tag-id="${tag.id}"
-                       class="tag-sort-card flex items-center justify-between p-2.5 rounded-xl border ${isOAA ? (isTop4 ? 'bg-[#2a0f1e] border-amber-400/70' : 'bg-[#160610] border-amber-500/25') : (isTop4 ? 'bg-white border-pink-300 shadow-sm ring-1 ring-pink-200' : 'bg-white border-pink-100')} hover:border-pink-300 text-xs select-none cursor-grab active:cursor-grabbing"
+                       class="tag-sort-card flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border ${isOAA ? (isTop4 ? 'bg-[#2a0f1e] border-amber-400/70' : 'bg-[#160610] border-amber-500/25') : (isTop4 ? 'bg-white border-pink-300 shadow-sm ring-1 ring-pink-200' : 'bg-white border-pink-100')} hover:border-pink-300 text-xs select-none cursor-grab active:cursor-grabbing"
                        ontouchstart="tagManager.handleCardPointerDown(event, '${tag.id}')"
                        onmousedown="tagManager.handleCardPointerDown(event, '${tag.id}')">
-                    <div class="flex items-center space-x-2.5 pointer-events-none">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1 pointer-events-none">
                       <!-- Order Badge & Up/Down Buttons -->
-                      <div class="flex items-center space-x-1 pointer-events-auto">
-                        <span class="w-6 h-6 rounded-lg ${isTop4 ? 'bg-pink-500 text-white' : (isOAA ? 'bg-rose-950 text-amber-200' : 'bg-slate-100 text-slate-700')} font-black text-[10px] flex items-center justify-center shadow-inner" title="${isTop4 ? '第 1 頁優先顯示' : `第 ${Math.floor(idx / 4) + 1} 頁`}">
+                      <div class="flex items-center gap-1 shrink-0 pointer-events-auto">
+                        <span class="w-6 h-6 rounded-lg ${isTop4 ? 'bg-pink-500 text-white' : (isOAA ? 'bg-rose-950 text-amber-200' : 'bg-slate-100 text-slate-700')} font-black text-[10px] flex items-center justify-center shadow-inner shrink-0" title="${isTop4 ? '第 1 頁優先顯示' : `第 ${Math.floor(idx / 4) + 1} 頁`}">
                           #${idx + 1}
                         </span>
                         <div class="flex flex-col space-y-0.5">
-                          <button type="button" onclick="tagManager.moveTagUp('${tag.id}')" ${idx === 0 ? 'disabled class="min-w-[32px] min-h-[28px] px-2 py-1 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[32px] min-h-[28px] hover:bg-pink-100 rounded-md px-2 py-1 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往上移一格">
+                          <button type="button" onclick="tagManager.moveTagUp('${tag.id}')" ${idx === 0 ? 'disabled class="min-w-[30px] min-h-[26px] px-1.5 py-0.5 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[30px] min-h-[26px] hover:bg-pink-100 rounded-md px-1.5 py-0.5 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往上移一格">
                             ▲
                           </button>
-                          <button type="button" onclick="tagManager.moveTagDown('${tag.id}')" ${idx === tags.length - 1 ? 'disabled class="min-w-[32px] min-h-[28px] px-2 py-1 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[32px] min-h-[28px] hover:bg-pink-100 rounded-md px-2 py-1 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往下移一格">
+                          <button type="button" onclick="tagManager.moveTagDown('${tag.id}')" ${idx === tags.length - 1 ? 'disabled class="min-w-[30px] min-h-[26px] px-1.5 py-0.5 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[30px] min-h-[26px] hover:bg-pink-100 rounded-md px-1.5 py-0.5 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往下移一格">
                             ▼
                           </button>
                         </div>
                       </div>
 
-                      <span class="font-black px-2.5 py-0.5 rounded-lg text-xs border ${badgeClass}">
+                      <span class="font-black px-2 py-0.5 rounded-lg text-xs border whitespace-nowrap shrink-0 ${badgeClass}">
                         ${tag.delta > 0 ? '+' : ''}${tag.delta} 分
                       </span>
-                      <div>
-                        <div class="flex items-center gap-1">
-                          <strong class="${isOAA ? 'text-white' : 'text-slate-900'} font-black text-sm">${tag.name}</strong>
-                          ${isTop4 ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold border border-amber-300">⭐ 第1頁</span>' : ''}
+                      <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          <strong class="${isOAA ? 'text-white' : 'text-slate-900'} font-black text-sm break-words">${tag.name}</strong>
+                          ${isTop4 ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold border border-amber-300 whitespace-nowrap shrink-0">⭐ 第1頁</span>' : ''}
                         </div>
                         <span class="text-[10px] ${isOAA ? 'text-amber-200/70' : 'text-slate-500'}">(${tag.category === 'academic' ? '學業' : tag.category === 'conflict' ? '衝突' : tag.category === 'social' ? '熱心' : '常規'})</span>
                       </div>
                     </div>
 
-                    <div class="flex items-center space-x-1.5 pointer-events-auto">
-                      <button onclick="tagManager.editTagDelta('${tag.id}')" class="px-2 py-1 rounded-lg ${isOAA ? 'text-amber-200 border-amber-500/40 hover:bg-rose-950' : 'text-slate-600 hover:bg-slate-100'} text-[11px] font-bold border transition">
+                    <div class="flex items-center justify-end gap-2 pt-1.5 sm:pt-0 border-t sm:border-t-0 ${isOAA ? 'border-amber-500/20' : 'border-pink-100'} shrink-0 pointer-events-auto">
+                      <button onclick="tagManager.editTagDelta('${tag.id}')" class="px-2.5 py-1 rounded-lg ${isOAA ? 'text-amber-200 border-amber-500/40 hover:bg-rose-950' : 'text-slate-600 hover:bg-slate-100 border-slate-200'} text-[11px] font-bold border transition whitespace-nowrap shrink-0 min-h-[32px] cursor-pointer">
                         改分值
                       </button>
-                      <button onclick="tagManager.deleteTag('${tag.id}')" class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="刪除此標籤">
+                      <button onclick="tagManager.deleteTag('${tag.id}')" class="min-w-[32px] min-h-[32px] flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition shrink-0 cursor-pointer" title="刪除此標籤">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                       </button>
                     </div>

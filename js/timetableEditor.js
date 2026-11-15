@@ -81,13 +81,13 @@ class TimetableEditorView {
       </div>
 
       <!-- Weekly Schedule Grid -->
-      <div class="glass-card rounded-3xl p-5 border ${isOAA ? 'border-amber-500/40 bg-[#240e1b]' : 'border-pink-200 bg-white'} overflow-x-auto mb-6 shadow-sm">
-        <table class="w-full text-center text-xs ${isOAA ? 'text-slate-200' : 'text-slate-800'} border-collapse">
+      <div class="glass-card rounded-3xl p-4 sm:p-5 border ${isOAA ? 'border-amber-500/40 bg-[#240e1b]' : 'border-pink-200 bg-white'} overflow-x-auto mb-6 shadow-sm">
+        <table class="w-full min-w-[760px] text-center text-xs ${isOAA ? 'text-slate-200' : 'text-slate-800'} border-collapse">
           <thead>
             <tr class="${isOAA ? 'bg-[#160610] text-amber-300 border-b border-amber-500/40' : 'bg-pink-50 text-slate-700 border-b border-pink-200'} text-xs">
-              <th class="py-3 px-2 sm:px-3 w-28 sm:w-32 text-left font-black sticky left-0 z-20 ${isOAA ? 'bg-[#160610]' : 'bg-pink-50'}">節次 / 時間</th>
+              <th class="py-3 px-2.5 sm:px-3 min-w-[116px] whitespace-nowrap text-left font-black sticky left-0 z-20 ${isOAA ? 'bg-[#160610]' : 'bg-pink-50'}">節次 / 時間</th>
               ${days.map(d => `
-                <th class="py-3 px-3 font-black min-w-[118px] ${curDay === d.id ? (isOAA ? 'bg-amber-600/20 text-amber-300' : 'bg-pink-100 text-pink-800') : ''}">
+                <th class="py-3 px-3 font-black min-w-[122px] whitespace-nowrap ${curDay === d.id ? (isOAA ? 'bg-amber-600/20 text-amber-300' : 'bg-pink-100 text-pink-800') : ''}">
                   ${d.name} ${curDay === d.id ? '(今日)' : ''}
                 </th>
               `).join('')}
@@ -101,7 +101,7 @@ class TimetableEditorView {
               return `
                 <tr class="${isSpecial ? (isOAA ? 'bg-[#14050d] text-amber-200/50' : 'bg-slate-50 text-slate-500') : (isOAA ? 'hover:bg-rose-950/30' : 'hover:bg-pink-50/40')} ${isCurrentPeriod ? 'timetable-current-slot' : ''}">
                   <!-- Period Header -->
-                  <td class="py-3 px-2 sm:px-3 text-left font-mono sticky left-0 z-10 ${isSpecial ? (isOAA ? 'bg-[#14050d]' : 'bg-slate-50') : (isOAA ? 'bg-[#240e1b]' : 'bg-white')} shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                  <td class="py-3 px-2.5 sm:px-3 min-w-[116px] whitespace-nowrap text-left font-mono sticky left-0 z-10 ${isSpecial ? (isOAA ? 'bg-[#14050d]' : 'bg-slate-50') : (isOAA ? 'bg-[#240e1b]' : 'bg-white')} shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
                     <div class="font-black ${isOAA ? 'text-white' : 'text-slate-900'}">${p.name}</div>
                     <div class="text-[10px] ${isOAA ? 'text-amber-200/60' : 'text-slate-500'}">${p.start} - ${p.end}</div>
                   </td>

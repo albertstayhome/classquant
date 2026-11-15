@@ -49,6 +49,78 @@ window.copyTextSafe = async function(text, successMsg = '已複製到剪貼簿�
   return false;
 };
 
+// Shared Period Label Formatter & Options Builder (Used across Retro Log, Modal & Events Log)
+window.cqPeriodChoices = [
+  { value: '0', label: '早自習 / 晨讀' },
+  { value: '1', label: '第 1 節' },
+  { value: '2', label: '第 2 節' },
+  { value: '3', label: '第 3 節' },
+  { value: '4', label: '第 4 節' },
+  { value: 'lunch', label: '午餐 / 午休' },
+  { value: '5', label: '第 5 節' },
+  { value: '6', label: '第 6 節' },
+  { value: '7', label: '第 7 節' },
+  { value: 'clean', label: '整潔活動' },
+  { value: '8', label: '第 8 節' },
+  { value: 'after', label: '課後放學' }
+];
+
+window.cqFormatPeriodLabel = function(period) {
+  if (period === undefined || period === null || period === '') return '未定節次';
+  const key = String(period);
+  if (key === '0') return '早自習';
+  if (key === 'lunch') return '午餐/午休';
+  if (key === 'clean') return '整潔活動';
+  if (key === 'after') return '課後放學';
+  const num = Number(key);
+  if (Number.isFinite(num) && num >= 1 && num <= 12) return `第 ${num} 節`;
+  return `節次 ${key}`;
+};
+
+window.cqBuildPeriodOptionsHtml = function(selectedPeriod) {
+  const sel = String(selectedPeriod ?? '1');
+  return window.cqPeriodChoices.map(p =>
+    `<option value="${p.value}" ${sel === p.value ? 'selected' : ''}>${p.label}</option>`
+  ).join('');
+};
+
+window.cqGetDefaultRetroPeriod = function() {
+  try {
+    const active = window.timetableEngine?.getActiveClassId?.();
+    if (active && active.period !== undefined && active.period !== null && active.period !== '') {
+      return String(active.period);
+    }
+  } catch (e) {}
+  return '1';
+};
+
+// Curated Tags Selector: Prioritizes custom/used tags with balanced positive & negative defaults (max 6)
+window.cqGetCuratedTags = function(store, classId, limit = 6) {
+  const tags = store?.getTagsSortedByClassFrequency ? store.getTagsSortedByClassFrequency(classId) : (store?.getTags?.(classId) || []);
+  if (tags.length <= limit) return tags;
+  const classEvents = store?.getEvents ? store.getEvents(classId) : [];
+  const usedIds = new Set(classEvents.map(e => e.tagId).filter(Boolean));
+  const picked = [];
+  const seen = new Set();
+  const pushTag = (t) => {
+    if (t && !seen.has(t.id) && picked.length < limit) {
+      seen.add(t.id);
+      picked.push(t);
+    }
+  };
+  tags.filter(t => String(t.id).startsWith('tag_') || usedIds.has(t.id)).forEach(pushTag);
+  const posList = tags.filter(t => t.delta > 0);
+  const negList = tags.filter(t => t.delta < 0);
+  let i = 0;
+  while (picked.length < limit && (i < posList.length || i < negList.length)) {
+    if (i < posList.length) pushTag(posList[i]);
+    if (i < negList.length) pushTag(negList[i]);
+    i++;
+  }
+  tags.forEach(pushTag);
+  return picked;
+};
+
 // Default Tag Categories and Definitions
 const DEFAULT_TAGS = [
   // 數學學業 (Academic)
@@ -886,23 +958,19 @@ class Store {
   getClassQualifiedName(classId) {
     const cls = this.getClass(classId);
     if (!cls) return String(classId || '班級');
-    const baseName = String(cls.name || classId || '班級').trim();
-    const roleLabel = this.getClassRoleLabel(cls);
-    const hasRoleInName = baseName.includes(roleLabel)
-      || (cls.type === 'homeroom' && baseName.includes('導師'))
-      || (cls.type !== 'homeroom' && cls.subject && baseName.includes(String(cls.subject).trim()));
-    const candidate = hasRoleInName ? baseName : `${baseName}(${roleLabel})`;
+    const formatCandidate = (c) => {
+      const base = String(c.name || c.id || '班級').trim();
+      const roleLabel = this.getClassRoleLabel(c);
+      const hasRoleInName = base.includes(roleLabel)
+        || (c.type === 'homeroom' && base.includes('導師'))
+        || (c.type !== 'homeroom' && c.subject && base.includes(String(c.subject).trim()))
+        || /[\(（][^()（）]{1,12}(?:導師|專任|課|組|班)[\)）]\s*$/.test(base);
+      return hasRoleInName ? base : `${base}(${roleLabel})`;
+    };
 
+    const candidate = formatCandidate(cls);
     const allClasses = Object.values(this.data.classes || {});
-    const dupCount = allClasses.filter(other => {
-      if (!other) return false;
-      const ob = String(other.name || other.id || '').trim();
-      const orole = this.getClassRoleLabel(other);
-      const oHas = ob.includes(orole)
-        || (other.type === 'homeroom' && ob.includes('導師'))
-        || (other.type !== 'homeroom' && other.subject && ob.includes(String(other.subject).trim()));
-      return (oHas ? ob : `${ob}(${orole})`) === candidate;
-    }).length;
+    const dupCount = allClasses.filter(other => other && formatCandidate(other) === candidate).length;
 
     return dupCount > 1 ? `${candidate}[${cls.id}]` : candidate;
   }

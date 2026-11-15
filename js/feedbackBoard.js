@@ -322,29 +322,29 @@ class FeedbackBoard {
 
     container.innerHTML = `
       <!-- Top Title Banner -->
-      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-5 ${isOAA ? 'border-2 border-amber-500/50 bg-[#240e1b]/95 text-white' : 'border border-pink-200 bg-white'} shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center space-x-3.5">
+      <div class="glass-card rounded-3xl p-4 sm:p-6 mb-5 ${isOAA ? 'border-2 border-amber-500/50 bg-[#240e1b]/95 text-white' : 'border border-pink-200 bg-white'} shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
             ${isOAA ? `
-              <div class="w-12 h-12 rounded-2xl bg-rose-950 border-2 border-amber-400 shadow-md flex items-center justify-center text-2xl shrink-0">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-rose-950 border-2 border-amber-400 shadow-md flex items-center justify-center text-xl sm:text-2xl shrink-0 self-start sm:self-auto">
                 🏛️
               </div>
             ` : `
-              <div class="sanrio-twinstars-badge !w-12 !h-12"></div>
+              <div class="sanrio-twinstars-badge !w-10 !h-10 sm:!w-12 sm:!h-12 shrink-0 self-start sm:self-auto"></div>
             `}
-            <div>
+            <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
-                  ${isOAA ? '🏛️ S-SYSTEM // 師生意見聯絡終端' : '💬 互動留言板'}
-                  ${isOAA ? '' : '<span class="kitty-bow"></span>'}
+                <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex flex-wrap items-center gap-2">
+                  <span>${isOAA ? '🏛️ S-SYSTEM // 師生意見聯絡終端' : '💬 互動留言板'}</span>
+                  ${isOAA ? '' : '<span class="kitty-bow shrink-0"></span>'}
                 </h2>
-                <span class="px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-rose-950/80 text-amber-200 border-amber-500/40' : 'bg-slate-100 text-slate-700 border-slate-300'} text-xs font-bold border shadow-sm flex items-center gap-1 font-mono">
+                <span class="px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-rose-950/80 text-amber-200 border-amber-500/40' : 'bg-slate-100 text-slate-700 border-slate-300'} text-xs font-bold border shadow-sm inline-flex items-center gap-1 font-mono whitespace-nowrap shrink-0">
                   <span>共 ${totalCount} 則</span>
                   <span>•</span>
                   <span>已回覆 ${repliedCount} 則</span>
                 </span>
                 ${isDev ? `
-                  <span class="px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-amber-950 text-amber-300 border-amber-500' : 'bg-purple-100 text-purple-800 border-purple-300'} text-xs font-bold border shadow-sm flex items-center gap-1">
+                  <span class="px-2.5 py-0.5 rounded-full ${isOAA ? 'bg-amber-950 text-amber-300 border-amber-500' : 'bg-purple-100 text-purple-800 border-purple-300'} text-xs font-bold border shadow-sm inline-flex items-center gap-1 whitespace-nowrap shrink-0">
                     <span>開發者模式</span>
                   </span>
                 ` : ''}
@@ -356,7 +356,7 @@ class FeedbackBoard {
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
             <div id="fb-sync-status-badge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ${isOAA ? 'bg-[#180712] border border-amber-500/30' : 'bg-slate-100 border border-slate-200'}">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
               <span class="${isOAA ? 'text-slate-300' : 'text-slate-500'} text-[11px] font-medium">本機模式</span>

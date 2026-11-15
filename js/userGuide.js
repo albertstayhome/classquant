@@ -64,16 +64,16 @@ class UserGuideView {
     container.innerHTML = `
       <!-- Guide Header Banner -->
       ${isOAA ? `
-        <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-amber-500/50 relative overflow-hidden bg-gradient-to-r from-[#240e1b] via-[#1a0813] to-[#290e1c] shadow-md text-white">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-4">
-              <div class="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner shrink-0">🏛️</div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h2 class="text-xl sm:text-2xl font-black text-white tracking-wide flex items-center gap-2">
+        <div class="glass-card rounded-3xl p-4 sm:p-8 mb-6 border border-amber-500/50 relative overflow-hidden bg-gradient-to-r from-[#240e1b] via-[#1a0813] to-[#290e1c] shadow-md text-white">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
+              <div class="text-2xl sm:text-4xl p-2 sm:p-2.5 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner shrink-0 self-start">🏛️</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="text-lg sm:text-2xl font-black text-white tracking-wide flex flex-wrap items-center gap-2">
                     ClassQuant Hub • 高度育成操作指南與 S-SYSTEM 手冊
                   </h2>
-                  <span class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">COTE VER.</span>
+                  <span class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50 whitespace-nowrap shrink-0">COTE VER.</span>
                 </div>
                 <p class="text-xs sm:text-sm text-amber-200/80 mt-1 font-medium">
                   以實力至上主義為核心設計 • 課堂零滑動極速記點、S-SYSTEM 名冊匯入、學業品格雙軌量化與 Google 雲端定期備份
@@ -81,28 +81,28 @@ class UserGuideView {
               </div>
             </div>
             
-            <div class="flex items-center space-x-2">
-              <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-rose-950/80 text-amber-300 border border-amber-500/50 text-xs font-bold hover:bg-rose-900 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                <i data-lucide="printer" class="w-4 h-4"></i> 列印 / 存為 PDF
+            <div class="flex items-center space-x-2 shrink-0 self-start md:self-auto">
+              <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-rose-950/80 text-amber-300 border border-amber-500/50 text-xs font-bold hover:bg-rose-900 transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                <i data-lucide="printer" class="w-4 h-4 shrink-0"></i> 列印 / 存為 PDF
               </button>
             </div>
           </div>
         </div>
       ` : `
-        <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-pink-300 relative overflow-hidden bg-gradient-to-r from-pink-50 via-white to-sky-50 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-3">
-              <div class="flex items-center -space-x-1 sm:space-x-1.5 shrink-0">
-                <div class="kitty-cat-avatar !w-10 !h-10 shrink-0" title="Hello Kitty"></div>
-                <div class="sanrio-twinstars-badge !w-10 !h-10 shrink-0" title="Little Twin Stars"></div>
-                <div class="sanrio-kuromi-badge !w-10 !h-10 shrink-0" title="Kuromi"></div>
+        <div class="glass-card rounded-3xl p-4 sm:p-8 mb-6 border border-pink-300 relative overflow-hidden bg-gradient-to-r from-pink-50 via-white to-sky-50 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 shrink-0 self-start">
+                <div class="kitty-cat-avatar !w-9 !h-9 sm:!w-10 sm:!h-10 shrink-0" title="Hello Kitty"></div>
+                <div class="sanrio-twinstars-badge !w-9 !h-9 sm:!w-10 sm:!h-10 shrink-0" title="Little Twin Stars"></div>
+                <div class="sanrio-kuromi-badge !w-9 !h-9 sm:!w-10 sm:!h-10 shrink-0" title="Kuromi"></div>
                 <div class="sanrio-cinnamoroll-badge !w-11 !h-10 hidden sm:inline-block shrink-0" title="Cinnamoroll"></div>
                 <div class="sanrio-mymelody-badge !w-9 !h-10 hidden sm:inline-block shrink-0" title="My Melody"></div>
               </div>
-              <div>
-                <h2 class="text-xl sm:text-2xl font-black text-pink-600 flex items-center gap-2">
-                  ClassQuant Hub • 教師實戰圖文教學手冊
-                  <span class="kitty-bow"></span>
+              <div class="min-w-0 flex-1">
+                <h2 class="text-lg sm:text-2xl font-black text-pink-600 flex flex-wrap items-center gap-2">
+                  <span>ClassQuant Hub • 教師實戰圖文教學手冊</span>
+                  <span class="kitty-bow shrink-0"></span>
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
                   以「人本」為核心設計 • 課堂 1~2 秒隨手記、全班名冊 1 秒批次導入、家長晤談與 Google 雲端定期備份
@@ -110,9 +110,9 @@ class UserGuideView {
               </div>
             </div>
             
-            <div class="flex items-center space-x-2">
-              <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-pink-100 text-pink-700 border border-pink-300 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="printer" class="w-4 h-4"></i> 列印 / 存為 PDF
+            <div class="flex items-center space-x-2 shrink-0 self-start md:self-auto">
+              <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-pink-100 text-pink-700 border border-pink-300 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer">
+                <i data-lucide="printer" class="w-4 h-4 shrink-0"></i> 列印 / 存為 PDF
               </button>
             </div>
           </div>

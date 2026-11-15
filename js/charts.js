@@ -58,12 +58,12 @@ class DashboardCharts {
       <!-- Term Settlement & Formula Hero Card -->
       <div class="rounded-3xl p-4 sm:p-6 mb-5 border-2 shadow-sm ${isOAA ? 'bg-gradient-to-br from-[#270e1c] via-[#1c0813] to-[#2e1121] border-amber-500/50 text-white' : 'glass-card border-pink-200 bg-gradient-to-r from-pink-50/90 via-white to-sky-50/80 text-slate-900'}">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-200/80'}">
-          <div class="flex items-start sm:items-center gap-3">
-            ${isOAA ? `<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#2e1026] flex items-center justify-center shadow-md border-2 border-amber-400/80 shrink-0">${window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-8 h-8') : '100'}</div>` : '<div class="sanrio-twinstars-badge !w-12 !h-12 shrink-0"></div>'}
-            <div>
+          <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            ${isOAA ? `<div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#2e1026] flex items-center justify-center shadow-md border-2 border-amber-400/80 shrink-0">${window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-7 h-7 sm:w-8 sm:h-8') : '100'}</div>` : '<div class="sanrio-twinstars-badge !w-10 !h-10 sm:!w-12 sm:!h-12 shrink-0"></div>'}
+            <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'}">${displayClassName} • 平時成績結算中心</h2>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-black ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-400/60' : 'bg-pink-100 text-pink-800 border border-pink-300'}">
+                <h2 class="text-base sm:text-2xl font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'}">${displayClassName} • 平時成績結算中心</h2>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-black whitespace-nowrap shrink-0 ${isOAA ? 'bg-amber-950 text-amber-300 border border-amber-400/60' : 'bg-pink-100 text-pink-800 border border-pink-300'}">
                   📅 ${nextTermLabel} 計算中
                 </span>
               </div>
@@ -113,14 +113,14 @@ class DashboardCharts {
       </div>
 
       <!-- Tab 2 Sub-Navigation Pills -->
-      <div class="mb-5 p-1.5 rounded-2xl border shadow-sm grid grid-cols-3 sm:flex sm:flex-wrap items-stretch sm:items-center gap-1.5 ${isOAA ? 'bg-[#1d0a15] border-amber-500/40' : 'glass-card border-pink-200 bg-white'}">
-        <button type="button" data-grades-subtab="grades" onclick="dashboardCharts.setGradesSubTab('grades', '${this.lastClassId}')" class="subtab-pill-btn min-h-[40px] px-2 sm:px-4 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center gap-1 sm:gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'grades' ? 'subtab-active' : ''}">
+      <div class="mb-5 p-1.5 rounded-2xl border shadow-sm flex flex-wrap items-stretch sm:items-center gap-1.5 ${isOAA ? 'bg-[#1d0a15] border-amber-500/40' : 'glass-card border-pink-200 bg-white'}">
+        <button type="button" data-grades-subtab="grades" onclick="dashboardCharts.setGradesSubTab('grades', '${this.lastClassId}')" class="subtab-pill-btn flex-auto sm:flex-none whitespace-nowrap min-h-[40px] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'grades' ? 'subtab-active' : ''}">
           <span>📋</span><span>平時成績與排行</span>
         </button>
-        <button type="button" data-grades-subtab="history" onclick="dashboardCharts.setGradesSubTab('history', '${this.lastClassId}')" class="subtab-pill-btn min-h-[40px] px-2 sm:px-4 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center gap-1 sm:gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'history' ? 'subtab-active' : ''}">
+        <button type="button" data-grades-subtab="history" onclick="dashboardCharts.setGradesSubTab('history', '${this.lastClassId}')" class="subtab-pill-btn flex-auto sm:flex-none whitespace-nowrap min-h-[40px] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'history' ? 'subtab-active' : ''}">
           <span>📜</span><span>歷史段考 (${archives.length})</span>
         </button>
-        <button type="button" data-grades-subtab="analytics" onclick="dashboardCharts.setGradesSubTab('analytics', '${this.lastClassId}')" class="subtab-pill-btn min-h-[40px] px-2 sm:px-4 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center gap-1 sm:gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'analytics' ? 'subtab-active' : ''}">
+        <button type="button" data-grades-subtab="analytics" onclick="dashboardCharts.setGradesSubTab('analytics', '${this.lastClassId}')" class="subtab-pill-btn flex-auto sm:flex-none whitespace-nowrap min-h-[40px] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center gap-1.5 leading-tight cursor-pointer ${this.gradesSubTab === 'analytics' ? 'subtab-active' : ''}">
           <span>📊</span><span>表現分析圖表</span>
         </button>
       </div>
@@ -207,11 +207,11 @@ class DashboardCharts {
           </div>
         </div>
 
-        <div class="mt-5 flex items-center justify-end gap-2.5">
-          <button type="button" onclick="appState.closeModal()" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm cursor-pointer ${isOAA ? 'bg-[#2b0f1f] text-amber-200 border border-amber-500/40' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+        <div class="mt-5 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5">
+          <button type="button" onclick="appState.closeModal()" class="w-full sm:w-auto whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm cursor-pointer ${isOAA ? 'bg-[#2b0f1f] text-amber-200 border border-amber-500/40' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
             先不結算
           </button>
-          <button type="button" id="confirm-settle-term-btn" onclick="dashboardCharts.confirmSettleTerm('${classId}')" class="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm text-white shadow-md cursor-pointer ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'}">
+          <button type="button" id="confirm-settle-term-btn" onclick="dashboardCharts.confirmSettleTerm('${classId}')" class="w-full sm:w-auto whitespace-nowrap px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm text-white shadow-md cursor-pointer ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 border border-amber-400' : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'}">
             ✅ 確認結算並下載 Excel
           </button>
         </div>
@@ -325,15 +325,15 @@ class DashboardCharts {
           <div class="text-center py-10 text-xs font-bold opacity-60">此篩選條件下尚無學生資料</div>
         ` : `
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm">
+            <table class="w-full min-w-full text-left text-xs sm:text-sm">
               <thead class="text-[11px] sm:text-xs font-black uppercase border-b ${isOAA ? 'bg-[#1a0710] text-amber-300 border-amber-500/30' : 'bg-pink-50/90 text-pink-900 border-pink-200'}">
                 <tr>
-                  <th class="py-2.5 px-2.5 text-center">名次</th>
-                  <th class="py-2.5 px-2.5">座號 / 姓名</th>
-                  <th class="py-2.5 px-2.5 text-right">本期加減點</th>
-                  <th class="py-2.5 px-2.5 text-center">本期平時成績</th>
-                  <th class="py-2.5 px-2.5 text-center">等第</th>
-                  <th class="py-2.5 px-2.5 text-right hidden sm:table-cell">歷史累積淨分</th>
+                  <th class="py-2.5 px-1.5 sm:px-2.5 text-center whitespace-nowrap">名次</th>
+                  <th class="py-2.5 px-1.5 sm:px-2.5 whitespace-nowrap">座號 / 姓名</th>
+                  <th class="py-2.5 px-1.5 sm:px-2.5 text-right whitespace-nowrap"><span class="sm:hidden">加減點</span><span class="hidden sm:inline">本期加減點</span></th>
+                  <th class="py-2.5 px-1.5 sm:px-2.5 text-center whitespace-nowrap"><span class="sm:hidden">平時分</span><span class="hidden sm:inline">本期平時成績</span></th>
+                  <th class="py-2.5 px-1.5 sm:px-2.5 text-center whitespace-nowrap">等第</th>
+                  <th class="py-2.5 px-2.5 text-right whitespace-nowrap hidden sm:table-cell">歷史累積淨分</th>
                 </tr>
               </thead>
               <tbody class="divide-y ${isOAA ? 'divide-amber-500/20' : 'divide-pink-100'}">
@@ -342,30 +342,30 @@ class DashboardCharts {
                   const rankBadge = shownRank === 1 ? '🥇' : shownRank === 2 ? '🥈' : shownRank === 3 ? '🥉' : `#${shownRank}`;
                   return `
                     <tr onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${item.seatNo})" class="cursor-pointer transition ${isOAA ? 'hover:bg-[#381328]' : 'hover:bg-pink-50/70'}">
-                      <td class="py-2.5 px-2.5 text-center font-mono font-black">${rankBadge}</td>
-                      <td class="py-2.5 px-2.5 font-black">
-                        <div class="flex items-center gap-2">
-                          <span class="px-1.5 py-0.5 rounded font-mono text-[11px] ${item.gender === 'F' ? (isOAA ? 'bg-pink-950 text-pink-300' : 'bg-pink-100 text-pink-700') : (isOAA ? 'bg-blue-950 text-cyan-300' : 'bg-blue-100 text-blue-700')}">${String(item.seatNo).padStart(2, '0')}</span>
-                          <span>${item.name}</span>
+                      <td class="py-2.5 px-1.5 sm:px-2.5 text-center font-mono font-black whitespace-nowrap">${rankBadge}</td>
+                      <td class="py-2.5 px-1.5 sm:px-2.5 font-black whitespace-nowrap">
+                        <div class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                          <span class="px-1.5 py-0.5 rounded font-mono text-[11px] shrink-0 ${item.gender === 'F' ? (isOAA ? 'bg-pink-950 text-pink-300' : 'bg-pink-100 text-pink-700') : (isOAA ? 'bg-blue-950 text-cyan-300' : 'bg-blue-100 text-blue-700')}">${String(item.seatNo).padStart(2, '0')}</span>
+                          <span class="whitespace-nowrap">${item.name}</span>
                         </div>
                       </td>
-                      <td class="py-2.5 px-2.5 text-right font-mono font-bold">
+                      <td class="py-2.5 px-1.5 sm:px-2.5 text-right font-mono font-bold whitespace-nowrap">
                         <span class="${item.netDelta > 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : item.netDelta < 0 ? (isOAA ? 'text-rose-400' : 'text-rose-700') : 'opacity-60'}">
-                          ${item.netDelta > 0 ? '+' : ''}${item.netDelta} 點
+                          ${item.netDelta > 0 ? '+' : ''}${item.netDelta}<span class="hidden sm:inline"> 點</span>
                         </span>
-                        <span class="block text-[10px] opacity-65">+${item.positivePts} / ${item.negativePts}</span>
+                        <span class="block text-[10px] opacity-65">+${item.positivePts}/${item.negativePts}</span>
                       </td>
-                      <td class="py-2.5 px-2.5 text-center font-mono">
+                      <td class="py-2.5 px-1.5 sm:px-2.5 text-center font-mono whitespace-nowrap">
                         <div>
                           <span class="text-sm sm:text-base font-black ${isOAA ? 'text-amber-300' : 'text-blue-700'}">${item.regularScore}</span>
-                          <span class="text-[11px] opacity-70">分</span>
+                          <span class="text-[11px] opacity-70 hidden sm:inline">分</span>
                         </div>
-                        ${item.settledTermCount > 0 ? `<span class="block sm:hidden text-[10px] opacity-75 mt-0.5">跨期均 ${item.allTermsAvgRegularScore}分</span>` : `<span class="block sm:hidden text-[10px] opacity-65 mt-0.5">累 ${item.totalCumulativeNetDelta >= 0 ? '+' : ''}${item.totalCumulativeNetDelta}</span>`}
+                        ${item.settledTermCount > 0 ? `<span class="block sm:hidden text-[10px] opacity-75 mt-0.5">均${item.allTermsAvgRegularScore}</span>` : `<span class="block sm:hidden text-[10px] opacity-65 mt-0.5">累${item.totalCumulativeNetDelta >= 0 ? '+' : ''}${item.totalCumulativeNetDelta}</span>`}
                       </td>
-                      <td class="py-2.5 px-2.5 text-center">
-                        <span class="inline-block min-w-[26px] px-2 py-0.5 rounded-lg text-xs font-black ${tierBadgeClass(item.tier)}">${item.tier}</span>
+                      <td class="py-2.5 px-1.5 sm:px-2.5 text-center whitespace-nowrap">
+                        <span class="inline-block min-w-[24px] sm:min-w-[26px] px-1.5 sm:px-2 py-0.5 rounded-lg text-xs font-black ${tierBadgeClass(item.tier)}">${item.tier}</span>
                       </td>
-                      <td class="py-2.5 px-2.5 text-right font-mono font-bold hidden sm:table-cell">
+                      <td class="py-2.5 px-2.5 text-right font-mono font-bold whitespace-nowrap hidden sm:table-cell">
                         <span class="${item.totalCumulativeNetDelta >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
                           ${item.totalCumulativeNetDelta >= 0 ? '+' : ''}${item.totalCumulativeNetDelta} 點
                         </span>
@@ -462,10 +462,10 @@ class DashboardCharts {
           <p class="text-xs ${isOAA ? 'text-amber-200/70' : 'text-slate-500'} mb-4">跨段考追蹤每位學生平時表現變化與總累積淨點數（不隨段考歸零而遺失）</p>
 
           <div class="overflow-x-auto -mx-2 sm:mx-0">
-            <table class="w-full text-left text-xs sm:text-sm">
+            <table class="w-full min-w-[520px] text-left text-xs sm:text-sm">
               <thead class="text-[11px] sm:text-xs font-black border-b ${isOAA ? 'bg-[#1a0710] text-amber-300 border-amber-500/30' : 'bg-pink-50 text-pink-900 border-pink-200'}">
                 <tr>
-                  <th class="py-2.5 px-2 w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-20 ${isOAA ? 'bg-[#1a0710]' : 'bg-pink-50'}">座號</th>
+                  <th class="py-2.5 px-2 w-[48px] min-w-[48px] max-w-[48px] whitespace-nowrap sticky left-0 z-20 ${isOAA ? 'bg-[#1a0710]' : 'bg-pink-50'}">座號</th>
                   <th class="py-2.5 px-2.5 whitespace-nowrap sticky left-[48px] z-20 ${isOAA ? 'bg-[#1a0710]' : 'bg-pink-50'} shadow-[4px_0_8px_-4px_rgba(0,0,0,0.12)]">姓名</th>
                   ${archives.map(a => `<th class="py-2.5 px-2.5 text-center whitespace-nowrap">${a.termLabel}</th>`).join('')}
                   <th class="py-2.5 px-2.5 text-center whitespace-nowrap">本期進行中</th>
@@ -476,15 +476,15 @@ class DashboardCharts {
               <tbody class="divide-y ${isOAA ? 'divide-amber-500/20' : 'divide-pink-100'}">
                 ${rowsBySeat.map(item => `
                   <tr onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${item.seatNo})" class="cursor-pointer transition ${isOAA ? 'hover:bg-[#381328]' : 'hover:bg-pink-50/70'}">
-                    <td class="py-2.5 px-2 w-[48px] min-w-[48px] max-w-[48px] sticky left-0 z-10 font-mono font-bold ${isOAA ? 'bg-[#240d1a]' : 'bg-white'}">${String(item.seatNo).padStart(2, '0')}</td>
+                    <td class="py-2.5 px-2 w-[48px] min-w-[48px] max-w-[48px] whitespace-nowrap sticky left-0 z-10 font-mono font-bold ${isOAA ? 'bg-[#240d1a]' : 'bg-white'}">${String(item.seatNo).padStart(2, '0')}</td>
                     <td class="py-2.5 px-2.5 font-black whitespace-nowrap sticky left-[48px] z-10 ${isOAA ? 'bg-[#240d1a]' : 'bg-white'} shadow-[4px_0_8px_-4px_rgba(0,0,0,0.10)]">${item.name}</td>
                     ${archives.map(arch => {
                       const rec = (arch.students || []).find(s => Number(s.seatNo) === Number(item.seatNo));
-                      return `<td class="py-2.5 px-2.5 text-center font-mono font-bold">${rec ? `${rec.regularScore} <span class="text-[10px] opacity-65">(${rec.netDelta >= 0 ? '+' : ''}${rec.netDelta})</span>` : '-'}</td>`;
+                      return `<td class="py-2.5 px-2.5 text-center font-mono font-bold whitespace-nowrap">${rec ? `${rec.regularScore} <span class="text-[10px] opacity-65">(${rec.netDelta >= 0 ? '+' : ''}${rec.netDelta})</span>` : '-'}</td>`;
                     }).join('')}
-                    <td class="py-2.5 px-2.5 text-center font-mono font-black ${isOAA ? 'text-amber-300' : 'text-blue-700'}">${item.regularScore}</td>
-                    <td class="py-2.5 px-2.5 text-right font-mono font-black">${item.allTermsAvgRegularScore} 分</td>
-                    <td class="py-2.5 px-2.5 text-right font-mono font-black ${item.totalCumulativeNetDelta >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
+                    <td class="py-2.5 px-2.5 text-center font-mono font-black whitespace-nowrap ${isOAA ? 'text-amber-300' : 'text-blue-700'}">${item.regularScore}</td>
+                    <td class="py-2.5 px-2.5 text-right font-mono font-black whitespace-nowrap">${item.allTermsAvgRegularScore} 分</td>
+                    <td class="py-2.5 px-2.5 text-right font-mono font-black whitespace-nowrap ${item.totalCumulativeNetDelta >= 0 ? (isOAA ? 'text-emerald-300' : 'text-emerald-700') : (isOAA ? 'text-rose-400' : 'text-rose-700')}">
                       ${item.totalCumulativeNetDelta >= 0 ? '+' : ''}${item.totalCumulativeNetDelta} 點
                     </td>
                   </tr>

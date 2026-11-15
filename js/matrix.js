@@ -641,51 +641,51 @@ class ClassroomMatrix {
       <!-- Top Slim Header -->
       <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'bg-[#220d18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <!-- Class Meta Badge -->
-        <div class="flex items-center space-x-2">
-          ${isOAA ? '<span class="text-xl">🏛️</span>' : '<div class="kitty-cat-mini"></div>'}
-          <div>
-            <div class="flex items-center gap-1.5">
+        <div class="flex items-start sm:items-center gap-2 min-w-0 w-full sm:w-auto">
+          ${isOAA ? '<span class="text-xl shrink-0">🏛️</span>' : '<div class="kitty-cat-mini shrink-0"></div>'}
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5">
               <h2 class="text-base sm:text-xl font-black ${isOAA ? 'text-white' : (isHomeroom ? 'text-pink-600' : 'text-blue-600')} tracking-wide">${classNameDisplay}</h2>
               ${classBadgeHtml}
             </div>
-            <div class="text-[10px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-600'} font-bold">
+            <div class="text-[10px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-600'} font-bold mt-0.5">
               ${statsOverviewHtml}
             </div>
           </div>
         </div>
 
         <!-- Quick Top Action Buttons -->
-        <div class="flex flex-wrap items-center gap-1.5">
+        <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
           <!-- Selection Count Badge -->
-          <div id="selection-status-badge" class="min-h-[34px] text-xs px-2.5 py-1 rounded-xl ${isOAA ? 'bg-[#290e1b] border border-amber-500/60 text-amber-200' : 'bg-pink-50 border border-pink-300 text-slate-800'} font-bold flex items-center gap-1">
+          <div id="selection-status-badge" class="min-h-[34px] text-xs px-2.5 py-1 rounded-xl whitespace-nowrap ${isOAA ? 'bg-[#290e1b] border border-amber-500/60 text-amber-200' : 'bg-pink-50 border border-pink-300 text-slate-800'} font-bold flex items-center gap-1">
             <span>已選: <strong id="selected-count" class="${isOAA ? 'text-amber-300 font-mono' : 'text-pink-600'} font-black text-sm">${this.selectedSeats.size}</strong></span>
-            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-400 underline font-bold text-xs ml-0.5 cursor-pointer">清空</button>
+            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-400 underline font-bold text-xs ml-0.5 cursor-pointer whitespace-nowrap">清空</button>
           </div>
 
           ${cols > 4 ? `
-            <button type="button" onclick="matrixView.toggleMobileGridDensity('${currentClassId}')" class="sm:hidden min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1a0812] border border-amber-500/40 text-amber-200' : 'bg-pink-50 border border-pink-200 text-pink-700'} rounded-xl shadow-sm transition active:scale-95 flex items-center gap-1 cursor-pointer" title="切換手機端座位欄位寬度">
+            <button type="button" onclick="matrixView.toggleMobileGridDensity('${currentClassId}')" class="sm:hidden min-h-[34px] px-2.5 py-1 text-xs font-black whitespace-nowrap ${isOAA ? 'bg-[#1a0812] border border-amber-500/40 text-amber-200' : 'bg-pink-50 border border-pink-200 text-pink-700'} rounded-xl shadow-sm transition active:scale-95 flex items-center gap-1 cursor-pointer" title="切換手機端座位欄位寬度">
               <span>${this.mobileGridDensity === 'exact' ? `📱 舒適${Math.min(cols, 4)}欄` : `📐 原班${cols}欄`}</span>
             </button>
           ` : ''}
 
           <!-- iOS Jiggle / Reorder Toggle Button -->
-          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="min-h-[34px] px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : (isOAA ? 'bg-amber-700/30 border border-amber-500/70 text-amber-200 hover:bg-amber-700/50' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
-            ${this.isJiggleMode ? '<span>✅ 完成排位</span>' : '<i data-lucide="move" class="w-3.5 h-3.5"></i> <span>🪑 拖曳排位</span>'}
+          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="min-h-[34px] px-3 py-1 text-xs font-black whitespace-nowrap ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : (isOAA ? 'bg-amber-700/30 border border-amber-500/70 text-amber-200 hover:bg-amber-700/50' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
+            ${this.isJiggleMode ? '<span>✅ 完成排位</span>' : '<i data-lucide="move" class="w-3.5 h-3.5 shrink-0"></i> <span>🪑 拖曳排位</span>'}
           </button>
 
-          <button onclick="matrixView.toggleQuickSelectBar()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#2b0f1d] border border-amber-500/50 text-amber-200 hover:bg-[#3d1529]' : 'bg-pink-50 text-pink-800 border border-pink-300 hover:bg-pink-100'} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
-            <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
+          <button onclick="matrixView.toggleQuickSelectBar()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold whitespace-nowrap ${isOAA ? 'bg-[#2b0f1d] border border-amber-500/50 text-amber-200 hover:bg-[#3d1529]' : 'bg-pink-50 text-pink-800 border border-pink-300 hover:bg-pink-100'} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="layers" class="w-3.5 h-3.5 shrink-0"></i> 分組/排
           </button>
 
-          <button onclick="matrixView.selectAll()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#1a0812] border border-slate-600 text-slate-200 hover:bg-[#280d1c]' : 'bg-white border border-pink-300 hover:bg-pink-50 text-slate-800'} rounded-xl shadow-sm cursor-pointer">
+          <button onclick="matrixView.selectAll()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold whitespace-nowrap ${isOAA ? 'bg-[#1a0812] border border-slate-600 text-slate-200 hover:bg-[#280d1c]' : 'bg-white border border-pink-300 hover:bg-pink-50 text-slate-800'} rounded-xl shadow-sm cursor-pointer">
             全選
           </button>
 
-          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-rose-700 hover:bg-rose-600 border border-rose-500' : 'bg-pink-500'} text-white rounded-xl shadow-sm cursor-pointer">
+          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black whitespace-nowrap ${isOAA ? 'bg-rose-700 hover:bg-rose-600 border border-rose-500' : 'bg-pink-500'} text-white rounded-xl shadow-sm cursor-pointer">
             抽籤
           </button>
 
-          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm cursor-pointer">
+          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black whitespace-nowrap ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm cursor-pointer">
             事件
           </button>
         </div>
@@ -910,7 +910,7 @@ class ClassroomMatrix {
              onscroll="matrixView.handleTagPagerScroll(this)">
           ${tagPages.map((pageTags, pageIdx) => `
             <div class="tag-page-slide">
-              <div class="grid grid-cols-2 gap-2.5">
+              <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
                 ${pageTags.map((tag, tagIdx) => {
                   const isPos = tag.delta > 0;
                   const isZero = tag.delta === 0;
@@ -921,12 +921,12 @@ class ClassroomMatrix {
 
                   return `
                     <button id="${btnId}" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
-                      class="quick-tag-button p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between min-h-[58px] sm:min-h-[64px] ${btnClass}">
-                      <div class="flex flex-col pr-1 overflow-hidden">
+                      class="quick-tag-button p-2.5 sm:p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between gap-1.5 min-h-[56px] sm:min-h-[64px] ${btnClass}">
+                      <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
                         <span class="text-xs sm:text-base font-black truncate ${isOAA ? 'text-white drop-shadow' : 'text-slate-900'} leading-tight">${tag.name}</span>
-                        <span class="text-xs ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
+                        <span class="text-[11px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
                       </div>
-                      <span class="text-xs sm:text-sm font-black px-3 py-1 rounded-xl border shrink-0 ${badgeClass}">
+                      <span class="text-xs sm:text-sm font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl border whitespace-nowrap shrink-0 ${badgeClass}">
                         ${tag.delta > 0 ? '+' : ''}${tag.delta}
                       </span>
                     </button>
@@ -1242,7 +1242,10 @@ class ClassroomMatrix {
       return;
     }
     const students = this.store.getStudents(classId);
-    const tags = this.store.getTagsSortedByClassFrequency(classId);
+    const allTags = this.store.getTagsSortedByClassFrequency(classId);
+    const curatedTags = window.cqGetCuratedTags ? window.cqGetCuratedTags(this.store, classId, 6) : allTags.slice(0, 6);
+    const defaultDelta = curatedTags[0] ? Number(curatedTags[0].delta || 0) : 1;
+    const defaultPeriod = window.cqGetDefaultRetroPeriod ? window.cqGetDefaultRetroPeriod() : '1';
     const modal = document.getElementById('global-modal');
     const modalContent = document.getElementById('global-modal-content');
     if (!modal || !modalContent) return;
@@ -1253,13 +1256,13 @@ class ClassroomMatrix {
     modalContent.innerHTML = `
       <div class="p-5 sm:p-6 max-h-[85vh] overflow-y-auto ${isOAA ? 'bg-[#1e0a15] text-white' : ''}">
         <div class="flex items-center space-x-3 mb-4">
-          ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">⏰</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
+          ${isOAA ? '<span class="text-2xl p-2 rounded-2xl bg-black/40 border border-amber-500/50">⏰</span>' : '<div class="sanrio-twinstars-badge !w-11 !h-11"></div>'}
           <div>
-            <h3 class="text-xl font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
-              ⏰ 課堂事後快速補記助手
+            <h3 class="text-lg sm:text-xl font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-1.5">
+              ⏰ 事後快速補記
               ${isOAA ? '' : '<span class="kitty-bow"></span>'}
             </h3>
-            <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'}">上課當下無法分心操作？放學或下課後，在此一次快速回憶補登學生事件與點數！</p>
+            <p class="text-xs ${isOAA ? 'text-amber-100/80' : 'text-slate-600'}">選時間 ➔ 勾學生 ➔ 選常用理由或直接調分補記</p>
           </div>
         </div>
 
@@ -1273,30 +1276,25 @@ class ClassroomMatrix {
             <div>
               <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">課堂節次</label>
               <select id="retro-period" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
-                <option value="0">早自習 / 晨讀</option>
-                <option value="1">第 1 節</option>
-                <option value="2" selected>第 2 節</option>
-                <option value="3">第 3 節</option>
-                <option value="4">第 4 節</option>
-                <option value="lunch">午休時間</option>
-                <option value="5">第 5 節</option>
-                <option value="6">第 6 節</option>
-                <option value="7">第 7 節</option>
-                <option value="clean">整潔活動</option>
-                <option value="8">第 8 節 / 放學</option>
+                ${window.cqBuildPeriodOptionsHtml ? window.cqBuildPeriodOptionsHtml(defaultPeriod) : '<option value="1">第 1 節</option>'}
               </select>
             </div>
           </div>
 
-          <!-- Who (Select multiple students) -->
+          <!-- Who (Searchable multiselect students) -->
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">選擇學生 (可多選)</label>
-              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-pink-600'} font-bold">點選學生頭像或姓名</span>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+              <label class="text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">選擇學生 (可多選)</label>
+              <div class="flex items-center gap-1.5">
+                <input type="text" placeholder="快搜座號/姓名..." oninput="document.querySelectorAll('#retro-modal-seats label').forEach(el => { const h = el.getAttribute('data-search') || ''; const q = this.value.trim().toLowerCase(); el.style.display = (!q || h.includes(q)) ? '' : 'none'; })"
+                  class="w-28 rounded-lg px-2 py-1 text-[11px] font-bold border ${isOAA ? 'border-amber-500/40 bg-[#12050c] text-white placeholder-slate-400' : 'border-pink-200 bg-white text-slate-800'} focus:outline-none">
+                <button type="button" onclick="document.querySelectorAll('#retro-modal-seats label').forEach(l => { if (l.style.display !== 'none') l.querySelector('input').checked = true; })" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer ${isOAA ? 'bg-amber-600/30 text-amber-200' : 'bg-pink-100 text-pink-800'}">全選</button>
+                <button type="button" onclick="document.querySelectorAll('input[name=retro_seats]').forEach(i => i.checked = false)" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer ${isOAA ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}">清空</button>
+              </div>
             </div>
-            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
+            <div id="retro-modal-seats" class="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
               ${students.map(s => `
-                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-2 rounded-xl border min-h-[38px] ${isOAA ? 'border-amber-500/25 bg-[#1b0812] hover:bg-rose-950/80' : 'border-pink-100 bg-white hover:bg-pink-100'} transition">
+                <label data-search="${(`${s.seatNo} ${String(s.seatNo).padStart(2, '0')} ${s.name}`).toLowerCase()}" class="flex items-center space-x-1.5 text-xs cursor-pointer p-2 rounded-xl border min-h-[38px] ${isOAA ? 'border-amber-500/25 bg-[#1b0812] hover:bg-rose-950/80' : 'border-pink-100 bg-white hover:bg-pink-100'} transition">
                   <input type="checkbox" name="retro_seats" value="${s.seatNo}" class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 shrink-0">
                   <span class="font-black truncate ${isOAA ? 'text-white' : 'text-slate-900'}">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
                 </label>
@@ -1304,27 +1302,39 @@ class ClassroomMatrix {
             </div>
           </div>
 
-          <!-- What (Tag Selection) -->
-          <div>
-            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">選擇行為標籤</label>
-            <select id="retro-tag" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
-              ${tags.map(t => `
-                <option value="${t.id}" data-name="${t.name}" data-delta="${t.delta}" data-category="${t.category}" data-severity="${t.severity}">
-                  ${t.name} (${t.delta > 0 ? '+' : ''}${t.delta} 分)
-                </option>
-              `).join('')}
-            </select>
+          <!-- What (Curated Tag + Direct Score Adjustment) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">常用理由（或自訂）</label>
+              <select id="retro-tag" onchange="const opt = this.options[this.selectedIndex]; const d = opt.getAttribute('data-delta'); if (d !== null && d !== '') document.getElementById('retro-modal-delta').value = d;" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-bold">
+                ${curatedTags.map(t => `
+                  <option value="${t.id}" data-name="${t.name}" data-delta="${t.delta}" data-category="${t.category}" data-severity="${t.severity}">
+                    ${t.name} (${t.delta > 0 ? '+' : ''}${t.delta} 分)
+                  </option>
+                `).join('')}
+                <option value="__custom__" data-name="自訂事後補記" data-delta="" data-category="social" data-severity="info">✏️ 自訂理由（以下方備註為主）</option>
+                ${allTags.filter(t => !curatedTags.some(c => c.id === t.id)).map(t => `
+                  <option value="${t.id}" data-name="${t.name}" data-delta="${t.delta}" data-category="${t.category}" data-severity="${t.severity}">
+                    [更多] ${t.name} (${t.delta > 0 ? '+' : ''}${t.delta} 分)
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">加減分值</label>
+              <input type="number" id="retro-modal-delta" value="${defaultDelta}" class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-mono font-black text-center">
+            </div>
           </div>
 
           <!-- Detail Note -->
           <div>
-            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">詳細事證或回憶備忘 (選填)</label>
-            <input type="text" id="retro-note" placeholder="如：第2節解出三角幾何難題 / 吵鬧制止後配合良好..." class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-pink-500">
+            <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">詳細事證或自訂理由 (選填)</label>
+            <input type="text" id="retro-note" placeholder="如：第2節解出三角幾何難題 / 作業補齊..." class="w-full border ${isOAA ? 'border-amber-500/50 bg-[#12050c] text-white' : 'border-pink-300 bg-white text-slate-900'} rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-pink-500">
           </div>
 
           <div class="flex items-center justify-end space-x-3 pt-2">
             <button type="button" onclick="window.appState.closeModal()" class="px-4 py-2 text-xs font-bold ${isOAA ? 'text-slate-300 hover:text-white' : 'text-slate-600'}">取消</button>
-            <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl shadow-md flex items-center gap-1.5">
+            <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer">
               <i data-lucide="check" class="w-4 h-4"></i> 快速批次補記
             </button>
           </div>
@@ -1351,11 +1361,17 @@ class ClassroomMatrix {
     const note = document.getElementById('retro-note').value.trim();
     const tagSelect = document.getElementById('retro-tag');
     const selectedOpt = tagSelect.options[tagSelect.selectedIndex];
-    
-    const tagName = selectedOpt.getAttribute('data-name');
-    const delta = parseInt(selectedOpt.getAttribute('data-delta'), 10) || 0;
-    const category = selectedOpt.getAttribute('data-category') || 'discipline';
-    const severity = selectedOpt.getAttribute('data-severity') || 'info';
+    const deltaInput = document.getElementById('retro-modal-delta');
+
+    let tagName = selectedOpt.getAttribute('data-name') || '自訂事後補記';
+    const rawDelta = deltaInput ? parseInt(deltaInput.value, 10) : parseInt(selectedOpt.getAttribute('data-delta'), 10);
+    const delta = Number.isFinite(rawDelta) ? rawDelta : 0;
+    const category = selectedOpt.getAttribute('data-category') || (delta >= 0 ? 'social' : 'discipline');
+    const severity = delta > 0 ? 'positive' : delta < 0 ? 'warning' : 'neutral';
+
+    if (tagSelect.value === '__custom__' && note) {
+      tagName = note.length > 14 ? note.slice(0, 14) + '…' : note;
+    }
 
     seats.forEach(seatNo => {
       this.store.addEvent({
@@ -1363,7 +1379,7 @@ class ClassroomMatrix {
         seatNo,
         date,
         period,
-        tagId: tagSelect.value,
+        tagId: tagSelect.value === '__custom__' ? 'custom_retro' : tagSelect.value,
         tagName,
         category,
         delta,
@@ -1378,9 +1394,16 @@ class ClassroomMatrix {
       window.appState.playWarning();
     }
 
-    window.appState.showToast(`🎉 已成功補記 ${seats.length} 位同學在 ${date} 第 ${period} 節之記錄！`, 'success');
+    const periodLabel = window.cqFormatPeriodLabel ? window.cqFormatPeriodLabel(period) : `第 ${period} 節`;
+    window.appState.showToast(`🎉 已成功補記 ${seats.length} 位同學在 ${date} ${periodLabel}之記錄 (${delta > 0 ? '+' : ''}${delta}分)！`, 'success');
     window.appState.closeModal();
     this.render('classroom-matrix-view', classId);
+    if (window.eventsLogView && document.getElementById('events-log-view')) {
+      window.eventsLogView.render('events-log-view');
+    }
+    if (window.retroLogView && document.getElementById('matrix-retro-host')) {
+      window.retroLogView.render('matrix-retro-host', classId);
+    }
   }
 
   openRandomPickerModal(classId) {
