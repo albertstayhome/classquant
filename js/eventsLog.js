@@ -174,13 +174,13 @@ class EventsLogView {
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center space-x-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button onclick="eventsLogView.openAddEventModal('${this.filterClass !== 'all' ? this.filterClass : '801'}')" 
-              class="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
-              <i data-lucide="clock" class="w-4 h-4"></i> ⏰ 事後快速補記
+              class="min-h-[38px] px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs sm:text-sm font-black shadow-md transition inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+              <i data-lucide="clock" class="w-4 h-4 shrink-0"></i> <span>⏰ 事後快速補記</span>
             </button>
-            <button onclick="eventsLogView.exportFilteredSummary()" class="px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-white hover:bg-pink-50 text-slate-800 border border-pink-300'} text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
-              <i data-lucide="copy" class="w-4 h-4 text-pink-500"></i> 複製搜尋結果
+            <button onclick="eventsLogView.exportFilteredSummary()" class="min-h-[38px] px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-white hover:bg-pink-50 text-slate-800 border border-pink-300'} text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 whitespace-nowrap transition shadow-sm cursor-pointer">
+              <i data-lucide="copy" class="w-4 h-4 shrink-0 text-pink-500"></i> <span>複製搜尋結果</span>
             </button>
           </div>
         </div>
@@ -327,9 +327,9 @@ class EventsLogView {
               ${isOAA ? '🏛️' : '📅'}
             </div>
             
-            <div class="mb-2 flex items-center gap-2">
+            <div class="mb-2 flex flex-wrap items-center gap-2">
               <h3 class="text-sm sm:text-base font-black ${isOAA ? 'text-amber-300' : 'text-pink-700'} font-mono">${date}</h3>
-              <span class="text-[11px] px-2 py-0.5 rounded-full ${isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-pink-100 text-pink-800'} font-bold">當日共 ${grouped[date].length} 筆記事</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap ${isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-pink-100 text-pink-800'} font-bold">當日共 ${grouped[date].length} 筆記事</span>
             </div>
 
             <!-- Events Cards on this Date -->
@@ -342,19 +342,19 @@ class EventsLogView {
                 const isRetro = (evt.note || '').includes('事後補記');
 
                 return `
-                  <div class="p-3.5 rounded-2xl border-2 ${isPos ? 'border-emerald-200 bg-emerald-50/40' : isZero ? 'border-slate-200 bg-slate-50/40' : 'border-rose-200 bg-rose-50/40'} shadow-sm relative">
-                    <div class="flex items-center justify-between mb-1.5">
-                      <div class="flex items-center space-x-1.5">
-                        <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-white border border-pink-200 text-slate-800">
+                  <div class="p-3.5 rounded-2xl border-2 ${isPos ? 'border-emerald-200 bg-emerald-50/40' : isZero ? 'border-slate-200 bg-slate-50/40' : 'border-rose-200 bg-rose-50/40'} shadow-sm relative min-w-0">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                      <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-white border border-pink-200 text-slate-800 whitespace-nowrap">
                           ${clsInfo ? clsInfo.name : evt.classId}
                         </span>
                         <span class="font-black text-slate-900 text-sm">
                           ${String(evt.seatNo).padStart(2, '0')} 號 ${student ? student.name : '學生'}
                         </span>
-                        ${isRetro ? '<span class="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 font-bold border border-amber-300">⏰ 事後補記</span>' : ''}
+                        ${isRetro ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold border border-amber-300 whitespace-nowrap">⏰ 事後補記</span>' : ''}
                       </div>
 
-                      <span class="font-black px-2.5 py-0.5 rounded-lg text-xs border ${isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge'}">
+                      <span class="font-black px-2.5 py-0.5 rounded-lg text-xs border whitespace-nowrap shrink-0 ${isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge'}">
                         ${evt.delta > 0 ? '+' : ''}${evt.delta}
                       </span>
                     </div>
@@ -400,22 +400,22 @@ class EventsLogView {
       <div>
         <!-- Student Multiselect Chips -->
         <div class="mb-5 p-3.5 rounded-2xl bg-pink-50 border border-pink-200">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-              <i data-lucide="user-check" class="w-4 h-4 text-pink-600"></i>
-              勾選 2 位以上學生進行交叉事件查詢 (例如同儕衝突雙方、同組合作名單)：
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5 min-w-0">
+              <i data-lucide="user-check" class="w-4 h-4 shrink-0 text-pink-600"></i>
+              <span>勾選 2 位以上學生進行交叉事件查詢 (例如同儕衝突雙方、同組合作名單)：</span>
             </span>
-            <span class="text-xs text-pink-600 font-bold">已選 ${selectedArray.length} 人</span>
+            <span class="text-xs text-pink-600 font-bold whitespace-nowrap shrink-0">已選 ${selectedArray.length} 人</span>
           </div>
 
-          <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1.5">
             ${students.map(s => {
               const isChecked = this.crossSelectedSeats.has(s.seatNo);
               return `
                 <button onclick="eventsLogView.toggleCrossSeat(${s.seatNo})" 
-                  class="px-2 py-1.5 rounded-xl border text-xs font-bold transition text-left truncate flex items-center justify-between ${isChecked ? 'bg-pink-600 text-white border-pink-700 shadow-sm' : 'bg-white text-slate-800 border-pink-200 hover:bg-pink-100'}">
-                  <span>${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
-                  ${isChecked ? '✓' : ''}
+                  class="min-h-[36px] min-w-0 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition text-left flex items-center justify-between gap-1 cursor-pointer ${isChecked ? 'bg-pink-600 text-white border-pink-700 shadow-sm' : 'bg-white text-slate-800 border-pink-200 hover:bg-pink-100'}">
+                  <span class="truncate">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
+                  ${isChecked ? '<span class="shrink-0">✓</span>' : ''}
                 </button>
               `;
             }).join('')}

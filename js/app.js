@@ -1849,12 +1849,12 @@ class AppState {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
       if (themeName === 'oaa') {
-        btn.innerHTML = '<span class="text-xs">🏛️</span><span class="text-xs font-black text-amber-200 ml-0.5 hidden md:inline">高度育成 OAA</span>';
-        btn.className = "px-2.5 py-1.5 rounded-xl border border-amber-500 bg-rose-950/80 hover:bg-rose-900 text-amber-200 transition active:scale-95 flex items-center gap-1 shrink-0 shadow-sm cursor-pointer";
+        btn.innerHTML = '<span class="text-xs">🏛️</span><span class="text-xs font-black text-amber-200 ml-0.5 hidden xl:inline whitespace-nowrap">高度育成 OAA</span>';
+        btn.className = "min-w-[38px] min-h-[38px] px-2.5 py-1.5 rounded-xl border border-amber-500 bg-rose-950/80 hover:bg-rose-900 text-amber-200 transition active:scale-95 flex items-center justify-center gap-1 shrink-0 shadow-sm cursor-pointer";
         btn.title = "目前為《實力至上主義教室》高度育成 OAA 主題，點擊切換為三麗鷗主題";
       } else {
-        btn.innerHTML = '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden md:inline">三麗鷗</span>';
-        btn.className = "px-2.5 py-1.5 rounded-xl border border-pink-300 hover:bg-pink-100 transition active:scale-95 flex items-center gap-1 shrink-0 cursor-pointer";
+        btn.innerHTML = '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden xl:inline whitespace-nowrap">三麗鷗</span>';
+        btn.className = "min-w-[38px] min-h-[38px] px-2.5 py-1.5 rounded-xl border border-pink-300 hover:bg-pink-100 transition active:scale-95 flex items-center justify-center gap-1 shrink-0 cursor-pointer";
         btn.title = "目前為三麗鷗主題，點擊切換為《實力至上主義教室》OAA 模式";
       }
       if (window.lucide) window.lucide.createIcons();

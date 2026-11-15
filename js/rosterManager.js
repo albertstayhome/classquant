@@ -36,150 +36,152 @@ class RosterManager {
     const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
 
     container.innerHTML = `
-      <div class="glass-card rounded-3xl p-5 sm:p-6 mb-6 border shadow-sm ${
+      <div class="glass-card rounded-3xl p-3.5 sm:p-6 mb-6 border shadow-sm ${
         isOAA 
           ? 'bg-gradient-to-br from-[#240e1b] via-[#2f1122] to-[#1a0813] border-amber-500/40 text-white' 
           : 'border-pink-200 bg-gradient-to-r from-pink-50/70 via-white to-sky-50/70'
       }">
         <!-- Header -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div class="flex items-center space-x-3">
-            ${isOAA ? '<span class="text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12"></div>'}
-            <div>
-              <h2 class="text-xl sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+            ${isOAA ? '<span class="text-2xl sm:text-3xl p-2 rounded-2xl bg-black/40 border border-amber-500/50 shadow-inner shrink-0">🏛️</span>' : '<div class="sanrio-twinstars-badge !w-12 !h-12 shrink-0"></div>'}
+            <div class="min-w-0 flex-1">
+              <h2 class="text-lg sm:text-2xl font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex flex-wrap items-center gap-2">
                 <span>${isOAA ? '👥 高度育成 • 生徒名簿與班級編成中心' : '👥 班級與學生名單管理中心'}</span>
-                ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
+                ${isOAA ? '<span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-amber-300 border border-amber-500/50 whitespace-nowrap shrink-0">S-SYSTEM</span>' : '<span class="kitty-bow"></span>'}
               </h2>
-              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium">
+              <p class="text-xs sm:text-sm ${isOAA ? 'text-amber-200/80' : 'text-slate-600'} font-medium mt-0.5">
                 ${isOAA ? '高度育成高等學校 生徒性別登錄、座號編成與日常行為紀錄協定' : '支援「1秒批次貼上全班名單」、自由新增/編輯班級、直接日常行為記點'}
               </p>
             </div>
           </div>
 
-          <div class="flex items-center space-x-2">
-            <button onclick="appState.switchTab('matrix')" class="px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1e0a15] border border-amber-500/40 hover:bg-[#2d0f20] text-amber-200' : 'bg-white border border-pink-300 hover:bg-pink-50 text-pink-700'} text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-              <i data-lucide="layout-grid" class="w-4 h-4 ${isOAA ? 'text-amber-400' : 'text-pink-500'}"></i> ${isOAA ? '🏫 前往 OAA 實力點記板' : '🏫 前往課堂點記板'}
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="appState.switchTab('matrix')" class="min-h-[38px] px-3.5 py-2 rounded-2xl ${isOAA ? 'bg-[#1e0a15] border border-amber-500/40 hover:bg-[#2d0f20] text-amber-200' : 'bg-white border border-pink-300 hover:bg-pink-50 text-pink-700'} text-xs sm:text-sm font-black shadow-sm transition inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+              <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 ${isOAA ? 'text-amber-400' : 'text-pink-500'}"></i> <span>${isOAA ? '🏫 前往 OAA 實力點記板' : '🏫 前往課堂點記板'}</span>
             </button>
           </div>
         </div>
 
         <!-- Class Quick Tabs / Switcher -->
-        <div class="mb-6 flex flex-wrap items-center gap-2">
+        <div class="mb-5 sm:mb-6 flex flex-wrap items-center gap-2">
           ${Object.values(classes).map(c => `
-            <button onclick="rosterManager.switchClass('${c.id}')" class="px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition cursor-pointer flex items-center gap-2 border ${
+            <button onclick="rosterManager.switchClass('${c.id}')" class="min-h-[38px] px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition cursor-pointer inline-flex items-center gap-2 border max-w-full ${
               c.id === this.currentClassId 
                 ? (isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white border-amber-400 shadow-md ring-2 ring-amber-500/50' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white border-pink-400 shadow-md ring-2 ring-pink-300/50')
                 : (isOAA ? 'bg-[#1f0b16] border-amber-500/30 text-amber-100 hover:bg-[#2d1020]' : 'bg-white/80 border-pink-200 text-slate-700 hover:bg-pink-50')
             }">
-              <span>${this.store.getClassQualifiedName ? this.store.getClassQualifiedName(c.id) : c.name}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${c.id === this.currentClassId ? 'bg-black/20 text-white' : 'bg-pink-100 text-pink-700'}">${c.studentCount || (c.students ? c.students.length : 0)}人</span>
+              <span class="truncate">${this.store.getClassQualifiedName ? this.store.getClassQualifiedName(c.id) : c.name}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full whitespace-nowrap shrink-0 ${c.id === this.currentClassId ? 'bg-black/20 text-white' : 'bg-pink-100 text-pink-700'}">${c.studentCount || (c.students ? c.students.length : 0)}人</span>
             </button>
           `).join('')}
 
-          <button onclick="rosterManager.openNewClassModal()" class="px-3.5 py-2 rounded-2xl ${isOAA ? 'border-amber-500/40 text-amber-300 hover:bg-amber-950/30' : 'border-dashed border-pink-300 text-pink-700 hover:bg-pink-50'} border text-xs sm:text-sm font-black transition flex items-center gap-1 cursor-pointer">
-            <i data-lucide="plus" class="w-4 h-4"></i> 新增班級
+          <button onclick="rosterManager.openNewClassModal()" class="min-h-[38px] px-3.5 py-2 rounded-2xl ${isOAA ? 'border-amber-500/40 text-amber-300 hover:bg-amber-950/30' : 'border-dashed border-pink-300 text-pink-700 hover:bg-pink-50'} border text-xs sm:text-sm font-black transition inline-flex items-center gap-1 whitespace-nowrap cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i> <span>新增班級</span>
           </button>
         </div>
 
         <!-- Class Settings Bar -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-4 border shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-3.5 sm:p-4 border shadow-sm min-w-0">
             <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-600'} mb-1.5">當前班級名稱：</label>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center gap-2 min-w-0">
               <input type="text" id="roster-class-name-input" value="${currentClass ? currentClass.name : ''}" 
-                class="border ${isOAA ? 'border-amber-500/40 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'} rounded-xl px-3 py-1.5 text-sm font-black flex-1 focus:outline-none">
-              <button onclick="rosterManager.saveClassName('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-pink-500 hover:bg-pink-600 text-white'} text-xs font-black transition cursor-pointer">
+                class="border ${isOAA ? 'border-amber-500/40 bg-[#12050c] text-white focus:border-amber-400' : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'} rounded-xl px-3 py-1.5 text-sm font-black flex-1 w-full min-w-0 focus:outline-none">
+              <button onclick="rosterManager.saveClassName('${this.currentClassId}')" class="min-h-[36px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-pink-500 hover:bg-pink-600 text-white'} text-xs font-black transition cursor-pointer whitespace-nowrap shrink-0">
                 儲存
               </button>
             </div>
           </div>
 
-          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-4 border shadow-sm flex items-center justify-between gap-2">
-            <div>
+          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-3.5 sm:p-4 border shadow-sm flex flex-wrap items-center justify-between gap-2.5 min-w-0">
+            <div class="min-w-0 flex-1">
               <div class="text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-600'} mb-1">班級型態：</div>
               <div class="text-sm font-black ${isOAA ? 'text-white' : 'text-slate-900'}">${currentClass && currentClass.type === 'homeroom' ? '🏫 導師班 (高頻日常紀錄)' : currentClass ? '📚 任教專科班' : '尚未建立班級'}</div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
               ${currentClass ? `
-                <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="px-2.5 py-1.5 rounded-xl ${isOAA ? 'bg-[#280e1e] border-amber-500/40 text-amber-300 hover:bg-[#38142b]' : 'bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200'} text-xs font-black transition cursor-pointer">
+                <button onclick="rosterManager.openEditClassModal('${this.currentClassId}')" class="min-h-[36px] px-2.5 py-1.5 rounded-xl ${isOAA ? 'bg-[#280e1e] border border-amber-500/40 text-amber-300 hover:bg-[#38142b]' : 'bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200'} text-xs font-black transition cursor-pointer whitespace-nowrap">
                   變更型態
                 </button>
-                <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="px-2.5 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/80 border-rose-500/40 text-rose-300 hover:bg-rose-900' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'} text-xs font-black transition cursor-pointer" title="刪除此班級">
+                <button onclick="rosterManager.deleteClass('${this.currentClassId}')" class="min-h-[36px] px-2.5 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:bg-rose-900' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'} text-xs font-black transition cursor-pointer whitespace-nowrap" title="刪除此班級">
                   🗑️ 刪除
                 </button>
               ` : ''}
             </div>
           </div>
 
-          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-4 border shadow-sm flex items-center justify-between">
-            <div>
+          <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-3.5 sm:p-4 border shadow-sm flex flex-wrap items-center justify-between gap-2.5 min-w-0">
+            <div class="min-w-0">
               <div class="text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-600'} mb-1">男女生性別統計：</div>
-              <div class="text-sm font-black flex items-center space-x-2">
-                <span class="text-blue-500">👦 男 ${maleCount}</span>
-                <span class="text-pink-500">👧 女 ${femaleCount}</span>
-                <span class="text-xs ${isOAA ? 'text-amber-300/70' : 'text-slate-600'} font-normal">(共 ${students.length} 人)</span>
+              <div class="text-sm font-black flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span class="text-blue-500 whitespace-nowrap">👦 男 ${maleCount}</span>
+                <span class="text-pink-500 whitespace-nowrap">👧 女 ${femaleCount}</span>
+                <span class="text-xs ${isOAA ? 'text-amber-300/70' : 'text-slate-600'} font-normal whitespace-nowrap">(共 ${students.length} 人)</span>
               </div>
             </div>
-            <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="px-3.5 py-2 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white border border-amber-400 hover:from-amber-500 hover:to-rose-600' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-md'} text-xs font-black transition flex items-center gap-1 cursor-pointer">
-              <i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i> 批次貼上名冊
+            <button id="roster-paste-btn" onclick="rosterManager.openBatchPasteModal('${this.currentClassId}')" class="min-h-[36px] px-3.5 py-2 rounded-xl ${isOAA ? 'bg-gradient-to-r from-amber-600 to-rose-700 text-white border border-amber-400 hover:from-amber-500 hover:to-rose-600' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-md'} text-xs font-black transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 ml-auto cursor-pointer">
+              <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 shrink-0"></i> <span>批次貼上名冊</span>
             </button>
           </div>
         </div>
 
         <!-- Gender Boundary & Quick Tools -->
-        <div class="${isOAA ? 'bg-[#180812] border-amber-500/30' : 'bg-white/80 border-pink-200'} rounded-2xl p-4 mb-6 border flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+        <div class="${isOAA ? 'bg-[#180812] border-amber-500/30' : 'bg-white/80 border-pink-200'} rounded-2xl p-3.5 sm:p-4 mb-5 sm:mb-6 border flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 text-xs">
+          <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
             <span class="font-black ${isOAA ? 'text-amber-200' : 'text-slate-700'}">⚡ 智慧男女劃分：</span>
             <span class="${isOAA ? 'text-slate-400' : 'text-slate-600'}">1 ~ </span>
             <input type="number" id="roster-gender-split-input" min="0" max="${students.length}" value="${defaultSplit}" 
               class="w-14 text-center border ${isOAA ? 'border-amber-500/40 bg-[#12050c] text-white' : 'border-pink-200 bg-white text-slate-800'} rounded-lg py-1 text-xs font-bold font-mono">
             <span class="${isOAA ? 'text-slate-400' : 'text-slate-600'}">號為男生，其餘為女生</span>
             <button onclick="rosterManager.applyGenderSplit('${this.currentClassId}')" 
-              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-pink-500 hover:bg-pink-600 text-white'} font-black transition cursor-pointer">
+              class="min-h-[34px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-pink-500 hover:bg-pink-600 text-white'} font-black transition cursor-pointer whitespace-nowrap">
               一鍵套用
             </button>
           </div>
 
-          <div class="flex items-center space-x-2">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <button onclick="rosterManager.resetHalfGender('${this.currentClassId}')" 
-              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-[#280e1e] border-amber-500/40 text-amber-200 hover:bg-[#38142b]' : 'bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200'} text-xs font-bold transition cursor-pointer" title="前半段為男、後半段為女">
+              class="min-h-[34px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-[#280e1e] border border-amber-500/40 text-amber-200 hover:bg-[#38142b]' : 'bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200'} text-xs font-bold transition cursor-pointer whitespace-nowrap" title="前半段為男、後半段為女">
               前後半男女
             </button>
             <button onclick="rosterManager.applyAllGender('${this.currentClassId}', 'M')" 
-              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-blue-950/90 hover:bg-blue-900 text-cyan-300 border border-cyan-500/60' : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300'} text-xs font-black transition cursor-pointer" title="全班全設為男生">
+              class="min-h-[34px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-blue-950/90 hover:bg-blue-900 text-cyan-300 border border-cyan-500/60' : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300'} text-xs font-black transition cursor-pointer whitespace-nowrap" title="全班全設為男生">
               全男
             </button>
             <button onclick="rosterManager.applyAllGender('${this.currentClassId}', 'F')" 
-              class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/90 hover:bg-rose-900 text-pink-300 border border-pink-500/60' : 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300'} text-xs font-black transition cursor-pointer" title="全班全設為女生">
+              class="min-h-[34px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-rose-950/90 hover:bg-rose-900 text-pink-300 border border-pink-500/60' : 'bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300'} text-xs font-black transition cursor-pointer whitespace-nowrap" title="全班全設為女生">
               全女
             </button>
           </div>
         </div>
 
         <!-- Student Roster Grid -->
-        <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-5 border shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-black ${isOAA ? 'text-white' : 'text-slate-800'} flex items-center gap-2">
-              <span>${currentClass ? currentClass.name : ''} 學生名冊清單</span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${isOAA ? 'bg-rose-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}">共 ${students.length} 位學生</span>
-            </h3>
-            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="min-h-[36px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'} text-xs font-black transition flex items-center gap-1 cursor-pointer">
-              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
+        <div class="${isOAA ? 'bg-[#1b0a14] border-amber-500/35' : 'bg-white border-pink-200'} rounded-2xl p-3.5 sm:p-5 border shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4">
+            <div class="flex flex-wrap items-center gap-2 min-w-0">
+              <h3 class="text-sm sm:text-base font-black ${isOAA ? 'text-white' : 'text-slate-800'} leading-snug">
+                ${currentClass ? (this.store.getClassQualifiedName ? this.store.getClassQualifiedName(currentClass.id) : currentClass.name) : ''} 學生名冊清單
+              </h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0 ${isOAA ? 'bg-rose-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}">共 ${students.length} 位學生</span>
+            </div>
+            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="min-h-[38px] px-3.5 py-1.5 rounded-xl ${isOAA ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'} text-xs font-black transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ml-auto cursor-pointer">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5 shrink-0"></i> <span>新增一位學生</span>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:max-h-[580px] md:overflow-y-auto pr-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:max-h-[580px] md:overflow-y-auto md:pr-1">
             ${students.map(s => {
               const gender = s.gender || (s.seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F');
               const studentEvents = classEvents.filter(e => e.seatNo === s.seatNo);
               const pts = studentEvents.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
               return `
-              <div class="p-2.5 sm:p-3 rounded-2xl border ${
+              <div class="roster-student-card p-3 rounded-2xl border min-w-0 overflow-hidden ${
                 isOAA 
                   ? 'border-amber-500/30 bg-[#240e1b] hover:bg-[#301224] text-white' 
                   : 'border-pink-100 bg-pink-50/40 hover:bg-pink-50 text-slate-900'
-              } flex items-center justify-between transition shadow-sm gap-1.5">
-                <div class="flex items-center space-x-1.5 min-w-0 flex-1">
+              } flex flex-col gap-2 transition shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 w-full">
                   <span class="w-7 h-7 rounded-xl ${
                     isOAA 
                       ? 'bg-[#12050d] text-amber-300 border border-amber-500/50' 
@@ -189,41 +191,44 @@ class RosterManager {
                   </span>
                   <input type="text" value="${s.name}" 
                     onchange="rosterManager.updateStudentName('${this.currentClassId}', ${s.seatNo}, this.value)"
-                    class="border ${
+                    class="roster-student-name-input border ${
                       isOAA 
                         ? 'border-amber-500/40 bg-[#14060e] text-white focus:border-amber-400' 
                         : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'
-                    } rounded-lg px-2 py-1 text-xs sm:text-sm font-black focus:outline-none flex-1 min-w-[68px]">
-                  <span class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md font-mono font-black shrink-0 ${
+                    } rounded-lg px-2.5 py-1.5 text-sm font-black focus:outline-none flex-1 w-full min-w-0">
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full">
+                  <span class="roster-student-points-badge text-xs px-2 py-1 rounded-lg font-mono font-black whitespace-nowrap shrink-0 ${
                     pts > 0 
                       ? (isOAA ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-800')
                       : pts < 0 
                       ? (isOAA ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : 'bg-rose-100 text-rose-800')
-                      : (isOAA ? 'bg-slate-800/80 text-slate-400' : 'bg-slate-100 text-slate-500')
+                      : (isOAA ? 'bg-slate-800/80 text-slate-400 border border-slate-700/50' : 'bg-slate-100 text-slate-600 border border-slate-200')
                   }" title="累計平時加扣分">
                     ${pts > 0 ? '+' + pts : pts}分
                   </span>
-                </div>
-                
-                <div class="flex items-center space-x-1 shrink-0">
-                  <button type="button" onclick="rosterManager.openQuickRecordModal('${this.currentClassId}', ${s.seatNo})" 
-                    class="min-h-[36px] px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-0.5 border ${
+
+                  <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+                    <button type="button" onclick="rosterManager.openQuickRecordModal('${this.currentClassId}', ${s.seatNo})" 
+                      class="roster-quick-record-btn min-h-[36px] px-2.5 py-1 rounded-xl text-xs font-black transition cursor-pointer inline-flex items-center gap-1 whitespace-nowrap border ${
+                        isOAA
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
+                          : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                      }" title="直接為此學生進行日常行為紀錄與加扣分">
+                      <span>⚡ 記點</span>
+                    </button>
+                    <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="roster-gender-btn min-w-[36px] min-h-[36px] px-2 py-1 rounded-xl text-xs font-black transition cursor-pointer inline-flex items-center justify-center border ${
                       isOAA
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
-                        : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-                    }" title="直接為此學生進行日常行為紀錄與加扣分">
-                    <span>⚡ 記點</span>
-                  </button>
-                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="min-h-[36px] px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${
-                    isOAA
-                      ? (gender === 'F' ? 'bg-rose-950 text-pink-300 border-pink-500/60 hover:bg-rose-900' : 'bg-blue-950 text-cyan-300 border-cyan-500/60 hover:bg-blue-900')
-                      : (gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200')
-                  }" title="點擊切換性別 (男 / 女)">
-                    ${gender === 'F' ? '👧' : '👦'}
-                  </button>
-                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="min-h-[36px] min-w-[32px] p-1.5 flex items-center justify-center ${isOAA ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-950/50' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'} rounded-lg transition cursor-pointer" title="刪除此學生">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
+                        ? (gender === 'F' ? 'bg-rose-950 text-pink-300 border-pink-500/60 hover:bg-rose-900' : 'bg-blue-950 text-cyan-300 border-cyan-500/60 hover:bg-blue-900')
+                        : (gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200')
+                    }" title="點擊切換性別 (男 / 女)">
+                      ${gender === 'F' ? '👧' : '👦'}
+                    </button>
+                    <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="roster-delete-btn min-h-[36px] min-w-[36px] p-1.5 inline-flex items-center justify-center ${isOAA ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-950/50' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'} rounded-xl transition cursor-pointer" title="刪除此學生">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             `;}).join('')}

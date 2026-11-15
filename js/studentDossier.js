@@ -741,12 +741,12 @@ class StudentDossierView {
         </div>
 
         <div class="glass-card rounded-3xl p-5 sm:p-6 border border-pink-200 shadow-sm bg-white">
-          <div class="flex items-center justify-between mb-1">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
             <h3 class="text-sm sm:text-base font-black flex items-center gap-2 text-slate-800">
-              <span class="kitty-bow"></span>
-              平時成績時序走勢 (EWMA 平滑趨勢線)
+              <span class="kitty-bow shrink-0"></span>
+              <span>平時成績時序走勢 (EWMA 平滑趨勢線)</span>
             </h3>
-            <span class="text-xs font-black ${profile.scoreSlope > 0 ? 'text-emerald-700' : profile.scoreSlope < 0 ? 'text-rose-700' : 'text-slate-500'}">
+            <span class="text-xs font-black whitespace-nowrap shrink-0 ${profile.scoreSlope > 0 ? 'text-emerald-700' : profile.scoreSlope < 0 ? 'text-rose-700' : 'text-slate-500'}">
               近期斜率: ${profile.scoreSlope > 0 ? '+' : ''}${profile.scoreSlope}
             </span>
           </div>
@@ -840,19 +840,19 @@ class StudentDossierView {
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
-      <div class="rounded-2xl p-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
-        <div class="flex items-center space-x-3">
+      <div class="rounded-2xl p-3.5 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
+        <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
           <div class="bg-amber-50/95 px-2.5 py-1 rounded-xl border border-amber-400/75 shadow-sm shrink-0">
             <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-7 sm:h-8 object-contain">
           </div>
-          <div>
+          <div class="min-w-0 flex-1">
             <h2 class="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase">
               OAA 學生綜合能力評估卡
             </h2>
-            <div class="flex items-center gap-2 mt-0.5">
+            <div class="flex flex-wrap items-center gap-2 mt-0.5">
               <p class="text-[11px] text-amber-300/80">高度育成高等學校 官方學生檔案</p>
-              <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer" title="查看實力晉階與卡階規則">
-                <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+              <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看實力晉階與卡階規則">
+                <i data-lucide="sparkles" class="w-3 h-3 shrink-0 text-amber-400"></i>
                 <span>實力晉階規則</span>
               </button>
             </div>

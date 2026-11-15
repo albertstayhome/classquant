@@ -372,8 +372,8 @@
       <div class="max-w-7xl mx-auto space-y-2 md:space-y-0 md:flex md:items-center md:justify-between md:gap-3">
         
         <!-- Mobile Row 1 / Desktop Left: Mascots, Title, Version Badge & Mobile Collapse Button -->
-        <div class="flex items-center justify-between gap-1.5 min-w-0">
-          <div class="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1 overflow-hidden">
+        <div class="flex items-center justify-between gap-1.5 min-w-0 shrink-0">
+          <div class="flex items-center space-x-1 sm:space-x-2 min-w-0">
             <!-- Sanrio Mascots Box (Hidden in OAA Mode) -->
             <div id="header-mascots-box" class="flex items-center space-x-1 bg-white px-1.5 py-0.5 rounded-2xl shadow-sm border border-pink-200 shrink-0">
               <div class="kitty-cat-avatar cursor-pointer !w-7 !h-7 sm:!w-8 sm:!h-8 transition-transform active:scale-90" onclick="appState.handleMascotTap('kitty')" title="Hello Kitty"></div>
@@ -407,12 +407,12 @@
         </div>
 
         <!-- Mobile Row 2 / Desktop Right: Class Selector Dropdown & Quick Control Tools -->
-        <div class="flex items-center justify-between gap-1.5 sm:gap-2">
-          <!-- Class Select Dropdown (Spacious & Clean, Never Truncated) -->
-          <div class="flex items-center space-x-1.5 border border-pink-300 rounded-xl px-2.5 py-1.5 sm:py-1 shadow-inner bg-white min-w-[125px] flex-1 max-w-[260px] sm:max-w-none min-h-[38px]">
+        <div class="flex items-center justify-between gap-1.5 sm:gap-2 min-w-0 flex-1 md:justify-end">
+          <!-- Class Select Dropdown (Spacious & Clean, Never Pushes Right Tools Off-Screen) -->
+          <div class="flex items-center space-x-1.5 border border-pink-300 rounded-xl px-2.5 py-1.5 sm:py-1 shadow-inner bg-white min-w-0 flex-1 md:max-w-[220px] lg:max-w-[260px] min-h-[38px]">
             <i data-lucide="users" class="w-3.5 h-3.5 text-pink-500 shrink-0"></i>
             <select id="global-class-select" onchange="appState.handleManualClassChange(this.value)" 
-              class="bg-transparent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer w-full text-slate-800 truncate pr-1">
+              class="bg-transparent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer w-full min-w-0 text-slate-800 truncate pr-1">
               <!-- Populated via JS -->
             </select>
           </div>
@@ -431,9 +431,9 @@
 
             <!-- Onboarding Tour Button (Desktop & Tablet) -->
             <button id="onboarding-guide-btn" onclick="onboardingTour.start(0)" 
-              class="hidden sm:flex min-h-[38px] px-2.5 py-1 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 transition items-center gap-1 shadow-sm active:scale-95 shrink-0" title="開啟新手教學">
+              class="hidden sm:flex min-h-[38px] px-2.5 py-1 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 transition items-center gap-1 shadow-sm active:scale-95 shrink-0 cursor-pointer" title="開啟新手教學">
               <span class="text-xs font-black">🎓</span>
-              <span class="text-xs font-bold text-pink-700 hidden md:inline">新手教學</span>
+              <span class="text-xs font-bold text-pink-700 hidden lg:inline whitespace-nowrap">新手教學</span>
             </button>
 
             <!-- Sound Toggle Button -->
@@ -556,15 +556,15 @@
 
     <!-- Tab 3: Unified Students & Class Management Hub -->
     <div id="students-hub-shell" class="tab-panel hidden animate-fade-in-up">
-      <div id="students-hub-subnav" class="glass-card rounded-2xl p-1.5 mb-4 border shadow-sm flex flex-wrap items-center gap-1.5">
-        <button type="button" data-subtab="roster" onclick="appState.switchStudentsSubTab('roster')" class="subtab-pill-btn students-subtab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer">
-          <span>📝</span><span>班級與名單管理</span>
+      <div id="students-hub-subnav" class="glass-card rounded-2xl p-1.5 mb-4 border shadow-sm grid grid-cols-3 sm:flex sm:flex-wrap items-stretch sm:items-center gap-1.5">
+        <button type="button" data-subtab="roster" onclick="appState.switchStudentsSubTab('roster')" class="subtab-pill-btn students-subtab-btn px-1.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1 sm:gap-1.5 min-h-[40px] cursor-pointer">
+          <span class="shrink-0">📝</span><span>班級與名單管理</span>
         </button>
-        <button type="button" data-subtab="student-dossier" onclick="appState.switchStudentsSubTab('student-dossier')" class="subtab-pill-btn students-subtab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer">
-          <span>👤</span><span>學生個人表現</span>
+        <button type="button" data-subtab="student-dossier" onclick="appState.switchStudentsSubTab('student-dossier')" class="subtab-pill-btn students-subtab-btn px-1.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1 sm:gap-1.5 min-h-[40px] cursor-pointer">
+          <span class="shrink-0">👤</span><span>學生個人表現</span>
         </button>
-        <button type="button" data-subtab="events" onclick="appState.switchStudentsSubTab('events')" class="subtab-pill-btn students-subtab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer">
-          <span>🔍</span><span>點記流水帳檢索</span>
+        <button type="button" data-subtab="events" onclick="appState.switchStudentsSubTab('events')" class="subtab-pill-btn students-subtab-btn px-1.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1 sm:gap-1.5 min-h-[40px] cursor-pointer">
+          <span class="shrink-0">🔍</span><span>點記流水帳檢索</span>
         </button>
       </div>
       <section id="roster-manager-view" class="students-subpanel"></section>

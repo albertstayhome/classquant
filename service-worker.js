@@ -5,7 +5,7 @@
  * - Completes core asset pre-caching before skipWaiting() to eliminate mixed-version cache crashes
  */
 
-const CACHE_NAME = 'classquant-hub-v142';
+const CACHE_NAME = 'classquant-hub-v143';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
