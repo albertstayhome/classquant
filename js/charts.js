@@ -751,7 +751,7 @@ class DashboardCharts {
 
   renderMultiClassAcademicChart(canvasId, multi) {
     const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
     this.destroyChart(canvasId);
     const isOAA = this.store?.getTheme() === 'oaa';
 
@@ -813,7 +813,7 @@ class DashboardCharts {
 
   renderMultiClassRadarChart(canvasId, multi) {
     const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
     this.destroyChart(canvasId);
     const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
@@ -887,7 +887,7 @@ class DashboardCharts {
 
   renderQuadrantScatter(canvasId, overview, classId) {
     const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
     this.destroyChart(canvasId);
     const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
@@ -958,7 +958,7 @@ class DashboardCharts {
 
   renderScoreDistribution(canvasId, overview) {
     const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
     this.destroyChart(canvasId);
     const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
 
@@ -1008,6 +1008,7 @@ class DashboardCharts {
   }
 
   renderStudentDetailCharts(radarCanvasId, ewmaCanvasId, profile) {
+    if (typeof Chart === 'undefined') return;
     const isOAA = (this.store ? this.store.getTheme() : 'kitty') === 'oaa';
     const radarCtx = document.getElementById(radarCanvasId);
     if (radarCtx) {

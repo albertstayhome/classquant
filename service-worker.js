@@ -1,8 +1,11 @@
 /**
- * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
+ * Service Worker for 100% Offline PWA functionality with Safe OTA Updates (ClassQuant Hub v9)
+ * - Never intercepts cross-origin requests (CDNs, Google Apps Script, Google Forms)
+ * - Fast 3.2s network timeout on Network-First requests so mobile/school Wi-Fi never stalls startup
+ * - Completes core asset pre-caching before skipWaiting() to eliminate mixed-version cache crashes
  */
 
-const CACHE_NAME = 'classquant-hub-v138';
+const CACHE_NAME = 'classquant-hub-v139';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -126,19 +129,30 @@ const ASSETS_TO_CACHE = [
   './使用指南_圖文說明書.html'
 ];
 
-// Install: Cache core assets and immediately activate
+const NETWORK_TIMEOUT_MS = 3200;
+
+function fetchWithTimeout(request, options = {}, timeoutMs = NETWORK_TIMEOUT_MS) {
+  if (typeof AbortController === 'undefined') {
+    return fetch(request, options);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(request, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
+// Install: Cache core assets cleanly BEFORE activating so caches are never half-empty mid-boot
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
+    caches.open(CACHE_NAME)
+      .then((cache) => Promise.allSettled(
         ASSETS_TO_CACHE.map((assetUrl) => cache.add(assetUrl).catch(() => null))
-      );
-    })
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate: Delete all old caches and claim all clients immediately
+// Activate: Delete all old caches and claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -157,17 +171,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Strategy: Network-First for HTML/JSON & versioned assets (Instant OTA), Stale-While-Revalidate for unversioned static
+// Fetch Strategy: Same-origin only; Network-First with fast timeout for HTML/JSON/versioned, SWR for static assets
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
-  const isHtmlOrJson = url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname.endsWith('/');
+  let url;
+  try {
+    url = new URL(event.request.url);
+  } catch (e) {
+    return;
+  }
+  if (url.origin !== self.location.origin) return;
+
+  const isHtmlOrJson = event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('.json') || url.pathname.endsWith('/');
   const hasVersionParam = url.searchParams.has('v');
 
   if (isHtmlOrJson || hasVersionParam) {
-    // Network-First: Always fetch latest from server when online
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetchWithTimeout(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
@@ -175,17 +195,22 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request, { ignoreSearch: true }).then((res) => {
-          if (res) return res;
-          if (isHtmlOrJson) return caches.match('./index.html').then((idx) => idx || new Response('Offline', { status: 503, statusText: 'Offline' }));
-          return new Response('', { status: 503, statusText: 'Offline' });
+        .catch(() => caches.match(event.request).then((exactRes) => {
+          if (exactRes) return exactRes;
+          return caches.match(event.request, { ignoreSearch: true }).then((looseRes) => {
+            if (looseRes) return looseRes;
+            if (isHtmlOrJson) {
+              return caches.match('./index.html', { ignoreSearch: true })
+                .then((idx) => idx || new Response('Offline', { status: 503, statusText: 'Offline' }));
+            }
+            return new Response('', { status: 503, statusText: 'Offline' });
+          });
         }))
     );
   } else {
-    // Stale-While-Revalidate: Return cache immediately with ignoreSearch, fetch fresh copy in background
     event.respondWith(
       caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
+        const fetchPromise = fetchWithTimeout(event.request, {}, 5000).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));

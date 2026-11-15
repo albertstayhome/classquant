@@ -36,14 +36,22 @@ class TimetableEngine {
 
   // Parse HH:MM to total minutes from midnight
   timeToMinutes(timeStr) {
-    const [h, m] = timeStr.split(':').map(Number);
+    if (typeof timeStr !== 'string' || !timeStr.includes(':')) return 0;
+    const parts = timeStr.split(':');
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return 0;
     return h * 60 + m;
   }
 
   detectActiveSlot() {
     const { day, timeStr } = this.getCurrentTimeInfo();
-    const periods = this.store.data.timetablePeriods;
-    const weeklySchedule = this.store.data.weeklySchedule;
+    const rawPeriods = this.store.data?.timetablePeriods;
+    const periods = Array.isArray(rawPeriods) ? rawPeriods : [];
+    const weeklySchedule = (this.store.data?.weeklySchedule && typeof this.store.data.weeklySchedule === 'object')
+      ? this.store.data.weeklySchedule
+      : {};
+    const classes = this.store.getClasses() || {};
     const currentMins = this.timeToMinutes(timeStr);
 
     // If Weekend (0 = Sun, 6 = Sat)
@@ -57,51 +65,56 @@ class TimetableEngine {
       };
     }
 
-    const daySchedule = weeklySchedule[day] || {};
+    const daySchedule = (weeklySchedule[day] && typeof weeklySchedule[day] === 'object') ? weeklySchedule[day] : {};
 
     // Check if within any period
     for (let i = 0; i < periods.length; i++) {
       const p = periods[i];
+      if (!p || typeof p.start !== 'string' || typeof p.end !== 'string') continue;
       const startMins = this.timeToMinutes(p.start);
       const endMins = this.timeToMinutes(p.end);
 
       if (currentMins >= startMins && currentMins <= endMins) {
-        const classId = daySchedule[p.period] || null;
+        const rawClassId = daySchedule[p.period] || null;
+        const classId = (rawClassId && classes[rawClassId]) ? rawClassId : null;
         const remaining = endMins - currentMins;
         return {
           status: 'in_session',
           period: p.period,
-          periodName: p.name,
+          periodName: p.name || `第 ${p.period} 節`,
           classId: classId,
           start: p.start,
           end: p.end,
           remainingMinutes: remaining,
-          message: `正在進行：${p.name} (剩餘 ${remaining} 分鐘)`
+          message: `正在進行：${p.name || ''} (剩餘 ${remaining} 分鐘)`
         };
       }
     }
 
     // Check if in break between periods
     for (let i = 0; i < periods.length - 1; i++) {
-      const currentEnd = this.timeToMinutes(periods[i].end);
-      const nextStart = this.timeToMinutes(periods[i + 1].start);
+      const curP = periods[i];
+      const nextP = periods[i + 1];
+      if (!curP || !nextP || typeof curP.end !== 'string' || typeof nextP.start !== 'string') continue;
+      const currentEnd = this.timeToMinutes(curP.end);
+      const nextStart = this.timeToMinutes(nextP.start);
 
       if (currentMins > currentEnd && currentMins < nextStart) {
-        const nextPeriod = periods[i + 1];
-        const nextClassId = daySchedule[nextPeriod.period] || null;
-        const prevPeriod = periods[i];
-        const prevClassId = daySchedule[prevPeriod.period] || null;
+        const nextRawId = daySchedule[nextP.period] || null;
+        const nextClassId = (nextRawId && classes[nextRawId]) ? nextRawId : null;
+        const prevRawId = daySchedule[curP.period] || null;
+        const prevClassId = (prevRawId && classes[prevRawId]) ? prevRawId : null;
         const remainingToNext = nextStart - currentMins;
 
         return {
           status: 'in_break',
-          period: prevPeriod.period,
-          periodName: `課間休息 (上節: ${prevPeriod.name})`,
+          period: curP.period,
+          periodName: `課間休息 (上節: ${curP.name || ''})`,
           classId: prevClassId, // retain previous class for late logging
           nextClassId: nextClassId,
-          nextPeriodName: nextPeriod.name,
+          nextPeriodName: nextP.name || '',
           remainingMinutes: remainingToNext,
-          message: `課間休息中 • 下節：${nextPeriod.name} (${nextClassId ? nextClassId + '班' : '無課'}) 還有 ${remainingToNext} 分鐘`
+          message: `課間休息中 • 下節：${nextP.name || ''} (${nextClassId ? nextClassId + '班' : '無課'}) 還有 ${remainingToNext} 分鐘`
         };
       }
     }
@@ -117,10 +130,13 @@ class TimetableEngine {
   }
 
   getActiveClassId() {
-    // 1. Check if user manually forced an override
-    if (this.store.data.currentClassOverride) {
+    const classes = this.store.getClasses() || {};
+
+    // 1. Check if user manually forced an override (verify class still exists!)
+    const override = this.store.data?.currentClassOverride;
+    if (override && classes[override]) {
       return {
-        classId: this.store.data.currentClassOverride,
+        classId: override,
         isOverride: true,
         slotInfo: this.detectActiveSlot()
       };
@@ -128,7 +144,7 @@ class TimetableEngine {
 
     // 2. Check auto detected slot
     const slotInfo = this.detectActiveSlot();
-    if (slotInfo.classId) {
+    if (slotInfo.classId && classes[slotInfo.classId]) {
       return {
         classId: slotInfo.classId,
         isOverride: false,
@@ -137,9 +153,9 @@ class TimetableEngine {
     }
 
     // 3. Default fallback: first available class (e.g. homeroom)
-    const allClasses = Object.keys(this.store.data.classes);
-    const homeroom = Object.values(this.store.data.classes).find(c => c.type === 'homeroom');
-    const fallbackId = homeroom ? homeroom.id : allClasses[0] || null;
+    const allClasses = Object.keys(classes);
+    const homeroom = Object.values(classes).find(c => c && c.type === 'homeroom');
+    const fallbackId = homeroom ? homeroom.id : (allClasses[0] || null);
 
     return {
       classId: fallbackId,
@@ -174,7 +190,7 @@ class TimetableEngine {
   startClock() {
     // Check every 30 seconds
     setInterval(() => {
-      if (this.store.data.settings.autoSwitchTimetable && !this.store.data.currentClassOverride) {
+      if (this.store.data?.settings?.autoSwitchTimetable !== false && !this.store.data?.currentClassOverride) {
         const active = this.getActiveClassId();
         this.notifyClassChange(active.classId, { isPeriodicCheck: true });
       }

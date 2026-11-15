@@ -560,3 +560,457 @@ html.oaa .more-menu-item:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================================
+ * Anime Crossover Cover: Classroom of the Elite (S-SYSTEM) × Sanrio 三麗鷗
+ * ========================================================================= */
+#anime-app-cover {
+  font-family: 'Zen Maru Gothic', 'Nunito', 'Noto Sans TC', system-ui, sans-serif;
+  user-select: none;
+  padding: env(safe-area-inset-top, 12px) 14px env(safe-area-inset-bottom, 16px);
+}
+
+.cq-cover-wing-cote {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 58%);
+  background: radial-gradient(circle at 20% 22%, #7f1d1d 0%, #310818 52%, #0c0612 100%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cq-cover-wing-sanrio {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 58%, 100% 45%, 100% 100%, 0 100%);
+  background: radial-gradient(circle at 78% 76%, #fff5f7 0%, #fce7f3 48%, #fbcfe8 80%, #bae6fd 100%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .cq-cover-wing-cote {
+    clip-path: polygon(0 0, 56% 0, 44% 100%, 0 100%);
+  }
+  .cq-cover-wing-sanrio {
+    clip-path: polygon(56% 0, 100% 0, 100% 100%, 44% 100%);
+  }
+}
+
+.cq-cover-cote-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(251, 191, 36, 0.09) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(251, 191, 36, 0.09) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.cq-cover-cote-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.7), rgba(244, 63, 94, 0.9), transparent);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.7);
+  animation: cqCoverScan 3.4s linear infinite;
+}
+
+@keyframes cqCoverScan {
+  0% { top: -4%; opacity: 0.2; }
+  45% { opacity: 0.85; }
+  100% { top: 102%; opacity: 0.15; }
+}
+
+.cq-cover-cote-hud {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 14px));
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(253, 224, 71, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.cq-cover-cote-logo {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 14px));
+  right: 14px;
+  height: 36px;
+  max-width: 155px;
+  object-fit: contain;
+  background: rgba(255, 251, 235, 0.92);
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 1024px) {
+  .cq-cover-cote-logo {
+    top: 22px;
+    left: 24px;
+    right: auto;
+    height: 46px;
+    max-width: 210px;
+  }
+  .cq-cover-cote-hud {
+    top: 76px;
+    left: 26px;
+    font-size: 11px;
+  }
+}
+
+.cq-cover-char {
+  position: absolute;
+  object-fit: contain;
+  object-position: top center;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.72));
+}
+
+.cq-char-ayanokoji {
+  left: 6px;
+  top: 48px;
+  height: 31vh;
+  max-height: 300px;
+  opacity: 0.96;
+}
+
+.cq-char-sakayanagi {
+  right: 6px;
+  top: 56px;
+  height: 29vh;
+  max-height: 280px;
+  opacity: 0.92;
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .cq-char-ayanokoji {
+    left: 10vw;
+    top: 54px;
+    height: 32vh;
+    max-height: 330px;
+  }
+  .cq-char-sakayanagi {
+    right: 10vw;
+    top: 62px;
+    height: 30vh;
+    max-height: 310px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cq-char-ayanokoji {
+    left: 1vw;
+    top: auto;
+    bottom: -10px;
+    height: 75vh;
+    max-height: 620px;
+  }
+  .cq-char-sakayanagi {
+    left: 14.5vw;
+    right: auto;
+    top: auto;
+    bottom: -14px;
+    height: 64vh;
+    max-height: 540px;
+    opacity: 0.94;
+  }
+}
+
+.cq-cover-slash-beam {
+  position: absolute;
+  left: -15%;
+  right: -15%;
+  top: 51%;
+  height: 5px;
+  transform: rotate(-8deg);
+  background: linear-gradient(90deg, #f59e0b 0%, #ffffff 48%, #f43f5e 100%);
+  box-shadow: 0 0 22px rgba(251, 191, 36, 0.85), 0 0 36px rgba(244, 63, 94, 0.75);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .cq-cover-slash-beam {
+    top: -12%;
+    bottom: -12%;
+    left: 50%;
+    right: auto;
+    width: 6px;
+    height: auto;
+    transform: rotate(10deg);
+  }
+}
+
+.cq-cover-sanrio-sparkles {
+  position: absolute;
+  bottom: 12px;
+  right: 18px;
+  font-size: 16px;
+  letter-spacing: 0.4em;
+  color: #ec4899;
+  opacity: 0.75;
+  animation: cqTwinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes cqTwinkle {
+  0%, 100% { opacity: 0.45; transform: scale(0.97); }
+  50% { opacity: 0.95; transform: scale(1.04); }
+}
+
+.cq-cover-mascot {
+  position: absolute;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(190, 24, 93, 0.25));
+  animation: cqMascotBob 3.6s ease-in-out infinite;
+}
+
+@keyframes cqMascotBob {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(2deg); }
+}
+
+.cq-mascot-kitty {
+  width: 78px;
+  height: 78px;
+  bottom: 18px;
+  left: 12px;
+  animation-delay: 0s;
+}
+.cq-mascot-kuromi {
+  width: 76px;
+  height: 76px;
+  bottom: 16px;
+  right: 12px;
+  animation-delay: 0.4s;
+}
+.cq-mascot-cinnamoroll {
+  width: 72px;
+  height: 72px;
+  bottom: 92px;
+  right: 26px;
+  animation-delay: 0.8s;
+}
+.cq-mascot-melody {
+  width: 66px;
+  height: 66px;
+  bottom: 96px;
+  left: 84px;
+  animation-delay: 1.1s;
+}
+.cq-mascot-twinstars {
+  width: 74px;
+  height: 74px;
+  bottom: 16px;
+  left: 50%;
+  margin-left: -37px;
+  animation-delay: 0.25s;
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .cq-mascot-kitty { width: 106px; height: 106px; bottom: 26px; left: 8vw; }
+  .cq-mascot-melody { width: 92px; height: 92px; bottom: 130px; left: 22vw; }
+  .cq-mascot-twinstars { width: 104px; height: 104px; bottom: 24px; left: 50%; margin-left: -52px; }
+  .cq-mascot-cinnamoroll { width: 98px; height: 98px; bottom: 132px; right: 20vw; }
+  .cq-mascot-kuromi { width: 104px; height: 104px; bottom: 24px; right: 8vw; }
+}
+
+@media (min-width: 1024px) {
+  .cq-mascot-kitty { width: 138px; height: 138px; bottom: 8%; right: 20%; left: auto; }
+  .cq-mascot-kuromi { width: 132px; height: 132px; bottom: 10%; right: 4%; }
+  .cq-mascot-cinnamoroll { width: 124px; height: 124px; top: 12%; right: 6%; bottom: auto; }
+  .cq-mascot-melody { width: 118px; height: 118px; top: 18%; right: 24%; left: auto; bottom: auto; }
+  .cq-mascot-twinstars { width: 124px; height: 124px; top: 44%; right: 8%; left: auto; margin-left: 0; bottom: auto; }
+}
+
+.cq-cover-plaque {
+  position: relative;
+  z-index: 20;
+  width: min(92vw, 440px);
+  padding: 22px 20px 18px;
+  border-radius: 26px;
+  background: linear-gradient(155deg, rgba(20, 8, 22, 0.90) 0%, rgba(56, 12, 34, 0.88) 54%, rgba(131, 24, 67, 0.88) 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 2px solid rgba(251, 191, 36, 0.65);
+  box-shadow:
+    0 24px 54px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 0 38px rgba(244, 63, 94, 0.35);
+  text-align: center;
+  color: #ffffff;
+}
+
+.cq-cover-edition-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(253, 224, 71, 0.55);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #fde68a;
+  margin-bottom: 10px;
+}
+
+.cq-cover-x {
+  color: #fda4af;
+  font-size: 13px;
+}
+
+.cq-cover-title {
+  margin: 0;
+  font-size: clamp(1.65rem, 5.2vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #fde68a 0%, #ffffff 48%, #fbcfe8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.15;
+}
+
+.cq-cover-subtitle {
+  margin: 6px 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 241, 242, 0.92);
+  line-height: 1.45;
+}
+
+.cq-cover-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(251, 207, 232, 0.3);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fce7f3;
+  margin-bottom: 14px;
+}
+
+.cq-cover-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
+  flex-shrink: 0;
+  animation: cqPulse 1.3s ease-in-out infinite;
+}
+
+@keyframes cqPulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+.cq-cover-enter-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 18px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(253, 224, 71, 0.8);
+  background: linear-gradient(135deg, #b91c1c 0%, #e11d48 52%, #ec4899 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(225, 29, 72, 0.45);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.cq-cover-enter-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(225, 29, 72, 0.58);
+}
+
+.cq-cover-enter-btn:active {
+  transform: scale(0.97);
+}
+
+.cq-cover-enter-en {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fde68a;
+}
+
+.cq-cover-recovery {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(127, 29, 29, 0.65);
+  border: 1px solid rgba(253, 224, 71, 0.65);
+}
+
+.cq-cover-recovery-msg {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fef3c7;
+  line-height: 1.45;
+}
+
+.cq-cover-repair-btn {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #fde68a;
+  background: #f59e0b;
+  color: #1c1917;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cq-cover-progress-track {
+  margin-top: 14px;
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.cq-cover-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #fbbf24 0%, #f43f5e 55%, #f9a8d4 100%);
+  animation: cqProgressFill 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cqProgressFill {
+  from { width: 6%; }
+  to { width: 100%; }
+}
+
+.cq-cover-skip-hint {
+  margin-top: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(253, 230, 138, 0.78);
+}

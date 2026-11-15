@@ -14,7 +14,7 @@ class AppState {
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '2.1.0';
+    this.appVersion = '2.2.0';
     this.toastTimer = null;
     this.lastTimetableSlotKey = null;
     this._mascotTapCount = 0;
@@ -552,7 +552,17 @@ class AppState {
     });
 
     if ('serviceWorker' in navigator) {
+      const hadControllerAtBoot = Boolean(navigator.serviceWorker.controller);
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadControllerAtBoot) return;
+        try {
+          const lastReload = Number(sessionStorage.getItem('cq_sw_reload_ts') || 0);
+          if (Date.now() - lastReload < 20000) {
+            console.warn('ClassQuant SW controllerchange throttled to prevent reload loop.');
+            return;
+          }
+          sessionStorage.setItem('cq_sw_reload_ts', String(Date.now()));
+        } catch (e) {}
         console.log('ClassQuant ServiceWorker controller updated. Reloading for fresh assets...');
         window.location.reload();
       });
@@ -567,16 +577,49 @@ class AppState {
     });
 
     // Hidden Non-Intrusive Easter Eggs
-    this._initEasterEggs();
+    try {
+      this._initEasterEggs();
+    } catch (e) {}
 
-    // Initial render
-    this.updateHeaderStatus();
-    this.updateHeaderClock();
-    this.renderClassDropdown();
-    this.updateSoundButtonUI();
-    this.updateFontSizeButtonUI(currentFontSize);
-    this.updateHeaderVersionBadge();
-    this.switchTab('matrix');
+    // Ensure resolved currentClassId exists in store (protects long-term users who renamed/deleted 801)
+    try {
+      const classes = window.appStore?.getClasses ? (window.appStore.getClasses() || {}) : {};
+      if (!classes[this.currentClassId]) {
+        this.currentClassId = Object.keys(classes)[0] || '801';
+      }
+    } catch (e) {}
+
+    // Initial render (Individually guarded so a single panel issue cannot lock app startup)
+    const safeRun = (label, fn) => {
+      try { fn(); } catch (err) { console.warn(`Init step [${label}] recovered:`, err); }
+    };
+    safeRun('updateHeaderStatus', () => this.updateHeaderStatus());
+    safeRun('updateHeaderClock', () => this.updateHeaderClock());
+    safeRun('renderClassDropdown', () => this.renderClassDropdown());
+    safeRun('updateSoundButtonUI', () => this.updateSoundButtonUI());
+    safeRun('updateFontSizeButtonUI', () => this.updateFontSizeButtonUI(currentFontSize));
+    safeRun('updateHeaderVersionBadge', () => this.updateHeaderVersionBadge());
+    safeRun('switchTab', () => this.switchTab('matrix'));
+
+    // Signal anime cover & watchdog that core appState booted cleanly
+    try {
+      window.__cqAppReady = true;
+      const clsCount = Object.keys(window.appStore?.getClasses?.() || {}).length;
+      const statusEl = document.getElementById('cq-cover-status-text');
+      if (statusEl) {
+        statusEl.textContent = clsCount > 0
+          ? `✨ 已完整保留 ${clsCount} 個班級資料（${this.currentClassId} 班）• 準備進入`
+          : '✨ 系統準備就緒 • 點擊或稍候立即進入';
+      }
+      if (window.__cqDismissCover && !window.__cqCoverLocked) {
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        setTimeout(() => {
+          if (window.__cqDismissCover && !window.__cqCoverLocked) {
+            window.__cqDismissCover(false);
+          }
+        }, reduceMotion ? 60 : 1250);
+      }
+    } catch (e) {}
   }
 
   updateHeaderVersionBadge() {
@@ -796,6 +839,25 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v2.2.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-rose-50 via-pink-50/90 to-amber-50/80 text-slate-900'} shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-red-700 via-rose-600 to-pink-500 text-white font-black text-xs shadow-sm font-mono">
+                v2.2.0 (長期用戶啟動防卡死修正 • 實教 × 三麗鷗動漫聯名封面)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-rose-700'} font-mono font-bold">2026-11-15</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【緊急修復｜長期使用者無法開啟／停在封面問題】修正跨版本升級時 Service Worker 連續重整迴圈與外網 CDN 阻塞問題；並新增「無損既有資料結構自癒引擎」與手機儲存空間防溢位保護（100% 保留原本老師已建立的所有班級、名單、自訂標籤、加減分紀錄與段考存檔）。</li>
+              <li>• 【動漫聯名封面｜實力至上主義教室 × Sanrio 三麗鷗】全新繪製 S-SYSTEM × SANRIO 雙次元交錯啟動封面，支援即時 1 秒進入與雙重安全看門狗防呆，並可於此視窗或右上角「⋯ 更多」隨時點按重播。</li>
+            </ul>
+            <div class="mt-2.5">
+              <button type="button" onclick="appState.closeModal(); appState.replayAppCover()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs font-black shadow-sm cursor-pointer active:scale-95 transition">
+                🎬 立即欣賞動漫聯名封面
+              </button>
+            </div>
           </div>
 
           <!-- v2.1.0 -->
@@ -1968,7 +2030,12 @@ class AppState {
     const targetShell = document.getElementById(shellMap[primaryTab]);
     if (targetShell) {
       targetShell.classList.remove('hidden');
-      this.refreshActiveTab();
+      try {
+        this.refreshActiveTab();
+      } catch (err) {
+        console.error(`Failed to render tab [${primaryTab}]:`, err);
+        this.showToast('⚠️ 該分頁載入時發生小異常，已安全切換保護模式', 'warning');
+      }
     }
   }
 
@@ -2356,6 +2423,18 @@ class AppState {
     return this.coteSilhouettes[idx] || this.coteSilhouettes[0];
   }
 
+  replayAppCover() {
+    if (window.__cqShowCover) {
+      window.__cqShowCover(5500);
+    }
+  }
+
+  dismissAppCover() {
+    if (window.__cqDismissCover) {
+      window.__cqDismissCover(true);
+    }
+  }
+
   playEliteTerminalChime() {
     if (!this.isSoundEnabled()) return;
     const ctx = this.getAudioContext();
@@ -2376,5 +2455,16 @@ class AppState {
   }
 }
 
-// Global App State Instance
-window.appState = new AppState();
+// Global App State Instance (Boot-guarded so unhandled edge cases never freeze UI)
+try {
+  window.appState = new AppState();
+} catch (bootErr) {
+  console.error('ClassQuant critical boot error:', bootErr);
+  window.__cqBootError = String(bootErr?.message || bootErr);
+  try {
+    var recoveryEl = document.getElementById('cq-cover-recovery');
+    var statusEl = document.getElementById('cq-cover-status-text');
+    if (statusEl) statusEl.textContent = '⚠️ 初始化遇見異常，請點擊下方修復快取（完整保留您的資料）';
+    if (recoveryEl) recoveryEl.style.display = 'block';
+  } catch (e) {}
+}

@@ -151,12 +151,23 @@ class Store {
         };
       }
 
-      // Auto Snapshot (at most once every 3 hours on startup)
-      const lastSnap = localStorage.getItem('classquant_last_auto_snapshot_ts');
-      const now = Date.now();
-      if (!lastSnap || (now - parseInt(lastSnap, 10)) > 3 * 3600 * 1000) {
-        this.createSnapshot('啟動時日常備份');
-        localStorage.setItem('classquant_last_auto_snapshot_ts', String(now));
+      // Non-destructive legacy schema repair (100% preserves existing classes, rosters, tags, events, archives)
+      this.sanitizeAndMigrateLegacyData();
+
+      // Auto Snapshot (at most once every 3 hours on startup, guarded against mobile localStorage quota pressure)
+      try {
+        const lastSnap = localStorage.getItem('classquant_last_auto_snapshot_ts');
+        const now = Date.now();
+        if (!lastSnap || (now - parseInt(lastSnap, 10)) > 3 * 3600 * 1000) {
+          this.createSnapshot('啟動時日常備份');
+          try {
+            localStorage.setItem('classquant_last_auto_snapshot_ts', String(now));
+          } catch (quotaErr) {
+            console.warn('Auto snapshot timestamp write skipped:', quotaErr);
+          }
+        }
+      } catch (snapErr) {
+        console.warn('Startup auto-snapshot skipped safely:', snapErr);
       }
     }
 
@@ -209,7 +220,9 @@ class Store {
   loadFromStorage() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : null;
     } catch (e) {
       console.error('Failed to load from storage:', e);
       return null;
@@ -679,7 +692,7 @@ class Store {
     const studentCount = students.length;
 
     let layout = this.data.seatingLayout[classId];
-    if (!layout || !layout.seatOrder || layout.seatOrder.length === 0) {
+    if (!layout || !Array.isArray(layout.seatOrder) || layout.seatOrder.length === 0) {
       // Default: 5 columns for <= 30 students, 6 columns for > 30
       const defaultCols = studentCount > 30 ? 6 : 5;
       layout = {
@@ -997,10 +1010,173 @@ class Store {
   }
 
   // --- Local Automatic Data Snapshots & 1-Click Rollback ---
+  sanitizeAndMigrateLegacyData() {
+    try {
+      if (!this.data || typeof this.data !== 'object' || Array.isArray(this.data)) {
+        this.data = {};
+      }
+      const d = this.data;
+
+      // 1. Classes container & per-class fields
+      if (!d.classes || typeof d.classes !== 'object' || Array.isArray(d.classes)) {
+        d.classes = {};
+      }
+      const cleanedClasses = {};
+      Object.keys(d.classes).forEach((cid) => {
+        const rawCls = d.classes[cid];
+        if (!rawCls || typeof rawCls !== 'object') return;
+        const normalizedId = String(rawCls.id || cid).trim() || cid;
+        const sl = rawCls.seatLayout && typeof rawCls.seatLayout === 'object' ? rawCls.seatLayout : {};
+        const cols = Number.isFinite(Number(sl.cols)) && Number(sl.cols) > 0 ? Math.min(12, Math.max(1, parseInt(sl.cols, 10))) : 5;
+        const rows = Number.isFinite(Number(sl.rows)) && Number(sl.rows) > 0 ? Math.min(12, Math.max(1, parseInt(sl.rows, 10))) : 6;
+        cleanedClasses[cid] = {
+          ...rawCls,
+          id: normalizedId,
+          name: String(rawCls.name || `${cid} 班`),
+          type: rawCls.type === 'homeroom' ? 'homeroom' : 'subject',
+          subject: String(rawCls.subject || (rawCls.type === 'homeroom' ? '導師班' : '數學')),
+          seatLayout: { rows, cols }
+        };
+      });
+      d.classes = cleanedClasses;
+
+      // 2. Students container & per-student coercions (strictly preserve student records)
+      if (!d.students || typeof d.students !== 'object' || Array.isArray(d.students)) {
+        d.students = {};
+      }
+      Object.keys(d.classes).forEach((cid) => {
+        const rawList = d.students[cid];
+        const safeList = Array.isArray(rawList) ? rawList.filter(s => s && typeof s === 'object') : [];
+        const total = safeList.length;
+        d.students[cid] = safeList.map((s, idx) => {
+          const parsedSeat = parseInt(s.seatNo, 10);
+          const seatNo = Number.isFinite(parsedSeat) && parsedSeat > 0 ? parsedSeat : (idx + 1);
+          const gender = (s.gender === 'M' || s.gender === 'F')
+            ? s.gender
+            : (seatNo <= Math.ceil((total || 1) / 2) ? 'M' : 'F');
+          return {
+            ...s,
+            seatNo,
+            name: String(s.name || `座號 ${seatNo}`),
+            gender,
+            notes: typeof s.notes === 'string' ? s.notes : ''
+          };
+        });
+        d.classes[cid].studentCount = d.students[cid].length;
+      });
+
+      // 3. Events array
+      if (!Array.isArray(d.events)) {
+        d.events = [];
+      } else {
+        d.events = d.events
+          .filter(e => e && typeof e === 'object')
+          .map(e => ({
+            ...e,
+            seatNo: parseInt(e.seatNo, 10) || e.seatNo || 1,
+            delta: Number.isFinite(Number(e.delta)) ? Number(e.delta) : 0,
+            classId: e.classId !== undefined && e.classId !== null ? String(e.classId) : ''
+          }));
+      }
+
+      // 4. Plain-object side dictionaries & seating layouts
+      if (!d.assessments || typeof d.assessments !== 'object' || Array.isArray(d.assessments)) d.assessments = {};
+      if (!d.seatingLayout || typeof d.seatingLayout !== 'object' || Array.isArray(d.seatingLayout)) d.seatingLayout = {};
+      if (!d.classTagStats || typeof d.classTagStats !== 'object' || Array.isArray(d.classTagStats)) d.classTagStats = {};
+      if (!d.termArchives || typeof d.termArchives !== 'object' || Array.isArray(d.termArchives)) d.termArchives = {};
+
+      Object.keys(d.seatingLayout).forEach((cid) => {
+        const layout = d.seatingLayout[cid];
+        if (!layout || typeof layout !== 'object') {
+          delete d.seatingLayout[cid];
+          return;
+        }
+        if (!Array.isArray(layout.seatOrder)) {
+          layout.seatOrder = (d.students[cid] || []).map(s => s.seatNo);
+        } else {
+          layout.seatOrder = layout.seatOrder
+            .map(n => parseInt(n, 10))
+            .filter(n => Number.isFinite(n) && n > 0);
+        }
+        layout.cols = Number.isFinite(Number(layout.cols)) && Number(layout.cols) > 0 ? parseInt(layout.cols, 10) : 5;
+        if (!layout.podiumPosition) layout.podiumPosition = 'top';
+      });
+
+      Object.keys(d.termArchives).forEach((cid) => {
+        if (!Array.isArray(d.termArchives[cid])) {
+          d.termArchives[cid] = [];
+        }
+      });
+
+      // 5. Timetable periods & weekly schedule validation
+      const timeRegex = /^\d{1,2}:\d{2}$/;
+      if (!Array.isArray(d.timetablePeriods) || d.timetablePeriods.length === 0) {
+        d.timetablePeriods = JSON.parse(JSON.stringify(DEFAULT_TIMETABLE_PERIODS));
+      } else {
+        const validPeriods = d.timetablePeriods.filter(p =>
+          p && typeof p === 'object' &&
+          typeof p.start === 'string' && timeRegex.test(p.start.trim()) &&
+          typeof p.end === 'string' && timeRegex.test(p.end.trim())
+        );
+        d.timetablePeriods = validPeriods.length > 0
+          ? validPeriods
+          : JSON.parse(JSON.stringify(DEFAULT_TIMETABLE_PERIODS));
+      }
+
+      if (!d.weeklySchedule || typeof d.weeklySchedule !== 'object' || Array.isArray(d.weeklySchedule)) {
+        d.weeklySchedule = {};
+      }
+
+      // 6. Clear stale currentClassOverride pointing to a deleted class
+      if (d.currentClassOverride && !d.classes[d.currentClassOverride]) {
+        d.currentClassOverride = null;
+      }
+
+      // 7. Custom tags & groupTags (never overwrite existing valid custom tags!)
+      if (!Array.isArray(d.tags) || d.tags.length === 0) {
+        d.tags = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+      }
+      if (!d.groupTags || typeof d.groupTags !== 'object') {
+        const fallbackHomeroom = (Array.isArray(d.classTags?.['801']) && d.classTags['801'].length > 0)
+          ? d.classTags['801']
+          : d.tags;
+        const fallbackSubject = (Array.isArray(d.classTags?.['803']) && d.classTags['803'].length > 0)
+          ? d.classTags['803']
+          : ((Array.isArray(d.classTags?.['805']) && d.classTags['805'].length > 0) ? d.classTags['805'] : d.tags);
+        d.groupTags = {
+          homeroom: JSON.parse(JSON.stringify(fallbackHomeroom)),
+          subject: JSON.parse(JSON.stringify(fallbackSubject))
+        };
+      } else {
+        if (!Array.isArray(d.groupTags.homeroom) || d.groupTags.homeroom.length === 0) {
+          d.groupTags.homeroom = JSON.parse(JSON.stringify(d.tags));
+        }
+        if (!Array.isArray(d.groupTags.subject) || d.groupTags.subject.length === 0) {
+          d.groupTags.subject = JSON.parse(JSON.stringify(d.tags));
+        }
+      }
+
+      // 8. Settings
+      if (!d.settings || typeof d.settings !== 'object' || Array.isArray(d.settings)) {
+        d.settings = {};
+      }
+      if (!d.settings.theme) d.settings.theme = 'kitty';
+      if (!d.settings.fontSize) d.settings.fontSize = 'large';
+    } catch (err) {
+      console.warn('Legacy schema sanitization recovered from error:', err);
+    }
+  }
+
+  getFirstClassId() {
+    const keys = Object.keys(this.data?.classes || {});
+    return keys[0] || '801';
+  }
+
   createSnapshot(reason = '自動快照') {
     try {
       const raw = localStorage.getItem('class_point_quant_hub_snapshots_v1');
-      const snapshots = raw ? JSON.parse(raw) : [];
+      const parsed = raw ? JSON.parse(raw) : [];
+      const snapshots = Array.isArray(parsed) ? parsed : [];
       snapshots.unshift({
         timestamp: Date.now(),
         timeStr: new Date().toLocaleString('zh-TW', { hour12: false }),
@@ -1009,8 +1185,21 @@ class Store {
       });
       // Maintain latest 5 snapshots to avoid localStorage bloat
       if (snapshots.length > 5) snapshots.length = 5;
-      localStorage.setItem('class_point_quant_hub_snapshots_v1', JSON.stringify(snapshots));
-      return true;
+      try {
+        localStorage.setItem('class_point_quant_hub_snapshots_v1', JSON.stringify(snapshots));
+        return true;
+      } catch (quotaErr) {
+        // Trim snapshots progressively on mobile QuotaExceededError so active teacher data stays safe
+        for (let limit = 2; limit >= 1; limit--) {
+          try {
+            snapshots.length = Math.min(snapshots.length, limit);
+            localStorage.setItem('class_point_quant_hub_snapshots_v1', JSON.stringify(snapshots));
+            return true;
+          } catch (e2) {}
+        }
+        console.warn('Snapshot skipped due to storage quota:', quotaErr);
+        return false;
+      }
     } catch (e) {
       console.warn('Snapshot skipped:', e);
       return false;
@@ -1033,6 +1222,7 @@ class Store {
       // Create backup of current state before rollback
       this.createSnapshot('還原前自動備份');
       this.data = target.data;
+      this.sanitizeAndMigrateLegacyData();
       this.saveToStorage();
       return true;
     }
@@ -1047,6 +1237,7 @@ class Store {
       }
       this.createSnapshot('匯入全系統備份前');
       this.data = parsed;
+      this.sanitizeAndMigrateLegacyData();
       if (!this.data.termArchives || typeof this.data.termArchives !== 'object') {
         this.data.termArchives = {};
       }
@@ -1402,7 +1593,11 @@ class Store {
     this.data.settings.googleBackup.lastBackupTs = Date.now();
     this.data.settings.googleBackup.lastBackupHash = payload.hash;
     this.data.settings.googleBackup.lastBackupStatus = `${statusLabel} (${payload.localTimeStr})`;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+    } catch (e) {
+      console.warn('Failed to persist backup status due to storage quota:', e);
+    }
   }
 
   scheduleAutoBackupOnChange() {
