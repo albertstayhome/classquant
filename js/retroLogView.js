@@ -25,7 +25,8 @@ class RetroLogView {
   }
 
   render(containerId, classId = null) {
-    const container = document.getElementById(containerId);
+    this.lastContainerId = containerId || this.lastContainerId || 'retro-log-view';
+    const container = document.getElementById(this.lastContainerId);
     if (!container) return;
 
     if (classId) {
@@ -304,7 +305,7 @@ class RetroLogView {
     if (window.appState && window.appState.currentClassId !== classId) {
       window.appState.handleManualClassChange(classId);
     } else {
-      this.render('retro-log-view');
+      this.render(this.lastContainerId || 'retro-log-view');
     }
   }
 
@@ -481,14 +482,14 @@ class RetroLogView {
     // Reset selection
     this.selectedSeats.clear();
     this.customNote = '';
-    this.render('retro-log-view');
+    this.render(this.lastContainerId || 'retro-log-view');
   }
 
   deleteRetroEvent(eventId) {
     if (confirm('確定要刪除這筆事後補記記錄嗎？')) {
       this.store.deleteEvent(eventId);
       window.appState.showToast('已刪除記錄', 'info');
-      this.render('retro-log-view');
+      this.render(this.lastContainerId || 'retro-log-view');
     }
   }
 }

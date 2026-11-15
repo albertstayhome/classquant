@@ -91,41 +91,41 @@ class StatisticsEngine {
     return denominator === 0 ? 0 : Math.round((numerator / denominator) * 100) / 100;
   }
 
-  // --- Student Comprehensive Metrics Profile ---
+  // --- Student Comprehensive Metrics Profile (Pure Classroom Regular Grading) ---
   getStudentProfile(classId, seatNo) {
     const student = this.store.getStudent(classId, seatNo);
     if (!student) return null;
 
-    const classEvents = this.store.getEvents(classId).filter(e => e.seatNo === parseInt(seatNo, 10));
-    const assessments = this.store.getAssessments(classId);
+    const cfg = this.store.getRegularGradeConfig
+      ? this.store.getRegularGradeConfig()
+      : { baseScore: 80, pointsPerUnit: 1, minScore: 0, maxScore: 100 };
 
-    // 1. Assessment Scores Progression
-    const studentScores = [];
-    const assessmentList = [];
-    assessments.forEach(asm => {
-      if (asm.scores && asm.scores[seatNo] !== undefined) {
-        studentScores.push(Number(asm.scores[seatNo]));
-        assessmentList.push(asm);
-      }
-    });
+    const classEvents = this.store.getEvents(classId)
+      .filter(e => e.seatNo === parseInt(seatNo, 10))
+      .sort((a, b) => `${a.date || ''} ${a.time || ''}`.localeCompare(`${b.date || ''} ${b.time || ''}`));
 
-    const scoreMean = studentScores.length > 0 ? this.mean(studentScores) : 70;
-    const scoreStd = this.standardDeviation(studentScores);
-    const ewmaScores = this.calculateEWMA(studentScores);
-    const scoreSlope = this.calculateSlope(studentScores);
-
-    // 2. Behavioral & Engagement Metrics
+    // 1. Classroom Behavior & Engagement Metrics
     let academicBonus = 0;
     let disciplineInfractions = 0;
     let conflictIncidents = 0;
     let socialContributions = 0;
+    let assessmentBonus = 0;
+    let positivePts = 0;
+    let negativePts = 0;
     let recentNegativeCount = 0;
 
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+    // Build chronological running regular score series for EWMA & trend
+    const runningScores = [cfg.baseScore];
+    let runningNet = 0;
+
     classEvents.forEach(evt => {
-      const delta = evt.delta || 0;
+      const delta = Number(evt.delta) || 0;
+      if (delta > 0) positivePts += delta;
+      if (delta < 0) negativePts += delta;
+
       if (evt.category === 'academic') {
         academicBonus += delta;
       } else if (evt.category === 'discipline') {
@@ -134,7 +134,13 @@ class StatisticsEngine {
         conflictIncidents += delta;
       } else if (evt.category === 'social') {
         socialContributions += delta;
+      } else if (evt.category === 'assessment') {
+        assessmentBonus += delta;
       }
+
+      runningNet += delta;
+      const stepScore = Math.round(Math.min(cfg.maxScore, Math.max(cfg.minScore, cfg.baseScore + runningNet * cfg.pointsPerUnit)) * 10) / 10;
+      runningScores.push(stepScore);
 
       if (delta < 0 && evt.date) {
         const evtDate = new Date(evt.date);
@@ -144,38 +150,36 @@ class StatisticsEngine {
       }
     });
 
-    const netPoints = academicBonus + disciplineInfractions + conflictIncidents + socialContributions;
+    const netPoints = positivePts + negativePts;
+    const rawScore = cfg.baseScore + (netPoints * cfg.pointsPerUnit);
+    const uncappedScore = Math.round(rawScore * 10) / 10;
+    const regularScore = Math.round(Math.min(cfg.maxScore, Math.max(cfg.minScore, rawScore)) * 10) / 10;
 
-    // 3. Cliff Drop & Alert Detection (2-sigma drop or severe slope)
+    const ewmaScores = this.calculateEWMA(runningScores);
+    const scoreSlope = this.calculateSlope(runningScores.slice(-10));
+    const scoreStd = this.standardDeviation(runningScores);
+
+    // 2. Cliff Drop & Behavior Alert Detection (no quiz slope dependency)
     let isCliffDrop = false;
     let cliffDropReason = '';
 
-    if (studentScores.length >= 3) {
-      const latestScore = studentScores[studentScores.length - 1];
-      const previousScores = studentScores.slice(0, -1);
-      const prevMean = this.mean(previousScores);
-      const prevStd = this.standardDeviation(previousScores);
-
-      if (prevStd > 0 && latestScore < prevMean - 1.8 * prevStd) {
-        isCliffDrop = true;
-        cliffDropReason = `最新評量 (${latestScore}分) 發生斷崖式下滑 (低於均值 ${Math.round((prevMean - latestScore)*10)/10} 分)`;
-      } else if (scoreSlope < -2.5) {
-        isCliffDrop = true;
-        cliffDropReason = `近期連續小考下滑斜率顯著 (斜率: ${scoreSlope})`;
-      }
-    }
-
     if (recentNegativeCount >= 3) {
       isCliffDrop = true;
-      cliffDropReason = (cliffDropReason ? cliffDropReason + ' • ' : '') + `近一週連續累積 ${recentNegativeCount} 次常規違規`;
+      cliffDropReason = `近一週連續累積 ${recentNegativeCount} 次扣分提醒`;
+    }
+    if (regularScore < Math.max(cfg.minScore, cfg.baseScore - 10)) {
+      isCliffDrop = true;
+      cliffDropReason = (cliffDropReason ? cliffDropReason + ' • ' : '') +
+        `目前平時成績降至 ${regularScore} 分（低於基準 ${cfg.baseScore} 分逾 10 分）`;
     }
 
-    // 4. Five-Dimensional Educational Quant Index (0-100 normalized)
-    const mathAbility = Math.min(100, Math.max(0, Math.round(scoreMean + academicBonus * 0.5)));
-    const motivation = Math.min(100, Math.max(0, Math.round(60 + scoreSlope * 5 + academicBonus * 2)));
-    const accountability = Math.min(100, Math.max(0, Math.round(75 + disciplineInfractions * 2.5)));
-    const discipline = Math.min(100, Math.max(0, Math.round(80 + disciplineInfractions * 3 + conflictIncidents * 4)));
-    const socialEmotional = Math.min(100, Math.max(0, Math.round(70 + socialContributions * 3 + conflictIncidents * 5)));
+    // 3. Five-Dimensional Classroom Quant Index (0-100 normalized around baseScore)
+    const clamp100 = (v) => Math.min(100, Math.max(0, Math.round(v)));
+    const mathAbility = clamp100(cfg.baseScore + academicBonus * 3 + assessmentBonus * 2);
+    const motivation = clamp100(cfg.baseScore - 2 + positivePts * 2.5 + scoreSlope * 2);
+    const accountability = clamp100(cfg.baseScore + disciplineInfractions * 3 + academicBonus * 2);
+    const discipline = clamp100(cfg.baseScore + disciplineInfractions * 3.5 + conflictIncidents * 4);
+    const socialEmotional = clamp100(cfg.baseScore + socialContributions * 4 + conflictIncidents * 5);
 
     const radar = {
       mathAbility,
@@ -187,14 +191,18 @@ class StatisticsEngine {
 
     return {
       student,
-      rawScores: studentScores,
-      assessmentList,
-      scoreMean: Math.round(scoreMean * 10) / 10,
+      rawScores: runningScores,
+      assessmentList: classEvents,
+      regularScore,
+      uncappedScore,
+      scoreMean: regularScore,
       scoreStd: Math.round(scoreStd * 10) / 10,
       ewmaScores,
       scoreSlope,
+      positivePts,
+      negativePts,
       pointsBreakdown: {
-        academic: academicBonus,
+        academic: academicBonus + assessmentBonus,
         discipline: disciplineInfractions,
         conflict: conflictIncidents,
         social: socialContributions,
@@ -209,53 +217,49 @@ class StatisticsEngine {
   // --- Class-Level Aggregate Analysis ---
   getClassOverview(classId) {
     const students = this.store.getStudents(classId) || [];
-    const assessments = this.store.getAssessments(classId) || [];
     const events = this.store.getEvents(classId) || [];
+    const cfg = this.store.getRegularGradeConfig
+      ? this.store.getRegularGradeConfig()
+      : { baseScore: 80, pointsPerUnit: 1, minScore: 0, maxScore: 100 };
 
     const studentProfiles = students.map(s => this.getStudentProfile(classId, s.seatNo)).filter(Boolean);
 
-    // Latest Assessment Summary & Box Plot
-    const latestAsm = assessments.length > 0 ? assessments[assessments.length - 1] : null;
-    let latestAsmScores = [];
-    let latestBoxPlot = null;
-    if (latestAsm && latestAsm.scores) {
-      latestAsmScores = Object.values(latestAsm.scores).map(Number);
-      latestBoxPlot = this.getFiveNumberSummary(latestAsmScores);
-    }
-
-    // Net Points Distribution
+    // Regular Score & Net Points Box Plots (Replaces Quiz Box Plot)
+    const regularScoresArr = studentProfiles.map(p => p.regularScore);
+    const latestBoxPlot = this.getFiveNumberSummary(regularScoresArr);
     const netPointsArr = studentProfiles.map(p => p.pointsBreakdown.net);
     const pointsBoxPlot = this.getFiveNumberSummary(netPointsArr);
 
-    // Differentiated Instruction 4-Quadrant Clustering
-    const classAvgScore = studentProfiles.length > 0 ? this.mean(studentProfiles.map(p => p.scoreMean)) : 70;
-    const classAvgEngagement = studentProfiles.length > 0 ? this.mean(studentProfiles.map(p => p.pointsBreakdown.net)) : 0;
+    // Differentiated Classroom Engagement Clustering
+    const classAvgScore = studentProfiles.length > 0 ? this.mean(regularScoresArr) : cfg.baseScore;
+    const classAvgEngagement = studentProfiles.length > 0 ? this.mean(netPointsArr) : 0;
 
     const clusters = {
-      topTier: [],      // High Score, High Engagement (拔尖進階組)
-      underachiever: [],// High Score, Low Engagement (潛力未發揮)
-      hardWorker: [],   // Low Score, High Engagement (努力待補救組)
-      highRisk: []      // Low Score, Low Engagement (雙低關懷組)
+      topTier: [],      // 積極拔尖組
+      underachiever: [],// 穩定達標組
+      hardWorker: [],   // 待多激勵組
+      highRisk: []      // 重點關懷組
     };
 
     studentProfiles.forEach(p => {
-      const isHighAbility = p.scoreMean >= (classAvgScore || 70);
-      const isHighEngagement = p.pointsBreakdown.net >= (classAvgEngagement || 0);
+      const isHighScore = p.regularScore >= classAvgScore;
+      const isHighPos = p.positivePts >= (studentProfiles.length > 0 ? this.mean(studentProfiles.map(sp => sp.positivePts)) : 1);
 
       const item = {
         seatNo: p.student.seatNo,
         name: p.student.name,
-        scoreMean: p.scoreMean,
+        scoreMean: p.regularScore,
+        regularScore: p.regularScore,
         netPoints: p.pointsBreakdown.net,
         isCliffDrop: p.isCliffDrop,
         cliffReason: p.cliffDropReason
       };
 
-      if (isHighAbility && isHighEngagement) {
+      if (isHighScore && isHighPos) {
         clusters.topTier.push(item);
-      } else if (isHighAbility && !isHighEngagement) {
+      } else if (isHighScore && !isHighPos) {
         clusters.underachiever.push(item);
-      } else if (!isHighAbility && isHighEngagement) {
+      } else if (!isHighScore && isHighPos) {
         clusters.hardWorker.push(item);
       } else {
         clusters.highRisk.push(item);
@@ -277,8 +281,9 @@ class StatisticsEngine {
       classId,
       totalStudents: students.length,
       studentProfiles,
-      latestAssessment: latestAsm,
+      latestAssessment: null,
       latestBoxPlot,
+      regularScoreBoxPlot: latestBoxPlot,
       pointsBoxPlot,
       classAvgScore: Math.round(classAvgScore * 10) / 10,
       classAvgEngagement: Math.round(classAvgEngagement * 10) / 10,
@@ -298,10 +303,9 @@ class StatisticsEngine {
       classOverviews[cls.id] = this.getClassOverview(cls.id);
     });
 
-    // Compute Homework & Teaching Strategy Advisory for each class
     const strategies = classList.map(cls => {
       const ov = classOverviews[cls.id];
-      const avgScore = ov ? ov.classAvgScore : 70;
+      const avgScore = ov ? ov.classAvgScore : 80;
       const avgEng = ov ? ov.classAvgEngagement : 0;
       const topCount = ov?.clusters?.topTier?.length || 0;
       const riskCount = (ov?.clusters?.highRisk?.length || 0) + (ov?.clusters?.hardWorker?.length || 0);
@@ -310,22 +314,22 @@ class StatisticsEngine {
       let hwDetail = '';
       let teachingStyle = '';
 
-      if (avgScore >= 80) {
-        hwLevel = '🌟 拔尖拓展型';
-        hwDetail = '核心基礎題 3 題 + 思考探究競賽題 2 題（著重代數多向證明）';
-        teachingStyle = '加快單元概念解說節奏，多安排學生上台發表與組間競賽搶答';
-      } else if (avgScore >= 70 && avgEng >= 0) {
-        hwLevel = '📘 穩健進階型';
-        hwDetail = '核心觀念題 4 題 + 題型變化題 2 題（著重題型辨析與步驟規範）';
-        teachingStyle = '強化典型例題板書拆解，隨堂抽查同儕筆記與概念理解程度';
-      } else if (avgScore < 70 && avgEng >= 0) {
-        hwLevel = '🌱 核心打底型';
-        hwDetail = '基礎定義題 5 題 + 錯題確實訂正（每題附簡易步驟提示）';
-        teachingStyle = '降低單堂概念密度，增加課堂隨堂演練時間與即時小組互助打底';
+      if (avgScore >= 86) {
+        hwLevel = '🌟 積極自治型';
+        hwDetail = '全班課堂氛圍極佳，鼓勵學生擔任同儕小老師與上台發表';
+        teachingStyle = '可適度引入進階討論任務與小組競賽機制，維持高動能正向循環';
+      } else if (avgScore >= 78 && avgEng >= 0) {
+        hwLevel = '📘 穩健達標型';
+        hwDetail = '課堂秩序與日常表現維持標準，持續透過口頭加點強化專注習慣';
+        teachingStyle = '在重點切換處多給予即時舉手/筆記加分，帶動中間族群參與意願';
+      } else if (avgEng >= -2) {
+        hwLevel = '🌱 常規養成型';
+        hwDetail = '部分節次專注力或作業習慣仍有起伏，建議多使用正向具體加分誘導';
+        teachingStyle = '縮短講述時間改採分步隨堂演練，先搶下「即時達成小目標」的正向回饋';
       } else {
-        hwLevel = '🛡️ 補救激勵型';
-        hwDetail = '降階基礎核心 3~4 題（限時小步完成，並給予課堂加點肯定）';
-        teachingStyle = '課堂以短節奏提問提神，加強巡視與口頭讚美，避免挫折感堆積';
+        hwLevel = '🛡️ 關懷整頓型';
+        hwDetail = '扣分提醒較多，需優先穩定課堂常規並關懷高風險個案';
+        teachingStyle = '先確立明確課堂公約與座位調整，多給予個別化口頭提醒與低門檻加分機會';
       }
 
       return {

@@ -163,12 +163,12 @@ class RosterManager {
               <span>${currentClass ? currentClass.name : ''} 學生名冊清單</span>
               <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${isOAA ? 'bg-rose-950 text-amber-300 border border-amber-500/40' : 'bg-pink-100 text-pink-700'}">共 ${students.length} 位學生</span>
             </h3>
-            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="px-3 py-1.5 rounded-xl ${isOAA ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'} text-xs font-black transition flex items-center gap-1 cursor-pointer">
+            <button onclick="rosterManager.addNewStudentRow('${this.currentClassId}')" class="min-h-[36px] px-3 py-1.5 rounded-xl ${isOAA ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'} text-xs font-black transition flex items-center gap-1 cursor-pointer">
               <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> 新增一位學生
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[550px] overflow-y-auto pr-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:max-h-[580px] md:overflow-y-auto pr-1">
             ${students.map(s => {
               const gender = s.gender || (s.seatNo <= Math.ceil(students.length / 2) ? 'M' : 'F');
               const studentEvents = classEvents.filter(e => e.seatNo === s.seatNo);
@@ -179,7 +179,7 @@ class RosterManager {
                   ? 'border-amber-500/30 bg-[#240e1b] hover:bg-[#301224] text-white' 
                   : 'border-pink-100 bg-pink-50/40 hover:bg-pink-50 text-slate-900'
               } flex items-center justify-between transition shadow-sm gap-1.5">
-                <div class="flex items-center space-x-1.5 min-w-0">
+                <div class="flex items-center space-x-1.5 min-w-0 flex-1">
                   <span class="w-7 h-7 rounded-xl ${
                     isOAA 
                       ? 'bg-[#12050d] text-amber-300 border border-amber-500/50' 
@@ -193,7 +193,7 @@ class RosterManager {
                       isOAA 
                         ? 'border-amber-500/40 bg-[#14060e] text-white focus:border-amber-400' 
                         : 'border-pink-200 bg-white text-slate-900 focus:border-pink-500'
-                    } rounded-lg px-2 py-1 text-xs sm:text-sm font-black focus:outline-none w-16 sm:w-20 shrink min-w-0">
+                    } rounded-lg px-2 py-1 text-xs sm:text-sm font-black focus:outline-none flex-1 min-w-[68px]">
                   <span class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md font-mono font-black shrink-0 ${
                     pts > 0 
                       ? (isOAA ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-emerald-100 text-emerald-800')
@@ -207,21 +207,21 @@ class RosterManager {
                 
                 <div class="flex items-center space-x-1 shrink-0">
                   <button type="button" onclick="rosterManager.openQuickRecordModal('${this.currentClassId}', ${s.seatNo})" 
-                    class="px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-0.5 border ${
+                    class="min-h-[36px] px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-0.5 border ${
                       isOAA
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
                         : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
                     }" title="直接為此學生進行日常行為紀錄與加扣分">
                     <span>⚡ 記點</span>
                   </button>
-                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="px-1.5 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${
+                  <button type="button" onclick="rosterManager.toggleGender('${this.currentClassId}', ${s.seatNo})" class="min-h-[36px] px-2 py-1 rounded-lg text-xs font-black transition cursor-pointer border ${
                     isOAA
                       ? (gender === 'F' ? 'bg-rose-950 text-pink-300 border-pink-500/60 hover:bg-rose-900' : 'bg-blue-950 text-cyan-300 border-cyan-500/60 hover:bg-blue-900')
                       : (gender === 'F' ? 'bg-pink-100 text-pink-700 border-pink-300 hover:bg-pink-200' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200')
                   }" title="點擊切換性別 (男 / 女)">
                     ${gender === 'F' ? '👧' : '👦'}
                   </button>
-                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="p-1 ${isOAA ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-950/50' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'} rounded-lg transition cursor-pointer" title="刪除此學生">
+                  <button onclick="rosterManager.deleteStudent('${this.currentClassId}', ${s.seatNo})" class="min-h-[36px] min-w-[32px] p-1.5 flex items-center justify-center ${isOAA ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-950/50' : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'} rounded-lg transition cursor-pointer" title="刪除此學生">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
@@ -627,7 +627,7 @@ class RosterManager {
       return;
     }
 
-    if (confirm(`⚠️ 確定要刪除 ${classId} 班及其所有學生名單、評量成績與記點記錄嗎？\n（系統會先自動建立本機快照以防誤刪）`)) {
+    if (confirm(`⚠️ 確定要刪除 ${classId} 班及其所有學生名單、歷史段考歸檔與記點記錄嗎？\n（系統會先自動建立本機快照以防誤刪）`)) {
       this.store.deleteClassData(classId);
 
       const remainClasses = Object.values(this.store.getClasses());

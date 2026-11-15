@@ -186,16 +186,16 @@ class EventsLogView {
         </div>
 
         <!-- View Mode Switcher Tabs -->
-        <div class="flex items-center justify-between border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-200'} pb-3 mb-4">
-          <div class="flex items-center space-x-2">
-            <button onclick="eventsLogView.switchViewMode('timeline')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'timeline' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
-              <i data-lucide="calendar" class="w-4 h-4"></i> 📅 日期時序時間軸
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-200'} pb-3 mb-4">
+          <div class="grid grid-cols-3 sm:flex sm:items-center gap-1.5 w-full sm:w-auto">
+            <button onclick="eventsLogView.switchViewMode('timeline')" class="px-2 sm:px-3.5 py-2 sm:py-1.5 min-h-[38px] rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center gap-1 cursor-pointer ${this.currentViewMode === 'timeline' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
+              <i data-lucide="calendar" class="w-4 h-4 hidden sm:inline"></i> <span>📅 日期時序時間軸</span>
             </button>
-            <button onclick="eventsLogView.switchViewMode('table')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'table' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
-              <i data-lucide="list" class="w-4 h-4"></i> 📋 完整列表模式
+            <button onclick="eventsLogView.switchViewMode('table')" class="px-2 sm:px-3.5 py-2 sm:py-1.5 min-h-[38px] rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center gap-1 cursor-pointer ${this.currentViewMode === 'table' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
+              <i data-lucide="list" class="w-4 h-4 hidden sm:inline"></i> <span>📋 完整列表模式</span>
             </button>
-            <button onclick="eventsLogView.switchViewMode('cross')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 ${this.currentViewMode === 'cross' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
-              <i data-lucide="users" class="w-4 h-4"></i> 👥 多生交叉查詢
+            <button onclick="eventsLogView.switchViewMode('cross')" class="px-2 sm:px-3.5 py-2 sm:py-1.5 min-h-[38px] rounded-xl text-[11px] sm:text-sm font-black transition flex items-center justify-center gap-1 cursor-pointer ${this.currentViewMode === 'cross' ? (isOAA ? 'bg-gradient-to-r from-rose-900 to-rose-800 text-amber-200 border border-amber-400 shadow-sm' : 'bg-pink-600 text-white shadow-sm') : (isOAA ? 'bg-[#1b0a14] text-slate-200 hover:bg-rose-950 border border-amber-500/40' : 'bg-pink-50 text-pink-700 hover:bg-pink-100')}">
+              <i data-lucide="users" class="w-4 h-4 hidden sm:inline"></i> <span>👥 多生交叉查詢</span>
             </button>
           </div>
           <span class="text-xs ${isOAA ? 'text-amber-200/80 font-mono' : 'text-slate-500 font-bold'} hidden sm:inline">共 ${events.length} 筆符合事證</span>
@@ -252,7 +252,7 @@ class EventsLogView {
             <label class="block text-xs text-slate-700 font-bold mb-1">類別</label>
             <select onchange="eventsLogView.setFilter('filterCategory', this.value)" class="w-full border border-pink-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none bg-white">
               <option value="all" ${this.filterCategory === 'all' ? 'selected' : ''}>所有類別</option>
-              <option value="academic" ${this.filterCategory === 'academic' ? 'selected' : ''}>數學學業</option>
+              <option value="academic" ${this.filterCategory === 'academic' ? 'selected' : ''}>課堂學習</option>
               <option value="discipline" ${this.filterCategory === 'discipline' ? 'selected' : ''}>生活常規</option>
               <option value="conflict" ${this.filterCategory === 'conflict' ? 'selected' : ''}>同儕衝突</option>
               <option value="social" ${this.filterCategory === 'social' ? 'selected' : ''}>熱心助人/日常記事</option>

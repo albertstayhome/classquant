@@ -119,11 +119,15 @@ class Store {
       if (!this.data.students) this.data.students = {};
       if (!this.data.assessments) this.data.assessments = {};
       if (!this.data.events) this.data.events = [];
+      if (!this.data.termArchives || typeof this.data.termArchives !== 'object') this.data.termArchives = {};
       if (!this.data.weeklySchedule) this.data.weeklySchedule = {};
       if (!this.data.timetablePeriods) this.data.timetablePeriods = DEFAULT_TIMETABLE_PERIODS;
       if (!this.data.tags) this.data.tags = DEFAULT_TAGS;
       if (!this.data.settings) this.data.settings = {};
       if (!this.data.settings.theme) this.data.settings.theme = 'kitty';
+      if (!this.data.settings.regularGradeConfig) {
+        this.data.settings.regularGradeConfig = this.getDefaultRegularGradeConfig();
+      }
       if (!this.data.settings.nasSettings) {
         this.data.settings.nasSettings = {
           serverUrl: 'http://192.168.1.100:5005',
@@ -471,6 +475,7 @@ class Store {
       students,
       assessments,
       events,
+      termArchives: {},
       tags: DEFAULT_TAGS,
       timetablePeriods: DEFAULT_TIMETABLE_PERIODS,
       weeklySchedule: DEFAULT_WEEKLY_SCHEDULE,
@@ -480,6 +485,7 @@ class Store {
         autoSwitchTimetable: true,
         enableSound: true,
         cliffDropSigmaThreshold: 1.8,
+        regularGradeConfig: this.getDefaultRegularGradeConfig(),
         nasSettings: {
           serverUrl: 'http://192.168.1.100:5005',
           username: '',
@@ -1041,6 +1047,13 @@ class Store {
       }
       this.createSnapshot('匯入全系統備份前');
       this.data = parsed;
+      if (!this.data.termArchives || typeof this.data.termArchives !== 'object') {
+        this.data.termArchives = {};
+      }
+      if (!this.data.settings) this.data.settings = {};
+      if (!this.data.settings.regularGradeConfig) {
+        this.data.settings.regularGradeConfig = this.getDefaultRegularGradeConfig();
+      }
       if (Object.keys(this.data.classes).length > 0) {
         localStorage.removeItem('classquant_user_cleared');
         delete this.data.hasClearedAll;
@@ -1059,6 +1072,7 @@ class Store {
     if (this.data.students) delete this.data.students[classId];
     if (this.data.assessments) delete this.data.assessments[classId];
     if (this.data.seatingLayout) delete this.data.seatingLayout[classId];
+    if (this.data.termArchives) delete this.data.termArchives[classId];
     if (Array.isArray(this.data.events)) {
       this.data.events = this.data.events.filter(e => e.classId !== classId);
     }
@@ -1097,6 +1111,7 @@ class Store {
       students: {},
       assessments: {},
       events: [],
+      termArchives: {},
       seatingLayout: {},
       tags: DEFAULT_TAGS,
       groupTags: {
@@ -1112,6 +1127,7 @@ class Store {
         autoSwitchTimetable: true,
         enableSound: prevSettings.enableSound !== undefined ? prevSettings.enableSound : true,
         cliffDropSigmaThreshold: prevSettings.cliffDropSigmaThreshold || 1.8,
+        regularGradeConfig: prevSettings.regularGradeConfig || this.getDefaultRegularGradeConfig(),
         googleBackup: prevSettings.googleBackup || this.getDefaultGoogleBackupSettings(),
         nasSettings: prevSettings.nasSettings || {
           serverUrl: 'http://192.168.1.100:5005',
@@ -1455,46 +1471,482 @@ class Store {
     return this.importAllData(result.dataJson);
   }
 
-  // --- Student Ranking & OAA Performance Tier Engine ---
+  // --- Term Regular Grading, Tiering, Settlement & Historical Cumulative Engine ---
+  getDefaultRegularGradeConfig() {
+    return {
+      baseScore: 80,
+      pointsPerUnit: 1,
+      minScore: 0,
+      maxScore: 100
+    };
+  }
+
+  getRegularGradeConfig() {
+    if (!this.data.settings) this.data.settings = {};
+    if (!this.data.settings.regularGradeConfig) {
+      this.data.settings.regularGradeConfig = this.getDefaultRegularGradeConfig();
+    }
+    const cfg = this.data.settings.regularGradeConfig;
+    const minScore = Number.isFinite(Number(cfg.minScore)) ? Number(cfg.minScore) : 0;
+    const maxScore = Number.isFinite(Number(cfg.maxScore)) ? Math.max(minScore, Number(cfg.maxScore)) : 100;
+    return {
+      baseScore: Number.isFinite(Number(cfg.baseScore)) ? Number(cfg.baseScore) : 80,
+      pointsPerUnit: Number.isFinite(Number(cfg.pointsPerUnit)) && Number(cfg.pointsPerUnit) > 0 ? Number(cfg.pointsPerUnit) : 1,
+      minScore,
+      maxScore
+    };
+  }
+
+  updateRegularGradeConfig(patch = {}) {
+    const curr = this.getRegularGradeConfig();
+    const minScore = patch.minScore !== undefined && Number.isFinite(Number(patch.minScore)) ? Number(patch.minScore) : curr.minScore;
+    const maxScore = patch.maxScore !== undefined && Number.isFinite(Number(patch.maxScore)) ? Math.max(minScore, Number(patch.maxScore)) : curr.maxScore;
+    const baseScore = patch.baseScore !== undefined && Number.isFinite(Number(patch.baseScore)) ? Number(patch.baseScore) : curr.baseScore;
+    const pointsPerUnit = patch.pointsPerUnit !== undefined && Number.isFinite(Number(patch.pointsPerUnit)) && Number(patch.pointsPerUnit) > 0
+      ? Number(patch.pointsPerUnit)
+      : curr.pointsPerUnit;
+
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings.regularGradeConfig = {
+      baseScore,
+      pointsPerUnit,
+      minScore,
+      maxScore
+    };
+    this.saveToStorage();
+    return this.getRegularGradeConfig();
+  }
+
+  computeGradeTier(score) {
+    const val = Number(score) || 0;
+    if (val >= 95) return { tier: 'S', oaaSubGrade: 'S', label: 'S 卓越表現' };
+    if (val >= 90) return { tier: 'A', oaaSubGrade: 'A+', label: 'A 優秀表現' };
+    if (val >= 85) return { tier: 'A', oaaSubGrade: 'A', label: 'A 優良表現' };
+    if (val >= 80) return { tier: 'B', oaaSubGrade: 'B+', label: 'B 穩定達標' };
+    if (val >= 75) return { tier: 'B', oaaSubGrade: 'B', label: 'B 基準表現' };
+    if (val >= 68) return { tier: 'C', oaaSubGrade: 'C+', label: 'C 尚需鼓勵' };
+    if (val >= 60) return { tier: 'C', oaaSubGrade: 'C', label: 'C 須加留意' };
+    return { tier: 'D', oaaSubGrade: 'D', label: 'D 重點輔導' };
+  }
+
+  getTermArchives(classId) {
+    if (!classId || !this.data.termArchives) return [];
+    const list = this.data.termArchives[classId];
+    return Array.isArray(list) ? list : [];
+  }
+
+  getNextTermNumber(classId) {
+    return this.getTermArchives(classId).length + 1;
+  }
+
+  getDefaultTermLabel(classId) {
+    return `第 ${this.getNextTermNumber(classId)} 次段考`;
+  }
+
+  _buildHistoryMapBySeat(classId, maxTermNumber = null) {
+    const archives = this.getTermArchives(classId).filter(a =>
+      maxTermNumber === null ? true : Number(a.termNumber) <= Number(maxTermNumber)
+    );
+    const bySeat = {};
+    archives.forEach(arch => {
+      (arch.students || []).forEach(stu => {
+        const key = Number(stu.seatNo);
+        if (!bySeat[key]) {
+          bySeat[key] = {
+            records: [],
+            pastNetDeltaSum: 0,
+            pastPositiveSum: 0,
+            pastNegativeSum: 0,
+            scoreSum: 0
+          };
+        }
+        const entry = bySeat[key];
+        entry.records.push({
+          archiveId: arch.id,
+          termNumber: arch.termNumber,
+          termLabel: arch.termLabel,
+          settledAt: arch.settledAt,
+          regularScore: Number(stu.regularScore) || 0,
+          netDelta: Number(stu.netDelta) || 0,
+          positivePts: Number(stu.positivePts) || 0,
+          negativePts: Number(stu.negativePts) || 0,
+          eventCount: Number(stu.eventCount) || 0,
+          overallRank: Number(stu.overallRank) || 0,
+          tier: stu.tier || this.computeGradeTier(stu.regularScore).tier
+        });
+        entry.pastNetDeltaSum += Number(stu.netDelta) || 0;
+        entry.pastPositiveSum += Number(stu.positivePts) || 0;
+        entry.pastNegativeSum += Number(stu.negativePts) || 0;
+        entry.scoreSum += Number(stu.regularScore) || 0;
+      });
+    });
+    return bySeat;
+  }
+
+  getStudentHistoricalSummary(classId, seatNo) {
+    const bySeat = this._buildHistoryMapBySeat(classId);
+    const rec = bySeat[Number(seatNo)];
+    const rank = this.getStudentRankInClass(classId, seatNo);
+    const records = rec ? rec.records : [];
+    const settledTermCount = records.length;
+    const pastNetDeltaSum = rec ? rec.pastNetDeltaSum : 0;
+    const pastPositiveSum = rec ? rec.pastPositiveSum : 0;
+    const pastNegativeSum = rec ? rec.pastNegativeSum : 0;
+    const pastAvgRegularScore = settledTermCount > 0 ? Math.round((rec.scoreSum / settledTermCount) * 10) / 10 : null;
+    const currentNetDelta = Number(rank.netDelta) || 0;
+    const currentRegularScore = Number(rank.regularScore) || this.getRegularGradeConfig().baseScore;
+    const allTermsAvgRegularScore = settledTermCount > 0
+      ? Math.round(((rec.scoreSum + currentRegularScore) / (settledTermCount + 1)) * 10) / 10
+      : currentRegularScore;
+
+    return {
+      records,
+      settledTermCount,
+      pastNetDeltaSum,
+      pastPositiveSum,
+      pastNegativeSum,
+      pastAvgRegularScore,
+      currentNetDelta,
+      currentRegularScore,
+      totalCumulativeNetDelta: pastNetDeltaSum + currentNetDelta,
+      allTermsAvgRegularScore
+    };
+  }
+
+  settleClassTerm(classId, customTermLabel = '') {
+    if (!classId || !this.data.classes?.[classId]) {
+      return { success: false, error: '找不到指定班級，無法結算' };
+    }
+    const cls = this.data.classes[classId];
+    const termNumber = this.getNextTermNumber(classId);
+    const termLabel = (customTermLabel || '').trim() || `第 ${termNumber} 次段考`;
+
+    // Safety snapshot before clearing this class's active events
+    this.createSnapshot(`結算 ${cls.name} ${termLabel} 前`);
+
+    const cfg = this.getRegularGradeConfig();
+    const leaderboard = this.getClassLeaderboard(classId);
+    const classEvents = (this.data.events || []).filter(e => e.classId === classId);
+    const settledAt = new Date().toISOString();
+
+    const studentSnapshots = leaderboard.map(item => ({
+      seatNo: item.seatNo,
+      name: item.name,
+      gender: item.gender,
+      overallRank: item.overallRank,
+      genderRank: item.genderRank,
+      regularScore: item.regularScore,
+      uncappedScore: item.uncappedScore,
+      netDelta: item.netDelta,
+      positivePts: item.positivePts,
+      negativePts: item.negativePts,
+      eventCount: item.eventCount,
+      tier: item.tier,
+      oaaSubGrade: item.oaaSubGrade,
+      pastNetDeltaSum: item.pastNetDeltaSum,
+      totalCumulativeNetDelta: item.totalCumulativeNetDelta,
+      allTermsAvgRegularScore: item.allTermsAvgRegularScore
+    }));
+
+    const avgScore = studentSnapshots.length > 0
+      ? Math.round((studentSnapshots.reduce((s, r) => s + r.regularScore, 0) / studentSnapshots.length) * 10) / 10
+      : cfg.baseScore;
+
+    const archiveEntry = {
+      id: `term_${classId}_${Date.now()}`,
+      classId,
+      className: cls.name,
+      termNumber,
+      termLabel,
+      settledAt,
+      gradeConfig: { ...cfg },
+      summary: {
+        studentCount: studentSnapshots.length,
+        classAvgRegularScore: avgScore,
+        totalEventCount: classEvents.length,
+        totalPositivePts: studentSnapshots.reduce((s, r) => s + r.positivePts, 0),
+        totalNegativePts: studentSnapshots.reduce((s, r) => s + r.negativePts, 0)
+      },
+      students: studentSnapshots,
+      events: JSON.parse(JSON.stringify(classEvents))
+    };
+
+    if (!this.data.termArchives || typeof this.data.termArchives !== 'object') {
+      this.data.termArchives = {};
+    }
+    if (!Array.isArray(this.data.termArchives[classId])) {
+      this.data.termArchives[classId] = [];
+    }
+    this.data.termArchives[classId].push(archiveEntry);
+
+    // Reset ONLY this class's active events; leave all other classes untouched
+    this.data.events = (this.data.events || []).filter(e => e.classId !== classId);
+    this.saveToStorage();
+
+    return {
+      success: true,
+      archive: archiveEntry,
+      settledEventCount: classEvents.length
+    };
+  }
+
+  buildClassTermWorkbookSheets(classId, archiveEntry = null) {
+    const cls = this.getClass(classId) || { id: classId, name: classId || '班級' };
+    const isArchived = Boolean(archiveEntry);
+    const cfg = archiveEntry?.gradeConfig || this.getRegularGradeConfig();
+    const termTitle = archiveEntry
+      ? archiveEntry.termLabel
+      : `${this.getDefaultTermLabel(classId)}（目前進度預覽）`;
+
+    const allArchives = this.getTermArchives(classId);
+    const relevantArchives = archiveEntry
+      ? allArchives.filter(a => Number(a.termNumber) <= Number(archiveEntry.termNumber))
+      : allArchives;
+
+    const sourceRows = archiveEntry
+      ? [...(archiveEntry.students || [])]
+      : this.getClassLeaderboard(classId);
+
+    const rowsBySeat = [...sourceRows].sort((a, b) => Number(a.seatNo) - Number(b.seatNo));
+    const dateStamp = (archiveEntry?.settledAt || new Date().toISOString()).slice(0, 10);
+
+    // Sheet 1: 平時成績總表 (Sorted by seat number ascending for direct gradebook entry)
+    const sheet1Rows = [
+      [
+        `${cls.name} 平時成績結算表`,
+        termTitle,
+        `規則：基準 ${cfg.baseScore} 分 / 每點 ×${cfg.pointsPerUnit}（${cfg.minScore}~${cfg.maxScore}分）`,
+        `時間：${dateStamp}`
+      ],
+      [
+        '座號',
+        '姓名',
+        '性別',
+        '本期平時成績',
+        '等第',
+        '班級排名',
+        '本期淨加減分',
+        '正向加分',
+        '扣分累計',
+        '點記次數',
+        '歷史累積淨分(含本期)',
+        '歷次段考平均'
+      ]
+    ];
+
+    rowsBySeat.forEach(item => {
+      const cumNet = item.totalCumulativeNetDelta !== undefined
+        ? Number(item.totalCumulativeNetDelta)
+        : Number(item.netDelta || 0);
+      const histAvg = item.allTermsAvgRegularScore !== undefined
+        ? Number(item.allTermsAvgRegularScore)
+        : Number(item.regularScore);
+      sheet1Rows.push([
+        Number(item.seatNo),
+        item.name || `${item.seatNo}號`,
+        item.gender === 'F' ? '女' : '男',
+        Number(item.regularScore),
+        item.tier || this.computeGradeTier(item.regularScore).tier,
+        Number(item.overallRank || 0),
+        Number(item.netDelta || 0),
+        Number(item.positivePts || 0),
+        Number(item.negativePts || 0),
+        Number(item.eventCount || 0),
+        cumNet,
+        histAvg
+      ]);
+    });
+
+    const sheets = [
+      {
+        name: '平時成績結算表',
+        rows: sheet1Rows,
+        titleRowIndexes: [0],
+        headerRowIndex: 1,
+        freezeRow: 2
+      }
+    ];
+
+    // Sheet 2: 課堂點記明細
+    const studentNameMap = {};
+    (this.getStudents(classId) || []).forEach(s => { studentNameMap[s.seatNo] = s.name; });
+    rowsBySeat.forEach(s => { if (s.name) studentNameMap[s.seatNo] = s.name; });
+
+    const rawEvents = archiveEntry ? (archiveEntry.events || []) : this.getEvents(classId);
+    const sortedEvents = [...rawEvents].sort((a, b) => {
+      const da = `${a.date || ''} ${a.time || ''}`;
+      const db = `${b.date || ''} ${b.time || ''}`;
+      return da.localeCompare(db);
+    });
+
+    const sheet2Rows = [
+      ['日期', '時間', '節次', '座號', '姓名', '項目標籤', '分數變動', '備註說明']
+    ];
+    sortedEvents.forEach(ev => {
+      sheet2Rows.push([
+        ev.date || '',
+        ev.time || '',
+        ev.period !== undefined && ev.period !== null ? String(ev.period) : '',
+        Number(ev.seatNo) || 0,
+        studentNameMap[ev.seatNo] || `${ev.seatNo}號`,
+        ev.tagName || ev.tagId || '課堂表現',
+        Number(ev.delta) || 0,
+        ev.note || ''
+      ]);
+    });
+    if (sortedEvents.length === 0) {
+      sheet2Rows.push(['（本期尚無點記明細）', '', '', '', '', '', 0, '']);
+    }
+
+    sheets.push({
+      name: '課堂點記明細',
+      rows: sheet2Rows,
+      headerRowIndex: 0,
+      freezeRow: 1
+    });
+
+    // Sheet 3: 歷次段考比較 (if any historical archives exist)
+    if (relevantArchives.length > 0) {
+      const termHeaders = relevantArchives.map(a => a.termLabel);
+      const headerRow = ['座號', '姓名', ...termHeaders];
+      if (!isArchived) headerRow.push('本期進行中');
+      headerRow.push('歷史累積淨分', '歷次段考平均');
+
+      const sheet3Rows = [headerRow];
+      const liveRankMap = isArchived ? {} : this.getClassStudentRanks(classId);
+
+      // Union of seats from current roster + snapshot
+      const seatSet = new Map();
+      (this.getStudents(classId) || []).forEach(s => seatSet.set(Number(s.seatNo), s.name));
+      rowsBySeat.forEach(s => { if (!seatSet.has(Number(s.seatNo))) seatSet.set(Number(s.seatNo), s.name); });
+
+      Array.from(seatSet.keys()).sort((a, b) => a - b).forEach(seatNo => {
+        const row = [seatNo, seatSet.get(seatNo) || `${seatNo}號`];
+        let cumNet = 0;
+        let scoreSum = 0;
+        let count = 0;
+
+        relevantArchives.forEach(arch => {
+          const found = (arch.students || []).find(st => Number(st.seatNo) === seatNo);
+          if (found) {
+            row.push(Number(found.regularScore));
+            cumNet += Number(found.netDelta || 0);
+            scoreSum += Number(found.regularScore || 0);
+            count++;
+          } else {
+            row.push('');
+          }
+        });
+
+        if (!isArchived) {
+          const live = liveRankMap[seatNo];
+          const liveScore = live ? Number(live.regularScore) : cfg.baseScore;
+          const liveNet = live ? Number(live.netDelta) : 0;
+          row.push(liveScore);
+          cumNet += liveNet;
+          scoreSum += liveScore;
+          count++;
+        }
+
+        const avg = count > 0 ? Math.round((scoreSum / count) * 10) / 10 : cfg.baseScore;
+        row.push(cumNet, avg);
+        sheet3Rows.push(row);
+      });
+
+      sheets.push({
+        name: '歷次段考比較',
+        rows: sheet3Rows,
+        headerRowIndex: 0,
+        freezeRow: 1
+      });
+    }
+
+    const safeClass = String(cls.name || classId || '班級').replace(/[\\\/:\*\?"<>\|]/g, '_');
+    const safeTerm = String(archiveEntry ? archiveEntry.termLabel : `${this.getDefaultTermLabel(classId)}_預覽`).replace(/[\\\/:\*\?"<>\|]/g, '_');
+    const yyyymmdd = dateStamp.replace(/-/g, '');
+    const filename = `${safeClass}_${safeTerm}_平時成績_${yyyymmdd}.xlsx`;
+
+    return { filename, sheets };
+  }
+
+  exportClassTermWorkbook(classId, archiveEntry = null, triggerDownload = true) {
+    const built = this.buildClassTermWorkbookSheets(classId, archiveEntry);
+    if (triggerDownload && window.XlsxBuilder?.downloadWorkbook) {
+      window.XlsxBuilder.downloadWorkbook(built.filename, built.sheets);
+    }
+    return built;
+  }
+
+  // --- Pure Classroom Behavior Ranking & Tier Engine (No quiz weighting) ---
   getClassStudentRanks(classId) {
     try {
-      if (!classId) classId = '801';
+      if (!classId) {
+        const firstId = Object.keys(this.data.classes || {})[0];
+        classId = firstId || '801';
+      }
       const students = this.getStudents(classId) || [];
       if (students.length === 0) return {};
 
+      const cfg = this.getRegularGradeConfig();
       const classEvents = this.getEvents(classId) || [];
+      const historyMap = this._buildHistoryMapBySeat(classId);
       const total = students.length;
 
       const scored = students.map(s => {
-        let academicScore = 75;
-        try {
-          const profile = window.statisticsEngine?.getStudentProfile ? window.statisticsEngine.getStudentProfile(classId, s.seatNo) : null;
-          if (profile && profile.scoreMean > 0) academicScore = profile.scoreMean;
-        } catch (e) {}
+        const events = classEvents.filter(e => e.seatNo === s.seatNo);
+        const netDelta = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
+        const positivePts = events.reduce((sum, e) => sum + Math.max(0, Number(e.delta) || 0), 0);
+        const negativePts = events.reduce((sum, e) => sum + Math.min(0, Number(e.delta) || 0), 0);
 
-        const events = classEvents.filter(e => e.seatNo === s.seatNo && e.category !== 'academic' && e.category !== 'assessment');
-        const characterPoints = events.reduce((sum, e) => sum + (Number(e.delta) || 0), 0);
-        // Composite rating = Academic score (weighted) + character points net delta
-        const composite = (academicScore * 10) + characterPoints;
+        const rawScore = cfg.baseScore + (netDelta * cfg.pointsPerUnit);
+        const uncappedScore = Math.round(rawScore * 10) / 10;
+        const regularScore = Math.round(Math.min(cfg.maxScore, Math.max(cfg.minScore, rawScore)) * 10) / 10;
+        const tierInfo = this.computeGradeTier(regularScore);
+
+        const hist = historyMap[Number(s.seatNo)];
+        const settledTermCount = hist ? hist.records.length : 0;
+        const pastNetDeltaSum = hist ? hist.pastNetDeltaSum : 0;
+        const totalCumulativeNetDelta = pastNetDeltaSum + netDelta;
+        const pastAvgRegularScore = settledTermCount > 0 ? Math.round((hist.scoreSum / settledTermCount) * 10) / 10 : null;
+        const allTermsAvgRegularScore = settledTermCount > 0
+          ? Math.round(((hist.scoreSum + regularScore) / (settledTermCount + 1)) * 10) / 10
+          : regularScore;
+
         const gender = s.gender || (s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F');
 
         return {
           seatNo: s.seatNo,
           name: s.name,
-          gender: gender,
-          composite: composite,
-          academicScore: academicScore,
-          characterPoints: characterPoints
+          gender,
+          regularScore,
+          uncappedScore,
+          netDelta,
+          positivePts,
+          negativePts,
+          eventCount: events.length,
+          tier: tierInfo.tier,
+          oaaSubGrade: tierInfo.oaaSubGrade,
+          tierLabel: tierInfo.label,
+          settledTermCount,
+          pastNetDeltaSum,
+          totalCumulativeNetDelta,
+          pastAvgRegularScore,
+          allTermsAvgRegularScore,
+          // Backward-compatible aliases without quiz hardcoding
+          composite: regularScore,
+          academicScore: regularScore,
+          characterPoints: netDelta
         };
       });
 
-      // Sort descending by composite score, ties broken deterministically by seatNo ascending
+      // Rank purely by classroom performance: regularScore desc -> uncappedScore desc -> positivePts desc -> seatNo asc
       scored.sort((a, b) => {
-        if (b.composite !== a.composite) return b.composite - a.composite;
+        if (b.regularScore !== a.regularScore) return b.regularScore - a.regularScore;
+        if (b.uncappedScore !== a.uncappedScore) return b.uncappedScore - a.uncappedScore;
+        if (b.positivePts !== a.positivePts) return b.positivePts - a.positivePts;
         return a.seatNo - b.seatNo;
       });
 
-      // Map seatNo -> Rank Object with overallRank (1..N) and genderRank (1..M/F count)
       let maleCount = 0;
       let femaleCount = 0;
       const rankMap = {};
@@ -1511,14 +1963,9 @@ class Store {
         }
 
         rankMap[item.seatNo] = {
-          seatNo: item.seatNo,
-          name: item.name,
-          gender: item.gender,
-          overallRank: overallRank,
-          genderRank: genderRank,
-          composite: item.composite,
-          academicScore: item.academicScore,
-          characterPoints: item.characterPoints
+          ...item,
+          overallRank,
+          genderRank
         };
       });
 
@@ -1541,14 +1988,30 @@ class Store {
 
   getStudentRankInClass(classId, seatNo) {
     const ranks = this.getClassStudentRanks(classId);
+    const base = this.getRegularGradeConfig().baseScore;
+    const tierInfo = this.computeGradeTier(base);
     return ranks[seatNo] || {
       seatNo: parseInt(seatNo, 10),
       name: '',
       gender: 'M',
       overallRank: 1,
       genderRank: 1,
-      composite: 750,
-      academicScore: 75,
+      regularScore: base,
+      uncappedScore: base,
+      netDelta: 0,
+      positivePts: 0,
+      negativePts: 0,
+      eventCount: 0,
+      tier: tierInfo.tier,
+      oaaSubGrade: tierInfo.oaaSubGrade,
+      tierLabel: tierInfo.label,
+      settledTermCount: 0,
+      pastNetDeltaSum: 0,
+      totalCumulativeNetDelta: 0,
+      pastAvgRegularScore: null,
+      allTermsAvgRegularScore: base,
+      composite: base,
+      academicScore: base,
       characterPoints: 0
     };
   }

@@ -91,9 +91,14 @@ class UserGuideView {
       ` : `
         <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-pink-300 relative overflow-hidden bg-gradient-to-r from-pink-50 via-white to-sky-50 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-4">
-              <div class="kitty-cat-avatar shrink-0"></div>
-              <div class="sanrio-twinstars-badge shrink-0"></div>
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center -space-x-1 sm:space-x-1.5 shrink-0">
+                <div class="kitty-cat-avatar !w-10 !h-10 shrink-0" title="Hello Kitty"></div>
+                <div class="sanrio-twinstars-badge !w-10 !h-10 shrink-0" title="Little Twin Stars"></div>
+                <div class="sanrio-kuromi-badge !w-10 !h-10 shrink-0" title="Kuromi"></div>
+                <div class="sanrio-cinnamoroll-badge !w-11 !h-10 hidden sm:inline-block shrink-0" title="Cinnamoroll"></div>
+                <div class="sanrio-mymelody-badge !w-9 !h-10 hidden sm:inline-block shrink-0" title="My Melody"></div>
+              </div>
               <div>
                 <h2 class="text-xl sm:text-2xl font-black text-pink-600 flex items-center gap-2">
                   ClassQuant Hub • 教師實戰圖文教學手冊
@@ -126,7 +131,7 @@ class UserGuideView {
             </div>
             <h3 class="${titleClass}">如何新增班級與匯入學生名單？</h3>
             <p class="${subDescClass}">
-              點擊導覽列最上方的 <strong>「👥 班級名單」</strong> 頁籤：
+              點擊上方主導覽列的 <strong>「👥 班級與學生」</strong> ➔「班級名單管理」：
             </p>
             <div class="${innerBoxClass}">
               <div><strong>1. 1秒批次貼上名單</strong>：點擊「📋 1秒批次貼上名單」，直接從 Excel 或 Word 複製整班學生名字貼上，系統自動依序排座號！</div>
@@ -167,8 +172,8 @@ class UserGuideView {
             </p>
             <div class="${innerNeutralBoxClass}">
               <div class="flex items-center justify-between">
-                <span>📘 <strong>學業均分</strong>：歷次小考/段考客觀平均</span>
-                ${isOAA ? '<span class="px-2 py-0.5 rounded bg-blue-950 text-cyan-300 border border-cyan-500/50 font-bold">85分</span>' : '<span class="px-2 py-0.5 rounded badge-academic font-bold">85分</span>'}
+                <span>💯 <strong>平時成績</strong>：基準分 + 加扣點即時換算</span>
+                ${isOAA ? '<span class="px-2 py-0.5 rounded bg-blue-950 text-cyan-300 border border-cyan-500/50 font-bold">86分</span>' : '<span class="px-2 py-0.5 rounded badge-academic font-bold">86分</span>'}
               </div>
               <div class="flex items-center justify-between">
                 <span>${isOAA ? '🏛️' : '🎀'} <strong>品格常規</strong>：課堂常規與責任淨點數</span>
@@ -251,20 +256,20 @@ class UserGuideView {
           </div>
         </div>
 
-        <!-- Step 8: 統計戰情室與家長晤談備忘 -->
+        <!-- Step 8: 段考一鍵結算 Excel & 歷史累積 -->
         <div class="${isOAA ? cardClass : 'glass-card rounded-3xl p-6 border border-purple-200 flex flex-col justify-between bg-white shadow-sm'}">
           <div>
             <div class="flex items-center justify-between mb-3">
-              ${badgeStep('08', '輔導晤談', 'bg-purple-600')}
-              <i data-lucide="pie-chart" class="w-4 h-4 ${isOAA ? 'text-purple-400' : 'text-purple-600'}"></i>
+              ${badgeStep('08', '段考結算', 'bg-purple-600')}
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 ${isOAA ? 'text-purple-400' : 'text-purple-600'}"></i>
             </div>
-            <h3 class="${titleClass}">因材施教分群與晤談備忘錄</h3>
+            <h3 class="${titleClass}">平時成績結算 Excel 與歷史累積</h3>
             <p class="${subDescClass}">
-              掌握全班學習趨勢與個別學生五維度雷達分析：
+              每次段考後切換至 <strong>「💯 平時成績」</strong> 分頁，一鍵完成結算：
             </p>
             <div class="${innerPurpleBoxClass}">
-              <div>• <strong>四象限分群</strong>：自動劃分拔尖、潛力、待補救與關懷引導組。</div>
-              <div>• <strong>一鍵複製備忘</strong>：自動生成客觀分析文案，家長晤談時直接複製使用！</div>
+              <div>• <strong>一鍵下載 Excel & 歸檔重算</strong>：產生含「平時成績表、排行與明細」之真實 .xlsx 檔，並只重置該班當期點數重新計算！</div>
+              <div>• <strong>歷史段考永久保存</strong>：已結算的「第1次／第2次段考」與累積平均可隨時重下 Excel 與查閱趨勢。</div>
             </div>
           </div>
         </div>

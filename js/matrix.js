@@ -17,6 +17,7 @@ class ClassroomMatrix {
     this.currentTagPage = 0;
     this.touchStartX = 0;
     this.showQuickSelectBar = false;
+    this.scoringMode = 'live'; // 'live' | 'retro'
 
     // Official COTE Character Avatars for OAA Mode (Official non-Q bust assets)
     this.coteAvatars = [
@@ -66,6 +67,28 @@ class ClassroomMatrix {
     this.currentHoverSeatNo = null;
     this.longPressTimer = null;
     this.justFinishedDrag = false;
+    this.mobileGridDensity = (typeof localStorage !== 'undefined' && localStorage.getItem('classquant_mobile_grid')) || 'comfort';
+  }
+
+  toggleMobileGridDensity(classId) {
+    this.mobileGridDensity = this.mobileGridDensity === 'exact' ? 'comfort' : 'exact';
+    try { localStorage.setItem('classquant_mobile_grid', this.mobileGridDensity); } catch (e) {}
+    const label = this.mobileGridDensity === 'exact' ? '原班橫排欄數（對應講台視角）' : '手機舒適大卡片（最多 4 欄更好點）';
+    window.appState?.showToast(`📱 已切換為：${label}`, 'info');
+    this.render('classroom-matrix-view', classId);
+  }
+
+  scrollToTagDock() {
+    const dock = document.getElementById('tag-dock-panel');
+    if (dock) {
+      dock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  setScoringMode(mode, classId = null) {
+    this.scoringMode = mode === 'retro' ? 'retro' : 'live';
+    const targetClass = classId || window.appState?.currentClassId || '801';
+    this.render('classroom-matrix-view', targetClass);
   }
 
   toggleQuickSelectBar() {
@@ -225,14 +248,36 @@ class ClassroomMatrix {
     if (e.cancelable) e.preventDefault();
 
     const touch = e.touches ? e.touches[0] : e;
+    this._pendingDragMove = {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      classId
+    };
+
+    if (typeof requestAnimationFrame === 'undefined') {
+      this._processSeatDirectMoveFrame();
+      return;
+    }
+
+    if (!this._dragRafId) {
+      this._dragRafId = requestAnimationFrame(() => {
+        this._dragRafId = null;
+        this._processSeatDirectMoveFrame();
+      });
+    }
+  }
+
+  _processSeatDirectMoveFrame() {
+    if (!this.isDragging || !this._pendingDragMove) return;
+    const { clientX, clientY, classId } = this._pendingDragMove;
     const currentScrollY = window.scrollY;
     const deltaScroll = currentScrollY - this.startWindowScrollY;
 
-    // 1. 1:1 hardware direct tracking for ghost
-    const dx = touch.clientX - this.startTouchX;
-    const dy = touch.clientY - this.startTouchY;
-    const vx = touch.clientX - (this.lastTouchX || touch.clientX);
-    this.lastTouchX = touch.clientX;
+    // 1. GPU-composited 1:1 finger lock for ghost
+    const dx = clientX - this.startTouchX;
+    const dy = clientY - this.startTouchY;
+    const vx = clientX - (this.lastTouchX || clientX);
+    this.lastTouchX = clientX;
     const tilt = Math.max(-6, Math.min(6, vx * 0.35));
 
     if (this.dragGhost) {
@@ -242,11 +287,11 @@ class ClassroomMatrix {
     // 2. Edge auto-scrolling
     const viewportHeight = window.innerHeight;
     const edgeZone = 75;
-    if (touch.clientY < edgeZone) {
-      const speed = Math.max(4, Math.round((edgeZone - touch.clientY) / 4));
+    if (clientY < edgeZone) {
+      const speed = Math.max(4, Math.round((edgeZone - clientY) / 4));
       window.scrollBy(0, -speed);
-    } else if (touch.clientY > viewportHeight - edgeZone) {
-      const speed = Math.max(4, Math.round((touch.clientY - (viewportHeight - edgeZone)) / 4));
+    } else if (clientY > viewportHeight - edgeZone) {
+      const speed = Math.max(4, Math.round((clientY - (viewportHeight - edgeZone)) / 4));
       window.scrollBy(0, speed);
     }
 
@@ -258,7 +303,7 @@ class ClassroomMatrix {
       for (let slot of this.slotSnapshots) {
         const centerY = slot.centerY - deltaScroll;
         const centerX = slot.centerX;
-        const distSq = Math.pow(touch.clientX - centerX, 2) + Math.pow(touch.clientY - centerY, 2);
+        const distSq = Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2);
         if (distSq < minDistSq) {
           minDistSq = distSq;
           closestSlot = slot;
@@ -350,6 +395,12 @@ class ClassroomMatrix {
   stopIOSDrag(classId) {
     this.isDragging = false;
     this.currentHoverSeatNo = null;
+    this._pendingDragMove = null;
+    this.lastTouchX = null;
+    if (this._dragRafId) {
+      cancelAnimationFrame(this._dragRafId);
+      this._dragRafId = null;
+    }
 
     // Remove window listeners cleanly
     if (this.boundSeatMove) {
@@ -495,6 +546,7 @@ class ClassroomMatrix {
 
     const layout = this.store.getSeatingLayout(currentClassId);
     const cols = layout.cols || (students.length > 30 ? 6 : 5);
+    const mobileCols = this.mobileGridDensity === 'exact' ? cols : Math.min(cols, 4);
     const seatOrder = layout.seatOrder || students.map(s => s.seatNo);
     const overview = this.stats.getClassOverview(currentClassId);
     
@@ -503,7 +555,8 @@ class ClassroomMatrix {
     const sortedTags = this.store.getTagsSorted(currentClassId);
     const isHomeroom = cls.type === 'homeroom';
     const isOAA = window.appStore && window.appStore.getTheme() === 'oaa';
-    const classRanks = (isOAA && this.store.getClassStudentRanks) ? this.store.getClassStudentRanks(currentClassId) : {};
+    const classRanks = this.store.getClassStudentRanks ? this.store.getClassStudentRanks(currentClassId) : {};
+    const termLabel = this.store.getDefaultTermLabel ? this.store.getDefaultTermLabel(currentClassId) : '第 1 次段考';
 
     // Chunk tags into pages of 4 (2 cols x 2 rows, large comfortable readable cards)
     const pageSize = 4;
@@ -516,17 +569,51 @@ class ClassroomMatrix {
     this.maxTagPages = tagPages.length;
     if (this.currentTagPage >= this.maxTagPages) this.currentTagPage = 0;
 
+    // Inline Mode Switcher Strip (⚡ 即時座位點記 ⇋ ⏰ 事後批次補記)
+    const modeSwitchBarHtml = `
+      <div class="mb-2.5 p-1.5 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-2 ${isOAA ? 'bg-[#1d0a15] border-amber-500/40 text-amber-100' : 'glass-card border-pink-200 bg-white/95'}">
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="matrixView.setScoringMode('live', '${currentClassId}')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'live' ? (isOAA ? 'bg-gradient-to-r from-rose-700 to-amber-600 text-white border border-amber-400/70 shadow-sm' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm') : (isOAA ? 'text-amber-300/80 hover:bg-rose-950/60' : 'text-slate-600 hover:bg-pink-50')}">
+            <span>⚡</span><span>即時點記</span>
+          </button>
+          <button id="retro-log-top-btn" type="button" onclick="matrixView.setScoringMode('retro', '${currentClassId}')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'retro' ? (isOAA ? 'bg-gradient-to-r from-amber-700 to-rose-700 text-white border border-amber-400/70 shadow-sm' : 'bg-amber-500 text-white shadow-sm') : (isOAA ? 'text-amber-300/80 hover:bg-rose-950/60' : 'text-slate-600 hover:bg-amber-50')}">
+            <span>⏰</span><span>事後補記</span>
+          </button>
+        </div>
+        <button type="button" onclick="appState.switchTab('grades')" class="px-3 py-1 rounded-xl text-[11px] sm:text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${isOAA ? 'bg-[#2a0f1f] text-amber-300 border border-amber-500/40 hover:bg-[#3a152b]' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'}" title="前往計算與結算平時成績">
+          <span>📅 ${termLabel}計算中</span>
+          <span>•</span>
+          <span class="underline">查看平時成績 →</span>
+        </button>
+      </div>
+    `;
+
+    if (this.scoringMode === 'retro') {
+      container.innerHTML = `
+        ${modeSwitchBarHtml}
+        <div id="matrix-retro-host"></div>
+      `;
+      if (window.retroLogView) {
+        window.retroLogView.currentClassId = currentClassId;
+        window.retroLogView.render('matrix-retro-host', currentClassId);
+      }
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
     // Dynamic Header Metadata (COTE vs Sanrio)
+    const studentCountDisplay = cls.studentCount ?? students.length;
     const classNameDisplay = isOAA ? `高度育成 ${cls.name}` : cls.name;
     const classBadgeHtml = isOAA
-      ? `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black bg-rose-900 text-amber-200 border border-amber-500/60 shadow-sm">${isHomeroom ? '高度育成 • 導師班' : '高度育成 • 數學班'} (${cls.studentCount}名)</span>`
-      : `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">${isHomeroom ? '🎀 導師本班' : '📘 數學科任'} (${cls.studentCount}人)</span>`;
+      ? `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black bg-rose-900 text-amber-200 border border-amber-500/60 shadow-sm">${isHomeroom ? '高度育成 • 導師班' : '高度育成 • 科任班'} (${studentCountDisplay}名)</span>`
+      : `<span class="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black ${isHomeroom ? 'bg-pink-100 text-pink-700 border border-pink-300' : 'bg-blue-100 text-blue-800 border border-blue-300'}">${isHomeroom ? '🎀 導師本班' : '📘 科任班'} (${studentCountDisplay}人)</span>`;
 
     const statsOverviewHtml = isOAA
-      ? `學業均分: <strong class="text-amber-300 font-black font-mono">${overview.classAvgScore}</strong> • 常規點數: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-black font-mono">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`
-      : `學業均分: <strong class="text-blue-700">${overview.classAvgScore}</strong> • 常規: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`;
+      ? `平時均分: <strong class="text-amber-300 font-black font-mono">${overview.classAvgScore}</strong> • 淨點均數: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-black font-mono">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`
+      : `平時均分: <strong class="text-blue-700">${overview.classAvgScore}</strong> • 淨點均數: <strong class="${overview.classAvgEngagement >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${overview.classAvgEngagement > 0 ? '+' : ''}${overview.classAvgEngagement}</strong>`;
 
     container.innerHTML = `
+      ${modeSwitchBarHtml}
       <!-- Top Slim Header -->
       <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'bg-[#220d18] border border-amber-500/40' : 'bg-white border border-pink-200'} shadow-sm flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <!-- Class Meta Badge -->
@@ -544,35 +631,37 @@ class ClassroomMatrix {
         </div>
 
         <!-- Quick Top Action Buttons -->
-        <div class="flex flex-wrap items-center space-x-1.5">
+        <div class="flex flex-wrap items-center gap-1.5">
           <!-- Selection Count Badge -->
-          <div id="selection-status-badge" class="text-xs px-2.5 py-1 rounded-xl ${isOAA ? 'bg-[#290e1b] border border-amber-500/60 text-amber-200' : 'bg-pink-50 border border-pink-300 text-slate-800'} font-bold flex items-center gap-1">
+          <div id="selection-status-badge" class="min-h-[34px] text-xs px-2.5 py-1 rounded-xl ${isOAA ? 'bg-[#290e1b] border border-amber-500/60 text-amber-200' : 'bg-pink-50 border border-pink-300 text-slate-800'} font-bold flex items-center gap-1">
             <span>已選: <strong id="selected-count" class="${isOAA ? 'text-amber-300 font-mono' : 'text-pink-600'} font-black text-sm">${this.selectedSeats.size}</strong></span>
-            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-400 underline font-bold text-xs ml-0.5">清空</button>
+            <button id="clear-sel-btn" onclick="matrixView.clearSelection()" class="${this.selectedSeats.size > 0 ? 'inline-block' : 'hidden'} text-rose-400 underline font-bold text-xs ml-0.5 cursor-pointer">清空</button>
           </div>
 
+          ${cols > 4 ? `
+            <button type="button" onclick="matrixView.toggleMobileGridDensity('${currentClassId}')" class="sm:hidden min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-[#1a0812] border border-amber-500/40 text-amber-200' : 'bg-pink-50 border border-pink-200 text-pink-700'} rounded-xl shadow-sm transition active:scale-95 flex items-center gap-1 cursor-pointer" title="切換手機端座位欄位寬度">
+              <span>${this.mobileGridDensity === 'exact' ? `📱 舒適${Math.min(cols, 4)}欄` : `📐 原班${cols}欄`}</span>
+            </button>
+          ` : ''}
+
           <!-- iOS Jiggle / Reorder Toggle Button -->
-          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : (isOAA ? 'bg-amber-700/30 border border-amber-500/70 text-amber-200 hover:bg-amber-700/50' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl shadow-sm transition flex items-center gap-1">
+          <button onclick="matrixView.toggleJiggleMode('${currentClassId}')" class="min-h-[34px] px-3 py-1 text-xs font-black ${this.isJiggleMode ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md ring-2 ring-emerald-300 active:scale-95' : (isOAA ? 'bg-amber-700/30 border border-amber-500/70 text-amber-200 hover:bg-amber-700/50' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
             ${this.isJiggleMode ? '<span>✅ 完成排位</span>' : '<i data-lucide="move" class="w-3.5 h-3.5"></i> <span>🪑 拖曳排位</span>'}
           </button>
 
-          <button onclick="matrixView.toggleQuickSelectBar()" class="px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#2b0f1d] border border-amber-500/50 text-amber-200 hover:bg-[#3d1529]' : 'bg-pink-50 text-pink-800 border border-pink-300 hover:bg-pink-100'} rounded-xl shadow-sm transition flex items-center gap-1">
+          <button onclick="matrixView.toggleQuickSelectBar()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#2b0f1d] border border-amber-500/50 text-amber-200 hover:bg-[#3d1529]' : 'bg-pink-50 text-pink-800 border border-pink-300 hover:bg-pink-100'} rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i> 分組/排
           </button>
 
-          <button onclick="matrixView.selectAll()" class="px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#1a0812] border border-slate-600 text-slate-200 hover:bg-[#280d1c]' : 'bg-white border border-pink-300 hover:bg-pink-50 text-slate-800'} rounded-xl shadow-sm">
+          <button onclick="matrixView.selectAll()" class="min-h-[34px] px-2.5 py-1 text-xs font-bold ${isOAA ? 'bg-[#1a0812] border border-slate-600 text-slate-200 hover:bg-[#280d1c]' : 'bg-white border border-pink-300 hover:bg-pink-50 text-slate-800'} rounded-xl shadow-sm cursor-pointer">
             全選
           </button>
-          
-          <button id="retro-log-top-btn" onclick="matrixView.openRetroLogModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-amber-600 hover:bg-amber-500 border border-amber-400' : 'bg-amber-500 hover:bg-amber-600'} text-white rounded-xl shadow-sm flex items-center gap-1" title="上課無法即時操作，課後回憶補記">
-            <i data-lucide="clock" class="w-3.5 h-3.5"></i> 事後補記
-          </button>
 
-          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-rose-700 hover:bg-rose-600 border border-rose-500' : 'bg-pink-500'} text-white rounded-xl shadow-sm">
+          <button onclick="matrixView.openRandomPickerModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-rose-700 hover:bg-rose-600 border border-rose-500' : 'bg-pink-500'} text-white rounded-xl shadow-sm cursor-pointer">
             抽籤
           </button>
 
-          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm">
+          <button onclick="matrixView.openConflictModal('${currentClassId}')" class="min-h-[34px] px-2.5 py-1 text-xs font-black ${isOAA ? 'bg-red-700 hover:bg-red-600 border border-red-500' : 'bg-rose-600'} text-white rounded-xl shadow-sm cursor-pointer">
             事件
           </button>
         </div>
@@ -631,7 +720,7 @@ class ClassroomMatrix {
 
       <!-- Blackboard / Podium Classroom Visual Anchor -->
       ${isOAA ? `
-        <div class="classroom-podium-bar p-2 rounded-2xl flex items-center justify-between text-xs font-bold mb-2.5 px-4 select-none">
+        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="classroom-podium-bar p-2 rounded-2xl flex items-center justify-between text-xs font-bold mb-2.5 px-4 select-none cursor-pointer">
           <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-amber-200 font-bold">
             🪟 靠窗側
           </span>
@@ -643,7 +732,7 @@ class ClassroomMatrix {
           </span>
         </div>
       ` : `
-        <div class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none">
+        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none cursor-pointer">
           <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
             🪟 靠窗側
           </span>
@@ -658,28 +747,21 @@ class ClassroomMatrix {
         </div>
       `}
 
-      <!-- Zero-Scroll Responsive Student Grid in Actual Seating Order -->
-      <div class="grid grid-cols-${cols} sm:grid-cols-${cols} md:grid-cols-${cols} lg:grid-cols-${cols} gap-1.5 sm:gap-2.5 mb-4 ${this.isJiggleMode ? 'ios-jiggle-active' : ''}" id="seat-grid-container">
+      <!-- Responsive Student Grid in Actual Seating Order -->
+      <div class="seat-grid-responsive gap-2 sm:gap-2.5 mb-4 ${this.isJiggleMode ? 'ios-jiggle-active' : ''}" id="seat-grid-container" style="--seat-cols-mobile: ${mobileCols}; --seat-cols-sm: ${cols};">
         ${seatOrder.map(seatNo => {
           const s = studentMap[seatNo];
           if (!s) return '';
 
-          const profile = this.stats.getStudentProfile(currentClassId, s.seatNo);
+          const rankInfo = classRanks[s.seatNo] || { overallRank: 1, genderRank: 1, gender: s.gender || 'M', regularScore: 80, netDelta: 0, tier: 'B' };
           const isSelected = this.selectedSeats.has(s.seatNo);
-          const characterPoints = profile ? profile.pointsBreakdown.discipline + profile.pointsBreakdown.conflict + profile.pointsBreakdown.social : 0;
-          const academicScore = profile ? profile.scoreMean : 70;
+          const regularScore = Number(rankInfo.regularScore ?? 80);
+          const netPts = Number(rankInfo.netDelta ?? 0);
 
-          // Rank / Mascot logic
+          // Rank / Mascot logic based cleanly on classroom regular score
           let rankBadgeHtml = '';
           if (isOAA) {
-            let rank = 'B';
-            if (academicScore >= 90) rank = 'S';
-            else if (academicScore >= 80) rank = 'A';
-            else if (academicScore >= 70) rank = 'B';
-            else if (academicScore >= 60) rank = 'C';
-            else rank = 'D';
-
-            const rankInfo = classRanks[s.seatNo] || { overallRank: 1, genderRank: 1, gender: s.gender || 'M' };
+            const rank = rankInfo.tier || 'B';
             const studentGender = s.gender || rankInfo.gender || 'M';
             const genderRank = rankInfo.genderRank || 1;
             const overallRank = rankInfo.overallRank || 1;
@@ -698,13 +780,13 @@ class ClassroomMatrix {
             `;
           } else {
             let mascotClass = 'sanrio-kitty-badge';
-            let mascotTitle = 'Hello Kitty (穩健良好)';
-            if ((academicScore >= 80 && characterPoints >= 0) || (profile && profile.scoreSlope >= 1.5)) {
+            let mascotTitle = `Hello Kitty (穩健達標 ${rankInfo.tier || 'B'} 級)`;
+            if (regularScore >= 85) {
               mascotClass = 'sanrio-twinstars-badge';
-              mascotTitle = '小雙星 (優良拔尖)';
-            } else if (characterPoints < 0 || academicScore < 60) {
+              mascotTitle = `小雙星 (優良表現 ${rankInfo.tier || 'A'} 級)`;
+            } else if (regularScore < 75) {
               mascotClass = 'sanrio-kuromi-badge';
-              mascotTitle = '酷洛米 (需關懷)';
+              mascotTitle = `酷洛米 (關懷提醒 ${rankInfo.tier || 'C'} 級)`;
             }
             rankBadgeHtml = `<div class="${mascotClass} !w-5 !h-5 sm:!w-6 sm:!h-6 shrink-0" title="${mascotTitle}"></div>`;
           }
@@ -717,21 +799,21 @@ class ClassroomMatrix {
             ? `<div class="text-xs sm:text-sm font-black truncate text-white text-center my-0.5 leading-tight tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
             : `<div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">${s.name}</div>`;
 
-          const displayAcademic = Math.round(academicScore);
+          const displayRegular = Math.round(regularScore);
           const dualScoreHtml = isOAA
             ? `
               <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="text-amber-300 font-mono font-black shrink-0" title="學業均分：${academicScore}分">📘${displayAcademic}</span>
-                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-black shrink-0 ${characterPoints > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : characterPoints < 0 ? 'bg-rose-950/80 text-rose-400 border border-rose-500/40' : 'bg-black/30 text-slate-400'}" title="品格常規點數：${characterPoints}點">
-                  ${characterPoints > 0 ? '+' : ''}${characterPoints}
+                <span class="text-amber-300 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">💯${displayRegular}</span>
+                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-black shrink-0 ${netPts > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : netPts < 0 ? 'bg-rose-950/80 text-rose-400 border border-rose-500/40' : 'bg-black/30 text-slate-400'}" title="本期淨點：${netPts}點">
+                  ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
               </div>
             `
             : `
               <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="text-blue-700 shrink-0" title="學業均分：${academicScore}分">📘${displayAcademic}</span>
-                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black shrink-0 ${characterPoints > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : characterPoints < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}" title="品格常規點數：${characterPoints}點">
-                  ${characterPoints > 0 ? '+' : ''}${characterPoints}
+                <span class="text-blue-700 shrink-0" title="本期平時成績：${regularScore}分">💯${displayRegular}</span>
+                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}" title="本期淨點：${netPts}點">
+                  ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
               </div>
             `;
@@ -739,7 +821,7 @@ class ClassroomMatrix {
           return `
             <div id="seat-card-${s.seatNo}"
                  data-seat-no="${s.seatNo}"
-                 class="student-seat-card p-1.5 sm:p-2 rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-all shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
+                 class="student-seat-card p-2 sm:p-2.5 min-h-[76px] sm:min-h-[82px] rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-transform duration-150 shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
                  ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
@@ -763,34 +845,34 @@ class ClassroomMatrix {
       </div>
 
       <!-- IN-FLOW SPACIOUS 4-TAG PAGED DOCK -->
-      <div class="glass-card rounded-3xl p-3 sm:p-4 ${isOAA ? 'border-2 border-amber-500/50 bg-[#250f1c]/95 text-white' : 'border-2 border-pink-300 bg-white/95'} shadow-md mb-6">
+      <div id="tag-dock-panel" class="glass-card rounded-3xl p-3 sm:p-4 ${isOAA ? 'border-2 border-amber-500/50 bg-[#250f1c]/95 text-white' : 'border-2 border-pink-300 bg-white/95'} shadow-md mb-6">
         <!-- Dock Header -->
-        <div class="flex items-center justify-between text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-2 px-1">
-          <div class="flex items-center gap-1.5">
-            ${isOAA ? '<span class="text-sm">⚜️</span>' : '<span class="kitty-bow !w-3.5 !h-3.5"></span>'}
-            <span class="font-black ${isOAA ? 'text-amber-200' : 'text-slate-900'} text-xs sm:text-sm">${isOAA ? '高度育成 • 課堂考評標籤' : '課堂快速標籤'}</span>
-            <button onclick="matrixView.toggleTagSortMode('${currentClassId}')" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold transition ${sortMode === 'custom' ? (isOAA ? 'bg-amber-950 text-amber-200 border border-amber-500/60' : 'bg-pink-100 text-pink-700 border border-pink-300') : (isOAA ? 'bg-rose-950 text-rose-200 border border-rose-500/60' : 'bg-blue-100 text-blue-700 border border-blue-300')}" title="點擊切換排序方式">
-              ${sortMode === 'custom' ? '📌 依自訂順序' : '📊 依使用頻率'}
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-2.5 px-1">
+          <div class="flex items-center gap-1.5 min-w-0 flex-wrap">
+            ${isOAA ? '<span class="text-sm shrink-0">⚜️</span>' : '<span class="kitty-bow !w-3.5 !h-3.5 shrink-0"></span>'}
+            <span class="font-black whitespace-nowrap shrink-0 ${isOAA ? 'text-amber-200' : 'text-slate-900'} text-xs sm:text-sm">${isOAA ? '高度育成 • 課堂考評標籤' : '課堂快速標籤'}</span>
+            <button onclick="matrixView.toggleTagSortMode('${currentClassId}')" class="text-[11px] sm:text-xs px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors ${sortMode === 'custom' ? (isOAA ? 'bg-amber-950 text-amber-200 border border-amber-500/60' : 'bg-pink-100 text-pink-700 border border-pink-300') : (isOAA ? 'bg-rose-950 text-rose-200 border border-rose-500/60' : 'bg-blue-100 text-blue-700 border border-blue-300')}" title="點擊切換排序方式">
+              ${sortMode === 'custom' ? '📌 自訂順序' : '📊 使用頻率'}
             </button>
           </div>
 
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center gap-1.5 shrink-0 ml-auto">
             <!-- Prev Page Button -->
-            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm cursor-pointer" title="上一頁">
+            <button onclick="matrixView.prevTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition-transform active:scale-90 shadow-sm cursor-pointer shrink-0" title="上一頁">
               <i data-lucide="chevron-left" class="w-4 h-4"></i>
             </button>
             
-            <span class="text-xs font-mono font-bold ${isOAA ? 'text-amber-300' : 'text-slate-600'}">
+            <span class="text-xs font-mono font-bold whitespace-nowrap shrink-0 px-0.5 ${isOAA ? 'text-amber-300' : 'text-slate-600'}">
               ${this.currentTagPage + 1} / ${this.maxTagPages}
             </span>
 
             <!-- Next Page Button -->
-            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition active:scale-90 shadow-sm cursor-pointer" title="下一頁">
+            <button onclick="matrixView.nextTagPage()" class="w-7 h-7 rounded-xl ${isOAA ? 'bg-[#1c0a13] hover:bg-rose-900 text-amber-300 border border-amber-500/50' : 'bg-pink-100 hover:bg-pink-200 text-pink-700'} font-black flex items-center justify-center text-xs transition-transform active:scale-90 shadow-sm cursor-pointer shrink-0" title="下一頁">
               <i data-lucide="chevron-right" class="w-4 h-4"></i>
             </button>
 
             <!-- Custom Tag Modal Button -->
-            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="${isOAA ? 'text-amber-400 hover:text-amber-300' : 'text-pink-600 hover:text-pink-700'} font-black hover:underline flex items-center gap-0.5 text-xs ml-1 cursor-pointer" title="管理自訂標籤">
+            <button id="custom-tag-open-btn" onclick="window.tagManager.openTagManagerModal()" class="${isOAA ? 'text-amber-400 hover:text-amber-300' : 'text-pink-600 hover:text-pink-700'} font-black hover:underline flex items-center gap-0.5 text-xs ml-1 cursor-pointer whitespace-nowrap shrink-0" title="管理自訂標籤">
               <i data-lucide="settings" class="w-3.5 h-3.5"></i> 自訂
             </button>
           </div>
@@ -830,12 +912,52 @@ class ClassroomMatrix {
           `).join('')}
         </div>
 
-        <!-- Bottom Swipe Indicator Hint -->
+        <!-- Bottom Swipe Indicator & Clickable Dots -->
         ${tagPages.length > 1 ? `
-          <div class="text-center text-xs text-slate-400 mt-2 font-bold flex items-center justify-center gap-1">
-            <span>第 ${this.currentTagPage + 1} / ${tagPages.length} 頁（向左滑 或 點按 ◀ ▶ 翻頁）</span>
+          <div class="mt-2.5 flex flex-col items-center gap-1.5">
+            <div id="tag-page-dots" class="flex items-center justify-center gap-1.5">
+              ${tagPages.map((_, i) => `
+                <button type="button" onclick="matrixView.scrollToTagPage(${i})" aria-label="第 ${i + 1} 頁"
+                  class="${i === this.currentTagPage ? 'w-5 h-2.5 rounded-full bg-pink-600' : 'w-2.5 h-2.5 rounded-full bg-pink-200'} transition-[width,background-color] duration-200 cursor-pointer"></button>
+              `).join('')}
+            </div>
+            <div class="text-center text-[11px] text-slate-400 font-bold">
+              <span>第 ${this.currentTagPage + 1} / ${tagPages.length} 頁（左右滑動 或 點按圓點翻頁）</span>
+            </div>
           </div>
         ` : ''}
+      </div>
+
+      <!-- Sticky Thumb-Zone Quick Selection Action Bar (Auto-appears when 1+ students selected in Live mode) -->
+      <div id="floating-selection-action-bar"
+           class="fixed left-2 right-2 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-2xl z-30 rounded-2xl p-2.5 shadow-[0_-8px_28px_rgba(244,63,94,0.20)] border-2 transition-[transform,opacity] duration-200 will-change-transform ${isOAA ? 'bg-[#1e0914] border-amber-400/90 text-white' : 'bg-white border-pink-400 text-slate-900'} ${(this.selectedSeats.size > 0 && !this.isJiggleMode) ? '' : 'translate-y-24 opacity-0 pointer-events-none'}">
+        <div class="flex items-center justify-between gap-2 mb-2 px-0.5">
+          <span id="floating-sel-summary" class="text-xs font-black truncate ${isOAA ? 'text-amber-300' : 'text-pink-700'}">
+            🎯 已選 ${this.selectedSeats.size} 人
+          </span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="matrixView.scrollToTagDock()" class="min-h-[30px] px-2.5 py-1 rounded-lg text-[11px] font-black cursor-pointer ${isOAA ? 'bg-[#2c0e1e] text-amber-200 border border-amber-500/40' : 'bg-pink-50 text-pink-700 border border-pink-200'}">
+              全部標籤 ▾
+            </button>
+            <button type="button" onclick="matrixView.clearSelection()" class="min-h-[30px] px-2.5 py-1 rounded-lg text-[11px] font-black cursor-pointer ${isOAA ? 'bg-rose-950 text-rose-200 border border-rose-500/50' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+              ✕ 清空
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          ${sortedTags.slice(0, 6).map(tag => {
+            const isPos = tag.delta > 0;
+            const isZero = tag.delta === 0;
+            const chipCls = isPos ? 'color-rule-pos' : isZero ? 'color-rule-zero' : 'color-rule-neg';
+            return `
+              <button type="button" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
+                class="floating-tag-btn shrink-0 min-h-[40px] px-3 py-1.5 rounded-xl border-2 text-xs font-black flex items-center gap-1.5 active:scale-95 transition cursor-pointer ${chipCls}">
+                <span class="whitespace-nowrap">${tag.name}</span>
+                <span class="font-mono font-black">${tag.delta > 0 ? '+' : ''}${tag.delta}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
 
@@ -891,14 +1013,18 @@ class ClassroomMatrix {
   }
 
   handleTagPagerScroll(el) {
-    const width = el.clientWidth;
-    if (width > 0) {
-      const page = Math.round(el.scrollLeft / width);
-      if (page !== this.currentTagPage) {
-        this.currentTagPage = page;
-        this.updateTagDots(page);
+    if (this._tagScrollRaf) return;
+    this._tagScrollRaf = requestAnimationFrame(() => {
+      this._tagScrollRaf = null;
+      const width = el.clientWidth;
+      if (width > 0) {
+        const page = Math.round(el.scrollLeft / width);
+        if (page !== this.currentTagPage) {
+          this.currentTagPage = page;
+          this.updateTagDots(page);
+        }
       }
-    }
+    });
   }
 
   updateTagDots(activeIdx) {
@@ -907,14 +1033,14 @@ class ClassroomMatrix {
     const dots = dotsContainer.querySelectorAll('button');
     dots.forEach((dot, idx) => {
       if (idx === activeIdx) {
-        dot.className = 'w-5 h-2.5 rounded-full bg-pink-600 transition-all';
+        dot.className = 'w-5 h-2.5 rounded-full bg-pink-600 transition-[width,background-color] duration-200';
       } else {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-pink-200 transition-all';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-pink-200 transition-[width,background-color] duration-200';
       }
     });
   }
 
-  toggleSeatSelection(seatNo, classId) {
+  toggleSeatSelection(seatNo, classId = window.appState?.currentClassId) {
     if (this.selectedSeats.has(seatNo)) {
       this.selectedSeats.delete(seatNo);
     } else {
@@ -966,6 +1092,27 @@ class ClassroomMatrix {
         clearBtn.classList.remove('inline-block');
       }
     }
+
+    const floatingBar = document.getElementById('floating-selection-action-bar');
+    if (floatingBar) {
+      if (this.selectedSeats.size > 0 && !this.isJiggleMode) {
+        floatingBar.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      } else {
+        floatingBar.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }
+    }
+
+    const summaryEl = document.getElementById('floating-sel-summary');
+    if (summaryEl) {
+      const picked = students
+        .filter(s => this.selectedSeats.has(s.seatNo))
+        .slice(0, 3)
+        .map(s => `${String(s.seatNo).padStart(2, '0')} ${s.name}`);
+      const suffix = this.selectedSeats.size > 3 ? ` 等 ${this.selectedSeats.size} 人` : '';
+      summaryEl.innerText = picked.length > 0
+        ? `🎯 已選 ${this.selectedSeats.size} 人（${picked.join('、')}${suffix}）`
+        : '🎯 已選 0 人';
+    }
   }
 
   applyTagToSelected(classId, tagId) {
@@ -980,9 +1127,12 @@ class ClassroomMatrix {
     const activeSlot = this.timetable.detectActiveSlot();
     const period = activeSlot.period !== null ? activeSlot.period : 1;
 
+    const seatsToProcess = Array.from(this.selectedSeats);
+    const milestoneSeats = new Set();
+    const beforeRanks = (tag.delta > 0 && this.store.getClassStudentRanks) ? this.store.getClassStudentRanks(classId) : {};
+
     try {
       let appliedCount = 0;
-      const seatsToProcess = Array.from(this.selectedSeats);
 
       seatsToProcess.forEach(seatNo => {
         this.store.addEvent({
@@ -1000,6 +1150,17 @@ class ClassroomMatrix {
         appliedCount++;
       });
 
+      if (tag.delta > 0 && this.store.getClassStudentRanks) {
+        const afterRanks = this.store.getClassStudentRanks(classId);
+        seatsToProcess.forEach(seatNo => {
+          const prev = Number(beforeRanks[seatNo]?.regularScore ?? 80);
+          const next = Number(afterRanks[seatNo]?.regularScore ?? 80);
+          if (prev < 100 && next >= 100) {
+            milestoneSeats.add(seatNo);
+          }
+        });
+      }
+
       // Sound effect
       if (tag.delta > 0 && window.appState?.playChime) {
         window.appState.playChime();
@@ -1007,23 +1168,24 @@ class ClassroomMatrix {
         window.appState.playWarning();
       }
 
-      window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」`, 'success');
+      const milestoneNote = milestoneSeats.size > 0 ? ' 💯 滿分里程碑達成！' : '';
+      window.appState.showToast(`⚡ 已為 ${appliedCount} 位同學記錄「${tag.name} (${tag.delta > 0 ? '+' : ''}${tag.delta})」${milestoneNote}`, 'success');
     } catch (err) {
       console.error('[ClassroomMatrix] applyTagToSelected error:', err);
     } finally {
       this.clearSelection(classId);
       this.render('classroom-matrix-view', classId);
-      seatsToProcess.forEach(seatNo => this.showFloatingBubble(seatNo, tag.delta));
+      seatsToProcess.forEach(seatNo => this.showFloatingBubble(seatNo, tag.delta, milestoneSeats.has(seatNo)));
     }
   }
 
-  showFloatingBubble(seatNo, delta) {
+  showFloatingBubble(seatNo, delta, isMilestone = false) {
     const card = document.getElementById(`seat-card-${seatNo}`);
     if (!card) return;
 
     const bubble = document.createElement('div');
-    bubble.className = `point-bubble ${delta > 0 ? 'text-emerald-600' : 'text-rose-600'} kitty-stamp-effect`;
-    bubble.innerText = `${delta > 0 ? '✨ +' : ''}${delta}`;
+    bubble.className = `point-bubble ${delta > 0 ? (isMilestone ? 'text-amber-500' : 'text-emerald-600') : 'text-rose-600'} kitty-stamp-effect`;
+    bubble.innerText = isMilestone ? `💯 +${delta}!` : `${delta > 0 ? '✨ +' : ''}${delta}`;
     card.appendChild(bubble);
 
     setTimeout(() => {
@@ -1090,11 +1252,11 @@ class ClassroomMatrix {
               <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'}">選擇學生 (可多選)</label>
               <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-pink-600'} font-bold">點選學生頭像或姓名</span>
             </div>
-            <div class="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
               ${students.map(s => `
-                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-1 rounded-lg ${isOAA ? 'hover:bg-rose-950/80' : 'hover:bg-pink-100'} transition">
-                  <input type="checkbox" name="retro_seats" value="${s.seatNo}" class="rounded text-pink-600 focus:ring-pink-500">
-                  <span class="font-black ${isOAA ? 'text-white' : 'text-slate-900'}">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
+                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-2 rounded-xl border min-h-[38px] ${isOAA ? 'border-amber-500/25 bg-[#1b0812] hover:bg-rose-950/80' : 'border-pink-100 bg-white hover:bg-pink-100'} transition">
+                  <input type="checkbox" name="retro_seats" value="${s.seatNo}" class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 shrink-0">
+                  <span class="font-black truncate ${isOAA ? 'text-white' : 'text-slate-900'}">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
                 </label>
               `).join('')}
             </div>
@@ -1313,11 +1475,11 @@ class ClassroomMatrix {
         <form id="conflict-form" onsubmit="matrixView.saveConflictEvent(event, '${classId}')" class="space-y-4">
           <div>
             <label class="block text-xs font-bold ${isOAA ? 'text-amber-200' : 'text-slate-700'} mb-1">涉事學生 (可複選)</label>
-            <div class="grid grid-cols-5 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl border ${isOAA ? 'border-amber-500/40 bg-[#12050c]' : 'border-pink-200 bg-pink-50/50'}">
               ${students.map(s => `
-                <label class="flex items-center space-x-1 text-xs cursor-pointer">
-                  <input type="checkbox" name="involved_seats" value="${s.seatNo}" class="rounded text-rose-600 focus:ring-rose-500">
-                  <span class="font-bold ${isOAA ? 'text-white' : 'text-slate-800'}">${String(s.seatNo).padStart(2, '0')} ${s.name.slice(0, 2)}</span>
+                <label class="flex items-center space-x-1.5 text-xs cursor-pointer p-2 rounded-xl border min-h-[38px] ${isOAA ? 'border-amber-500/25 bg-[#1b0812]' : 'border-pink-100 bg-white'}">
+                  <input type="checkbox" name="involved_seats" value="${s.seatNo}" class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 shrink-0">
+                  <span class="font-bold truncate ${isOAA ? 'text-white' : 'text-slate-800'}">${String(s.seatNo).padStart(2, '0')} ${s.name}</span>
                 </label>
               `).join('')}
             </div>

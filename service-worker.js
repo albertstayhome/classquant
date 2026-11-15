@@ -2,7 +2,7 @@
  * Service Worker for 100% Offline PWA functionality with Network-First Live OTA Updates (ClassQuant Hub v8)
  */
 
-const CACHE_NAME = 'classquant-hub-v135';
+const CACHE_NAME = 'classquant-hub-v138';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,14 +12,10 @@ const ASSETS_TO_CACHE = [
   './css/kitty-theme.css',
   './css/sanrio-characters.css',
   './css/oaa-theme.css',
-  './assets/cote/cote_logo.webp',
+  './assets/cote/cote_logo_s3.png',
   './assets/cote/cote_wp_1.jpg',
   './assets/cote/cote_cover.jpg',
   './assets/cote/ayanokoji_oaa.jpg',
-  './assets/cote/ayanokoji_cutin.jpg',
-  './assets/cote/karuizawa_cutin.jpg',
-  './assets/cote/sakayanagi_cutin.jpg',
-  './assets/cote/ichinose_cutin.jpg',
   './assets/cote/ic-1-1.jpg',
   './assets/cote/ic-1-2.jpg',
   './assets/cote/ic-1-3.jpg',
@@ -102,6 +98,7 @@ const ASSETS_TO_CACHE = [
   './assets/cote/official/yukimura.webp',
   './assets/cote/official/yukimura_full.webp',
   './js/store.js',
+  './js/xlsxExport.js',
   './js/timetable.js',
   './js/statistics.js',
   './js/charts.js',
@@ -122,6 +119,10 @@ const ASSETS_TO_CACHE = [
   './data/cloud_config.json',
   './data/feedback.json',
   './assets/images/twin_stars.png',
+  './assets/images/hello_kitty.png',
+  './assets/images/kuromi.png',
+  './assets/images/cinnamoroll.png',
+  './assets/images/my_melody.png',
   './使用指南_圖文說明書.html'
 ];
 

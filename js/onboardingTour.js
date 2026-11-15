@@ -52,9 +52,9 @@ class OnboardingTour {
       },
       {
         id: "step-goto-roster",
-        targetSelector: 'button[data-tab="roster"]',
-        title: "5. 前往『👥 班級名單』中心",
-        content: "請<strong>點擊發光的「👥 班級名單」</strong>按鈕進入名單管理與學生資料編修中心！",
+        targetSelector: 'button[data-tab="students"]',
+        title: "5. 前往『👥 班級與學生』中心",
+        content: "請<strong>點擊發光的「👥 班級與學生」</strong>按鈕，即可管理班級名單、查看學生個人表現與歷史記事！",
         forceAction: "click",
         tab: null
       },
@@ -78,11 +78,12 @@ class OnboardingTour {
       },
       {
         id: "step-goto-retro",
-        targetSelector: 'button[data-tab="retro"]',
-        title: "8. 前往全新『⏰ 課堂事後補記』專區",
-        content: "下課回辦公室神器！請<strong>點擊「⏰ 課堂事後補記」</strong>，進入專屬的事後批次補記工作台！",
+        targetSelector: "#retro-log-top-btn",
+        fallbackSelector: 'button[data-tab="matrix"]',
+        title: "8. 切換至『⏰ 事後補記』工作台",
+        content: "下課回辦公室神器！請<strong>點擊「⏰ 事後補記」</strong>，直接在點記板分頁內進入事後批次補記工作台（用完可點頂部「⚡ 即時點記」切回）！",
         forceAction: "click",
-        tab: null
+        tab: "matrix"
       },
       {
         id: "step-retro-action",
@@ -95,9 +96,9 @@ class OnboardingTour {
       },
       {
         id: "step-goto-dashboard",
-        targetSelector: 'button[data-tab="dashboard"]',
-        title: "10. 前往『📊 統計戰情室』",
-        content: "請<strong>點擊「📊 統計戰情室」</strong>，查看班級整體學業與常規分析！",
+        targetSelector: 'button[data-tab="grades"]',
+        title: "10. 前往『💯 平時成績』結算戰情室",
+        content: "請<strong>點擊「💯 平時成績」</strong>，查看即時排行、設定平時成績換算公式，以及段考一鍵匯出 Excel 與歸檔！",
         forceAction: "click",
         tab: null
       },
@@ -105,10 +106,10 @@ class OnboardingTour {
         id: "step-dashboard-charts",
         targetSelector: "#dashboard-view .glass-card:first-child",
         fallbackSelector: "#dashboard-view",
-        title: "11. 四象限拔尖與關懷分析",
-        content: "系統自動產出<strong>「學業均分 ✕ 常規點數」四象限圖表</strong>與拔尖/關懷學生名單，段考親師座談報告必備利器！",
+        title: "11. 平時成績計算、段考結算與歷史累積",
+        content: "系統自動將課堂點數換算成班級平時成績與排行；每次段考後可<strong>一鍵匯出 Excel 並歸檔重算</strong>，歷次段考與累積平均永久保存！",
         forceAction: null,
-        tab: "dashboard"
+        tab: "grades"
       },
       {
         id: "step-finish",
@@ -126,7 +127,13 @@ class OnboardingTour {
   safeQuerySelector(selector) {
     if (!selector) return null;
     try {
-      return document.querySelector(selector);
+      const candidates = document.querySelectorAll(selector);
+      if (!candidates || candidates.length === 0) return null;
+      for (const el of candidates) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) return el;
+      }
+      return candidates[0];
     } catch (e) {
       console.warn('Invalid selector in tour step:', selector, e);
       return null;
@@ -220,9 +227,19 @@ class OnboardingTour {
       window.appState.closeModal();
     }
 
-    // 2. Switch tab if specified
-    if (step.tab && window.appState && window.appState.activeTab !== step.tab) {
-      window.appState.switchTab(step.tab);
+    // 2. Switch tab / sub-mode if specified
+    if (step.tab && window.appState) {
+      if (step.tab === 'retro') {
+        if (window.appState.activeTab !== 'matrix' || window.matrixView?.scoringMode !== 'retro') {
+          window.appState.switchTab('retro');
+        }
+      } else if (step.tab === 'roster') {
+        if (window.appState.activeTab !== 'students' || window.appState.studentsSubTab !== 'roster') {
+          window.appState.switchTab('roster');
+        }
+      } else if (window.appState.activeTab !== step.tab) {
+        window.appState.switchTab(step.tab);
+      }
     }
 
     // 3. Frame 1: Scroll navigation bar horizontally and viewport vertically

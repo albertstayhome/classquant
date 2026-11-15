@@ -147,10 +147,10 @@ class TagManager {
                           #${idx + 1}
                         </span>
                         <div class="flex flex-col space-y-0.5">
-                          <button type="button" onclick="tagManager.moveTagUp('${tag.id}')" ${idx === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : `class="hover:bg-pink-100 rounded px-1 ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-[9px] active:scale-90"`} title="往上移一格">
+                          <button type="button" onclick="tagManager.moveTagUp('${tag.id}')" ${idx === 0 ? 'disabled class="min-w-[32px] min-h-[28px] px-2 py-1 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[32px] min-h-[28px] hover:bg-pink-100 rounded-md px-2 py-1 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往上移一格">
                             ▲
                           </button>
-                          <button type="button" onclick="tagManager.moveTagDown('${tag.id}')" ${idx === tags.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed"' : `class="hover:bg-pink-100 rounded px-1 ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-[9px] active:scale-90"`} title="往下移一格">
+                          <button type="button" onclick="tagManager.moveTagDown('${tag.id}')" ${idx === tags.length - 1 ? 'disabled class="min-w-[32px] min-h-[28px] px-2 py-1 text-xs flex items-center justify-center opacity-20 cursor-not-allowed"' : `class="min-w-[32px] min-h-[28px] hover:bg-pink-100 rounded-md px-2 py-1 flex items-center justify-center ${isOAA ? 'text-amber-200 hover:text-slate-900' : 'text-slate-700'} font-black text-xs active:scale-90 cursor-pointer"`} title="往下移一格">
                             ▼
                           </button>
                         </div>

@@ -23,8 +23,8 @@ class OnboardingWizard {
                 <span>切換導師班時，以「生活常規、晨讀、出缺席、同儕互動」為核心指標。</span>
               </div>
               <div class="p-3 rounded-2xl bg-sky-50 border border-sky-200">
-                <strong class="text-blue-700 block mb-1 font-black">📘 數學科任專區</strong>
-                <span>切換任教班時，以「解題速度、觀念卡關、作業繳交、小考成績」為核心指標。</span>
+                <strong class="text-blue-700 block mb-1 font-black">📘 科任課堂專區</strong>
+                <span>切換任教班時，以「解題積極度、課堂提問、作業繳交、學習態度」為核心指標並換算平時成績。</span>
               </div>
             </div>
             <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
@@ -42,7 +42,7 @@ class OnboardingWizard {
         badge: "👥 班級名單管理",
         content: `
           <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-            <p>在<strong>「👥 班級名單」</strong>中，您可以隨時新增導師班或任教班，並支援<strong>「1 鍵批次貼上名冊」</strong>：</p>
+            <p>在<strong>「👥 班級與學生」</strong>頁籤的「班級名單管理」中，您可以隨時新增導師班或任教班，並支援<strong>「1 鍵批次貼上名冊」</strong>：</p>
             <div class="p-3 rounded-2xl bg-pink-50 border border-pink-200 space-y-1.5 text-xs">
               <div class="font-black text-pink-900 mb-1">📋 批次貼上自動去雜訊示範：</div>
               <div class="font-mono bg-white p-2 rounded-xl border border-pink-200 text-slate-600">
@@ -57,7 +57,7 @@ class OnboardingWizard {
         `,
         actionLabel: "下一步：自訂課堂標籤 ➔",
         secondaryAction: {
-          label: "🚀 前往「班級名單」頁面",
+          label: "🚀 前往「班級與學生」頁面",
           onClick: "appState.switchTab('roster'); onboardingWizard.close();"
         }
       },

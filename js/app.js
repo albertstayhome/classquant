@@ -9,12 +9,19 @@ class AppState {
   constructor() {
     this.currentClassId = '801';
     this.activeTab = 'matrix';
+    this.studentsSubTab = 'roster';
+    this.settingsSubTab = 'ai-hub';
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '1.9.23';
+    this.appVersion = '2.1.0';
     this.toastTimer = null;
     this.lastTimetableSlotKey = null;
+    this._mascotTapCount = 0;
+    this._mascotTapTimer = null;
+    this._chalkTapCount = 0;
+    this._chalkTapTimer = null;
+    this._chalkQuoteIdx = 0;
 
     // Official COTE Terminal Quotes Database for Easter Egg
     this.coteTerminalQuotes = [
@@ -441,8 +448,6 @@ class AppState {
         auraColor: '#475569'
       }
     ];
-    this.currentSilhouetteIdx = 0;
-    this.silhouetteTimeout = null;
 
     // Split into canonical Male and Female rosters by story strength ranking
     const maleIds = new Set([
@@ -553,6 +558,17 @@ class AppState {
       });
     }
 
+    // Close More dropdown on outside click
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('more-menu-wrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        this.closeMoreMenu();
+      }
+    });
+
+    // Hidden Non-Intrusive Easter Eggs
+    this._initEasterEggs();
+
     // Initial render
     this.updateHeaderStatus();
     this.updateHeaderClock();
@@ -573,6 +589,7 @@ class AppState {
   toggleHeader(forceExpand = null) {
     const header = document.getElementById('global-header');
     const unhidePill = document.getElementById('header-unhide-pill');
+    const mobileCollapsedBar = document.getElementById('mobile-collapsed-bar');
     if (!header) return;
 
     if (forceExpand !== null) {
@@ -584,11 +601,27 @@ class AppState {
     if (this.isHeaderCollapsed) {
       header.classList.add('header-collapsed');
       if (unhidePill) unhidePill.classList.remove('hidden');
+      if (mobileCollapsedBar) mobileCollapsedBar.classList.remove('hidden');
     } else {
       header.classList.remove('header-collapsed');
       if (unhidePill) unhidePill.classList.add('hidden');
+      if (mobileCollapsedBar) mobileCollapsedBar.classList.add('hidden');
     }
+    this.updateMobileCollapsedLabel();
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  updateMobileCollapsedLabel() {
+    const label = document.getElementById('mobile-collapsed-class-label');
+    if (!label) return;
+    const classes = window.appStore ? window.appStore.getClasses() : {};
+    const cls = classes[this.currentClassId];
+    const baseName = cls ? cls.name : `${this.currentClassId} 班`;
+    const active = window.timetableEngine ? window.timetableEngine.getActiveClassId() : { isOverride: false, slotInfo: {} };
+    const statusText = active.isOverride
+      ? '手動調課'
+      : (active.slotInfo?.status === 'in_session' ? active.slotInfo.message : '');
+    label.textContent = statusText ? `${baseName} · ${statusText}` : baseName;
   }
 
   updateNetworkBadge(isOnline) {
@@ -714,7 +747,7 @@ class AppState {
     const isOAA = (window.appStore ? window.appStore.getTheme() : 'kitty') === 'oaa';
 
     modalContent.innerHTML = `
-      <div class="p-5 sm:p-7 max-h-[85vh] overflow-y-auto animate-fade-in-up">
+      <div class="p-4 sm:p-7 animate-fade-in-up">
         <!-- Header -->
         <div class="flex items-center justify-between pb-3.5 border-b ${isOAA ? 'border-amber-500/30' : 'border-pink-100'} mb-4">
           <div class="flex items-center space-x-3">
@@ -744,16 +777,16 @@ class AppState {
           </div>
           <div class="space-y-1.5 text-xs ${isOAA ? 'text-amber-100/90' : 'text-slate-700'} font-medium">
             <div class="flex items-start gap-1.5">
-              <span class="${isOAA ? 'text-amber-400' : 'text-pink-600'} font-bold">🎯</span>
-              <span><strong>段考小考${isOAA ? '實力數據統計' : '量化統計'}</strong>：利用「統計戰情室」的四象限分析，可即時掌握各班高分低常規或雙低需關懷之學生名單。</span>
+              <span class="${isOAA ? 'text-amber-400' : 'text-pink-600'} font-bold">💯</span>
+              <span><strong>段考平時成績一鍵結算</strong>：切換至「💯 平時成績」，即可為當前班級一鍵下載《平時成績與明細 Excel》，結算該次段考並保留歷史累積分數後乾淨進入下一次段考。</span>
             </div>
             <div class="flex items-start gap-1.5">
               <span class="text-emerald-500 font-bold">⏰</span>
-              <span><strong>課堂事後回憶補記</strong>：課堂現場無法掏手機時，下課或放學回到辦公室點擊頂部「事後補記」，1 秒批次補齊記錄！</span>
+              <span><strong>課堂點記＆事後補記二合一</strong>：在「🎯 課堂點記」上方一鍵切換【⚡ 即時點記】與【⏰ 事後補記】，無須再於多個分頁來回尋找。</span>
             </div>
             <div class="flex items-start gap-1.5">
-              <span class="${isOAA ? 'text-amber-300' : 'text-blue-600'} font-bold">📶</span>
-              <span><strong>100% 離線支援</strong>：在地下室或無 Wi-Fi 教室操作，所有資料皆自動安全存放於本機，連網時自動背景熱更新。</span>
+              <span class="${isOAA ? 'text-amber-300' : 'text-blue-600'} font-bold">☁️</span>
+              <span><strong>自動備份＆離線保障</strong>：所有資料皆安全存放於本機並每日定時備份至 Google 雲端表單，老師原有的標籤、名單與分數完整保留。</span>
             </div>
           </div>
         </div>
@@ -763,6 +796,35 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v2.1.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-rose-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-pink-50/90 to-amber-50/70 text-slate-900'} shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black text-xs shadow-sm font-mono">
+                v2.1.0 (手機／平板行動優先體驗 • 拇指底部導覽 • 選座全域浮動加分條)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-pink-700'} font-mono font-bold">2026-11-15</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【拇指底部導覽＆單列收合列】手機版（&lt;768px）改為貼合底部的 5 鍵拇指導覽與「⋯ 更多」Bottom Sheet 抽屜；收合頂部選單時自動顯示單行目前班級與節次指示，座位區可視空間大幅提升；平板（≥768px）頂部導覽維持單列橫滑不換行。</li>
+              <li>• 【選座全域浮動加分條＆舒適 4 欄切換】在教室座位圖勾選任一位同學後，底部即刻浮出快捷加減分條（顯示常用前 6 個標籤＋跳轉全部標籤＋清空），選前排同學不必再一路滑到頁面最下方；手機支援一鍵切換「📱 舒適 4 欄 ⇋ 📐 原班欄數」。</li>
+              <li>• 【觸控與 iOS/Android 防抖優化】全面升級彈窗為手機底部滑出卡片（支援點擊遮罩關閉）、表單輸入維持 16px 防 iOS 自動放大、觸控裝置移除黏滯 Hover、名單取消手機雙層捲動框，並修正各分頁與 OAA 主題行動捲動流暢度。</li>
+            </ul>
+          </div>
+
+          <!-- v2.0.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-pink-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-pink-50/80 text-slate-900'} shadow-md">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-xs shadow-sm font-mono">
+                v2.0.0 (極簡 4 大分頁重構 • 每次段考一鍵匯出 Excel 結算歸零 • 歷史累積成績引擎)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-pink-700'} font-mono font-bold">2026-11-15</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【大更新｜導覽極簡化 11 → 4 大直覺分頁】收斂為「🎯 課堂點記（整合即時點記＋事後補記）」、「💯 平時成績（結算＋排行＋圖表）」、「👥 班級與學生（名單＋個人檔案＋流水帳）」與「⚙️ 設定與備份（雲端快照＋課表）」，其餘輔助工具收攏於右上角「⋯ 更多」。</li>
+              <li>• 【小更新｜平時成績段考結算 & 歷史累積】移除未使用的「小考／AI 考卷」雜訊與 75 分上限卡階 Bug，改以純課堂表現（預設基準 80 分）即時計算 S/A/B/C/D 等第與排名；支援針對單一班級標註「第 1/2/3 次段考」一鍵匯出真實 <code>.xlsx</code> Excel 檔，自動封存歷史累積淨分與歷次段考均分並開啟下一次段考重新計算！</li>
+            </ul>
           </div>
 
           <!-- v1.9.23 -->
@@ -1687,22 +1749,7 @@ class AppState {
 
     // Refresh active views to sync OAA mode immediately with explicit current class
     try {
-      const activeClass = this.currentClassId || '801';
-      if (this.activeTab === 'student-dossier' && window.studentDossierView) {
-        window.studentDossierView.render('student-dossier-view', activeClass);
-      }
-      if (this.activeTab === 'matrix' && window.matrixView) {
-        window.matrixView.render('classroom-matrix-view', activeClass);
-      }
-      if (this.activeTab === 'dashboard' && window.dashboardCharts) {
-        window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
-      }
-      if (this.activeTab === 'roster' && window.rosterManager) {
-        window.rosterManager.render('roster-manager-view');
-      }
-      if (this.activeTab === 'guide' && window.userGuideView) {
-        window.userGuideView.render('user-guide-view');
-      }
+      this.refreshActiveTab();
     } catch (e) {
       console.warn('Error refreshing views on theme apply:', e);
     }
@@ -1771,88 +1818,174 @@ class AppState {
     }
   }
 
-  switchTab(tabId) {
-    this.activeTab = tabId;
+  toggleMoreMenu(evt) {
+    if (evt) evt.stopPropagation();
+    const dd = document.getElementById('more-menu-dropdown');
+    if (dd) dd.classList.toggle('hidden');
+  }
 
-    // Update Nav buttons
+  closeMoreMenu() {
+    const dd = document.getElementById('more-menu-dropdown');
+    if (dd) dd.classList.add('hidden');
+  }
+
+  toggleMobileMoreSheet(evt) {
+    if (evt) evt.stopPropagation();
+    const sheet = document.getElementById('mobile-more-sheet');
+    if (sheet) {
+      sheet.classList.toggle('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  closeMobileMoreSheet() {
+    const sheet = document.getElementById('mobile-more-sheet');
+    if (sheet) sheet.classList.add('hidden');
+  }
+
+  switchStudentsSubTab(subTab = 'roster', seatNo = null) {
+    const valid = ['roster', 'student-dossier', 'events'];
+    this.studentsSubTab = valid.includes(subTab) ? subTab : 'roster';
+
+    document.querySelectorAll('.students-subtab-btn').forEach(btn => {
+      if (btn.getAttribute('data-subtab') === this.studentsSubTab) {
+        btn.classList.add('subtab-active');
+      } else {
+        btn.classList.remove('subtab-active');
+      }
+    });
+
+    const panelMap = {
+      'roster': 'roster-manager-view',
+      'student-dossier': 'student-dossier-view',
+      'events': 'events-log-view'
+    };
+    Object.values(panelMap).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(panelMap[this.studentsSubTab]);
+    if (target) target.classList.remove('hidden');
+
+    const activeClass = this.currentClassId || '801';
+    if (this.studentsSubTab === 'roster' && window.rosterManager) {
+      window.rosterManager.currentClassId = activeClass;
+      window.rosterManager.render('roster-manager-view');
+    } else if (this.studentsSubTab === 'student-dossier' && window.studentDossierView) {
+      window.studentDossierView.currentClassId = activeClass;
+      window.studentDossierView.render('student-dossier-view', activeClass, seatNo || window.studentDossierView.currentSeatNo);
+    } else if (this.studentsSubTab === 'events' && window.eventsLogView) {
+      window.eventsLogView.render('events-log-view', activeClass);
+    }
+  }
+
+  switchSettingsSubTab(subTab = 'ai-hub') {
+    const valid = ['ai-hub', 'timetable'];
+    this.settingsSubTab = valid.includes(subTab) ? subTab : 'ai-hub';
+
+    document.querySelectorAll('.settings-subtab-btn').forEach(btn => {
+      if (btn.getAttribute('data-subtab') === this.settingsSubTab) {
+        btn.classList.add('subtab-active');
+      } else {
+        btn.classList.remove('subtab-active');
+      }
+    });
+
+    const panelMap = {
+      'ai-hub': 'ai-hub-view',
+      'timetable': 'timetable-editor-view'
+    };
+    Object.values(panelMap).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(panelMap[this.settingsSubTab]);
+    if (target) target.classList.remove('hidden');
+
+    if (this.settingsSubTab === 'ai-hub' && window.aiHub) {
+      window.aiHub.render('ai-hub-view');
+    } else if (this.settingsSubTab === 'timetable' && window.timetableEditorView) {
+      window.timetableEditorView.render('timetable-editor-view');
+    }
+  }
+
+  switchTab(tabId) {
+    this.closeMoreMenu();
+    this.closeMobileMoreSheet();
+
+    // Backward-compatible tab routing -> 4 primary tabs + secondary more views
+    let primaryTab = tabId;
+    if (tabId === 'retro') {
+      primaryTab = 'matrix';
+      if (window.matrixView) window.matrixView.scoringMode = 'retro';
+    } else if (tabId === 'dashboard' || tabId === 'grades') {
+      primaryTab = 'grades';
+    } else if (tabId === 'roster' || tabId === 'student-dossier' || tabId === 'events' || tabId === 'students') {
+      primaryTab = 'students';
+      if (tabId !== 'students') this.studentsSubTab = tabId;
+    } else if (tabId === 'ai-hub' || tabId === 'timetable' || tabId === 'settings') {
+      primaryTab = 'settings';
+      if (tabId !== 'settings') this.settingsSubTab = tabId;
+    }
+
+    this.activeTab = primaryTab;
+
+    // Update top nav buttons (highlight primary tab or 'more' for feedback/guide)
+    const isMoreTab = (primaryTab === 'feedback-board' || primaryTab === 'guide');
     document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-      if (btn.getAttribute('data-tab') === tabId) {
+      const btnTab = btn.getAttribute('data-tab');
+      const isActive = (btnTab === primaryTab) || (isMoreTab && btnTab === 'more');
+      if (isActive) {
         btn.classList.add('tab-active');
       } else {
         btn.classList.remove('tab-active');
       }
     });
 
-    // Hide all tab containers
-    const tabContainers = [
+    // Hide all top-level tab shells
+    const topShells = [
       'classroom-matrix-view',
-      'roster-manager-view',
-      'retro-log-view',
       'dashboard-view',
-      'timetable-editor-view',
-      'events-log-view',
-      'student-dossier-view',
-      'ai-hub-view',
+      'students-hub-shell',
+      'settings-hub-shell',
       'feedback-board-view',
       'user-guide-view'
     ];
-
-    tabContainers.forEach(id => {
+    topShells.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
 
-    // Show active tab
-    const viewIdMap = {
+    const shellMap = {
       'matrix': 'classroom-matrix-view',
-      'roster': 'roster-manager-view',
-      'retro': 'retro-log-view',
-      'dashboard': 'dashboard-view',
-      'timetable': 'timetable-editor-view',
-      'events': 'events-log-view',
-      'student-dossier': 'student-dossier-view',
-      'ai-hub': 'ai-hub-view',
+      'grades': 'dashboard-view',
+      'students': 'students-hub-shell',
+      'settings': 'settings-hub-shell',
       'feedback-board': 'feedback-board-view',
       'guide': 'user-guide-view'
     };
 
-    const targetViewId = viewIdMap[tabId];
-    const activeEl = document.getElementById(targetViewId);
-    if (activeEl) {
-      activeEl.classList.remove('hidden');
+    const targetShell = document.getElementById(shellMap[primaryTab]);
+    if (targetShell) {
+      targetShell.classList.remove('hidden');
       this.refreshActiveTab();
     }
   }
 
   refreshActiveTab() {
-    const activeClass = this.currentClassId || '801';
+    const activeClass = this.currentClassId || Object.keys(window.appStore.getClasses())[0] || '801';
     if (this.activeTab === 'matrix') {
-      window.matrixView.render('classroom-matrix-view', activeClass);
-    } else if (this.activeTab === 'roster') {
-      if (window.rosterManager) {
-        window.rosterManager.currentClassId = activeClass;
-        window.rosterManager.render('roster-manager-view');
-      }
-    } else if (this.activeTab === 'retro' && window.retroLogView) {
-      window.retroLogView.currentClassId = activeClass;
-      window.retroLogView.render('retro-log-view', activeClass);
-    } else if (this.activeTab === 'dashboard') {
-      window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
-    } else if (this.activeTab === 'timetable') {
-      window.timetableEditorView.render('timetable-editor-view');
-    } else if (this.activeTab === 'events') {
-      window.eventsLogView.render('events-log-view', activeClass);
-    } else if (this.activeTab === 'student-dossier') {
-      if (window.studentDossierView) {
-        window.studentDossierView.currentClassId = activeClass;
-        window.studentDossierView.render('student-dossier-view', activeClass);
-      }
-    } else if (this.activeTab === 'ai-hub') {
-      window.aiHub.render('ai-hub-view');
+      if (window.matrixView) window.matrixView.render('classroom-matrix-view', activeClass);
+    } else if (this.activeTab === 'grades' || this.activeTab === 'dashboard') {
+      if (window.dashboardCharts) window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
+    } else if (this.activeTab === 'students') {
+      this.switchStudentsSubTab(this.studentsSubTab || 'roster');
+    } else if (this.activeTab === 'settings') {
+      this.switchSettingsSubTab(this.settingsSubTab || 'ai-hub');
     } else if (this.activeTab === 'feedback-board' && window.feedbackBoard) {
       window.feedbackBoard.render('feedback-board-view');
       window.feedbackBoard.syncFeedbacks(true);
-    } else if (this.activeTab === 'guide') {
+    } else if (this.activeTab === 'guide' && window.userGuideView) {
       window.userGuideView.render('user-guide-view');
     }
   }
@@ -1946,6 +2079,8 @@ class AppState {
     if (overrideBtn) {
       overrideBtn.classList.add('hidden');
     }
+
+    this.updateMobileCollapsedLabel();
   }
 
   updateHeaderClock() {
@@ -1994,7 +2129,7 @@ class AppState {
       info: 'bg-pink-600 border-pink-500 text-white'
     };
 
-    toast.className = `fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-all transform duration-300 ${bgMap[type] || bgMap.info}`;
+    toast.className = `fixed bottom-20 md:bottom-16 right-4 sm:right-6 left-4 sm:left-auto max-w-sm z-50 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xl flex items-center gap-2 transition-[transform,opacity] transform duration-300 ease-out will-change-transform ${bgMap[type] || bgMap.info}`;
     toast.innerHTML = `<span>${message}</span>`;
     toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
 
@@ -2078,53 +2213,128 @@ class AppState {
     }
   }
 
-  playCinematicBoomSFX() {
-    if (!this.isSoundEnabled()) return;
-    const ctx = this.getAudioContext();
-    if (!ctx) return;
-    try {
-      const now = ctx.currentTime;
+  // --- Subtle, Non-Intrusive Teacher Easter Eggs ---
+  _initEasterEggs() {
+    if (this._easterEggListenerBound) return;
+    this._easterEggListenerBound = true;
 
-      // 1. Sub-bass boom drop (cinematic anime impact: 120Hz -> 30Hz)
-      const subOsc = ctx.createOscillator();
-      const subGain = ctx.createGain();
-      subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(120, now);
-      subOsc.frequency.exponentialRampToValueAtTime(30, now + 1.2);
-      subGain.gain.setValueAtTime(0.35, now);
-      subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-      subOsc.connect(subGain);
-      subGain.connect(ctx.destination);
-      subOsc.start(now);
-      subOsc.stop(now + 1.45);
+    const konamiSeq = [
+      'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+      'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+      'b', 'a'
+    ];
+    let progress = 0;
 
-      // 2. Mid punch impact
-      const punchOsc = ctx.createOscillator();
-      const punchGain = ctx.createGain();
-      punchOsc.type = 'triangle';
-      punchOsc.frequency.setValueAtTime(220, now);
-      punchOsc.frequency.exponentialRampToValueAtTime(55, now + 0.35);
-      punchGain.gain.setValueAtTime(0.18, now);
-      punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      punchOsc.connect(punchGain);
-      punchGain.connect(ctx.destination);
-      punchOsc.start(now);
-      punchOsc.stop(now + 0.45);
+    document.addEventListener('keydown', (e) => {
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return;
+      if (window.onboardingTour && window.onboardingTour.isActive) return;
 
-      // 3. Metallic tension shimmer
-      [523.25, 659.25, 830.61, 1046.5].forEach((freq, idx) => {
-        const chimeOsc = ctx.createOscillator();
-        const chimeGain = ctx.createGain();
-        chimeOsc.type = 'sawtooth';
-        chimeOsc.frequency.setValueAtTime(freq, now + 0.05 + idx * 0.03);
-        chimeGain.gain.setValueAtTime(0.025, now + 0.05 + idx * 0.03);
-        chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
-        chimeOsc.connect(chimeGain);
-        chimeGain.connect(ctx.destination);
-        chimeOsc.start(now + 0.05 + idx * 0.03);
-        chimeOsc.stop(now + 0.9);
-      });
-    } catch(e) {}
+      const key = (e.key && e.key.length === 1) ? e.key.toLowerCase() : e.key;
+      if (key === konamiSeq[progress]) {
+        progress++;
+        if (progress === konamiSeq.length) {
+          progress = 0;
+          this.triggerSecretCelebration('konami');
+        }
+      } else {
+        progress = key === konamiSeq[0] ? 1 : 0;
+      }
+    });
+  }
+
+  handleMascotTap(who = 'kitty') {
+    this._mascotTapCount = (this._mascotTapCount || 0) + 1;
+    clearTimeout(this._mascotTapTimer);
+    this._mascotTapTimer = setTimeout(() => {
+      this._mascotTapCount = 0;
+    }, 2600);
+
+    if (this._mascotTapCount >= 5) {
+      this._mascotTapCount = 0;
+      this.triggerSecretCelebration('mascot');
+      return;
+    }
+
+    if (who === 'twinstars') {
+      this.showToast('小雙星 Kiki & Lala 守護班級每一顆星星！✨', 'info');
+    } else {
+      this.showToast('Hello Kitty 陪伴老師一起快樂教學！🎀', 'info');
+    }
+  }
+
+  handleChalkboardTap() {
+    this._chalkTapCount = (this._chalkTapCount || 0) + 1;
+    clearTimeout(this._chalkTapTimer);
+    this._chalkTapTimer = setTimeout(() => {
+      this._chalkTapCount = 0;
+    }, 2400);
+
+    if (this._chalkTapCount < 5) return;
+    this._chalkTapCount = 0;
+
+    const isOAA = window.appStore?.getTheme?.() === 'oaa';
+    const chalkQuotes = isOAA
+      ? [
+          '🖍️ 黑板角落密鑰：唯有看清每位同學的長處，才能打造無懈可擊的 A 班！',
+          '🖍️ 粉筆灰備忘錄：精準的扣分與及時的鼓勵，是最強大的班級經營演算。',
+          '🖍️ S-SYSTEM 日誌：老師今天的節奏掌握得極其完美 ♟️'
+        ]
+      : [
+          '🖍️ 黑板角落的悄悄話：辛苦老師了！下課記得喝口水、深呼吸一口氣 ☕',
+          '🖍️ 粉筆灰魔法：大耳狗與美樂蒂也來幫這堂課加滿幸福能量 ✨',
+          '🖍️ 秘密教室備忘錄：願今天每一位同學都專心聽講、準時交作業 🌟'
+        ];
+
+    const quote = chalkQuotes[this._chalkQuoteIdx % chalkQuotes.length];
+    this._chalkQuoteIdx = (this._chalkQuoteIdx || 0) + 1;
+    if (this.playPop) this.playPop();
+    this.showToast(quote, 'info');
+  }
+
+  triggerSecretCelebration(source = 'konami') {
+    const isOAA = window.appStore?.getTheme?.() === 'oaa';
+    if (this.playChime) this.playChime();
+
+    if (source === 'mascot') {
+      this.showToast('🎉 三麗鷗隱藏祝福解鎖：Kitty、小雙星、大耳狗與美樂蒂齊聲幫老師加油！💖', 'success');
+    } else if (isOAA) {
+      this.showToast('🗝️ 隱藏秘技認証通過！高度育成全域士氣 +100%，祝今日授課無往不利！⚡', 'success');
+    } else {
+      this.showToast('🌟 隱藏秘技發動！祝老師今日課程圓滿、滿堂彩！🎀', 'success');
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const existing = document.getElementById('secret-easter-confetti-layer');
+    if (existing) existing.remove();
+
+    const layer = document.createElement('div');
+    layer.id = 'secret-easter-confetti-layer';
+    layer.className = 'fixed inset-0 pointer-events-none overflow-hidden z-[9990]';
+
+    const icons = isOAA
+      ? ['✦', '★', '⚜️', '💠', '🏆', '📜']
+      : ['🎀', '⭐', '✨', '💖', '🌸', '🍓'];
+
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 22; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'secret-confetti-piece text-base sm:text-xl';
+      piece.textContent = icons[i % icons.length];
+      piece.style.left = `${(4 + Math.random() * 92).toFixed(1)}%`;
+      piece.style.animationDelay = `${(Math.random() * 0.35).toFixed(2)}s`;
+      piece.style.setProperty('--fall-dur', `${(1.55 + Math.random() * 0.65).toFixed(2)}s`);
+      piece.style.setProperty('--dx-mid', `${((Math.random() - 0.5) * 36).toFixed(0)}px`);
+      piece.style.setProperty('--dx-end', `${((Math.random() - 0.5) * 60).toFixed(0)}px`);
+      fragment.appendChild(piece);
+    }
+    layer.appendChild(fragment);
+    document.body.appendChild(layer);
+
+    setTimeout(() => {
+      layer.remove();
+    }, 2400);
   }
 
   // Retrieve canonical COTE character based on student gender and rank
@@ -2144,101 +2354,6 @@ class AppState {
     if (!rank || rank < 1) rank = 1;
     const idx = (rank - 1) % this.coteSilhouettes.length;
     return this.coteSilhouettes[idx] || this.coteSilhouettes[0];
-  }
-
-  // --- Dramatic Anime Character Silhouette Easter Egg (Non-Q Cut-In) ---
-  triggerSilhouetteCutIn(charOrRankOrIdx, gender = null) {
-    this.playCinematicBoomSFX();
-
-    let char;
-    if (charOrRankOrIdx && typeof charOrRankOrIdx === 'object' && charOrRankOrIdx.name) {
-      char = charOrRankOrIdx;
-    } else if (gender === 'M' || gender === 'F') {
-      char = this.getCoteCharacterByGenderAndRank(gender, charOrRankOrIdx || 1);
-    } else if (typeof charOrRankOrIdx === 'number') {
-      const idx = Math.max(0, charOrRankOrIdx) % this.coteSilhouettes.length;
-      char = this.coteSilhouettes[idx] || this.coteSilhouettes[0];
-    } else {
-      char = this.coteSilhouettes[this.currentSilhouetteIdx % this.coteSilhouettes.length];
-      this.currentSilhouetteIdx++;
-    }
-
-    let stage = document.getElementById('cote-silhouette-stage');
-    if (!stage) {
-      stage = document.createElement('div');
-      stage.id = 'cote-silhouette-stage';
-      stage.onclick = () => this.dismissSilhouetteCutIn();
-      document.body.appendChild(stage);
-    }
-
-    if (this.silhouetteTimeout) {
-      clearTimeout(this.silhouetteTimeout);
-      this.silhouetteTimeout = null;
-    }
-
-    stage.innerHTML = `
-      <div class="cote-speed-lines"></div>
-      <button type="button" onclick="appState.dismissSilhouetteCutIn()" class="cote-stage-close-btn" title="關閉">✕</button>
-      
-      <!-- Character Cut-In Stage (Upper & Center Area, Cleanly Framed & Never Overlapped) -->
-      <div class="cote-figure-container">
-        <div class="cote-portrait-frame" style="--aura-color: ${char.auraColor}">
-          <img src="${char.image}" id="cote-silhouette-img" class="cote-cutin-figure" alt="${char.name}">
-          <div class="cote-portrait-glow"></div>
-          <div class="cote-eye-flare"></div>
-        </div>
-      </div>
-
-      <!-- Shouted Anime Dialogue Banner -->
-      <div class="cote-dialogue-banner" onclick="event.stopPropagation()">
-        <div class="cote-banner-header">
-          <span class="cote-banner-badge">🏛️ S-SYSTEM // ELITE CUT-IN 實力者降臨</span>
-          <span class="cote-banner-romaji">${char.kana}</span>
-          <button type="button" onclick="appState.toggleSilhouetteUnveil()" class="cote-unveil-btn" title="切換暗影/全彩">
-            ⚡ 暗影 / 全彩
-          </button>
-        </div>
-        <div class="cote-banner-name">
-          <span>${char.name}</span>
-          <span class="cote-banner-sub">${char.classTitle}</span>
-        </div>
-        <div class="cote-banner-quote">${char.shoutedQuote}</div>
-        <div class="cote-banner-subquote">${char.subQuote}</div>
-        <div class="flex items-center justify-between text-[10px] text-amber-400/80 font-mono pt-1 border-t border-amber-500/20">
-          <span>高度育成高等學校 機密實力者資料檔案</span>
-          <span class="cursor-pointer hover:underline text-rose-300" onclick="appState.dismissSilhouetteCutIn()">[ 點擊任意處退場 ]</span>
-        </div>
-      </div>
-    `;
-
-    stage.classList.remove('hidden');
-    stage.classList.add('show');
-
-    // Auto dismiss after 5.5 seconds
-    this.silhouetteTimeout = setTimeout(() => {
-      this.dismissSilhouetteCutIn();
-    }, 5500);
-  }
-
-  toggleSilhouetteUnveil() {
-    const img = document.getElementById('cote-silhouette-img');
-    if (img) {
-      img.classList.toggle('silhouette-mode');
-      this.playEliteTerminalChime();
-    }
-  }
-
-  dismissSilhouetteCutIn() {
-    const stage = document.getElementById('cote-silhouette-stage');
-    if (!stage) return;
-    if (this.silhouetteTimeout) {
-      clearTimeout(this.silhouetteTimeout);
-      this.silhouetteTimeout = null;
-    }
-    stage.classList.remove('show');
-    setTimeout(() => {
-      stage.classList.add('hidden');
-    }, 280);
   }
 
   playEliteTerminalChime() {

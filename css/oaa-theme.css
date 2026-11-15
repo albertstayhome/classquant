@@ -17,6 +17,12 @@ html[data-theme="oaa"] body {
   color: #ffffff !important;
 }
 
+@media (max-width: 1024px) {
+  html[data-theme="oaa"] body {
+    background-attachment: scroll !important;
+  }
+}
+
 /* 2. 徹底隱藏所有三麗鷗卡通元素 (Kitty、小雙星、酷洛米、粉紅蝴蝶結) */
 html[data-theme="oaa"] .kitty-bow,
 html[data-theme="oaa"] .kitty-cat-mini,
@@ -101,9 +107,9 @@ html[data-theme="oaa"] .tab-active {
 
 /* 5. 卡片面板 (Glass Cards) */
 html[data-theme="oaa"] .glass-card {
-  background: rgba(30, 13, 21, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+  background: rgba(30, 13, 21, 0.93) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
   border-radius: 1.25rem !important;
@@ -120,11 +126,13 @@ html[data-theme="oaa"] .compact-seat-tile {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
 }
 
-html[data-theme="oaa"] .student-seat-card:hover,
-html[data-theme="oaa"] .compact-seat-tile:hover {
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme="oaa"] .student-seat-card:hover,
+  html[data-theme="oaa"] .compact-seat-tile:hover {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+    transform: translateY(-1px);
+  }
 }
 
 /* 選中座位高亮 */
@@ -333,7 +341,8 @@ html[data-theme="oaa"] .color-rule-zero-badge {
 
 /* 快速標籤按鈕內部文字全域銳化 */
 html[data-theme="oaa"] .quick-tag-button {
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease !important;
+  will-change: transform;
 }
 html[data-theme="oaa"] .quick-tag-button span.text-slate-900 {
   color: #ffffff !important;
@@ -442,282 +451,6 @@ html[data-theme="oaa"] .tag-sort-card:hover {
   transform: scale(1);
 }
 
-/* 召喚實力者按鈕在 OAA 模式下顯現 */
-html[data-theme="oaa"] #cote-summon-easteregg-btn {
-  display: inline-flex !important;
-}
-
-/* ==========================================================================
-   13. 實力者降臨 巨幅角色剪影震撼彩蛋 (Anime Elite Silhouette Cut-In Stage)
-   ========================================================================== */
-
-#cote-silhouette-stage {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  overflow-y: auto;
-  background: radial-gradient(circle at 50% 35%, rgba(159, 18, 57, 0.4) 0%, rgba(20, 7, 14, 0.95) 60%, rgba(0, 0, 0, 0.98) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 16px 16px 20px 16px;
-  box-sizing: border-box;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.28s ease;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-#cote-silhouette-stage.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* 右上角獨立退場按鈕 */
-.cote-stage-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(26, 7, 16, 0.88);
-  border: 1.5px solid #fbbf24;
-  color: #fbbf24;
-  font-size: 16px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 30;
-  transition: transform 0.2s, background-color 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-.cote-stage-close-btn:active {
-  transform: scale(0.9);
-  background: rgba(159, 18, 57, 0.9);
-}
-
-/* 角色本格立體半身像裁切視窗 (上層獨立置中，絕不被台詞布條遮擋) */
-.cote-figure-container {
-  flex: 1;
-  width: 100%;
-  max-width: 540px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  min-height: 0;
-  padding: 4px 0;
-  margin-bottom: 8px;
-}
-
-.cote-portrait-frame {
-  position: relative;
-  width: min(78vw, 300px);
-  height: min(44vh, 390px);
-  max-width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 1.5rem;
-  border: 3px solid #fbbf24;
-  box-shadow: 0 0 35px var(--aura-color, rgba(239, 68, 68, 0.7)), 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(251, 191, 36, 0.3);
-  overflow: hidden;
-  background: #0f040a;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto 0;
-  transform: translateY(30px) scale(0.92);
-  opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.25), opacity 0.3s ease;
-}
-
-#cote-silhouette-stage.show .cote-portrait-frame {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-  animation: cote-frame-slam 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.2) forwards;
-}
-
-.cote-cutin-figure {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  filter: contrast(112%) brightness(106%) saturate(110%);
-  transition: filter 0.35s ease;
-}
-
-/* 暗影剪影模式 (點擊「暗影 / 全彩」可隨心切換) */
-.cote-cutin-figure.silhouette-mode {
-  filter: contrast(240%) brightness(16%) drop-shadow(0 0 20px var(--aura-color, #ef4444)) !important;
-}
-
-.cote-portrait-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 20%, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
-  box-shadow: inset 0 0 25px rgba(251, 191, 36, 0.4);
-}
-
-/* 動漫特寫紅光眼煞 (直對角色雙眼，立體閃爍) */
-.cote-portrait-frame .cote-eye-flare {
-  position: absolute;
-  top: 32%;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #ff003c, #ffffff, #ff003c, transparent);
-  box-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c;
-  opacity: 0;
-  pointer-events: none;
-}
-
-#cote-silhouette-stage.show .cote-portrait-frame .cote-eye-flare {
-  animation: cote-eye-flash 0.8s 0.25s ease-out forwards;
-}
-
-@keyframes cote-eye-flash {
-  0% { opacity: 0; transform: scaleX(0.1); }
-  50% { opacity: 1; transform: scaleX(1.4); }
-  100% { opacity: 0.7; transform: scaleX(1); }
-}
-
-@keyframes cote-frame-slam {
-  0% { transform: translateY(50px) scale(0.88); opacity: 0; }
-  70% { transform: translateY(-6px) scale(1.03); opacity: 1; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-/* 震撼台詞布條 (Dramatic Shouted Dialogue Banner - 底部獨立排列絕不蓋到立繪) */
-.cote-dialogue-banner {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 540px;
-  margin-top: auto;
-  margin-bottom: 4px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(22, 6, 14, 0.96) 0%, rgba(46, 10, 26, 0.96) 50%, rgba(18, 5, 12, 0.98) 100%);
-  border: 2px solid #f59e0b;
-  border-left: 6px solid #ef4444;
-  border-right: 6px solid #ef4444;
-  border-radius: 1.25rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transform: translateY(40px);
-  opacity: 0;
-  transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.25) 0.1s, opacity 0.3s ease 0.1s;
-}
-
-#cote-silhouette-stage.show .cote-dialogue-banner {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.cote-banner-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  gap: 8px;
-}
-
-.cote-banner-badge {
-  font-family: monospace;
-  font-weight: 900;
-  font-size: 11px;
-  color: #fbbf24;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.cote-banner-romaji {
-  font-family: monospace;
-  font-size: 10px;
-  color: #fda4af;
-  letter-spacing: 0.15em;
-  opacity: 0.85;
-}
-
-.cote-unveil-btn {
-  background: rgba(136, 19, 55, 0.8);
-  border: 1px solid #f59e0b;
-  color: #fef08a;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  pointer-events: auto;
-}
-.cote-unveil-btn:hover {
-  background: #9f1239;
-  border-color: #fbbf24;
-  transform: scale(1.05);
-}
-
-.cote-banner-name {
-  font-size: 20px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 12px rgba(245, 158, 11, 0.5);
-}
-
-.cote-banner-sub {
-  font-size: 11px;
-  color: #fca5a5;
-  font-weight: 700;
-  font-family: monospace;
-}
-
-.cote-banner-quote {
-  font-size: 15px;
-  font-weight: 900;
-  color: #fef08a;
-  line-height: 1.45;
-  letter-spacing: 0.04em;
-  margin-bottom: 6px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(239, 68, 68, 0.6);
-  font-family: "Noto Serif TC", "Songti TC", serif;
-}
-
-.cote-banner-subquote {
-  font-size: 12px;
-  color: #e2e8f0;
-  font-weight: 600;
-  font-style: italic;
-  margin-bottom: 8px;
-  opacity: 0.9;
-}
-
-/* 動漫高速衝擊放射線背景 */
-.cote-speed-lines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-radial-gradient(
-    circle at 50% 50%,
-    transparent 0,
-    transparent 15px,
-    rgba(239, 68, 68, 0.04) 16px,
-    transparent 32px
-  );
-  opacity: 0.8;
-}
 
 /* ==========================================================================
    14. 全域高對比深色模式與螢光/暗淡模糊文字徹底根除 (Universal Eradication)
@@ -874,6 +607,22 @@ html[data-theme="oaa"] .floating-guide-btn:hover {
   color: #ffffff !important;
 }
 
+/* 全域頁尾 OAA 深色高對比銳化 */
+html[data-theme="oaa"] footer {
+  background: rgba(20, 7, 14, 0.96) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.45) !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  color: #f1f5f9 !important;
+}
+html[data-theme="oaa"] footer .text-slate-500,
+html[data-theme="oaa"] footer .text-slate-300 {
+  color: #cbd5e1 !important;
+}
+html[data-theme="oaa"] footer .text-pink-600 {
+  color: #fbbf24 !important;
+}
+
 /* 班級名單 (Roster Manager) OAA 主題徹底防禦 (防止手機觸控殘留白底) */
 html[data-theme="oaa"] #roster-manager-view .hover\:bg-pink-50:hover,
 html[data-theme="oaa"] #roster-manager-view .hover\:bg-pink-100:hover {
@@ -910,6 +659,39 @@ html[data-theme="oaa"] #user-guide-view .bg-purple-50\/70 {
   background-color: #1b0b2e !important;
   border-color: rgba(168, 85, 247, 0.4) !important;
   color: #f3e8ff !important;
+}
+
+/* Mobile Bottom Nav, More Sheet & Selection Action Sheet OAA 主題適配 */
+html[data-theme="oaa"] #mobile-bottom-nav {
+  background: rgba(20, 7, 14, 0.97) !important;
+  border-top: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.75) !important;
+}
+html[data-theme="oaa"] #mobile-bottom-nav .mobile-nav-btn {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: #fde68a !important;
+}
+html[data-theme="oaa"] #mobile-bottom-nav .mobile-nav-btn.tab-active {
+  background: linear-gradient(135deg, #9f1239 0%, #881337 100%) !important;
+  color: #ffffff !important;
+  border: 1.5px solid #fbbf24 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4) !important;
+}
+html[data-theme="oaa"] #mobile-more-sheet-card,
+html[data-theme="oaa"] #mobile-collapsed-bar {
+  background: rgba(24, 9, 17, 0.98) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  color: #ffffff !important;
+}
+html[data-theme="oaa"] #mobile-collapsed-bar button {
+  background: rgba(136, 19, 55, 0.9) !important;
+  border-color: #f59e0b !important;
+  color: #fef08a !important;
+}
+html[data-theme="oaa"] #mobile-collapsed-class-label {
+  color: #fbbf24 !important;
 }
 
 
