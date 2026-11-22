@@ -897,6 +897,7 @@ class StudentDossierView {
     const genderRank = rankInfo?.genderRank || 1;
     const coteChar = window.appState?.getCoteCharacterByGenderAndRank ? window.appState.getCoteCharacterByGenderAndRank(studentGender, genderRank) : (window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(overallRank) : null);
     const charFullImage = coteChar?.image || (studentGender === 'F' ? './assets/cote/official/sakayanagi_full.webp' : './assets/cote/official/ayanokoji_full.webp');
+    const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
     const cleanName = window.cqCleanStudentName ? window.cqCleanStudentName(student.name, student.seatNo) : student.name;
     const regularScore = rankInfo?.regularScore ?? oaa.finalScore;
     const netPoints = rankInfo?.netDelta ?? (profile ? profile.pointsBreakdown.net : 0);
@@ -913,9 +914,9 @@ class StudentDossierView {
             <h2 class="text-sm sm:text-lg font-black tracking-wide text-amber-200">
               學生個人平時表現
             </h2>
-            <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看等第計算說明">
+            <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看等第與角色對應說明">
               <i data-lucide="sparkles" class="w-3 h-3 shrink-0 text-amber-400"></i>
-              <span>等第說明</span>
+              <span>等第與角色說明</span>
             </button>
           </div>
         </div>
@@ -943,67 +944,81 @@ class StudentDossierView {
       <!-- Quick Student Switcher Bar -->
       ${this.renderQuickStudentDeck(students, true)}
 
-      <!-- Clean Student Summary Card with Subtle Corner Anime Illustration -->
+      <!-- Student Summary Card with Character Standing Portrait (立繪) -->
       <div class="relative overflow-hidden rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-[#290e1b] via-[#341122] to-[#1c0712] border border-amber-500/50 shadow-xl text-white mb-6">
-        <!-- Subtle Corner Illustration (Purely Decorative in Bottom-Right Corner, Zero Text) -->
-        <img src="${charFullImage}" alt="" class="pointer-events-none select-none absolute right-2 bottom-0 h-32 sm:h-44 w-auto object-contain opacity-20">
-
-        <div class="relative z-10">
-          <!-- Student Identity & Core Score Strip -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-amber-500/25">
-            <div class="flex flex-wrap items-center gap-2.5">
-              <span class="px-2.5 py-1 rounded-xl font-mono font-black text-xs sm:text-sm bg-[#16060e] text-amber-300 border border-amber-500/50">
-                ${String(student.seatNo).padStart(2, '0')} 號
-              </span>
-              <h1 class="text-xl sm:text-3xl font-black tracking-wide text-white">
-                ${cleanName}
-              </h1>
-              <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${studentGender === 'F' ? 'bg-pink-950/90 text-pink-300 border border-pink-500/40' : 'bg-blue-950/90 text-blue-300 border border-blue-500/40'}">
-                ${studentGender === 'F' ? '👧 女生' : '👦 男生'}
-              </span>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
-              <span class="px-3 py-1 rounded-xl bg-amber-950/80 text-amber-200 border border-amber-400/50">
-                平時成績：<strong class="font-mono font-black text-base text-amber-300">${regularScore}</strong> 分 (${oaa.overallGrade})
-              </span>
-              <span class="px-2.5 py-1 rounded-xl bg-black/40 text-amber-100 border border-amber-500/35">
-                班級第 <strong class="font-mono font-black text-amber-300">${overallRank}</strong> 名
-              </span>
-              <span class="px-2.5 py-1 rounded-xl ${netPoints >= 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/45' : 'bg-rose-950/80 text-rose-300 border border-rose-500/45'}">
-                本期淨點：<strong class="font-mono font-black">${netPoints > 0 ? '+' : ''}${netPoints}</strong>
-              </span>
-              <span class="px-2.5 py-1 rounded-xl bg-black/35 text-slate-200 border border-amber-500/25">
-                歷史累積：<strong class="font-mono font-black">${histSummary.totalCumulativeNetDelta >= 0 ? '+' : ''}${histSummary.totalCumulativeNetDelta}</strong>
-              </span>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center relative z-10">
+          <!-- Left Column: Student's Corresponding Character Standing Portrait (立繪) -->
+          <div class="lg:col-span-4 flex flex-col items-center">
+            <div class="w-36 sm:w-44 lg:w-full aspect-[4/5] max-w-[220px] mx-auto rounded-2xl bg-gradient-to-b from-[#1b0812] via-[#2a0e1c] to-[#12050c] border-2 border-amber-500/60 overflow-hidden shadow-md relative group flex items-center justify-center p-2">
+              <img src="${charFullImage}" class="w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" alt="${charName}" title="對應角色立繪 - ${charName}">
+              <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 text-center">
+                <div class="text-[10px] font-bold text-amber-300">
+                  ${studentGender === 'F' ? '女生' : '男生'}第 ${genderRank} 名 (全班 #${overallRank})
+                </div>
+                <div class="text-sm font-black text-white truncate">
+                  ${charName}
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Clean 4-Dimension Progress Bars -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            ${oaa.metrics.map(m => {
-              const pct = Math.max(0, Math.min(100, Number(m.score) || 0));
-              const barGrad = (m.grade === 'S' || m.grade === 'A')
-                ? 'bg-gradient-to-r from-amber-500 to-yellow-300'
-                : m.grade === 'B'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-300'
-                : m.grade === 'C'
-                ? 'bg-gradient-to-r from-slate-400 to-cyan-300'
-                : 'bg-gradient-to-r from-rose-600 to-orange-400';
-              return `
-                <div class="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/30 border border-amber-500/20 min-w-0">
-                  <div class="flex items-center justify-between gap-2 min-w-0">
-                    <span class="font-bold text-xs sm:text-sm text-amber-100 truncate">${m.label}</span>
-                    <span class="font-mono font-black text-xs sm:text-sm tabular-nums ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
-                      ${m.score} 分 (${m.grade})
-                    </span>
+          <!-- Right Column: Clean Student Grade Summary & 4-Dimension Progress Bars -->
+          <div class="lg:col-span-8">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-amber-500/25">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-xl font-mono font-black text-xs sm:text-sm bg-[#16060e] text-amber-300 border border-amber-500/50">
+                  ${String(student.seatNo).padStart(2, '0')} 號
+                </span>
+                <h1 class="text-xl sm:text-3xl font-black tracking-wide text-white">
+                  ${cleanName}
+                </h1>
+                <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${studentGender === 'F' ? 'bg-pink-950/90 text-pink-300 border border-pink-500/40' : 'bg-blue-950/90 text-blue-300 border border-blue-500/40'}">
+                  ${studentGender === 'F' ? '👧 女生' : '👦 男生'}
+                </span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                <span class="px-3 py-1 rounded-xl bg-amber-950/80 text-amber-200 border border-amber-400/50">
+                  平時成績：<strong class="font-mono font-black text-base text-amber-300">${regularScore}</strong> 分 (${oaa.overallGrade})
+                </span>
+                <span class="px-2.5 py-1 rounded-xl bg-black/40 text-amber-100 border border-amber-500/35">
+                  班級第 <strong class="font-mono font-black text-amber-300">${overallRank}</strong> 名
+                </span>
+                <span class="px-2.5 py-1 rounded-xl ${netPoints >= 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/45' : 'bg-rose-950/80 text-rose-300 border border-rose-500/45'}">
+                  本期淨點：<strong class="font-mono font-black">${netPoints > 0 ? '+' : ''}${netPoints}</strong>
+                </span>
+                <span class="px-2.5 py-1 rounded-xl bg-black/35 text-slate-200 border border-amber-500/25">
+                  歷史累積：<strong class="font-mono font-black">${histSummary.totalCumulativeNetDelta >= 0 ? '+' : ''}${histSummary.totalCumulativeNetDelta}</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Clean 4-Dimension Progress Bars -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              ${oaa.metrics.map(m => {
+                const pct = Math.max(0, Math.min(100, Number(m.score) || 0));
+                const barGrad = (m.grade === 'S' || m.grade === 'A')
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-300'
+                  : m.grade === 'B'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-300'
+                  : m.grade === 'C'
+                  ? 'bg-gradient-to-r from-slate-400 to-cyan-300'
+                  : 'bg-gradient-to-r from-rose-600 to-orange-400';
+                return `
+                  <div class="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/30 border border-amber-500/20 min-w-0">
+                    <div class="flex items-center justify-between gap-2 min-w-0">
+                      <span class="font-bold text-xs sm:text-sm text-amber-100 truncate">${m.label}</span>
+                      <span class="font-mono font-black text-xs sm:text-sm tabular-nums ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
+                        ${m.score} 分 (${m.grade})
+                      </span>
+                    </div>
+                    <div class="h-1.5 w-full rounded-full bg-black/55 overflow-hidden">
+                      <div class="h-full rounded-full ${barGrad}" style="width: ${pct}%"></div>
+                    </div>
                   </div>
-                  <div class="h-1.5 w-full rounded-full bg-black/55 overflow-hidden">
-                    <div class="h-full rounded-full ${barGrad}" style="width: ${pct}%"></div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
+                `;
+              }).join('')}
+            </div>
           </div>
         </div>
       </div>

@@ -818,21 +818,62 @@ class ClassroomMatrix {
           const regularScore = Number(rankInfo.regularScore ?? 80);
           const netPts = Number(rankInfo.netDelta ?? 0);
           const cleanName = window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : String(s.name || '').trim();
+          const compactAvatarCls = mobileCols >= 6 ? 'w-5 h-5 sm:w-8 sm:h-8' : mobileCols === 5 ? 'w-5 h-5 sm:w-8 sm:h-8' : 'w-6 h-6 sm:w-8 sm:h-8';
+          const compactTierCls = mobileCols >= 6 ? '!w-3 !h-3 sm:!w-4 sm:!h-4 text-[7px] sm:text-[10px]' : '!w-3.5 !h-3.5 sm:!w-4 sm:!h-4 text-[9px] sm:text-[10px]';
 
-          // Clean, minimal seat number & tier letter (Zero anime clutter on individual student cards)
+          // Original per-student character avatar & tier badge (without chuunibyou text)
+          let rankBadgeHtml = '';
+          if (isOAA) {
+            const studentGender = s.gender || rankInfo.gender || 'M';
+            const genderRank = rankInfo.genderRank || 1;
+            const overallRank = rankInfo.overallRank || 1;
+
+            const coteChar = window.appState?.getCoteCharacterByGenderAndRank
+              ? window.appState.getCoteCharacterByGenderAndRank(studentGender, genderRank)
+              : (window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(overallRank) : null);
+            const coteAvatar = coteChar?.avatar || (studentGender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
+            const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
+
+            rankBadgeHtml = `
+              <div class="relative shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName} // 評級: ${tier}">
+                <img src="${coteAvatar}" class="${compactAvatarCls} rounded-full border border-amber-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.65)] object-cover" alt="${charName}">
+                <span class="oaa-rank-badge oaa-rank-${tier} absolute -bottom-0.5 -right-0.5 ${compactTierCls} flex items-center justify-center font-black rounded-full border border-black/70 shadow">${tier}</span>
+              </div>
+            `;
+          } else {
+            let mascotClass = 'sanrio-kitty-badge';
+            let mascotTitle = `Hello Kitty (穩健達標 ${tier} 級)`;
+            if (regularScore >= 85) {
+              mascotClass = 'sanrio-twinstars-badge';
+              mascotTitle = `小雙星 (優良表現 ${tier} 級)`;
+            } else if (regularScore < 75) {
+              mascotClass = 'sanrio-kuromi-badge';
+              mascotTitle = `酷洛米 (關懷提醒 ${tier} 級)`;
+            }
+            const kittyTierCls = tier === 'S'
+              ? 'bg-amber-400 text-amber-950 border-white'
+              : tier === 'A'
+              ? 'bg-indigo-500 text-white border-white'
+              : tier === 'B'
+              ? 'bg-emerald-500 text-white border-white'
+              : tier === 'C'
+              ? 'bg-slate-500 text-white border-white'
+              : 'bg-rose-500 text-white border-white';
+            rankBadgeHtml = `
+              <div class="relative shrink-0 pointer-events-none" title="${mascotTitle}">
+                <div class="${mascotClass} ${mobileCols >= 6 ? '!w-5 !h-5 sm:!w-7 sm:!h-7' : '!w-6 !h-6 sm:!w-7 sm:!h-7'} shrink-0"></div>
+                <span class="absolute -bottom-0.5 -right-0.5 ${mobileCols >= 6 ? 'w-3 h-3 text-[7px]' : 'w-3.5 h-3.5 text-[8px]'} rounded-full font-black flex items-center justify-center border shadow-xs ${kittyTierCls}">${tier}</span>
+              </div>
+            `;
+          }
+
           const seatNoBadgeHtml = isOAA
             ? `<span class="font-mono font-bold text-[10px] sm:text-[11px] leading-none text-amber-300/75 pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`
             : `<span class="font-mono font-bold text-[10px] sm:text-[11px] leading-none text-rose-500/80 pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`;
 
-          const tierPillCls = isOAA
-            ? (tier === 'S' ? 'text-amber-300 border-amber-400/50 bg-amber-950/60' : tier === 'A' ? 'text-cyan-300 border-cyan-400/50 bg-cyan-950/60' : tier === 'B' ? 'text-emerald-300 border-emerald-500/40 bg-emerald-950/50' : 'text-slate-400 border-white/10 bg-black/30')
-            : (tier === 'S' ? 'text-amber-800 border-amber-300 bg-amber-50' : tier === 'A' ? 'text-sky-800 border-sky-300 bg-sky-50' : tier === 'B' ? 'text-emerald-800 border-emerald-200 bg-emerald-50' : 'text-slate-600 border-slate-200 bg-slate-50');
-
-          const rankBadgeHtml = `<span class="px-1 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-black border leading-none pointer-events-none ${tierPillCls}">${tier}</span>`;
-
           const studentNameHtml = isOAA
-            ? `<div class="seat-student-name text-[13px] sm:text-sm font-black truncate text-white text-center my-1 leading-snug tracking-wide pointer-events-none">${cleanName}</div>`
-            : `<div class="seat-student-name text-[13px] sm:text-sm font-black truncate text-slate-900 text-center my-1 leading-snug pointer-events-none">${cleanName}</div>`;
+            ? `<div class="seat-student-name text-[13px] sm:text-sm font-black truncate text-white text-center my-0.5 leading-snug tracking-wide pointer-events-none drop-shadow-md">${cleanName}</div>`
+            : `<div class="seat-student-name text-[13px] sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-snug pointer-events-none">${cleanName}</div>`;
 
           const displayRegular = Math.round(regularScore);
           const dualScoreHtml = isOAA
