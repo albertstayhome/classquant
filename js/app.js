@@ -836,13 +836,13 @@ class AppState {
           <div class="p-3.5 rounded-2xl border-2 border-amber-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-rose-50 via-pink-50/90 to-amber-50/80 text-slate-900'} shadow-md">
             <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
               <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-600 via-pink-500 to-amber-500 text-white font-black text-xs shadow-sm font-mono">
-                v2.5.0 (直覺導航重構 • 實教 OAA × 獵人執照 × 咒術特級評定動漫版面大革新)
+                v2.5.0 (直覺頻率導航重構 • 換位設定置底 • 清爽座位卡與角落微動畫)
               </span>
               <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-rose-700'} font-mono font-bold">2026-11-22</span>
             </div>
             <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
-              <li>• 【直覺導航重構｜點開「學生」直達實力名鑑】修正低頻率「名冊建置（1～3 年才改一次）」排在第一順位的反直覺問題；點擊「學生」現直接進入「🎖️ 學生實力檔案」與「全班實力名牌快選牆」，點記板講桌亦將「貼上名單／新增班級」收進「🪑 座位與班務」抽屜。</li>
-              <li>• 【動漫戰術版面大革新｜實教 OAA × 獵人執照 × 咒術特級評定】導入《實力至上主義教室》官方 OAA 終端插畫切鏡、《獵人》雙星執照晶片條碼卡與念能力六維框、《咒術迴戰》特級／一級斜切評定印章，以及成績頁「TOP 3 特級榮耀頒獎台」。</li>
+              <li>• 【直覺頻率導航重構】點開「學生」直接進入日常使用的「👤 學生個人表現」與全班快速切換列（將低頻的名冊建置移至最後）；點記板則將「🪑 座位排數與換位設定」移至畫面最下方。</li>
+              <li>• 【清爽座位卡與角落插畫微動畫】移除學生卡片上的頭像與冗餘文字，專注呈現座號、姓名與平時分數；動漫元素改為低調角落插畫與加分時角落輕巧探頭動畫。</li>
             </ul>
           </div>
 

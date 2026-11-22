@@ -690,8 +690,8 @@ class StudentDossierView {
       <div class="rounded-2xl p-2 sm:p-3 mb-3 border shadow-sm ${isOAA ? 'bg-[#1b0813]/95 border-amber-500/45 text-amber-100' : 'bg-white/95 border-pink-200 text-slate-800'}">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
           <div class="flex items-center gap-1.5 text-xs font-black ${isOAA ? 'text-amber-300' : 'text-pink-700'}">
-            ${isOAA ? '<img src="./assets/anime/hxh_license_chip.svg" alt="" class="h-4 w-auto object-contain shrink-0">' : '<span>🎖️</span>'}
-            <span>全班實力名牌快選夾</span>
+            <span>👥</span>
+            <span>全班學生快速切換</span>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <button type="button" onclick="studentDossierView.stepStudent(-1)" class="min-h-[26px] px-2 py-0.5 rounded-lg text-[11px] font-black border cursor-pointer whitespace-nowrap ${isOAA ? 'bg-[#2a0e1d] border-amber-500/50 text-amber-200 hover:bg-rose-950' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'}">◀ 上一位</button>
@@ -891,47 +891,32 @@ class StudentDossierView {
       'E': 'text-rose-500'
     };
 
-    const rankInfo = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : { overallRank: 1, genderRank: 1, gender: 'M' };
+    const rankInfo = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : { overallRank: 1, genderRank: 1, gender: 'M', regularScore: oaa.finalScore, netDelta: 0, tier: oaa.overallGrade };
     const overallRank = rankInfo?.overallRank || 1;
     const studentGender = student.gender || rankInfo?.gender || 'M';
     const genderRank = rankInfo?.genderRank || 1;
     const coteChar = window.appState?.getCoteCharacterByGenderAndRank ? window.appState.getCoteCharacterByGenderAndRank(studentGender, genderRank) : (window.appState?.getCoteCharacterByRank ? window.appState.getCoteCharacterByRank(overallRank) : null);
     const charFullImage = coteChar?.image || (studentGender === 'F' ? './assets/cote/official/sakayanagi_full.webp' : './assets/cote/official/ayanokoji_full.webp');
-    const charAvatar = coteChar?.avatar || (studentGender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
-    const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
-    const charClassTitle = coteChar?.classTitle || (studentGender === 'F' ? '高度育成 2年A班 // A班司令塔' : '高度育成 2年D班 // 白室最頂點');
-    const sceneArtBg = `./assets/cote/ic-1-${((Math.max(1, Number(student.seatNo) || 1) - 1) % 6) + 1}.jpg`;
-    const jjkSealTitle = (oaa.overallGrade === 'S+' || oaa.overallGrade === 'S')
-      ? '特級術師評定 // SPECIAL GRADE'
-      : (oaa.overallGrade === 'A+' || oaa.overallGrade === 'A')
-      ? '一級術師評定 // GRADE 1'
-      : (oaa.overallGrade === 'B+' || oaa.overallGrade === 'B')
-      ? '準一級評定 // SEMI-GRADE 1'
-      : (oaa.overallGrade === 'C+' || oaa.overallGrade === 'C')
-      ? '二級術師評定 // GRADE 2'
-      : '三級觀察評定 // GRADE 3';
-    const nenAuraLabels = ['強化・學力', '變化・動機', '具現・責任', '特質・常規', '操作・貢獻'];
+    const cleanName = window.cqCleanStudentName ? window.cqCleanStudentName(student.name, student.seatNo) : student.name;
+    const regularScore = rankInfo?.regularScore ?? oaa.finalScore;
+    const netPoints = rankInfo?.netDelta ?? (profile ? profile.pointsBreakdown.net : 0);
+    const histSummary = this.store.getStudentHistoricalSummary ? this.store.getStudentHistoricalSummary(this.currentClassId, student.seatNo) : { totalCumulativeNetDelta: 0 };
 
     container.innerHTML = `
-      <!-- OAA Top Control Bar -->
-      <div class="rounded-2xl p-2.5 sm:p-4 mb-2.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 cq-anime-tactical-banner cq-corner-brackets border border-amber-500/55 shadow-lg text-white">
+      <!-- Clean Top Control Bar -->
+      <div class="rounded-2xl p-2.5 sm:p-4 mb-2.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
         <div class="flex items-center justify-between sm:justify-start gap-2.5 min-w-0 w-full lg:flex-1">
-          <div class="flex items-center gap-2 shrink-0">
-            <div class="bg-amber-50/95 px-2 py-0.5 rounded-xl border border-amber-400/75 shadow-sm shrink-0">
-              <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-5 sm:h-7 object-contain">
-            </div>
-            <img src="./assets/anime/jjk_special_seal.svg" alt="特級評定印章" class="w-7 h-7 sm:w-9 sm:h-9 shrink-0">
+          <div class="bg-amber-50/95 px-2 py-0.5 rounded-xl border border-amber-400/75 shadow-sm shrink-0">
+            <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-5 sm:h-6 object-contain">
           </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center justify-between gap-1.5">
-              <h2 class="text-sm sm:text-lg font-black tracking-wide text-amber-200 uppercase">
-                OAA 實力名鑑 × 獵人執照卡
-              </h2>
-              <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看實力晉階與卡階規則">
-                <i data-lucide="sparkles" class="w-3 h-3 shrink-0 text-amber-400"></i>
-                <span>晉階規則</span>
-              </button>
-            </div>
+          <div class="min-w-0 flex-1 flex flex-wrap items-center justify-between gap-1.5">
+            <h2 class="text-sm sm:text-lg font-black tracking-wide text-amber-200">
+              學生個人平時表現
+            </h2>
+            <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看等第計算說明">
+              <i data-lucide="sparkles" class="w-3 h-3 shrink-0 text-amber-400"></i>
+              <span>等第說明</span>
+            </button>
           </div>
         </div>
 
@@ -948,200 +933,77 @@ class StudentDossierView {
           <select onchange="studentDossierView.switchStudent(this.value)" class="w-full sm:w-auto min-h-[34px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-2.5 py-1 text-xs font-bold focus:outline-none">
             ${students.map(s => `
               <option value="${s.seatNo}" ${this.currentSeatNo === s.seatNo ? 'selected' : ''}>
-                No.${String(s.seatNo).padStart(2, '0')} ${window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name}
+                ${String(s.seatNo).padStart(2, '0')} 號 ${window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name}
               </option>
             `).join('')}
           </select>
         </div>
       </div>
 
-      <!-- Quick Student License Deck -->
+      <!-- Quick Student Switcher Bar -->
       ${this.renderQuickStudentDeck(students, true)}
 
-      <!-- 🌟 Authentic COTE OAA × Hunter License × JJK Special Grade Card -->
-      <div class="cq-hxh-license-card cq-corner-brackets rounded-3xl p-4 sm:p-7 border-2 border-amber-500/55 shadow-2xl text-white mb-6">
-        <!-- Top Hunter License Smart-Chip & JJK Special Grade Seal Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-amber-500/30">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <img src="./assets/anime/hxh_license_chip.svg" alt="Hunter License Chip" class="h-8 sm:h-9 w-auto object-contain shrink-0">
-            <div class="min-w-0">
-              <div class="text-[10px] sm:text-xs font-mono font-black tracking-widest text-amber-300 uppercase truncate">
-                HUNTER LICENSE × ANHS OAA TERMINAL
-              </div>
-              <div class="text-[10px] font-mono text-cyan-300/85 truncate">
-                SERIAL // ${studentIdStr} • CLASS-${this.currentClassId}
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="cq-jjk-stamp px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border ${oaa.overallGrade.startsWith('S') ? 'bg-gradient-to-r from-amber-500 via-yellow-300 to-rose-500 text-black border-amber-200' : oaa.overallGrade.startsWith('A') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-300' : 'bg-[#2a0e1d] text-amber-200 border-amber-500/50'}">
-              ${jjkSealTitle}
-            </span>
-          </div>
-        </div>
+      <!-- Clean Student Summary Card with Subtle Corner Anime Illustration -->
+      <div class="relative overflow-hidden rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-[#290e1b] via-[#341122] to-[#1c0712] border border-amber-500/50 shadow-xl text-white mb-6">
+        <!-- Subtle Corner Illustration (Purely Decorative in Bottom-Right Corner, Zero Text) -->
+        <img src="${charFullImage}" alt="" class="pointer-events-none select-none absolute right-2 bottom-0 h-32 sm:h-44 w-auto object-contain opacity-20">
 
-        <!-- Right Side Vertical Watermark Text (Faithfully matching the official light novel) -->
-        <div class="hidden sm:block absolute top-20 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
-          ADVANCED NURTURING HIGH SCHOOL // OAA
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-          <!-- Left Column: Character Silhouette / Photo Card with COTE Scene Key Visual & Vertical Motto -->
-          <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-amber-500/30 pb-5 lg:pb-0 lg:pr-6">
-            <div>
-              <!-- Silhouette / Official Photo Card (Official Non-Q Standing Portrait over Anime Key Visual) -->
-              <div class="w-40 sm:w-48 lg:w-full aspect-[4/5] max-w-[248px] mx-auto mb-2.5 rounded-2xl bg-[#12050c] border-2 border-amber-500/65 overflow-hidden shadow-lg relative group flex items-center justify-center p-2">
-                <img src="${sceneArtBg}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 scale-105 pointer-events-none">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#12050c] via-[#1c0814]/65 to-[#0b1929]/55 pointer-events-none"></div>
-                <div class="hidden sm:block absolute top-3 left-2.5 font-serif font-black text-[10px] tracking-[0.2em] text-amber-300/75 select-none [writing-mode:vertical-rl] pointer-events-none drop-shadow">
-                  實力至上・高度育成評価
-                </div>
-                <img src="${charFullImage}" class="relative z-10 w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_14px_rgba(0,0,0,0.85)]" alt="${charName}" title="高度育成生徒立繪 - ${charName}">
-                <div class="absolute bottom-0 inset-x-0 z-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-2.5 text-center">
-                  <div class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                    高度育成生徒立繪 // ${studentGender === 'F' ? '女生' : '男生'}階位 #${genderRank} (總 #${overallRank})
-                  </div>
-                  <div class="text-sm font-black text-white truncate">
-                    ${charName}
-                  </div>
-                  <div class="text-[10px] text-cyan-300/85 truncate">${charClassTitle}</div>
-                </div>
-              </div>
-
-              <!-- Clean Technical Metadata -->
-              <div class="px-2 space-y-1.5 text-xs text-amber-200/90 font-medium">
-                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
-                  <span class="text-amber-400/80 shrink-0">座號 / 班級</span>
-                  <span class="font-bold text-white shrink-0">${String(student.seatNo).padStart(2, '0')} 號 (${this.currentClassId}班)</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
-                  <span class="text-amber-400/80 shrink-0">性別</span>
-                  <span class="font-bold text-amber-300 shrink-0">${studentGender === 'F' ? '👧 女生' : '👦 男生'}</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
-                  <span class="text-amber-400/80 shrink-0">班級實力排名</span>
-                  <span class="font-black text-amber-300 truncate text-right">總第 ${overallRank} 名 (${studentGender === 'F' ? '女' : '男'}生 #${genderRank})</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
-                  <span class="text-amber-400/80 shrink-0">實力對應角色</span>
-                  <span class="font-black text-white truncate max-w-[130px] text-right">${charName}</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-amber-500/20 pb-1 gap-2 min-w-0">
-                  <span class="text-amber-400/80 shrink-0">班級類別</span>
-                  <span class="font-bold text-white shrink-0">${oaa.isHomeroom ? '導師班' : '科任班'}</span>
-                </div>
-              </div>
+        <div class="relative z-10">
+          <!-- Student Identity & Core Score Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-amber-500/25">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="px-2.5 py-1 rounded-xl font-mono font-black text-xs sm:text-sm bg-[#16060e] text-amber-300 border border-amber-500/50">
+                ${String(student.seatNo).padStart(2, '0')} 號
+              </span>
+              <h1 class="text-xl sm:text-3xl font-black tracking-wide text-white">
+                ${cleanName}
+              </h1>
+              <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${studentGender === 'F' ? 'bg-pink-950/90 text-pink-300 border border-pink-500/40' : 'bg-blue-950/90 text-blue-300 border border-blue-500/40'}">
+                ${studentGender === 'F' ? '👧 女生' : '👦 男生'}
+              </span>
             </div>
 
-            <div class="mt-4 pt-3 border-t border-amber-500/20 text-xs text-amber-300/70 flex items-center justify-between font-mono">
-              <span>OVERALL ABILITY ASSESSMENT</span>
-              <span>VER. 2.0</span>
+            <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+              <span class="px-3 py-1 rounded-xl bg-amber-950/80 text-amber-200 border border-amber-400/50">
+                平時成績：<strong class="font-mono font-black text-base text-amber-300">${regularScore}</strong> 分 (${oaa.overallGrade})
+              </span>
+              <span class="px-2.5 py-1 rounded-xl bg-black/40 text-amber-100 border border-amber-500/35">
+                班級第 <strong class="font-mono font-black text-amber-300">${overallRank}</strong> 名
+              </span>
+              <span class="px-2.5 py-1 rounded-xl ${netPoints >= 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/45' : 'bg-rose-950/80 text-rose-300 border border-rose-500/45'}">
+                本期淨點：<strong class="font-mono font-black">${netPoints > 0 ? '+' : ''}${netPoints}</strong>
+              </span>
+              <span class="px-2.5 py-1 rounded-xl bg-black/35 text-slate-200 border border-amber-500/25">
+                歷史累積：<strong class="font-mono font-black">${histSummary.totalCumulativeNetDelta >= 0 ? '+' : ''}${histSummary.totalCumulativeNetDelta}</strong>
+              </span>
             </div>
           </div>
 
-          <!-- Right Column: Student Metadata, OAA Evaluation Box & Stats -->
-          <div class="lg:col-span-8 flex flex-col justify-between">
-            <div>
-              <!-- Row 1: Student Name & ID Card Headers -->
-              <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
-                <div>
-                  <div class="flex items-center space-x-2 mb-1 flex-wrap gap-2">
-                    <span class="px-2 py-0.5 rounded text-xs font-black bg-rose-950 text-amber-300 border border-amber-500/50">
-                      名前
-                    </span>
-                    <h1 class="text-2xl sm:text-4xl font-black tracking-wide text-white drop-shadow">
-                      ${student.name}
-                    </h1>
-                    <span class="text-xs px-2.5 py-1 rounded-xl font-black ${studentGender === 'F' ? 'bg-pink-950/90 text-pink-300 border border-pink-500/50' : 'bg-blue-950/90 text-blue-300 border border-blue-500/50'}">
-                      ${studentGender === 'F' ? '👧 女生' : '👦 男生'}
+          <!-- Clean 4-Dimension Progress Bars -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${oaa.metrics.map(m => {
+              const pct = Math.max(0, Math.min(100, Number(m.score) || 0));
+              const barGrad = (m.grade === 'S' || m.grade === 'A')
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-300'
+                : m.grade === 'B'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-300'
+                : m.grade === 'C'
+                ? 'bg-gradient-to-r from-slate-400 to-cyan-300'
+                : 'bg-gradient-to-r from-rose-600 to-orange-400';
+              return `
+                <div class="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/30 border border-amber-500/20 min-w-0">
+                  <div class="flex items-center justify-between gap-2 min-w-0">
+                    <span class="font-bold text-xs sm:text-sm text-amber-100 truncate">${m.label}</span>
+                    <span class="font-mono font-black text-xs sm:text-sm tabular-nums ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
+                      ${m.score} 分 (${m.grade})
                     </span>
                   </div>
-                  <div class="text-xs font-mono tracking-wider text-amber-300/80 pl-1">
-                    STUDENT DOSSIER // SEAT ${String(student.seatNo).padStart(2, '0')}
+                  <div class="h-1.5 w-full rounded-full bg-black/55 overflow-hidden">
+                    <div class="h-full rounded-full ${barGrad}" style="width: ${pct}%"></div>
                   </div>
                 </div>
-
-                <!-- Info Badges -->
-                <div class="flex flex-wrap sm:flex-nowrap gap-2 text-xs">
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
-                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">學籍番号</span>
-                    <span class="font-bold text-white font-mono tracking-wider">${studentIdStr}</span>
-                  </div>
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
-                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">全班位階</span>
-                    <span class="font-bold text-amber-200">#${overallRank} (${studentGender === 'F' ? '女' : '男'} #${genderRank})</span>
-                  </div>
-                  <div class="bg-[#1f0915]/90 border border-amber-500/50 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
-                    <span class="text-xs text-amber-400 uppercase font-bold shrink-0">實力對應</span>
-                    <span class="font-bold text-amber-200">${charName}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Row 2: Character Evaluation Box -->
-              <div class="mb-6 p-4 sm:p-5 rounded-2xl bg-[#1e0a15]/80 border border-amber-500/30 text-xs sm:text-sm text-slate-100 leading-relaxed font-medium backdrop-blur-sm relative">
-                <div class="text-xs text-amber-300 tracking-wider uppercase mb-1.5 flex items-center gap-1.5 font-bold">
-                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                  <span>能力特性與綜合評語</span>
-                </div>
-                <p class="whitespace-pre-wrap">${oaa.oaaSummary}</p>
-                ${oaa.gatingNote ? `
-                  <div class="mt-2.5 px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-500 text-rose-200 text-xs flex items-center gap-2">
-                    <i data-lucide="shield-alert" class="w-4 h-4 shrink-0 text-rose-400"></i>
-                    <span><strong>【實力考核限制】</strong> ${oaa.gatingNote}</span>
-                  </div>
-                ` : ''}
-              </div>
-
-              <!-- Row 3: Four / Three Dimensions Stats Bar -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                ${oaa.metrics.map(m => {
-                  const pct = Math.max(0, Math.min(100, Number(m.score) || 0));
-                  const barGrad = (m.grade === 'S' || m.grade === 'A')
-                    ? 'bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.45)]'
-                    : m.grade === 'B'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-300'
-                    : m.grade === 'C'
-                    ? 'bg-gradient-to-r from-slate-400 to-cyan-300'
-                    : 'bg-gradient-to-r from-rose-600 to-orange-400';
-                  return `
-                    <div class="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/25 border border-amber-500/20 hover:border-amber-400/55 transition cursor-pointer group min-w-0" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
-                      <div class="flex items-center justify-between gap-2 min-w-0">
-                        <span class="font-bold text-xs sm:text-sm text-amber-100 truncate">${m.label} <span class="text-[11px] text-amber-400/75 font-normal">(${m.weight})</span></span>
-                        <span class="font-mono font-black text-xs sm:text-sm tabular-nums ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
-                          ${m.grade} (${m.score})
-                        </span>
-                      </div>
-                      <div class="h-1.5 w-full rounded-full bg-black/55 overflow-hidden border border-white/5">
-                        <div class="h-full rounded-full ${barGrad} transition-all duration-300" style="width: ${pct}%"></div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Row 4: Giant Overall Rating (総合評價) -->
-            <div class="pt-4 border-t-2 border-amber-500/40 flex flex-wrap items-center justify-between gap-4">
-              <div class="flex items-baseline space-x-3">
-                <span class="text-sm sm:text-base font-bold tracking-wider text-amber-300 uppercase">
-                  総合 ：
-                </span>
-                <span class="text-3xl sm:text-5xl font-mono font-black tracking-wider ${gradeColorMap[oaa.overallGrade] || 'text-white'}">
-                  ${oaa.overallGrade} (${oaa.finalScore})
-                </span>
-                <span class="text-xs text-amber-300/70 ml-2">
-                  (加權值: ${oaa.rawWeighted.toFixed(1)})
-                </span>
-              </div>
-
-              <div class="flex items-center space-x-2">
-                <span class="text-xs text-amber-300/80 hidden sm:inline font-bold">OAA VERIFIED</span>
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center font-mono font-black text-lg text-white shadow-md">
-                  ${oaa.overallGrade.charAt(0)}
-                </div>
-              </div>
-            </div>
+              `;
+            }).join('')}
           </div>
         </div>
       </div>
@@ -1151,25 +1013,6 @@ class StudentDossierView {
 
       <!-- Formative Assessment Points Breakdown (平時成績加扣分累計總表) -->
       ${this.renderPointsBreakdownSection(events, true)}
-
-      <!-- OAA Dimension Source Inspector (Transparency) -->
-      <div class="rounded-2xl p-5 bg-[#200b17] border border-amber-500/50 text-white mb-6">
-        <h3 class="text-sm font-bold tracking-wide text-amber-300 mb-3 flex items-center gap-2">
-          <i data-lucide="database" class="w-4 h-4 text-amber-400"></i>
-          <span>課堂表現數據來源透明稽核（有理有據）</span>
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${oaa.metrics.length} gap-3 text-xs">
-          ${oaa.metrics.map(m => `
-            <div class="p-3 rounded-xl bg-[#2d1020]/80 border border-amber-500/30">
-              <div class="flex items-center justify-between font-bold mb-1">
-                <span class="text-amber-100">${m.label}</span>
-                <span class="${gradeColorMap[m.grade] || 'text-white'}">${m.grade} (${m.score})</span>
-              </div>
-              <p class="text-[11px] text-amber-200/80 leading-normal font-sans">${m.detail}</p>
-            </div>
-          `).join('')}
-        </div>
-      </div>
 
       <!-- OAA Analytics: 5-Dim Radar & EWMA Trajectory -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

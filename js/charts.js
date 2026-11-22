@@ -290,34 +290,23 @@ class DashboardCharts {
         ${topThreeRanked.map((p, idx) => {
           const rankNum = idx + 1;
           const cleanName = window.cqCleanStudentName ? window.cqCleanStudentName(p.name, p.seatNo) : p.name;
-          const coteChar = window.appState?.getCoteCharacterByGenderAndRank
-            ? window.appState.getCoteCharacterByGenderAndRank(p.gender || 'M', p.genderRank || rankNum)
-            : null;
-          const avatarUrl = coteChar?.avatar || (p.gender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
-          const charName = coteChar?.name || (p.gender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
-          const jjkTitle = rankNum === 1 ? '🥇 NO.01 特級' : rankNum === 2 ? '🥈 NO.02 一級' : '🥉 NO.03 一級';
+          const medalLabel = rankNum === 1 ? '🥇 第 1 名' : rankNum === 2 ? '🥈 第 2 名' : '🥉 第 3 名';
           const borderCls = rankNum === 1
-            ? (isOAA ? 'border-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.25)]' : 'border-amber-300 bg-gradient-to-br from-amber-50 via-white to-pink-50')
+            ? (isOAA ? 'border-amber-400/80' : 'border-amber-300 bg-gradient-to-br from-amber-50 via-white to-pink-50')
             : rankNum === 2
-            ? (isOAA ? 'border-cyan-400/70' : 'border-sky-200 bg-gradient-to-br from-sky-50/70 via-white to-pink-50/40')
-            : (isOAA ? 'border-rose-400/60' : 'border-pink-200 bg-gradient-to-br from-pink-50/60 via-white to-amber-50/40');
+            ? (isOAA ? 'border-cyan-400/60' : 'border-sky-200 bg-gradient-to-br from-sky-50/70 via-white to-pink-50/40')
+            : (isOAA ? 'border-rose-400/50' : 'border-pink-200 bg-gradient-to-br from-pink-50/60 via-white to-amber-50/40');
           return `
             <div onclick="dashboardCharts.jumpToStudentDossier('${classId}', ${p.seatNo})"
-              class="relative overflow-hidden rounded-2xl p-3 border-2 cursor-pointer transition active:scale-95 ${borderCls} ${isOAA ? 'bg-[#180711] hover:bg-[#260c1b] text-white' : 'hover:shadow-md text-slate-900'}">
-              ${isOAA ? `<img src="${cutinBgs[idx % cutinBgs.length]}" alt="" class="absolute right-0 top-0 h-full w-24 object-cover opacity-20 pointer-events-none">` : ''}
+              class="relative overflow-hidden rounded-2xl p-3 border cursor-pointer transition active:scale-95 ${borderCls} ${isOAA ? 'bg-[#180711] hover:bg-[#260c1b] text-white' : 'hover:shadow-md text-slate-900'}">
+              ${isOAA ? `<img src="${cutinBgs[idx % cutinBgs.length]}" alt="" class="absolute right-0 top-0 h-full w-20 object-cover opacity-15 pointer-events-none select-none">` : ''}
               <div class="relative z-10 flex items-center justify-between gap-2 min-w-0">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  ${isOAA
-                    ? `<img src="${avatarUrl}" alt="${charName}" class="w-10 h-10 rounded-xl border border-amber-400/80 object-cover shrink-0 shadow">`
-                    : `<div class="${p.regularScore >= 85 ? 'sanrio-twinstars-badge' : 'sanrio-kitty-badge'} !w-9 !h-9 shrink-0"></div>`}
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-[10px] font-mono font-black px-1.5 py-0.2 rounded ${rankNum === 1 ? (isOAA ? 'bg-amber-400 text-black' : 'bg-amber-200 text-amber-950') : (isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-pink-100 text-pink-800')}">${jjkTitle}</span>
-                      <span class="text-[10px] font-mono opacity-75">#${String(p.seatNo).padStart(2, '0')}</span>
-                    </div>
-                    <div class="text-sm sm:text-base font-black truncate mt-0.5">${cleanName}</div>
-                    ${isOAA ? `<div class="text-[10px] text-amber-300/80 truncate">${charName}</div>` : ''}
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] font-black px-2 py-0.5 rounded-lg ${rankNum === 1 ? (isOAA ? 'bg-amber-400 text-black' : 'bg-amber-200 text-amber-950') : (isOAA ? 'bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-pink-100 text-pink-800')}">${medalLabel}</span>
+                    <span class="text-xs font-mono opacity-80">${String(p.seatNo).padStart(2, '0')} 號</span>
                   </div>
+                  <div class="text-sm sm:text-base font-black truncate mt-1">${cleanName}</div>
                 </div>
                 <div class="text-right shrink-0">
                   <div class="font-mono font-black text-base sm:text-lg leading-none ${isOAA ? 'text-amber-300' : 'text-blue-700'}">${p.regularScore}<span class="text-[10px] ml-0.5 font-bold opacity-75">分</span></div>
