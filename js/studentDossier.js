@@ -986,17 +986,30 @@ class StudentDossierView {
               </div>
 
               <!-- Row 3: Four / Three Dimensions Stats Bar -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
-                ${oaa.metrics.map(m => `
-                  <div class="flex items-center group cursor-pointer min-w-0" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
-                    <span class="font-bold text-sm sm:text-base text-amber-100 whitespace-nowrap shrink-0">${m.label}</span>
-                    <span class="text-xs text-amber-400/80 ml-1.5 shrink-0">(${m.weight})</span>
-                    <span class="flex-1 min-w-[16px] border-b border-amber-500/30 mx-2 sm:mx-3 group-hover:border-amber-400 transition"></span>
-                    <span class="font-mono font-black text-sm sm:text-base ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
-                      ${m.grade} (${m.score})
-                    </span>
-                  </div>
-                `).join('')}
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                ${oaa.metrics.map(m => {
+                  const pct = Math.max(0, Math.min(100, Number(m.score) || 0));
+                  const barGrad = (m.grade === 'S' || m.grade === 'A')
+                    ? 'bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.45)]'
+                    : m.grade === 'B'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-300'
+                    : m.grade === 'C'
+                    ? 'bg-gradient-to-r from-slate-400 to-cyan-300'
+                    : 'bg-gradient-to-r from-rose-600 to-orange-400';
+                  return `
+                    <div class="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/25 border border-amber-500/20 hover:border-amber-400/55 transition cursor-pointer group min-w-0" onclick="studentDossierView.showMetricTooltip('${m.label}', '${m.grade}', '${m.score}', '${m.weight}', '${m.detail}')" title="點擊查看數據來源">
+                      <div class="flex items-center justify-between gap-2 min-w-0">
+                        <span class="font-bold text-xs sm:text-sm text-amber-100 truncate">${m.label} <span class="text-[11px] text-amber-400/75 font-normal">(${m.weight})</span></span>
+                        <span class="font-mono font-black text-xs sm:text-sm tabular-nums ${gradeColorMap[m.grade] || 'text-white'} whitespace-nowrap shrink-0">
+                          ${m.grade} (${m.score})
+                        </span>
+                      </div>
+                      <div class="h-1.5 w-full rounded-full bg-black/55 overflow-hidden border border-white/5">
+                        <div class="h-full rounded-full ${barGrad} transition-all duration-300" style="width: ${pct}%"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
 

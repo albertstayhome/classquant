@@ -1849,8 +1849,9 @@ class AppState {
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
       if (themeName === 'oaa') {
-        btn.innerHTML = '<span class="text-xs">🏛️</span><span class="text-xs font-black text-amber-200 ml-0.5 hidden xl:inline whitespace-nowrap">高度育成 OAA</span>';
-        btn.className = "min-w-[38px] min-h-[38px] px-2.5 py-1.5 rounded-xl border border-amber-500 bg-rose-950/80 hover:bg-rose-900 text-amber-200 transition active:scale-95 flex items-center justify-center gap-1 shrink-0 shadow-sm cursor-pointer";
+        const crestIcon = '<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.8 21.6,7.4 19.2,17.8 12,22.2 4.8,17.8 2.4,7.4" fill="#240916" stroke="#fbbf24" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 15.2L8.2 9.8L10.4 12L12 8.4L13.6 12L15.8 9.8L16.8 15.2Z" fill="#fde047"/></svg>';
+        btn.innerHTML = `${crestIcon}<span class="text-xs font-black text-amber-200 ml-0.5 hidden xl:inline whitespace-nowrap">高度育成 OAA</span>`;
+        btn.className = "min-w-[38px] min-h-[38px] px-2.5 py-1.5 rounded-xl border border-amber-500/70 bg-gradient-to-r from-[#280b18] to-[#1a0710] hover:border-amber-400 text-amber-200 transition active:scale-95 flex items-center justify-center gap-1 shrink-0 shadow-sm cursor-pointer";
         btn.title = "目前為《實力至上主義教室》高度育成 OAA 主題，點擊切換為三麗鷗主題";
       } else {
         btn.innerHTML = '<span class="kitty-bow !w-3.5 !h-3.5"></span><span class="text-xs font-bold text-pink-600 ml-0.5 hidden xl:inline whitespace-nowrap">三麗鷗</span>';
@@ -1896,7 +1897,7 @@ class AppState {
         'xlarge': '116%'
       };
       const text = labels[size] || '108%';
-      btn.innerHTML = `<span class="text-xs font-black">🔍A</span><span class="text-xs font-bold hidden md:inline">${text}</span>`;
+      btn.innerHTML = `<span class="text-xs font-black tracking-tight">Aa</span><span class="text-[11px] font-bold hidden md:inline opacity-80">${text}</span>`;
       btn.title = `目前字級：${text}，點擊切換 (標準 100% / 舒適 108% / 超大 116%)`;
     }
   }

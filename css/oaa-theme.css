@@ -4,11 +4,20 @@
    輕小說高對比白色標題 (#ffffff) 與高彩度鮮明數據字體
    ========================================================================== */
 
-/* 1. 頁面背景：以官方美術掛畫/壁紙搭配暗酒紅半透明高校氛圍 */
+html[data-theme="oaa"] {
+  --cq-crest-bg: #1e0713;
+  --cq-crest-ring: #fbbf24;
+  --cq-crest-inner: rgba(253, 224, 71, 0.35);
+  --cq-crest-gold: #fde047;
+  --cq-crest-spark: #fb7185;
+}
+
+/* 1. 頁面背景：以官方美術掛畫/壁紙搭配黑曜酒紅光影漸層氛圍 */
 html[data-theme="oaa"] body {
-  background-color: #13070d !important;
+  background-color: #11060c !important;
   background-image: 
-    linear-gradient(rgba(18, 8, 14, 0.90), rgba(24, 10, 18, 0.93)),
+    radial-gradient(ellipse at 50% 0%, rgba(159, 18, 57, 0.24) 0%, rgba(17, 6, 12, 0.72) 55%, rgba(12, 4, 9, 0.96) 100%),
+    linear-gradient(rgba(18, 8, 14, 0.88), rgba(20, 7, 15, 0.93)),
     url('../assets/cote/cote_wp_1.jpg') !important;
   background-position: center top !important;
   background-size: cover !important;
@@ -65,14 +74,14 @@ html[data-theme="oaa"] #header-version-badge {
   font-weight: 900 !important;
 }
 
-/* 4. 分頁導覽列 (徹底修復所有文字對比度，無任何看不清的按鈕) */
+/* 4. 分頁導覽列 (靜謐深曜底 + 皇家赤金選中光環，降低橘黃線條疲勞) */
 html[data-theme="oaa"] .nav-tab-btn {
-  color: #f1f5f9 !important;
-  background: rgba(40, 16, 26, 0.85) !important;
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #e2e8f0 !important;
+  background: rgba(30, 11, 21, 0.65) !important;
+  border: 1px solid rgba(245, 158, 11, 0.16) !important;
   border-radius: 0.875rem !important;
   font-weight: 800 !important;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.32) !important;
 }
 
 /* 強制修復淺色模式中原本寫死的淺黃/淺粉背景按鈕 */
@@ -86,51 +95,51 @@ html[data-theme="oaa"] .nav-tab-btn[data-tab="events"],
 html[data-theme="oaa"] .nav-tab-btn[data-tab="student-dossier"],
 html[data-theme="oaa"] .nav-tab-btn[data-tab="ai-hub"] {
   color: #ffffff !important;
-  background-color: rgba(40, 16, 26, 0.85) !important;
-  border-color: rgba(245, 158, 11, 0.35) !important;
+  background-color: rgba(34, 12, 23, 0.72) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
 }
 
 html[data-theme="oaa"] .nav-tab-btn:hover {
-  background-color: rgba(159, 18, 57, 0.6) !important;
+  background-color: rgba(136, 19, 55, 0.55) !important;
   color: #fef08a !important;
-  border-color: rgba(245, 158, 11, 0.7) !important;
+  border-color: rgba(251, 191, 36, 0.55) !important;
 }
 
-/* 選中分頁：官方制服深紅漸層 + 金色高亮邊框 */
+/* 選中分頁：官方制服深紅漸層 + 鎏金高光鑲邊 */
 html[data-theme="oaa"] .tab-active {
   color: #ffffff !important;
-  background: linear-gradient(135deg, #9f1239 0%, #881337 50%, #4c0519 100%) !important;
-  border: 2px solid #fbbf24 !important;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  background: linear-gradient(135deg, #be123c 0%, #881337 52%, #4c0519 100%) !important;
+  border: 1.5px solid #fbbf24 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(254, 240, 138, 0.38) !important;
   font-weight: 900 !important;
 }
 
-/* 5. 卡片面板 (Glass Cards) */
+/* 5. 卡片面板 (Glass Cards：絲絨酒紅漸層 + 靜謐細金高光) */
 html[data-theme="oaa"] .glass-card {
-  background: rgba(30, 13, 21, 0.93) !important;
+  background: linear-gradient(160deg, rgba(34, 13, 24, 0.94) 0%, rgba(18, 6, 13, 0.96) 100%) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+  border: 1px solid rgba(245, 158, 11, 0.22) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(253, 230, 138, 0.14) !important;
   border-radius: 1.25rem !important;
   color: #ffffff !important;
 }
 
-/* 6. 學生座位卡 (100% 高對比、官方動漫頭貼、深紅高校風) */
+/* 6. 學生座位卡 (層次絨紅漸層、官方動漫頭貼、靜謐外框與高亮香檳金選中框) */
 html[data-theme="oaa"] .student-seat-card,
 html[data-theme="oaa"] .compact-seat-tile {
-  background: rgba(36, 15, 25, 0.95) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  background: linear-gradient(170deg, rgba(40, 15, 28, 0.96) 0%, rgba(22, 8, 16, 0.98) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.22) !important;
   color: #ffffff !important;
   border-radius: 1rem !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-theme="oaa"] .student-seat-card:hover,
   html[data-theme="oaa"] .compact-seat-tile:hover {
-    border-color: #f59e0b !important;
-    box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+    border-color: rgba(251, 191, 36, 0.72) !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(254, 240, 138, 0.18) !important;
     transform: translateY(-1px);
   }
 }
@@ -138,9 +147,9 @@ html[data-theme="oaa"] .compact-seat-tile {
 /* 選中座位高亮 */
 html[data-theme="oaa"] .student-seat-card.selected,
 html[data-theme="oaa"] .compact-seat-tile.selected {
-  background: rgba(120, 20, 45, 0.95) !important;
+  background: linear-gradient(160deg, rgba(136, 19, 55, 0.96) 0%, rgba(76, 5, 25, 0.98) 100%) !important;
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 0 2px #fbbf24, 0 0 20px rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.9), 0 8px 22px rgba(245, 158, 11, 0.45) !important;
 }
 
 /* 學生姓名與數字高對比規範 */
@@ -205,10 +214,10 @@ html[data-theme="oaa"] .student-seat-card .border-pink-100 {
 
 /* 8. 講台與黑板方位條 */
 html[data-theme="oaa"] .classroom-podium-bar {
-  background: linear-gradient(90deg, #1c0a12 0%, #3d1220 50%, #1c0a12 100%) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+  background: linear-gradient(90deg, #160710 0%, #3d1223 50%, #160710 100%) !important;
+  border: 1px solid rgba(251, 191, 36, 0.45) !important;
   color: #fef08a !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(254, 240, 138, 0.18), inset 0 -1px 0 rgba(245, 158, 11, 0.22) !important;
 }
 
 /* 9. 輸入框與下拉選單 */
@@ -279,62 +288,62 @@ html[data-theme="oaa"] .border-slate-300 {
    11. 課堂標籤 (Quick Tag Dock) 與三層色規深度重構 (徹底根除淺色螢光與模糊)
    ========================================================================== */
 
-/* 正向加分標籤：深邃墨綠底 (#062c19)、翡翠微光邊框 (#10b981)、純白高對比粗體 */
+/* 正向加分標籤：寶石翡翠漸層、清晰高光 */
 html[data-theme="oaa"] .color-rule-pos {
-  background-color: #072e1c !important;
-  border-color: #10b981 !important;
+  background: linear-gradient(155deg, #0b3823 0%, #052215 100%) !important;
+  border-color: rgba(16, 185, 129, 0.72) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.45), inset 0 1px 0 rgba(16, 185, 129, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.42), inset 0 1px 0 rgba(110, 231, 183, 0.18) !important;
 }
 html[data-theme="oaa"] .color-rule-pos:hover {
-  background-color: #0d442b !important;
+  background: linear-gradient(155deg, #10492e 0%, #072e1c 100%) !important;
   border-color: #34d399 !important;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.45) !important;
 }
 html[data-theme="oaa"] .color-rule-pos-badge {
-  background-color: #042416 !important;
+  background-color: #031c11 !important;
   color: #6ee7b7 !important;
-  border-color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.8) !important;
   font-weight: 900 !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* 違規扣分標籤：制服深酒紅底 (#3b0c16)、警示赤紅邊框 (#ef4444)、純白高對比粗體 */
+/* 違規扣分標籤：紅寶石絲絨漸層、警示赤框 */
 html[data-theme="oaa"] .color-rule-neg {
-  background-color: #380b15 !important;
-  border-color: #ef4444 !important;
+  background: linear-gradient(155deg, #470e1d 0%, #2a0710 100%) !important;
+  border-color: rgba(239, 68, 68, 0.72) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(159, 18, 57, 0.45), inset 0 1px 0 rgba(239, 68, 68, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(159, 18, 57, 0.42), inset 0 1px 0 rgba(252, 165, 165, 0.18) !important;
 }
 html[data-theme="oaa"] .color-rule-neg:hover {
-  background-color: #520f1f !important;
+  background: linear-gradient(155deg, #5e1125 0%, #380b15 100%) !important;
   border-color: #f87171 !important;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.45) !important;
 }
 html[data-theme="oaa"] .color-rule-neg-badge {
-  background-color: #26050d !important;
+  background-color: #21040b !important;
   color: #fca5a5 !important;
-  border-color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.8) !important;
   font-weight: 900 !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* 零分與常規記事：深黑紫底 (#1e0e18)、校徽金邊框 (#f59e0b)、純白高對比粗體 */
+/* 零分與常規記事：琥珀曜紫漸層、校徽金框 */
 html[data-theme="oaa"] .color-rule-zero {
-  background-color: #1f0f1a !important;
-  border-color: #f59e0b !important;
+  background: linear-gradient(155deg, #271321 0%, #170912 100%) !important;
+  border-color: rgba(245, 158, 11, 0.65) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(253, 224, 71, 0.16) !important;
 }
 html[data-theme="oaa"] .color-rule-zero:hover {
-  background-color: #2f1727 !important;
+  background: linear-gradient(155deg, #36192d 0%, #210d1b 100%) !important;
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
 }
 html[data-theme="oaa"] .color-rule-zero-badge {
-  background-color: #160811 !important;
+  background-color: #14060f !important;
   color: #fde047 !important;
-  border-color: #f59e0b !important;
+  border-color: rgba(245, 158, 11, 0.78) !important;
   font-weight: 900 !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
@@ -674,10 +683,13 @@ html[data-theme="oaa"] #mobile-bottom-nav .mobile-nav-btn {
   color: #fde68a !important;
 }
 html[data-theme="oaa"] #mobile-bottom-nav .mobile-nav-btn.tab-active {
-  background: linear-gradient(135deg, #9f1239 0%, #881337 100%) !important;
+  background: linear-gradient(135deg, #be123c 0%, #881337 100%) !important;
   color: #ffffff !important;
-  border: 1.5px solid #fbbf24 !important;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4) !important;
+  border: 1px solid rgba(251, 191, 36, 0.85) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(254, 240, 138, 0.3) !important;
+}
+html[data-theme="oaa"] #mobile-bottom-nav .mobile-nav-btn.tab-active::before {
+  background: linear-gradient(90deg, #f59e0b, #fde047, #f59e0b);
 }
 html[data-theme="oaa"] #mobile-more-sheet-card,
 html[data-theme="oaa"] #mobile-collapsed-bar {

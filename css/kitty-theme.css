@@ -1,22 +1,30 @@
 /* Sanrio Hello Kitty & Little Twin Stars (Kiki & Lala) Aesthetic Theme */
+html[data-theme="kitty"] {
+  --cq-crest-bg: #fff1f2;
+  --cq-crest-ring: #f43f5e;
+  --cq-crest-inner: rgba(244, 63, 94, 0.22);
+  --cq-crest-gold: #f59e0b;
+  --cq-crest-spark: #ec4899;
+}
 
 html[data-theme="kitty"] body {
-  background-color: #fff0f3;
+  background-color: #fff2f6;
   background-image: 
     radial-gradient(#ffccd5 1.2px, transparent 1.2px),
-    radial-gradient(#bae6fd 1.2px, transparent 1.2px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
+    radial-gradient(#bae6fd 1.2px, transparent 1.2px),
+    linear-gradient(180deg, #fff5f8 0%, #fff0f5 55%, #f0f9ff 100%);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+  background-position: 0 0, 16px 16px, 0 0;
   color: #33272a;
 }
 
 /* Sanrio Glassmorphism Card */
 html[data-theme="kitty"] .glass-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 245, 248, 0.94) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 2px solid #ffccd5;
-  box-shadow: 0 8px 24px -4px rgba(255, 117, 143, 0.12), 0 4px 8px -2px rgba(186, 230, 253, 0.1);
+  border: 1.5px solid rgba(244, 114, 182, 0.28);
+  box-shadow: 0 10px 26px -6px rgba(244, 63, 94, 0.12), 0 4px 10px -2px rgba(186, 230, 253, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   border-radius: 1.25rem;
   color: #33272a;
 }
@@ -114,23 +122,29 @@ html[data-theme="kitty"] .tab-active {
 
 /* Kitty Student Cards */
 html[data-theme="kitty"] .student-seat-card {
-  background: #ffffff;
-  border: 2px solid #ffccd5;
+  background: linear-gradient(175deg, #ffffff 0%, #fff8fa 100%);
+  border: 1.5px solid rgba(244, 114, 182, 0.28);
   border-radius: 1.15rem;
-  box-shadow: 0 4px 12px rgba(255, 117, 143, 0.08);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-theme="kitty"] .student-seat-card:hover {
-    border-color: #ff4d6d;
-    box-shadow: 0 8px 20px rgba(255, 77, 109, 0.18);
+    border-color: #fb7185;
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.16);
   }
 }
 
 html[data-theme="kitty"] .student-seat-card.selected {
-  border-color: #ff2a55 !important;
-  box-shadow: 0 0 0 3px rgba(255, 42, 85, 0.35);
-  background: #fff0f3 !important;
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.28), 0 6px 16px rgba(244, 63, 94, 0.16);
+  background: linear-gradient(175deg, #fff1f2 0%, #ffe4ec 100%) !important;
+}
+
+html[data-theme="kitty"] #mobile-bottom-nav .mobile-nav-btn.tab-active {
+  background: linear-gradient(135deg, #ffe4ec, #fff1f2) !important;
+  color: #be123c !important;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 63, 94, 0.32), 0 2px 8px rgba(244, 63, 94, 0.12) !important;
 }
 
 /* Dual Badges (Academic vs Character) */

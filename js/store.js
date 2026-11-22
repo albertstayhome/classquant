@@ -2349,11 +2349,11 @@ class Store {
 }
 
 /**
- * Shared high-contrast Midnight-Navy × Imperial-Gold "100" Score Crest SVG.
- * Designed so the grade icon pops clearly on white, pastel pink (Kitty), and crimson (OAA) backgrounds.
+ * Shared ANHS × Imperial Chess Crown & Tactical Diamond Crest SVG.
+ * Uses CSS custom properties so it harmonizes across both OAA crimson-gold and Sanrio pastel themes.
  */
 window.cqGradeCrestSvg = function(sizeClass = 'w-4 h-4') {
-  return `<svg class="cq-grade-crest ${sizeClass} inline-block shrink-0" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/><rect x="5" y="4.4" width="14" height="2" rx="1" fill="#34d399"/><text x="12" y="15.8" text-anchor="middle" fill="#fde047" font-family="ui-monospace, SFMono-Regular, Arial, sans-serif" font-weight="900" font-size="9.5" letter-spacing="-0.5">100</text><rect x="5.5" y="18" width="13" height="1.6" rx="0.8" fill="#fbbf24"/></svg>`;
+  return `<svg class="cq-grade-crest ${sizeClass} inline-block shrink-0" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.6 22,7.2 19.6,17.8 12,22.4 4.4,17.8 2,7.2" fill="var(--cq-crest-bg, #1c0712)" stroke="var(--cq-crest-ring, #fbbf24)" stroke-width="1.5" stroke-linejoin="round"/><polygon points="12,4.2 19.4,8.4 17.5,16.4 12,19.9 6.5,16.4 4.6,8.4" fill="none" stroke="var(--cq-crest-inner, rgba(253,224,71,0.35))" stroke-width="1" stroke-linejoin="round"/><path d="M6.8 15.6L7.9 9.7L10.3 12.1L12 8.2L13.7 12.1L16.1 9.7L17.2 15.6Z" fill="var(--cq-crest-gold, #fde047)" stroke="var(--cq-crest-gold, #fde047)" stroke-width="0.6" stroke-linejoin="round"/><rect x="7.4" y="16.6" width="9.2" height="1.3" rx="0.65" fill="var(--cq-crest-ring, #fbbf24)"/><circle cx="12" cy="6.1" r="1.15" fill="var(--cq-crest-spark, #f43f5e)"/></svg>`;
 };
 
 // Global Store Instance

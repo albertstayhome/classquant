@@ -580,18 +580,18 @@ class ClassroomMatrix {
 
     // Inline Mode Switcher Strip (⚡ 即時座位點記 ⇋ ⏰ 事後批次補記)
     const modeSwitchBarHtml = `
-      <div class="mb-2.5 p-1.5 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-2 ${isOAA ? 'bg-[#1d0a15] border-amber-500/40 text-amber-100' : 'glass-card border-pink-200 bg-white/95'}">
-        <div class="flex items-center gap-1.5">
-          <button type="button" onclick="matrixView.setScoringMode('live', '${currentClassId}')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'live' ? (isOAA ? 'bg-gradient-to-r from-rose-700 to-amber-600 text-white border border-amber-400/70 shadow-sm' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm') : (isOAA ? 'text-amber-300/80 hover:bg-rose-950/60' : 'text-slate-600 hover:bg-pink-50')}">
+      <div class="mb-2.5 p-1.5 sm:p-2 rounded-2xl border shadow-sm flex flex-wrap items-center justify-between gap-2 ${isOAA ? 'bg-[#1a0712] border-amber-500/30 text-amber-100' : 'glass-card border-pink-200 bg-white/95'}">
+        <div class="inline-flex items-center gap-1 p-1 rounded-xl ${isOAA ? 'bg-black/35 border border-amber-500/20' : 'bg-pink-50/90 border border-pink-200/70'}">
+          <button type="button" onclick="matrixView.setScoringMode('live', '${currentClassId}')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'live' ? (isOAA ? 'bg-gradient-to-r from-rose-800 via-rose-700 to-amber-700 text-white border border-amber-400/70 shadow-sm' : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm') : (isOAA ? 'text-amber-200/75 hover:bg-rose-950/60 hover:text-amber-100' : 'text-slate-600 hover:bg-white/70')}">
             <span>⚡</span><span>即時點記</span>
           </button>
-          <button id="retro-log-top-btn" type="button" onclick="matrixView.setScoringMode('retro', '${currentClassId}')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'retro' ? (isOAA ? 'bg-gradient-to-r from-amber-700 to-rose-700 text-white border border-amber-400/70 shadow-sm' : 'bg-amber-500 text-white shadow-sm') : (isOAA ? 'text-amber-300/80 hover:bg-rose-950/60' : 'text-slate-600 hover:bg-amber-50')}">
+          <button id="retro-log-top-btn" type="button" onclick="matrixView.setScoringMode('retro', '${currentClassId}')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${this.scoringMode === 'retro' ? (isOAA ? 'bg-gradient-to-r from-amber-700 to-rose-700 text-white border border-amber-400/70 shadow-sm' : 'bg-amber-500 text-white shadow-sm') : (isOAA ? 'text-amber-200/75 hover:bg-rose-950/60 hover:text-amber-100' : 'text-slate-600 hover:bg-white/70')}">
             <span>⏰</span><span>事後補記</span>
           </button>
         </div>
-        <button type="button" onclick="appState.switchTab('grades')" class="px-3 py-1 rounded-xl text-[11px] sm:text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${isOAA ? 'bg-[#2a0f1f] text-amber-300 border border-amber-500/40 hover:bg-[#3a152b]' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'}" title="前往計算與結算平時成績">
+        <button type="button" onclick="appState.switchTab('grades')" class="px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${isOAA ? 'bg-[#280d1c] text-amber-200 border border-amber-500/35 hover:bg-[#3a152b] hover:border-amber-400/70' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'}" title="前往計算與結算平時成績">
           <span>📅 ${termLabel}計算中</span>
-          <span>•</span>
+          <span class="opacity-60">•</span>
           <span class="underline">查看平時成績 →</span>
         </button>
       </div>
@@ -744,29 +744,33 @@ class ClassroomMatrix {
 
       <!-- Blackboard / Podium Classroom Visual Anchor -->
       ${isOAA ? `
-        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="classroom-podium-bar p-2 rounded-2xl flex items-center justify-between text-xs font-bold mb-2.5 px-4 select-none cursor-pointer">
-          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-amber-200 font-bold">
-            🪟 靠窗側
+        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="classroom-podium-bar py-2 rounded-2xl flex items-center justify-between text-xs font-bold mb-2.5 px-3.5 sm:px-5 select-none cursor-pointer">
+          <span class="flex items-center gap-1 opacity-85 text-[10px] sm:text-[11px] text-amber-200/80 font-bold tracking-wide">
+            <span class="w-1.5 h-1.5 rotate-45 bg-amber-400/70 inline-block"></span>
+            靠窗側
           </span>
           <div class="flex items-center gap-2">
-            <span class="text-amber-300 font-black sm:text-sm tracking-wider">【 🏫 講台 / 黑板 】</span>
+            <span class="w-1.5 h-1.5 rotate-45 bg-amber-400 inline-block"></span>
+            <span class="text-amber-200 font-black text-xs sm:text-sm tracking-[0.16em] uppercase">ANHS 講台・黑板</span>
+            <span class="w-1.5 h-1.5 rotate-45 bg-amber-400 inline-block"></span>
           </div>
-          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-amber-200 font-bold">
-            靠門側 🚪
+          <span class="flex items-center gap-1 opacity-85 text-[10px] sm:text-[11px] text-amber-200/80 font-bold tracking-wide">
+            靠門側
+            <span class="w-1.5 h-1.5 rotate-45 bg-amber-400/70 inline-block"></span>
           </span>
         </div>
       ` : `
-        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="p-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 text-white border-2 border-emerald-900 shadow-md flex items-center justify-between text-xs font-black mb-2.5 px-3.5 select-none cursor-pointer">
-          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
-            🪟 靠窗側
+        <div id="classroom-chalkboard-bar" onclick="window.appState?.handleChalkboardTap()" class="py-2 rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 text-white border border-emerald-950 shadow-sm flex items-center justify-between text-xs font-black mb-2.5 px-3.5 sm:px-5 select-none cursor-pointer ring-1 ring-inset ring-emerald-400/20">
+          <span class="opacity-85 text-[10px] sm:text-[11px] text-emerald-100/90 font-bold">
+            靠窗側
           </span>
           <div class="flex items-center gap-2">
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
-            <span class="tracking-widest text-emerald-100 font-black sm:text-sm">【 🏫 講台 / 黑板 】</span>
+            <span class="tracking-[0.16em] text-emerald-50 font-black text-xs sm:text-sm">講台・黑板</span>
             <span class="kitty-bow !w-3.5 !h-3.5"></span>
           </div>
-          <span class="flex items-center gap-1.5 opacity-90 text-[11px] text-emerald-100 font-bold">
-            靠門側 🚪
+          <span class="opacity-85 text-[10px] sm:text-[11px] text-emerald-100/90 font-bold">
+            靠門側
           </span>
         </div>
       `}
@@ -778,6 +782,7 @@ class ClassroomMatrix {
           if (!s) return '';
 
           const rankInfo = classRanks[s.seatNo] || { overallRank: 1, genderRank: 1, gender: s.gender || 'M', regularScore: 80, netDelta: 0, tier: 'B' };
+          const tier = rankInfo.tier || 'B';
           const isSelected = this.selectedSeats.has(s.seatNo);
           const regularScore = Number(rankInfo.regularScore ?? 80);
           const netPts = Number(rankInfo.netDelta ?? 0);
@@ -785,7 +790,6 @@ class ClassroomMatrix {
           // Rank / Mascot logic based cleanly on classroom regular score
           let rankBadgeHtml = '';
           if (isOAA) {
-            const rank = rankInfo.tier || 'B';
             const studentGender = s.gender || rankInfo.gender || 'M';
             const genderRank = rankInfo.genderRank || 1;
             const overallRank = rankInfo.overallRank || 1;
@@ -797,47 +801,66 @@ class ClassroomMatrix {
             const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
 
             rankBadgeHtml = `
-              <div class="relative shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName} // 評級: ${rank}">
-                <img src="${coteAvatar}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-amber-400 shadow-sm object-cover" alt="${charName}">
-                <span class="oaa-rank-badge oaa-rank-${rank} absolute -bottom-1 -right-1 !w-3.5 !h-3.5 sm:!w-4 sm:!h-4 text-[9px] sm:text-[10px] flex items-center justify-center font-black rounded-full border border-black/60">${rank}</span>
+              <div class="relative shrink-0 pointer-events-none" title="總排名 第${overallRank}名 (${studentGender === 'F' ? '女' : '男'}生第${genderRank}名) // 對應角色：${charName} // 評級: ${tier}">
+                <img src="${coteAvatar}" class="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-amber-400/80 shadow-[0_2px_8px_rgba(0,0,0,0.65)] object-cover" alt="${charName}">
+                <span class="oaa-rank-badge oaa-rank-${tier} absolute -bottom-1 -right-1 !w-3.5 !h-3.5 sm:!w-4 sm:!h-4 text-[9px] sm:text-[10px] flex items-center justify-center font-black rounded-full border border-black/70 shadow">${tier}</span>
               </div>
             `;
           } else {
             let mascotClass = 'sanrio-kitty-badge';
-            let mascotTitle = `Hello Kitty (穩健達標 ${rankInfo.tier || 'B'} 級)`;
+            let mascotTitle = `Hello Kitty (穩健達標 ${tier} 級)`;
             if (regularScore >= 85) {
               mascotClass = 'sanrio-twinstars-badge';
-              mascotTitle = `小雙星 (優良表現 ${rankInfo.tier || 'A'} 級)`;
+              mascotTitle = `小雙星 (優良表現 ${tier} 級)`;
             } else if (regularScore < 75) {
               mascotClass = 'sanrio-kuromi-badge';
-              mascotTitle = `酷洛米 (關懷提醒 ${rankInfo.tier || 'C'} 級)`;
+              mascotTitle = `酷洛米 (關懷提醒 ${tier} 級)`;
             }
-            rankBadgeHtml = `<div class="${mascotClass} !w-5 !h-5 sm:!w-6 sm:!h-6 shrink-0" title="${mascotTitle}"></div>`;
+            const kittyTierCls = tier === 'S'
+              ? 'bg-amber-400 text-amber-950 border-white'
+              : tier === 'A'
+              ? 'bg-indigo-500 text-white border-white'
+              : tier === 'B'
+              ? 'bg-emerald-500 text-white border-white'
+              : tier === 'C'
+              ? 'bg-slate-500 text-white border-white'
+              : 'bg-rose-500 text-white border-white';
+            rankBadgeHtml = `
+              <div class="relative shrink-0 pointer-events-none" title="${mascotTitle}">
+                <div class="${mascotClass} !w-6 !h-6 sm:!w-7 sm:!h-7 shrink-0"></div>
+                <span class="absolute -bottom-0.5 -right-1 w-3.5 h-3.5 rounded-full text-[8px] font-black flex items-center justify-center border shadow-xs ${kittyTierCls}">${tier}</span>
+              </div>
+            `;
           }
 
           const seatNoBadgeHtml = isOAA
-            ? `<span class="w-5 h-5 rounded-lg bg-[#2d0f19] text-amber-300 border border-amber-500/70 font-mono font-black text-[11px] sm:text-xs flex items-center justify-center shadow-sm pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`
-            : `<span class="w-5 h-5 rounded-lg bg-pink-100 text-pink-900 border border-pink-300 font-black text-[11px] sm:text-xs flex items-center justify-center shadow-inner pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`;
+            ? `<span class="px-1.5 py-0.5 min-w-[22px] rounded-md bg-black/45 text-amber-300/95 border border-amber-500/35 font-mono font-black text-[10px] sm:text-[11px] leading-none text-center pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`
+            : `<span class="px-1.5 py-0.5 min-w-[22px] rounded-md bg-pink-50/90 text-rose-600 border border-pink-200/90 font-mono font-black text-[10px] sm:text-[11px] leading-none text-center pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`;
 
           const studentNameHtml = isOAA
-            ? `<div class="text-xs sm:text-sm font-black truncate text-white text-center my-0.5 leading-tight tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
-            : `<div class="text-xs sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-tight pointer-events-none">${s.name}</div>`;
+            ? `<div class="text-[13px] sm:text-sm font-black truncate text-white text-center my-0.5 leading-snug tracking-wide pointer-events-none drop-shadow-md">${s.name}</div>`
+            : `<div class="text-[13px] sm:text-sm font-black truncate text-slate-900 text-center my-0.5 leading-snug pointer-events-none">${s.name}</div>`;
 
           const displayRegular = Math.round(regularScore);
-          const gradeCrestMini = window.cqGradeCrestSvg ? window.cqGradeCrestSvg('w-3.5 h-3.5') : '';
           const dualScoreHtml = isOAA
             ? `
-              <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-amber-500/30 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="inline-flex items-center gap-0.5 text-amber-300 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">${gradeCrestMini}<span>${displayRegular}</span></span>
-                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-black shrink-0 ${netPts > 0 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : netPts < 0 ? 'bg-rose-950/80 text-rose-400 border border-rose-500/40' : 'bg-black/30 text-slate-400'}" title="本期淨點：${netPts}點">
+              <div class="flex items-center justify-between pt-1.5 border-t border-amber-500/20 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-1">
+                <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
+                  <strong class="text-[13px] sm:text-sm font-black text-amber-200 tabular-nums">${displayRegular}</strong>
+                  <span class="text-[9px] text-amber-300/60 font-bold ml-0.5">分</span>
+                </span>
+                <span class="px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-950/85 text-emerald-300 border border-emerald-500/45' : netPts < 0 ? 'bg-rose-950/85 text-rose-300 border border-rose-500/45' : 'bg-black/35 text-slate-400 border border-white/10'}" title="本期淨點：${netPts}點">
                   ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
               </div>
             `
             : `
-              <div class="flex items-center justify-between text-[10px] sm:text-xs font-black pt-1 border-t border-pink-100 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5">
-                <span class="inline-flex items-center gap-0.5 text-blue-700 font-mono font-black shrink-0" title="本期平時成績：${regularScore}分">${gradeCrestMini}<span>${displayRegular}</span></span>
-                <span class="px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}" title="本期淨點：${netPts}點">
+              <div class="flex items-center justify-between pt-1.5 border-t border-pink-100/90 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-1">
+                <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
+                  <strong class="text-[13px] sm:text-sm font-black text-slate-800 tabular-nums">${displayRegular}</strong>
+                  <span class="text-[9px] text-slate-400 font-bold ml-0.5">分</span>
+                </span>
+                <span class="px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}" title="本期淨點：${netPts}點">
                   ${netPts > 0 ? '+' : ''}${netPts}
                 </span>
               </div>
@@ -846,7 +869,8 @@ class ClassroomMatrix {
           return `
             <div id="seat-card-${s.seatNo}"
                  data-seat-no="${s.seatNo}"
-                 class="student-seat-card p-2 sm:p-2.5 min-h-[76px] sm:min-h-[82px] rounded-2xl border-2 ${isOAA ? 'bg-[#240e1b] border-amber-500/40' : 'bg-white border-pink-200'} cursor-pointer select-none relative transition-transform duration-150 shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
+                 data-tier="${tier}"
+                 class="student-seat-card overflow-hidden p-2 pt-2.5 sm:p-2.5 sm:pt-3 min-h-[78px] sm:min-h-[86px] rounded-2xl border ${isOAA ? 'bg-[#240e1b] border-amber-500/30' : 'bg-white border-pink-200/80'} cursor-pointer select-none relative transition-transform duration-150 shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
                  ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
@@ -862,7 +886,7 @@ class ClassroomMatrix {
                 ${studentNameHtml}
               </div>
 
-              <!-- Unified Dual Score Summary -->
+              <!-- Unified Score & Net Points Strip -->
               ${dualScoreHtml}
             </div>
           `;
@@ -917,16 +941,18 @@ class ClassroomMatrix {
                   
                   const btnClass = isPos ? 'color-rule-pos' : isZero ? 'color-rule-zero' : 'color-rule-neg';
                   const badgeClass = isPos ? 'color-rule-pos-badge' : isZero ? 'color-rule-zero-badge' : 'color-rule-neg-badge';
+                  const stripeCls = isPos ? 'bg-emerald-400' : isZero ? 'bg-amber-400' : 'bg-rose-400';
                   const btnId = (pageIdx === 0 && tagIdx === 0) ? 'first-quick-tag-btn' : `quick-tag-btn-${tag.id}`;
 
                   return `
                     <button id="${btnId}" onclick="matrixView.applyTagToSelected('${currentClassId}', '${tag.id}')"
-                      class="quick-tag-button p-2.5 sm:p-3 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between gap-1.5 min-h-[56px] sm:min-h-[64px] ${btnClass}">
+                      class="quick-tag-button overflow-hidden relative p-2.5 pl-3.5 sm:p-3 sm:pl-4 rounded-2xl border-2 text-left transition shadow-sm active:scale-95 flex items-center justify-between gap-1.5 min-h-[56px] sm:min-h-[64px] ${btnClass}">
+                      <span class="absolute left-1.5 inset-y-2.5 w-1 rounded-full ${stripeCls} opacity-85 pointer-events-none" aria-hidden="true"></span>
                       <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
                         <span class="text-xs sm:text-base font-black truncate ${isOAA ? 'text-white drop-shadow' : 'text-slate-900'} leading-tight">${tag.name}</span>
                         <span class="text-[11px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-500'} font-bold mt-0.5 truncate">${tag.category === 'academic' ? '數學學業' : tag.category === 'discipline' ? '生活常規' : tag.category === 'conflict' ? '同儕衝突' : '日常記事'}</span>
                       </div>
-                      <span class="text-xs sm:text-sm font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl border whitespace-nowrap shrink-0 ${badgeClass}">
+                      <span class="text-xs sm:text-sm font-black font-mono tabular-nums px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl border whitespace-nowrap shrink-0 ${badgeClass}">
                         ${tag.delta > 0 ? '+' : ''}${tag.delta}
                       </span>
                     </button>

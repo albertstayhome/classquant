@@ -1,6 +1,20 @@
 /* Base Tailwind & Custom Color Rules for ClassQuant Hub */
 :root {
   --app-font-scale: 1.08;
+  --cq-crest-bg: #fff1f2;
+  --cq-crest-ring: #f43f5e;
+  --cq-crest-inner: rgba(244, 63, 94, 0.22);
+  --cq-crest-gold: #f59e0b;
+  --cq-crest-spark: #ec4899;
+}
+
+.cq-nav-icon,
+.cq-grade-crest {
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease;
+}
+.nav-tab-btn.tab-active .cq-nav-icon,
+.nav-tab-btn.tab-active .cq-grade-crest {
+  transform: scale(1.06);
 }
 
 html {
@@ -557,6 +571,35 @@ html.oaa .more-menu-item:hover {
   }
 }
 
+/* Tier-colored hairline accent along top edge of Student Seat Cards */
+.student-seat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.7), rgba(52, 211, 153, 0.9));
+  pointer-events: none;
+  opacity: 0.92;
+}
+.student-seat-card[data-tier="S"]::before {
+  background: linear-gradient(90deg, #f59e0b, #fde047, #f59e0b);
+}
+.student-seat-card[data-tier="A"]::before {
+  background: linear-gradient(90deg, #6366f1, #38bdf8);
+}
+.student-seat-card[data-tier="B"]::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.student-seat-card[data-tier="C"]::before {
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+}
+.student-seat-card[data-tier="D"]::before,
+.student-seat-card[data-tier="E"]::before {
+  background: linear-gradient(90deg, #f43f5e, #fb7185);
+}
+
 #mobile-bottom-nav {
   background: rgba(255, 255, 255, 0.96);
   border-color: #fbcfe8;
@@ -567,8 +610,20 @@ html.oaa .more-menu-item:hover {
 }
 #mobile-bottom-nav .mobile-nav-btn.tab-active {
   background: linear-gradient(135deg, #fce7f3, #ffe4e6) !important;
-  color: #be185d !important;
-  box-shadow: inset 0 0 0 1.5px rgba(244, 63, 94, 0.35) !important;
+  color: #be123c !important;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 63, 94, 0.3) !important;
+}
+#mobile-bottom-nav .mobile-nav-btn.tab-active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 9999px 9999px;
+  background: linear-gradient(90deg, #f43f5e, #ec4899);
+  pointer-events: none;
 }
 
 #floating-selection-action-bar {
