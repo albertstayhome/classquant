@@ -291,6 +291,9 @@ class EventsLogView {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="appState.switchTab('matrix')" class="min-h-[38px] px-3 py-2 rounded-2xl ${isOAA ? 'bg-[#1b0a14] hover:bg-rose-950 text-amber-200 border border-amber-500/40' : 'bg-white hover:bg-pink-50 text-pink-700 border border-pink-300'} text-xs sm:text-sm font-black inline-flex items-center gap-1 whitespace-nowrap transition shadow-sm cursor-pointer">
+              <span>←</span><span>返回座位點記</span>
+            </button>
             <button type="button" onclick="eventsLogView.openAddEventModal('${quickClassTarget}')"
               class="min-h-[38px] px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 text-white text-xs sm:text-sm font-black shadow-md transition inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
               <i data-lucide="clock" class="w-4 h-4 shrink-0"></i> <span>⏰ 事後快速補記</span>

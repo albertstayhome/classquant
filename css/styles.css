@@ -550,10 +550,27 @@ html.oaa .more-menu-item:hover {
   color: #ffffff;
 }
 
-/* Responsive Classroom Seat Grid (Mobile-Comfort vs Tablet/Desktop Original Columns) */
+/* Responsive Classroom Seat Grid (Mobile-Comfort vs Tablet/Desktop Original Columns 4~8) */
 .seat-grid-responsive {
   display: grid;
   grid-template-columns: repeat(var(--seat-cols-mobile, 4), minmax(0, 1fr));
+}
+
+@media (max-width: 639px) {
+  .seat-grid-cols-6 .student-seat-card {
+    padding: 0.3rem 0.22rem 0.35rem;
+    min-height: 68px;
+    border-radius: 0.75rem;
+  }
+  .seat-grid-cols-6 .seat-student-name {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em;
+  }
+  .seat-grid-cols-5 .seat-student-name {
+    font-size: 12px !important;
+    line-height: 1.22 !important;
+  }
 }
 
 @media (min-width: 640px) {

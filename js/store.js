@@ -121,6 +121,36 @@ window.cqGetCuratedTags = function(store, classId, limit = 6) {
   return picked;
 };
 
+// Shared Student Name Sanitizer & Legacy Placeholder Healer (removes redundant "座號 X" / "座號 1 (陳生)")
+window.cqCleanStudentName = function(rawName, seatNo = 1) {
+  const num = Math.max(1, parseInt(seatNo, 10) || 1);
+  const s = String(rawName ?? '').trim();
+  const fallbackNames = [
+    '陳冠宇', '林子涵', '黃柏翔', '張雅晴', '李承翰', '王品妍', '吳廷軒', '蔡詠晴', '許志豪', '鄭羽彤',
+    '郭俊廷', '謝欣潔', '曾郁翔', '洪若涵', '邱冠宏', '賴思妤', '周聖文', '葉佩珊', '莊凱翔', '江詩婷',
+    '劉宗憲', '呂佩真', '潘宥安', '顏子淇', '鍾建宇', '蕭曼婷', '彭子豪', '方宣瑜', '蘇家緯', '戴綺芸',
+    '羅宇軒', '高珮琪', '何柏翰', '傅心瑜', '盧威廷', '柯佳穎'
+  ];
+  const givenNamesByParity = [
+    ['冠宇', '子涵', '柏翔', '雅晴', '承翰', '品妍', '廷軒', '詠晴', '志豪', '羽彤', '俊廷', '欣潔', '郁翔', '若涵', '冠宏', '思妤', '聖文', '佩珊'],
+    ['宥廷', '語彤', '宇軒', '苡萱', '品睿', '依潔', '彥廷', '恩希', '家誠', '詩涵', '柏諺', '沛璇', '楷哲', '詠晴', '子軒', '佳穎', '睿恩', '語晴']
+  ];
+  const placeholderMatch = s.match(/^座號\s*(\d+)\s*[（(]([一-龥])[生同學]*[)）]$/);
+  if (placeholderMatch) {
+    const pSeat = Math.max(1, parseInt(placeholderMatch[1], 10) || num);
+    const surname = placeholderMatch[2];
+    const matchedFromPool = fallbackNames.find((n, idx) => n.startsWith(surname) && idx !== (pSeat - 1));
+    if (matchedFromPool && (pSeat % 2 === 1)) return matchedFromPool;
+    const pool = givenNamesByParity[pSeat % 2];
+    return `${surname}${pool[(pSeat - 1) % pool.length]}`;
+  }
+  if (!s || /^座號\s*\d+$/.test(s)) {
+    return fallbackNames[(num - 1) % fallbackNames.length];
+  }
+  const stripped = s.replace(/^(?:座號\s*)?\d{1,2}\s*(?:號\s*|[.、\-:]\s*|\s+)(?=[一-龥A-Za-z])/, '').trim();
+  return stripped || s;
+};
+
 // Default Tag Categories and Definitions
 const DEFAULT_TAGS = [
   // 數學學業 (Academic)
@@ -347,18 +377,30 @@ class Store {
     };
 
     const students = {};
-    const studentNames = [
+    const homeroomNames = [
       '陳冠宇', '林子涵', '黃柏翔', '張雅晴', '李承翰', '王品妍', '吳廷軒', '蔡詠晴', '許志豪', '鄭羽彤',
       '郭俊廷', '謝欣潔', '曾郁翔', '洪若涵', '邱冠宏', '賴思妤', '周聖文', '葉佩珊', '莊凱翔', '江詩婷',
       '劉宗憲', '呂佩真', '潘宥安', '顏子淇', '鍾建宇', '蕭曼婷', '彭子豪', '方宣瑜', '蘇家緯', '戴綺芸'
     ];
+    const class803Names = [
+      '陳宥廷', '林語彤', '黃宇軒', '張苡萱', '李品睿', '王依潔', '吳彥廷', '蔡恩希', '許家誠', '鄭詩涵',
+      '郭柏諺', '謝沛璇', '曾楷哲', '洪詠晴', '邱子軒', '賴佳穎', '周睿恩', '葉語晴', '莊承祐', '江映彤',
+      '劉恩碩', '呂芷晴', '潘宥銘', '顏芯妍', '鍾冠廷', '蕭羽希', '彭祐誠', '方忻潔', '蘇宇澤', '戴子晴'
+    ];
+    const class805Names = [
+      '朱創睿', '吳秉樺', '陳智昊', '張愷恩', '江睿恩', '林宥辰', '王品翔', '李語晴', '黃以安', '周品妤',
+      '許芯瑜', '蔡羽恩', '郭芷萱', '賴妍希', '謝宥希', '劉宣彤', '曾柏瑋', '洪嘉駿', '潘品翰', '沈楷霖',
+      '盧冠瑋', '呂承霖', '何祐誠', '葉心潔', '鄭宇恩', '高珮琪', '羅柏翰', '柯思妤'
+    ];
+    const rosterByClass = { '801': homeroomNames, '803': class803Names, '805': class805Names };
 
     Object.values(classes).forEach(cls => {
+      const pool = rosterByClass[cls.id] || homeroomNames;
       students[cls.id] = [];
       for (let seat = 1; seat <= cls.studentCount; seat++) {
         students[cls.id].push({
           seatNo: seat,
-          name: cls.type === 'homeroom' ? studentNames[seat - 1] || `座號 ${seat}` : `座號 ${seat} (${studentNames[seat - 1]?.[0] || '生'}生)`,
+          name: pool[seat - 1] || homeroomNames[(seat - 1) % homeroomNames.length],
           gender: seat <= Math.ceil(cls.studentCount / 2) ? 'M' : 'F',
           baselineAbility: 60 + Math.floor(Math.random() * 35),
           notes: ''
@@ -555,11 +597,18 @@ class Store {
       }
     ];
 
+    const seatingLayout = {
+      '801': { cols: 5, podiumPosition: 'top', seatOrder: (students['801'] || []).map(s => s.seatNo) },
+      '803': { cols: 6, podiumPosition: 'top', seatOrder: (students['803'] || []).map(s => s.seatNo) },
+      '805': { cols: 6, podiumPosition: 'top', seatOrder: (students['805'] || []).map(s => s.seatNo) }
+    };
+
     this.data = {
       classes,
       students,
       assessments,
       events,
+      seatingLayout,
       termArchives: {},
       tags: DEFAULT_TAGS,
       timetablePeriods: DEFAULT_TIMETABLE_PERIODS,
@@ -762,11 +811,15 @@ class Store {
     if (!this.data.seatingLayout) this.data.seatingLayout = {};
     const students = this.getStudents(classId);
     const studentCount = students.length;
+    const cls = this.getClass(classId);
+    const clsCols = Number(cls?.seatLayout?.cols);
 
     let layout = this.data.seatingLayout[classId];
     if (!layout || !Array.isArray(layout.seatOrder) || layout.seatOrder.length === 0) {
-      // Default: 5 columns for <= 30 students, 6 columns for > 30
-      const defaultCols = studentCount > 30 ? 6 : 5;
+      // Honor explicit class seatLayout cols first, else 6 cols for > 30 students or 5 cols
+      const defaultCols = (Number.isFinite(clsCols) && clsCols >= 3 && clsCols <= 8)
+        ? clsCols
+        : (studentCount > 30 ? 6 : 5);
       layout = {
         cols: defaultCols,
         podiumPosition: 'top', // 'top' (前方黑板) or 'bottom'
@@ -793,6 +846,22 @@ class Store {
     if (!this.data.seatingLayout) this.data.seatingLayout = {};
     this.data.seatingLayout[classId] = layout;
     this.saveToStorage();
+  }
+
+  setSeatingCols(classId, cols) {
+    const clamped = Math.min(8, Math.max(3, parseInt(cols, 10) || 5));
+    const layout = this.getSeatingLayout(classId);
+    layout.cols = clamped;
+    this.saveSeatingLayout(classId, layout);
+    if (this.data.classes && this.data.classes[classId]) {
+      const count = (this.data.students[classId] || []).length || 30;
+      this.data.classes[classId].seatLayout = {
+        rows: Math.max(1, Math.ceil(count / clamped)),
+        cols: clamped
+      };
+      this.saveToStorage();
+    }
+    return layout;
   }
 
   swapStudentSeats(classId, seatNoA, seatNoB) {
@@ -982,11 +1051,21 @@ class Store {
   getStudents(classId) {
     const list = this.data.students[classId] || [];
     const total = list.length;
+    let dirty = false;
     list.forEach(s => {
       if (!s.gender || (s.gender !== 'M' && s.gender !== 'F')) {
         s.gender = s.seatNo <= Math.ceil(total / 2) ? 'M' : 'F';
+        dirty = true;
+      }
+      if (typeof window.cqCleanStudentName === 'function') {
+        const cleaned = window.cqCleanStudentName(s.name, s.seatNo);
+        if (cleaned && cleaned !== s.name) {
+          s.name = cleaned;
+          dirty = true;
+        }
       }
     });
+    if (dirty) this.saveToStorage();
     return list;
   }
 
@@ -1189,10 +1268,13 @@ class Store {
           const gender = (s.gender === 'M' || s.gender === 'F')
             ? s.gender
             : (seatNo <= Math.ceil((total || 1) / 2) ? 'M' : 'F');
+          const cleanName = typeof window.cqCleanStudentName === 'function'
+            ? window.cqCleanStudentName(s.name, seatNo)
+            : String(s.name || `同學${seatNo}`);
           return {
             ...s,
             seatNo,
-            name: String(s.name || `座號 ${seatNo}`),
+            name: cleanName,
             gender,
             notes: typeof s.notes === 'string' ? s.notes : ''
           };

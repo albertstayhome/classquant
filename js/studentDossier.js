@@ -703,8 +703,11 @@ class StudentDossierView {
           </div>
         </div>
 
-        <!-- Class/Student Switchers -->
+        <!-- Class/Student Switchers & Back to Seating Matrix -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
+          <button type="button" onclick="appState.switchTab('matrix')" class="sm:col-span-2 lg:col-span-1 w-full lg:w-auto min-h-[38px] px-3 py-1.5 rounded-xl border border-pink-300 bg-white hover:bg-pink-50 text-pink-700 text-xs sm:text-sm font-black transition flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer">
+            <span>←</span><span>返回座位點記</span>
+          </button>
           <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[38px] border border-pink-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none bg-white">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -714,7 +717,7 @@ class StudentDossierView {
           <select onchange="studentDossierView.switchStudent(this.value)" class="w-full sm:w-auto min-h-[38px] border border-pink-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none bg-white">
             ${students.map(s => `
               <option value="${s.seatNo}" ${this.currentSeatNo === s.seatNo ? 'selected' : ''}>
-                ${String(s.seatNo).padStart(2, '0')} 號 ${s.name}
+                ${String(s.seatNo).padStart(2, '0')} 號 ${window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name}
               </option>
             `).join('')}
           </select>
@@ -860,6 +863,9 @@ class StudentDossierView {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
+          <button type="button" onclick="appState.switchTab('matrix')" class="sm:col-span-2 lg:col-span-1 w-full lg:w-auto min-h-[38px] px-3 py-1.5 rounded-xl border border-amber-500/60 bg-[#1c0a14] hover:bg-rose-950 text-amber-200 text-xs font-black transition flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer">
+            <span>←</span><span>返回座位點記</span>
+          </button>
           <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[38px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
@@ -869,7 +875,7 @@ class StudentDossierView {
           <select onchange="studentDossierView.switchStudent(this.value)" class="w-full sm:w-auto min-h-[38px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
             ${students.map(s => `
               <option value="${s.seatNo}" ${this.currentSeatNo === s.seatNo ? 'selected' : ''}>
-                No.${String(s.seatNo).padStart(2, '0')} ${s.name}
+                No.${String(s.seatNo).padStart(2, '0')} ${window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name}
               </option>
             `).join('')}
           </select>

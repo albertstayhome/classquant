@@ -56,13 +56,20 @@ class AIImportExportHub {
             </button>
           </div>
         </div>
+        <!-- Quick Jump Drawers inside Settings -->
+        <div class="flex flex-wrap items-center gap-1.5 pt-3 mt-3 border-t ${isOAA ? 'border-amber-500/25' : 'border-pink-100'} text-xs font-bold">
+          <span class="${isOAA ? 'text-amber-300/80' : 'text-slate-500'} text-[11px] mr-1">快速跳轉抽屜：</span>
+          <button type="button" onclick="document.getElementById('settings-prefs-card')?.scrollIntoView({behavior:'smooth',block:'start'})" class="px-2.5 py-1 rounded-xl border cursor-pointer transition whitespace-nowrap ${isOAA ? 'bg-[#170710] border-amber-500/35 text-amber-200 hover:border-amber-400' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'}">🎨 主題與字級設定</button>
+          <button type="button" onclick="document.getElementById('google-backup-center-card')?.scrollIntoView({behavior:'smooth',block:'start'})" class="px-2.5 py-1 rounded-xl border cursor-pointer transition whitespace-nowrap ${isOAA ? 'bg-[#170710] border-amber-500/35 text-amber-200 hover:border-amber-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'}">☁️ Google 雲端備份</button>
+          <button type="button" onclick="document.getElementById('settings-snapshots-card')?.scrollIntoView({behavior:'smooth',block:'start'})" class="px-2.5 py-1 rounded-xl border cursor-pointer transition whitespace-nowrap ${isOAA ? 'bg-[#170710] border-amber-500/35 text-amber-200 hover:border-amber-400' : 'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100'}">💾 本機快照與還原</button>
+        </div>
       </div>
 
       <!-- ☁️ Google 表單／試算表 定期＆隨時雲端備份中心 -->
       ${this.renderGoogleBackupCard(isOAA)}
 
       <!-- 🎨 System Preferences (Appearance, Font Scale, Sound, Auto-Timetable) -->
-      <div class="${cardCls} mb-6">
+      <div id="settings-prefs-card" class="${cardCls} mb-6">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-base font-black ${isOAA ? 'text-amber-300' : 'text-slate-900'} flex items-center gap-2">
             <i data-lucide="sliders" class="w-5 h-5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
@@ -104,7 +111,7 @@ class AIImportExportHub {
       </div>
 
       <!-- Snapshots History / Safety Net -->
-      <div class="${cardCls} mb-6">
+      <div id="settings-snapshots-card" class="${cardCls} mb-6">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h3 class="text-base font-black ${isOAA ? 'text-white' : 'text-slate-900'} flex items-center gap-2">
             <i data-lucide="shield-check" class="w-5 h-5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
@@ -355,7 +362,7 @@ ${window.getLocalDateStr()},3,801,12,academic,主動解出難題,+3,positive,"�
       : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-black">⚠️ 尚未綁定（依下方 3 步驟即可設定）</span>';
 
     return `
-      <div class="glass-card rounded-3xl p-5 sm:p-6 border-2 ${isOAA ? 'border-amber-500/60 bg-gradient-to-br from-[#230c19] via-[#1b0812] to-[#2c1020] text-white' : 'border-emerald-300 bg-gradient-to-br from-emerald-50/60 via-white to-sky-50/50'} shadow-md mb-6">
+      <div id="google-backup-center-card" class="glass-card rounded-3xl p-5 sm:p-6 border-2 ${isOAA ? 'border-amber-500/60 bg-gradient-to-br from-[#230c19] via-[#1b0812] to-[#2c1020] text-white' : 'border-emerald-300 bg-gradient-to-br from-emerald-50/60 via-white to-sky-50/50'} shadow-md mb-6">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b ${isOAA ? 'border-amber-500/30' : 'border-emerald-200'}">
           <div>
             <div class="flex flex-wrap items-center gap-2">
