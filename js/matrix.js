@@ -682,16 +682,19 @@ class ClassroomMatrix {
     container.innerHTML = `
       ${modeSwitchBarHtml}
       ${undoBannerHtml}
-      <!-- Teacher's Desk Card: Class Header + Direct Roster Entry + Labeled Drawers -->
-      <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'bg-[#220d18] border border-amber-500/35' : 'bg-white border border-pink-200'} shadow-sm mb-2.5">
-        <!-- Row 1: Class Identity + Direct Setup/Report Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2.5 border-b ${isOAA ? 'border-amber-500/20' : 'border-pink-100'}">
-          <div class="flex items-start sm:items-center gap-2 min-w-0 flex-1">
-            ${isOAA ? '<span class="text-xl shrink-0">🏛️</span>' : '<div class="kitty-cat-mini shrink-0"></div>'}
+      <!-- Teacher's Desk Tactical HUD Card: Class Header + Daily Quick Views + Labeled Drawers -->
+      <div class="p-2.5 sm:p-3.5 rounded-2xl ${isOAA ? 'cq-anime-tactical-banner cq-corner-brackets border border-amber-500/45 shadow-lg' : 'bg-white border border-pink-200 shadow-sm'} mb-2.5">
+        <!-- Row 1: Class Identity + Daily High-Frequency Views (Dossier & Grades) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2.5 border-b ${isOAA ? 'border-amber-500/25' : 'border-pink-100'}">
+          <div class="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+            ${isOAA
+              ? `<img src="./assets/anime/jjk_special_seal.svg" alt="特級評定紋章" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]">`
+              : '<div class="kitty-cat-mini shrink-0"></div>'}
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-1.5">
                 <h2 class="text-base sm:text-xl font-black ${isOAA ? 'text-white' : (isHomeroom ? 'text-pink-600' : 'text-blue-600')} tracking-wide">${classNameDisplay}</h2>
                 ${classBadgeHtml}
+                ${isOAA ? '<span class="hidden md:inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/45 text-cyan-300 border border-cyan-500/35">OAA × 獵人執照 × 特級評定</span>' : ''}
               </div>
               <div class="text-[10px] sm:text-xs ${isOAA ? 'text-slate-200' : 'text-slate-600'} font-bold mt-0.5">
                 ${statsOverviewHtml}
@@ -700,22 +703,19 @@ class ClassroomMatrix {
           </div>
 
           <div class="flex flex-wrap items-center gap-1.5 shrink-0">
-            <button type="button" onclick="rosterManager.openBatchPasteModal('${currentClassId}')" class="min-h-[32px] px-2.5 py-1 text-[11px] sm:text-xs font-black whitespace-nowrap ${isOAA ? 'bg-[#1a0812] border border-amber-500/35 text-amber-200 hover:bg-[#2b0e1e]' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'} rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer" title="快速貼上全班學生名單">
-              <span>📋</span><span>貼上名單</span>
+            <button type="button" onclick="appState.switchTab('students')" class="min-h-[32px] px-2.5 py-1 text-[11px] sm:text-xs font-black whitespace-nowrap ${isOAA ? 'bg-[#1a0812]/90 border border-cyan-400/50 text-cyan-200 hover:bg-[#2b0e1e]' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'} rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer" title="查看全班學生 OAA 實力名鑑與獵人執照卡">
+              <span>🎖️</span><span>實力名鑑</span>
             </button>
-            <button type="button" onclick="rosterManager.openNewClassModal()" class="min-h-[32px] px-2.5 py-1 text-[11px] sm:text-xs font-black whitespace-nowrap ${isOAA ? 'bg-[#1a0812] border border-amber-500/35 text-amber-200 hover:bg-[#2b0e1e]' : 'bg-white text-slate-700 border border-pink-200 hover:bg-pink-50'} rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer" title="建立導師班或科任班">
-              <span>➕</span><span>新增班級</span>
-            </button>
-            <button type="button" onclick="appState.switchTab('grades')" class="min-h-[32px] px-2.5 py-1 text-[11px] sm:text-xs font-black whitespace-nowrap ${isOAA ? 'bg-amber-950/70 border border-amber-400/50 text-amber-200 hover:bg-amber-900/70' : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'} rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer" title="查看全班平時成績與結算 Excel">
-              <span>📊</span><span>成績結算</span>
+            <button type="button" onclick="appState.switchTab('grades')" class="min-h-[32px] px-2.5 py-1 text-[11px] sm:text-xs font-black whitespace-nowrap ${isOAA ? 'bg-amber-950/80 border border-amber-400/60 text-amber-200 hover:bg-amber-900/75' : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'} rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer" title="查看全班平時成績榮耀頒獎台與結算 Excel">
+              <span>🏆</span><span>成績排行</span>
             </button>
           </div>
         </div>
 
         <!-- Row 2: Labeled Tool Drawers Strip -->
         <div class="flex flex-wrap items-center gap-1.5 pt-2.5">
-          <!-- Drawer 1: Seating & Column Count -->
-          <button id="desk-drawer-seat-btn" type="button" aria-expanded="${(this.activeDeskDrawer === 'seat' || this.isJiggleMode) ? 'true' : 'false'}" onclick="matrixView.toggleDeskDrawer('seat')" class="min-h-[34px] px-2.5 py-1 text-xs font-black whitespace-nowrap ${(this.activeDeskDrawer === 'seat' || this.isJiggleMode) ? (isOAA ? 'bg-amber-600/35 border border-amber-400 text-amber-200 shadow-sm' : 'bg-amber-100 border border-amber-400 text-amber-950 shadow-sm') : (isOAA ? 'bg-[#1a0812] border border-amber-500/40 text-amber-200 hover:bg-[#2b0e1e]' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl transition flex items-center gap-1 cursor-pointer" title="設定4/5/6/7排座位或拖曳換位">
+          <!-- Drawer 1: Seating & Column Count + Semester Roster Setup -->
+          <button id="desk-drawer-seat-btn" type="button" aria-expanded="${(this.activeDeskDrawer === 'seat' || this.isJiggleMode) ? 'true' : 'false'}" onclick="matrixView.toggleDeskDrawer('seat')" class="min-h-[34px] px-2.5 py-1 text-xs font-black whitespace-nowrap ${(this.activeDeskDrawer === 'seat' || this.isJiggleMode) ? (isOAA ? 'bg-amber-600/35 border border-amber-400 text-amber-200 shadow-sm' : 'bg-amber-100 border border-amber-400 text-amber-950 shadow-sm') : (isOAA ? 'bg-[#1a0812] border border-amber-500/40 text-amber-200 hover:bg-[#2b0e1e]' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100')} rounded-xl transition flex items-center gap-1 cursor-pointer" title="設定4/5/6/7排座位、拖曳換位或新學期名單建置">
             <span>🪑 座位・${cols}排</span>
             <span class="text-[10px] opacity-80">▾</span>
           </button>
@@ -780,6 +780,13 @@ class ClassroomMatrix {
           <button type="button" onclick="matrixView.applyAutoArrange('${currentClassId}', 'snake_s')" class="min-h-[30px] px-2.5 py-1 rounded-lg font-bold ${isOAA ? 'bg-[#15060e] border border-amber-500/35 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} cursor-pointer">🔄 S型</button>
           <button type="button" onclick="matrixView.applyAutoArrange('${currentClassId}', 'col_first')" class="min-h-[30px] px-2.5 py-1 rounded-lg font-bold ${isOAA ? 'bg-[#15060e] border border-amber-500/35 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} cursor-pointer">📊 左至右</button>
           <button type="button" onclick="matrixView.applyAutoArrange('${currentClassId}', 'random')" class="min-h-[30px] px-2.5 py-1 rounded-lg font-bold ${isOAA ? 'bg-[#15060e] border border-amber-500/35 text-amber-200' : 'bg-white border border-amber-300 text-amber-900'} cursor-pointer">🎲 隨機換位</button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t ${isOAA ? 'border-amber-500/20' : 'border-amber-200/80'}">
+          <span class="font-black ${isOAA ? 'text-amber-300' : 'text-amber-900'}">📂 學期名冊建置：</span>
+          <button type="button" onclick="rosterManager.openBatchPasteModal('${currentClassId}')" class="min-h-[30px] px-2.5 py-1 rounded-lg font-black ${isOAA ? 'bg-[#15060e] border border-amber-500/40 text-amber-200 hover:bg-[#2c0e1e]' : 'bg-white border border-pink-300 text-pink-700 hover:bg-pink-50'} cursor-pointer">📋 批次貼上名單</button>
+          <button type="button" onclick="rosterManager.openNewClassModal()" class="min-h-[30px] px-2.5 py-1 rounded-lg font-bold ${isOAA ? 'bg-[#15060e] border border-amber-500/35 text-amber-200 hover:bg-[#2c0e1e]' : 'bg-white border border-amber-300 text-slate-700 hover:bg-amber-100'} cursor-pointer">➕ 新增班級</button>
+          <button type="button" onclick="appState.switchTab('roster')" class="min-h-[30px] px-2.5 py-1 rounded-lg font-bold ${isOAA ? 'bg-[#15060e] border border-amber-500/35 text-amber-200 hover:bg-[#2c0e1e]' : 'bg-white border border-amber-300 text-slate-700 hover:bg-amber-100'} cursor-pointer">⚙️ 名單微調</button>
         </div>
       </div>
 
@@ -912,9 +919,24 @@ class ClassroomMatrix {
             `;
           }
 
-          // Quiet compact seat index in top-left so it never competes with student's bright name
+          // Quiet compact seat index + JJK/Hunter License tactical seal on tablet/desktop
+          const jjkRankLabel = tier === 'S' ? '特級' : tier === 'A' ? '一級' : tier === 'B' ? '二級' : tier === 'C' ? '準二' : '三級';
+          const topBarAccent = tier === 'S'
+            ? 'bg-gradient-to-r from-amber-400 via-yellow-200 to-rose-500'
+            : tier === 'A'
+            ? 'bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500'
+            : tier === 'B'
+            ? 'bg-gradient-to-r from-emerald-400 to-teal-500'
+            : tier === 'C'
+            ? 'bg-gradient-to-r from-slate-400 to-slate-500'
+            : 'bg-gradient-to-r from-rose-500 to-red-700';
+          const energyBarWidth = Math.max(14, Math.min(100, Math.round(regularScore)));
+
           const seatNoBadgeHtml = isOAA
-            ? `<span class="font-mono font-bold text-[10px] sm:text-[11px] leading-none text-amber-300/75 pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`
+            ? `<div class="flex items-center gap-1 min-w-0 pointer-events-none">
+                <span class="font-mono font-bold text-[10px] sm:text-[11px] leading-none text-amber-300/80">${String(s.seatNo).padStart(2, '0')}</span>
+                <span class="hidden sm:inline-block text-[8px] font-black px-1 py-0.2 rounded bg-black/50 text-amber-200/90 border border-amber-500/35 leading-none">${jjkRankLabel}</span>
+              </div>`
             : `<span class="font-mono font-bold text-[10px] sm:text-[11px] leading-none text-rose-500/80 pointer-events-none">${String(s.seatNo).padStart(2, '0')}</span>`;
 
           const studentNameHtml = isOAA
@@ -924,27 +946,37 @@ class ClassroomMatrix {
           const displayRegular = Math.round(regularScore);
           const dualScoreHtml = isOAA
             ? `
-              <div class="flex items-center justify-between pt-1 sm:pt-1.5 border-t border-amber-500/20 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5 sm:gap-1">
-                <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
-                  <strong class="${mobileCols >= 6 ? 'text-[11px] sm:text-sm' : 'text-[13px] sm:text-sm'} font-black text-amber-200 tabular-nums">${displayRegular}</strong>
-                  <span class="${mobileCols >= 6 ? 'hidden sm:inline' : 'inline'} text-[9px] text-amber-300/60 font-bold ml-0.5">分</span>
-                  ${mobileCols >= 6 ? '<span class="sr-only">分</span>' : ''}
-                </span>
-                <span class="px-1 sm:px-1.5 py-0.5 rounded-md ${mobileCols >= 6 ? 'text-[9px] sm:text-[11px]' : 'text-[10px] sm:text-[11px]'} font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-950/85 text-emerald-300 border border-emerald-500/45' : netPts < 0 ? 'bg-rose-950/85 text-rose-300 border border-rose-500/45' : 'bg-black/35 text-slate-400 border border-white/10'}" title="本期淨點：${netPts}點">
-                  ${netPts > 0 ? '+' : ''}${netPts}
-                </span>
+              <div class="pt-1 sm:pt-1.5 border-t border-amber-500/20 pointer-events-none min-w-0">
+                <div class="flex items-center justify-between leading-none whitespace-nowrap min-w-0 gap-0.5 sm:gap-1">
+                  <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
+                    <strong class="${mobileCols >= 6 ? 'text-[11px] sm:text-sm' : 'text-[13px] sm:text-sm'} font-black text-amber-200 tabular-nums">${displayRegular}</strong>
+                    <span class="${mobileCols >= 6 ? 'hidden sm:inline' : 'inline'} text-[9px] text-amber-300/60 font-bold ml-0.5">分</span>
+                    ${mobileCols >= 6 ? '<span class="sr-only">分</span>' : ''}
+                  </span>
+                  <span class="px-1 sm:px-1.5 py-0.5 rounded-md ${mobileCols >= 6 ? 'text-[9px] sm:text-[11px]' : 'text-[10px] sm:text-[11px]'} font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-950/85 text-emerald-300 border border-emerald-500/45' : netPts < 0 ? 'bg-rose-950/85 text-rose-300 border border-rose-500/45' : 'bg-black/35 text-slate-400 border border-white/10'}" title="本期淨點：${netPts}點">
+                    ${netPts > 0 ? '+' : ''}${netPts}
+                  </span>
+                </div>
+                <div class="mt-1 h-[2.5px] w-full rounded-full bg-black/50 overflow-hidden">
+                  <div class="h-full ${topBarAccent}" style="width: ${energyBarWidth}%"></div>
+                </div>
               </div>
             `
             : `
-              <div class="flex items-center justify-between pt-1 sm:pt-1.5 border-t border-pink-100/90 leading-none pointer-events-none whitespace-nowrap min-w-0 gap-0.5 sm:gap-1">
-                <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
-                  <strong class="${mobileCols >= 6 ? 'text-[11px] sm:text-sm' : 'text-[13px] sm:text-sm'} font-black text-slate-800 tabular-nums">${displayRegular}</strong>
-                  <span class="${mobileCols >= 6 ? 'hidden sm:inline' : 'inline'} text-[9px] text-slate-400 font-bold ml-0.5">分</span>
-                  ${mobileCols >= 6 ? '<span class="sr-only">分</span>' : ''}
-                </span>
-                <span class="px-1 sm:px-1.5 py-0.5 rounded-md ${mobileCols >= 6 ? 'text-[9px] sm:text-[11px]' : 'text-[10px] sm:text-[11px]'} font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}" title="本期淨點：${netPts}點">
-                  ${netPts > 0 ? '+' : ''}${netPts}
-                </span>
+              <div class="pt-1 sm:pt-1.5 border-t border-pink-100/90 pointer-events-none min-w-0">
+                <div class="flex items-center justify-between leading-none whitespace-nowrap min-w-0 gap-0.5 sm:gap-1">
+                  <span class="inline-flex items-baseline font-mono leading-none shrink-0" title="本期平時成績：${regularScore}分">
+                    <strong class="${mobileCols >= 6 ? 'text-[11px] sm:text-sm' : 'text-[13px] sm:text-sm'} font-black text-slate-800 tabular-nums">${displayRegular}</strong>
+                    <span class="${mobileCols >= 6 ? 'hidden sm:inline' : 'inline'} text-[9px] text-slate-400 font-bold ml-0.5">分</span>
+                    ${mobileCols >= 6 ? '<span class="sr-only">分</span>' : ''}
+                  </span>
+                  <span class="px-1 sm:px-1.5 py-0.5 rounded-md ${mobileCols >= 6 ? 'text-[9px] sm:text-[11px]' : 'text-[10px] sm:text-[11px]'} font-mono font-black tabular-nums shrink-0 ${netPts > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : netPts < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}" title="本期淨點：${netPts}點">
+                    ${netPts > 0 ? '+' : ''}${netPts}
+                  </span>
+                </div>
+                <div class="mt-1 h-[2.5px] w-full rounded-full bg-pink-100 overflow-hidden">
+                  <div class="h-full ${topBarAccent}" style="width: ${energyBarWidth}%"></div>
+                </div>
               </div>
             `;
 
@@ -952,10 +984,12 @@ class ClassroomMatrix {
             <div id="seat-card-${s.seatNo}"
                  data-seat-no="${s.seatNo}"
                  data-tier="${tier}"
-                 class="student-seat-card overflow-hidden ${mobileCols >= 5 ? 'p-1.5 pt-2 sm:p-2.5 sm:pt-3 min-h-[72px] sm:min-h-[86px]' : 'p-2 pt-2.5 sm:p-2.5 sm:pt-3 min-h-[78px] sm:min-h-[86px]'} rounded-2xl border ${isOAA ? 'bg-[#240e1b] border-amber-500/30' : 'bg-white border-pink-200/80'} cursor-pointer select-none relative transition-transform duration-150 shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
+                 class="student-seat-card overflow-hidden ${mobileCols >= 5 ? 'p-1.5 pt-2 sm:p-2.5 sm:pt-3 min-h-[72px] sm:min-h-[88px]' : 'p-2 pt-2.5 sm:p-2.5 sm:pt-3 min-h-[78px] sm:min-h-[88px]'} rounded-2xl border ${isOAA ? 'bg-[#240e1b] border-amber-500/30' : 'bg-white border-pink-200/80'} cursor-pointer select-none relative transition-transform duration-150 shadow-sm ${isSelected ? 'selected' : ''} min-w-0 flex flex-col justify-between"
                  ontouchstart="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onmousedown="matrixView.handleSeatTouchStart(event, ${s.seatNo}, '${currentClassId}')"
                  onclick="if (!matrixView.justFinishedDrag) matrixView.toggleSeatSelection(${s.seatNo}, '${currentClassId}')">
+              <!-- Top Tactical Rank Stripe -->
+              <div class="absolute top-0 inset-x-0 h-[2.5px] ${topBarAccent} opacity-85 pointer-events-none"></div>
               
               <!-- Seat Header: Quiet Index + Mascot / COTE Rank -->
               <div class="flex items-center justify-between mb-0.5 min-w-0 gap-0.5">

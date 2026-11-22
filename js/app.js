@@ -9,12 +9,12 @@ class AppState {
   constructor() {
     this.currentClassId = '801';
     this.activeTab = 'matrix';
-    this.studentsSubTab = 'roster';
+    this.studentsSubTab = 'student-dossier';
     this.settingsSubTab = 'ai-hub';
     this.deferredPrompt = null;
     this.isHeaderCollapsed = false;
     this.audioCtx = null;
-    this.appVersion = '2.4.0';
+    this.appVersion = '2.5.0';
     this.toastTimer = null;
     this.lastTimetableSlotKey = null;
     this._mascotTapCount = 0;
@@ -830,6 +830,20 @@ class AppState {
           <div class="text-xs font-black ${isOAA ? 'text-amber-300' : 'text-slate-800'} flex items-center gap-1">
             <i data-lucide="history" class="w-3.5 h-3.5 ${isOAA ? 'text-amber-400' : 'text-pink-600'}"></i>
             <span>歷史版本發布日誌 (Changelog)：</span>
+          </div>
+
+          <!-- v2.5.0 -->
+          <div class="p-3.5 rounded-2xl border-2 border-amber-400 ${isOAA ? 'bg-[#2a1020] text-white' : 'bg-gradient-to-br from-rose-50 via-pink-50/90 to-amber-50/80 text-slate-900'} shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+              <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-600 via-pink-500 to-amber-500 text-white font-black text-xs shadow-sm font-mono">
+                v2.5.0 (直覺導航重構 • 實教 OAA × 獵人執照 × 咒術特級評定動漫版面大革新)
+              </span>
+              <span class="text-[11px] ${isOAA ? 'text-amber-300' : 'text-rose-700'} font-mono font-bold">2026-11-22</span>
+            </div>
+            <ul class="text-xs ${isOAA ? 'text-amber-100' : 'text-slate-700'} space-y-1.5 font-medium pl-1">
+              <li>• 【直覺導航重構｜點開「學生」直達實力名鑑】修正低頻率「名冊建置（1～3 年才改一次）」排在第一順位的反直覺問題；點擊「學生」現直接進入「🎖️ 學生實力檔案」與「全班實力名牌快選牆」，點記板講桌亦將「貼上名單／新增班級」收進「🪑 座位與班務」抽屜。</li>
+              <li>• 【動漫戰術版面大革新｜實教 OAA × 獵人執照 × 咒術特級評定】導入《實力至上主義教室》官方 OAA 終端插畫切鏡、《獵人》雙星執照晶片條碼卡與念能力六維框、《咒術迴戰》特級／一級斜切評定印章，以及成績頁「TOP 3 特級榮耀頒獎台」。</li>
+            </ul>
           </div>
 
           <!-- v2.4.0 -->
@@ -1927,9 +1941,9 @@ class AppState {
     if (sheet) sheet.classList.add('hidden');
   }
 
-  switchStudentsSubTab(subTab = 'roster', seatNo = null) {
-    const valid = ['roster', 'student-dossier', 'events'];
-    this.studentsSubTab = valid.includes(subTab) ? subTab : 'roster';
+  switchStudentsSubTab(subTab = 'student-dossier', seatNo = null) {
+    const valid = ['student-dossier', 'events', 'roster'];
+    this.studentsSubTab = valid.includes(subTab) ? subTab : 'student-dossier';
 
     document.querySelectorAll('.students-subtab-btn').forEach(btn => {
       if (btn.getAttribute('data-subtab') === this.studentsSubTab) {
@@ -2006,7 +2020,7 @@ class AppState {
       primaryTab = 'grades';
     } else if (tabId === 'roster' || tabId === 'student-dossier' || tabId === 'events' || tabId === 'students') {
       primaryTab = 'students';
-      if (tabId !== 'students') this.studentsSubTab = tabId;
+      this.studentsSubTab = (tabId === 'students') ? 'student-dossier' : tabId;
     } else if (tabId === 'ai-hub' || tabId === 'timetable' || tabId === 'settings') {
       primaryTab = 'settings';
       if (tabId !== 'settings') this.settingsSubTab = tabId;
@@ -2068,7 +2082,7 @@ class AppState {
     } else if (this.activeTab === 'grades' || this.activeTab === 'dashboard') {
       if (window.dashboardCharts) window.dashboardCharts.renderClassDashboard('dashboard-view', activeClass);
     } else if (this.activeTab === 'students') {
-      this.switchStudentsSubTab(this.studentsSubTab || 'roster');
+      this.switchStudentsSubTab(this.studentsSubTab || 'student-dossier');
     } else if (this.activeTab === 'settings') {
       this.switchSettingsSubTab(this.settingsSubTab || 'ai-hub');
     } else if (this.activeTab === 'feedback-board' && window.feedbackBoard) {

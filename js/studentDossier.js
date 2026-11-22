@@ -648,6 +648,63 @@ class StudentDossierView {
     if (window.lucide) window.lucide.createIcons();
   }
 
+  stepStudent(dir = 1) {
+    const students = this.store.getStudents(this.currentClassId) || [];
+    if (students.length === 0) return;
+    const idx = students.findIndex(s => Number(s.seatNo) === Number(this.currentSeatNo));
+    const nextIdx = idx < 0 ? 0 : (idx + dir + students.length) % students.length;
+    this.switchStudent(students[nextIdx].seatNo);
+  }
+
+  renderQuickStudentDeck(students, isOAA) {
+    const classRanks = this.store.getClassRankMap ? this.store.getClassRankMap(this.currentClassId) : {};
+    const pillsHtml = (students || []).map(s => {
+      const isAct = Number(s.seatNo) === Number(this.currentSeatNo);
+      const cleanName = window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name;
+      const rInfo = classRanks[s.seatNo] || { tier: 'B', regularScore: 80 };
+      const tier = rInfo.tier || 'B';
+      const activeCls = isOAA
+        ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-black font-black border-amber-200 shadow-[0_0_12px_rgba(251,191,36,0.45)]'
+        : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black border-pink-600 shadow-sm';
+      const idleCls = isOAA
+        ? 'bg-[#170610] text-amber-100/90 border-amber-500/35 hover:border-amber-400 hover:bg-[#2a0d1d]'
+        : 'bg-white text-slate-700 border-pink-200 hover:bg-pink-50';
+      const tierDotCls = tier === 'S'
+        ? (isOAA ? 'bg-amber-300 text-black' : 'bg-amber-400 text-amber-950')
+        : tier === 'A'
+        ? (isOAA ? 'bg-cyan-300 text-black' : 'bg-sky-500 text-white')
+        : tier === 'B'
+        ? (isOAA ? 'bg-emerald-400 text-black' : 'bg-emerald-500 text-white')
+        : (isOAA ? 'bg-slate-600 text-white' : 'bg-slate-400 text-white');
+      return `
+        <button type="button" onclick="studentDossierView.switchStudent(${s.seatNo})"
+          class="shrink-0 min-h-[34px] px-2.5 py-1 rounded-xl border text-xs transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${isAct ? activeCls : idleCls}">
+          <span class="font-mono text-[10px] opacity-80">${String(s.seatNo).padStart(2, '0')}</span>
+          <span class="font-black">${cleanName}</span>
+          <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-black ${isAct && !isOAA ? 'bg-white/25 text-white' : tierDotCls}">${tier}</span>
+        </button>
+      `;
+    }).join('');
+
+    return `
+      <div class="rounded-2xl p-2 sm:p-3 mb-3 border shadow-sm ${isOAA ? 'bg-[#1b0813]/95 border-amber-500/45 text-amber-100' : 'bg-white/95 border-pink-200 text-slate-800'}">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+          <div class="flex items-center gap-1.5 text-xs font-black ${isOAA ? 'text-amber-300' : 'text-pink-700'}">
+            ${isOAA ? '<img src="./assets/anime/hxh_license_chip.svg" alt="" class="h-4 w-auto object-contain shrink-0">' : '<span>🎖️</span>'}
+            <span>全班實力名牌快選夾</span>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="studentDossierView.stepStudent(-1)" class="min-h-[26px] px-2 py-0.5 rounded-lg text-[11px] font-black border cursor-pointer whitespace-nowrap ${isOAA ? 'bg-[#2a0e1d] border-amber-500/50 text-amber-200 hover:bg-rose-950' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'}">◀ 上一位</button>
+            <button type="button" onclick="studentDossierView.stepStudent(1)" class="min-h-[26px] px-2 py-0.5 rounded-lg text-[11px] font-black border cursor-pointer whitespace-nowrap ${isOAA ? 'bg-[#2a0e1d] border-amber-500/50 text-amber-200 hover:bg-rose-950' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'}">下一位 ▶</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          ${pillsHtml}
+        </div>
+      </div>
+    `;
+  }
+
   // --- 🌸 Mode 1: Default Sanrio Mode ---
   renderDefaultMode(container, student, classes, students, profile, events, oaa) {
     const rankInfo = this.store.getStudentRankInClass ? this.store.getStudentRankInClass(this.currentClassId, student.seatNo) : null;
@@ -723,6 +780,9 @@ class StudentDossierView {
           </select>
         </div>
       </div>
+
+      <!-- Quick Student License Deck -->
+      ${this.renderQuickStudentDeck(students, false)}
 
       <!-- Historical Term Archives Card -->
       ${this.renderHistoricalTermsCard(this.currentClassId, student.seatNo, false)}
@@ -840,39 +900,52 @@ class StudentDossierView {
     const charAvatar = coteChar?.avatar || (studentGender === 'F' ? './assets/cote/official/sakayanagi.webp' : './assets/cote/official/ayanokoji.webp');
     const charName = coteChar?.name || (studentGender === 'F' ? '坂柳 有栖' : '綾小路 清隆');
     const charClassTitle = coteChar?.classTitle || (studentGender === 'F' ? '高度育成 2年A班 // A班司令塔' : '高度育成 2年D班 // 白室最頂點');
+    const sceneArtBg = `./assets/cote/ic-1-${((Math.max(1, Number(student.seatNo) || 1) - 1) % 6) + 1}.jpg`;
+    const jjkSealTitle = (oaa.overallGrade === 'S+' || oaa.overallGrade === 'S')
+      ? '特級術師評定 // SPECIAL GRADE'
+      : (oaa.overallGrade === 'A+' || oaa.overallGrade === 'A')
+      ? '一級術師評定 // GRADE 1'
+      : (oaa.overallGrade === 'B+' || oaa.overallGrade === 'B')
+      ? '準一級評定 // SEMI-GRADE 1'
+      : (oaa.overallGrade === 'C+' || oaa.overallGrade === 'C')
+      ? '二級術師評定 // GRADE 2'
+      : '三級觀察評定 // GRADE 3';
+    const nenAuraLabels = ['強化・學力', '變化・動機', '具現・責任', '特質・常規', '操作・貢獻'];
 
     container.innerHTML = `
       <!-- OAA Top Control Bar -->
-      <div class="rounded-2xl p-3.5 sm:p-4 mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 bg-[#240d1a] border border-amber-500/50 shadow-lg text-white">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full lg:flex-1">
-          <div class="bg-amber-50/95 px-2.5 py-1 rounded-xl border border-amber-400/75 shadow-sm shrink-0 self-start sm:self-auto">
-            <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-6 sm:h-8 object-contain">
+      <div class="rounded-2xl p-2.5 sm:p-4 mb-2.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 cq-anime-tactical-banner cq-corner-brackets border border-amber-500/55 shadow-lg text-white">
+        <div class="flex items-center justify-between sm:justify-start gap-2.5 min-w-0 w-full lg:flex-1">
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="bg-amber-50/95 px-2 py-0.5 rounded-xl border border-amber-400/75 shadow-sm shrink-0">
+              <img src="./assets/cote/cote_logo_s3.png" alt="ようこそ実力至上主義の教室へ" class="h-5 sm:h-7 object-contain">
+            </div>
+            <img src="./assets/anime/jjk_special_seal.svg" alt="特級評定印章" class="w-7 h-7 sm:w-9 sm:h-9 shrink-0">
           </div>
           <div class="min-w-0 flex-1">
-            <h2 class="text-base sm:text-lg font-black tracking-wider text-amber-200 uppercase">
-              OAA 學生綜合能力評估卡
-            </h2>
-            <div class="flex flex-wrap items-center gap-2 mt-0.5">
-              <p class="text-[11px] text-amber-300/80">高度育成高等學校 官方學生檔案</p>
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
+              <h2 class="text-sm sm:text-lg font-black tracking-wide text-amber-200 uppercase">
+                OAA 實力名鑑 × 獵人執照卡
+              </h2>
               <button type="button" onclick="studentDossierView.openEvolutionGuideModal()" class="px-2 py-0.5 rounded-lg bg-[#190712] hover:bg-rose-950 text-amber-300 border border-amber-500/50 text-[11px] font-bold transition inline-flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer" title="查看實力晉階與卡階規則">
                 <i data-lucide="sparkles" class="w-3 h-3 shrink-0 text-amber-400"></i>
-                <span>實力晉階規則</span>
+                <span>晉階規則</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
-          <button type="button" onclick="appState.switchTab('matrix')" class="sm:col-span-2 lg:col-span-1 w-full lg:w-auto min-h-[38px] px-3 py-1.5 rounded-xl border border-amber-500/60 bg-[#1c0a14] hover:bg-rose-950 text-amber-200 text-xs font-black transition flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-2 w-full lg:w-auto shrink-0">
+          <button type="button" onclick="appState.switchTab('matrix')" class="col-span-2 sm:col-span-1 w-full lg:w-auto min-h-[34px] px-2.5 py-1 rounded-xl border border-amber-500/60 bg-[#1c0a14] hover:bg-rose-950 text-amber-200 text-xs font-black transition flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer">
             <span>←</span><span>返回座位點記</span>
           </button>
-          <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[38px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
+          <select onchange="studentDossierView.switchClass(this.value)" class="w-full sm:w-auto min-h-[34px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-2.5 py-1 text-xs font-bold focus:outline-none">
             ${Object.values(classes).map(c => `
               <option value="${c.id}" ${this.currentClassId === c.id ? 'selected' : ''}>${c.name}</option>
             `).join('')}
           </select>
 
-          <select onchange="studentDossierView.switchStudent(this.value)" class="w-full sm:w-auto min-h-[38px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
+          <select onchange="studentDossierView.switchStudent(this.value)" class="w-full sm:w-auto min-h-[34px] bg-[#1c0a14] border border-amber-500/60 text-amber-200 rounded-xl px-2.5 py-1 text-xs font-bold focus:outline-none">
             ${students.map(s => `
               <option value="${s.seatNo}" ${this.currentSeatNo === s.seatNo ? 'selected' : ''}>
                 No.${String(s.seatNo).padStart(2, '0')} ${window.cqCleanStudentName ? window.cqCleanStudentName(s.name, s.seatNo) : s.name}
@@ -882,27 +955,56 @@ class StudentDossierView {
         </div>
       </div>
 
-      <!-- 🌟 Authentic COTE Student Card (Replica of the Official Reference Image) -->
-      <div class="relative overflow-hidden rounded-3xl p-4 sm:p-8 bg-gradient-to-br from-[#290e1b] via-[#381224] to-[#1c0712] border-2 border-amber-500/50 shadow-2xl text-white mb-6">
+      <!-- Quick Student License Deck -->
+      ${this.renderQuickStudentDeck(students, true)}
+
+      <!-- 🌟 Authentic COTE OAA × Hunter License × JJK Special Grade Card -->
+      <div class="cq-hxh-license-card cq-corner-brackets rounded-3xl p-4 sm:p-7 border-2 border-amber-500/55 shadow-2xl text-white mb-6">
+        <!-- Top Hunter License Smart-Chip & JJK Special Grade Seal Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-amber-500/30">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img src="./assets/anime/hxh_license_chip.svg" alt="Hunter License Chip" class="h-8 sm:h-9 w-auto object-contain shrink-0">
+            <div class="min-w-0">
+              <div class="text-[10px] sm:text-xs font-mono font-black tracking-widest text-amber-300 uppercase truncate">
+                HUNTER LICENSE × ANHS OAA TERMINAL
+              </div>
+              <div class="text-[10px] font-mono text-cyan-300/85 truncate">
+                SERIAL // ${studentIdStr} • CLASS-${this.currentClassId}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="cq-jjk-stamp px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border ${oaa.overallGrade.startsWith('S') ? 'bg-gradient-to-r from-amber-500 via-yellow-300 to-rose-500 text-black border-amber-200' : oaa.overallGrade.startsWith('A') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-300' : 'bg-[#2a0e1d] text-amber-200 border-amber-500/50'}">
+              ${jjkSealTitle}
+            </span>
+          </div>
+        </div>
+
         <!-- Right Side Vertical Watermark Text (Faithfully matching the official light novel) -->
-        <div class="hidden sm:block absolute top-8 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
+        <div class="hidden sm:block absolute top-20 right-3 sm:right-4 font-mono text-[9px] sm:text-[10px] tracking-[0.35em] text-amber-400/20 uppercase select-none [writing-mode:vertical-rl] pointer-events-none">
           ADVANCED NURTURING HIGH SCHOOL // OAA
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-          <!-- Left Column: Character Silhouette / Photo Card -->
+          <!-- Left Column: Character Silhouette / Photo Card with COTE Scene Key Visual & Vertical Motto -->
           <div class="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-amber-500/30 pb-5 lg:pb-0 lg:pr-6">
             <div>
-              <!-- Silhouette / Official Photo Card (Official Non-Q Standing Portrait) -->
-              <div class="w-36 sm:w-44 lg:w-full aspect-[4/5] max-w-[240px] mx-auto mb-2 rounded-2xl bg-gradient-to-b from-[#1b0812] via-[#2a0e1c] to-[#12050c] border-2 border-amber-500/60 overflow-hidden shadow-md relative group flex items-center justify-center p-2">
-                <img src="${charFullImage}" class="w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]" alt="${charName}" title="高度育成生徒立繪 - ${charName}">
-                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 text-center">
+              <!-- Silhouette / Official Photo Card (Official Non-Q Standing Portrait over Anime Key Visual) -->
+              <div class="w-40 sm:w-48 lg:w-full aspect-[4/5] max-w-[248px] mx-auto mb-2.5 rounded-2xl bg-[#12050c] border-2 border-amber-500/65 overflow-hidden shadow-lg relative group flex items-center justify-center p-2">
+                <img src="${sceneArtBg}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 scale-105 pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#12050c] via-[#1c0814]/65 to-[#0b1929]/55 pointer-events-none"></div>
+                <div class="hidden sm:block absolute top-3 left-2.5 font-serif font-black text-[10px] tracking-[0.2em] text-amber-300/75 select-none [writing-mode:vertical-rl] pointer-events-none drop-shadow">
+                  實力至上・高度育成評価
+                </div>
+                <img src="${charFullImage}" class="relative z-10 w-full h-full object-contain object-top group-hover:scale-105 transition duration-300 drop-shadow-[0_4px_14px_rgba(0,0,0,0.85)]" alt="${charName}" title="高度育成生徒立繪 - ${charName}">
+                <div class="absolute bottom-0 inset-x-0 z-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-2.5 text-center">
                   <div class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
                     高度育成生徒立繪 // ${studentGender === 'F' ? '女生' : '男生'}階位 #${genderRank} (總 #${overallRank})
                   </div>
                   <div class="text-sm font-black text-white truncate">
                     ${charName}
                   </div>
+                  <div class="text-[10px] text-cyan-300/85 truncate">${charClassTitle}</div>
                 </div>
               </div>
 

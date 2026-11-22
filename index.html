@@ -71,10 +71,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
   <!-- Custom Stylesheets -->
-  <link rel="stylesheet" href="./css/styles.css?v=2.4.0">
-  <link rel="stylesheet" href="./css/kitty-theme.css?v=2.4.0">
-  <link rel="stylesheet" href="./css/sanrio-characters.css?v=2.4.0">
-  <link rel="stylesheet" href="./css/oaa-theme.css?v=2.4.0">
+  <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/kitty-theme.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/sanrio-characters.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/oaa-theme.css?v=2.5.0">
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300 font-sans selection:bg-pink-300 selection:text-pink-900">
 
@@ -86,7 +86,7 @@
       <div class="cq-cover-cote-scanline"></div>
       <div class="cq-cover-cote-hud">
         <span>ANHS // S-SYSTEM</span>
-        <span>OAA TERMINAL v2.4</span>
+        <span>OAA TERMINAL v2.5</span>
       </div>
       <img src="./assets/cote/official/ayanokoji_full.webp" alt="" class="cq-cover-char cq-char-ayanokoji" loading="eager">
       <img src="./assets/cote/official/sakayanagi_full.webp" alt="" class="cq-cover-char cq-char-sakayanagi" loading="eager">
@@ -138,7 +138,7 @@
       <div class="cq-cover-progress-track">
         <div id="cq-cover-progress-fill" class="cq-cover-progress-fill" style="width: 20%;"></div>
       </div>
-      <div id="cq-cover-hint-line" class="cq-cover-skip-hint">載入完成後即開放一鍵登入教室 • v2.4.0</div>
+      <div id="cq-cover-hint-line" class="cq-cover-skip-hint">載入完成後即開放一鍵登入教室 • v2.5.0</div>
       <button id="cq-cover-skip-pref-btn" type="button" onclick="event.stopPropagation(); window.__cqEnableSkipCoverAndEnter()" class="cq-cover-skip-pref-btn">
         ⚡ 下次略過此封面（直接進教室）
       </button>
@@ -187,7 +187,7 @@
           }
           if (labelEl) labelEl.textContent = '🔓 全部載入完成 • ⚡ 一鍵登入系統';
           if (enEl) enEl.textContent = 'LOGIN READY';
-          if (hint) hint.textContent = '✨ 所有圖庫、資料與樣式已就緒，點擊上方按鈕即可登入 • v2.4.0';
+          if (hint) hint.textContent = '✨ 所有圖庫、資料與樣式已就緒，點擊上方按鈕即可登入 • v2.5.0';
         } else {
           if (labelEl) labelEl.textContent = '⏳ 正在載入系統資源 (' + window.__cqBootPct + '%)';
           if (enEl) enEl.textContent = 'LOADING';
@@ -392,7 +392,7 @@
                 <span class="kitty-bow !w-3 !h-3 sm:!w-3.5 sm:!h-3.5 shrink-0"></span>
               </h1>
               <button id="header-version-badge" onclick="appState.openBulletinModal()" class="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-pink-100 text-pink-700 border border-pink-300 hover:bg-pink-200 transition active:scale-95 cursor-pointer flex items-center gap-0.5 shrink-0 whitespace-nowrap" title="查看公佈欄與更新日誌">
-                <span>v2.0.0</span>
+                <span>v2.5.0</span>
                 <span>📢</span>
               </button>
             </div>
@@ -488,7 +488,7 @@
             <span class="kitty-bow !w-3 !h-3"></span>
             <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
             <span>選單</span>
-            <span class="text-[9px] px-1 py-0.2 rounded bg-pink-200/80 text-pink-900 font-mono font-bold">v2.4.0</span>
+            <span class="text-[9px] px-1 py-0.2 rounded bg-pink-200/80 text-pink-900 font-mono font-bold">v2.5.0</span>
           </button>
 
           <!-- 1. 🎯 課堂點記 (Live Scoring + Inline Retro Log) -->
@@ -554,22 +554,22 @@
     <!-- Tab 2: Regular Grades, Term Settlement & Behavior Analytics View -->
     <section id="dashboard-view" class="tab-panel hidden animate-fade-in-up"></section>
 
-    <!-- Tab 3: Unified Students & Class Management Hub -->
+    <!-- Tab 3: Unified Students & Class Management Hub (Frequency-First: Student Dossier Default, Roster Setup Last) -->
     <div id="students-hub-shell" class="tab-panel hidden animate-fade-in-up">
       <div id="students-hub-subnav" class="glass-card rounded-2xl p-1.5 mb-4 border shadow-sm flex flex-wrap items-stretch sm:items-center gap-1.5">
-        <button type="button" data-subtab="roster" onclick="appState.switchStudentsSubTab('roster')" class="subtab-pill-btn students-subtab-btn flex-auto sm:flex-none whitespace-nowrap px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1.5 min-h-[40px] cursor-pointer">
-          <span class="shrink-0">📝</span><span>班級與名單管理</span>
-        </button>
-        <button type="button" data-subtab="student-dossier" onclick="appState.switchStudentsSubTab('student-dossier')" class="subtab-pill-btn students-subtab-btn flex-auto sm:flex-none whitespace-nowrap px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1.5 min-h-[40px] cursor-pointer">
-          <span class="shrink-0">👤</span><span>學生個人表現</span>
+        <button type="button" data-subtab="student-dossier" onclick="appState.switchStudentsSubTab('student-dossier')" class="subtab-pill-btn students-subtab-btn subtab-active flex-auto sm:flex-none whitespace-nowrap px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1.5 min-h-[40px] cursor-pointer">
+          <span class="shrink-0">🎖️</span><span>學生實力檔案</span>
         </button>
         <button type="button" data-subtab="events" onclick="appState.switchStudentsSubTab('events')" class="subtab-pill-btn students-subtab-btn flex-auto sm:flex-none whitespace-nowrap px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1.5 min-h-[40px] cursor-pointer">
-          <span class="shrink-0">🔍</span><span>點記流水帳檢索</span>
+          <span class="shrink-0">📜</span><span>點記流水檢索</span>
+        </button>
+        <button type="button" data-subtab="roster" onclick="appState.switchStudentsSubTab('roster')" class="subtab-pill-btn students-subtab-btn flex-auto sm:flex-none whitespace-nowrap px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center text-center leading-tight gap-1.5 min-h-[40px] cursor-pointer" title="新學期建置班級或調整學生名單">
+          <span class="shrink-0">⚙️</span><span>學期名冊建置</span>
         </button>
       </div>
-      <section id="roster-manager-view" class="students-subpanel"></section>
-      <section id="student-dossier-view" class="students-subpanel hidden"></section>
+      <section id="student-dossier-view" class="students-subpanel"></section>
       <section id="events-log-view" class="students-subpanel hidden"></section>
+      <section id="roster-manager-view" class="students-subpanel hidden"></section>
     </div>
 
     <!-- Tab 4: Unified Settings, Cloud Backup & Timetable Hub -->
@@ -642,7 +642,7 @@
           <span class="text-lg">🎬</span><span>重播實力教室 × 三麗鷗動漫封面</span>
         </button>
         <button type="button" onclick="appState.checkForUpdates(false); appState.closeMobileMoreSheet()" class="more-menu-item p-3 rounded-2xl border border-pink-200/70 text-left text-xs font-black flex items-center gap-2 min-h-[48px] cursor-pointer active:scale-95 col-span-2 justify-center">
-          <span class="text-base">🔄</span><span>檢查最新版本 (ClassQuant Hub v2.4.0)</span>
+          <span class="text-base">🔄</span><span>檢查最新版本 (ClassQuant Hub v2.5.0)</span>
         </button>
       </div>
     </div>
@@ -658,7 +658,7 @@
   <footer class="hidden md:flex glass-card border-t py-3.5 px-6 text-center text-xs items-center justify-between">
     <div class="flex items-center space-x-2">
       <span class="kitty-cat-mini"></span>
-      <span class="font-black text-pink-600">ClassQuant Hub v2.4.0</span>
+      <span class="font-black text-pink-600">ClassQuant Hub v2.5.0</span>
       <span class="text-slate-500">| 陪伴國中教師因材施教</span>
     </div>
     <div class="flex items-center space-x-2">
@@ -737,25 +737,25 @@
   </div>
 
   <!-- Application Logic Scripts (Bust stale caches with version tag) -->
-  <script src="./js/xlsxExport.js?v=2.4.0"></script>
-  <script src="./js/store.js?v=2.4.0"></script>
-  <script src="./js/timetable.js?v=2.4.0"></script>
-  <script src="./js/statistics.js?v=2.4.0"></script>
-  <script src="./js/charts.js?v=2.4.0"></script>
-  <script src="./js/sortable.min.js?v=2.4.0"></script>
-  <script src="./js/tagManager.js?v=2.4.0"></script>
-  <script src="./js/matrix.js?v=2.4.0"></script>
-  <script src="./js/rosterManager.js?v=2.4.0"></script>
-  <script src="./js/retroLogView.js?v=2.4.0"></script>
-  <script src="./js/eventsLog.js?v=2.4.0"></script>
-  <script src="./js/studentDossier.js?v=2.4.0"></script>
-  <script src="./js/timetableEditor.js?v=2.4.0"></script>
-  <script src="./js/aiImportExport.js?v=2.4.0"></script>
-  <script src="./js/feedbackBoard.js?v=2.4.0"></script>
-  <script src="./js/onboardingTour.js?v=2.4.0"></script>
-  <script src="./js/onboardingWizard.js?v=2.4.0"></script>
-  <script src="./js/userGuide.js?v=2.4.0"></script>
-  <script src="./js/app.js?v=2.4.0"></script>
+  <script src="./js/xlsxExport.js?v=2.5.0"></script>
+  <script src="./js/store.js?v=2.5.0"></script>
+  <script src="./js/timetable.js?v=2.5.0"></script>
+  <script src="./js/statistics.js?v=2.5.0"></script>
+  <script src="./js/charts.js?v=2.5.0"></script>
+  <script src="./js/sortable.min.js?v=2.5.0"></script>
+  <script src="./js/tagManager.js?v=2.5.0"></script>
+  <script src="./js/matrix.js?v=2.5.0"></script>
+  <script src="./js/rosterManager.js?v=2.5.0"></script>
+  <script src="./js/retroLogView.js?v=2.5.0"></script>
+  <script src="./js/eventsLog.js?v=2.5.0"></script>
+  <script src="./js/studentDossier.js?v=2.5.0"></script>
+  <script src="./js/timetableEditor.js?v=2.5.0"></script>
+  <script src="./js/aiImportExport.js?v=2.5.0"></script>
+  <script src="./js/feedbackBoard.js?v=2.5.0"></script>
+  <script src="./js/onboardingTour.js?v=2.5.0"></script>
+  <script src="./js/onboardingWizard.js?v=2.5.0"></script>
+  <script src="./js/userGuide.js?v=2.5.0"></script>
+  <script src="./js/app.js?v=2.5.0"></script>
 
   <!-- Register Service Worker cleanly without reload deadlocks -->
   <script>

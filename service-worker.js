@@ -5,7 +5,7 @@
  * - Completes core asset pre-caching before skipWaiting() to eliminate mixed-version cache crashes
  */
 
-const CACHE_NAME = 'classquant-hub-v147';
+const CACHE_NAME = 'classquant-hub-v148';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,10 +15,18 @@ const ASSETS_TO_CACHE = [
   './css/kitty-theme.css',
   './css/sanrio-characters.css',
   './css/oaa-theme.css',
+  './assets/anime/hxh_license_chip.svg',
+  './assets/anime/jjk_special_seal.svg',
+  './assets/anime/anime_tactical_banner.svg',
   './assets/cote/cote_logo_s3.png',
   './assets/cote/cote_wp_1.jpg',
+  './assets/cote/cote_wp_2.jpg',
   './assets/cote/cote_cover.jpg',
   './assets/cote/ayanokoji_oaa.jpg',
+  './assets/cote/ayanokoji_cutin.jpg',
+  './assets/cote/sakayanagi_cutin.jpg',
+  './assets/cote/ichinose_cutin.jpg',
+  './assets/cote/karuizawa_cutin.jpg',
   './assets/cote/ic-1-1.jpg',
   './assets/cote/ic-1-2.jpg',
   './assets/cote/ic-1-3.jpg',

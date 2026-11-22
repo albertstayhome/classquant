@@ -706,5 +706,70 @@ html[data-theme="oaa"] #mobile-collapsed-class-label {
   color: #fbbf24 !important;
 }
 
+/* ==========================================================================
+   v2.5.0 Anime Tactical Layout Motifs (COTE OAA × Hunter License × JJK Grade)
+   ========================================================================== */
+.cq-anime-tactical-banner {
+  position: relative;
+  overflow: hidden;
+  background-image:
+    linear-gradient(100deg, rgba(20, 6, 14, 0.94) 0%, rgba(36, 11, 24, 0.88) 58%, rgba(12, 24, 42, 0.86) 100%),
+    url('../assets/anime/anime_tactical_banner.svg');
+  background-size: cover;
+  background-position: center;
+}
+
+.cq-corner-brackets {
+  position: relative;
+}
+.cq-corner-brackets::before,
+.cq-corner-brackets::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+.cq-corner-brackets::before {
+  top: 4px;
+  left: 4px;
+  border-top: 2px solid rgba(253, 224, 71, 0.75);
+  border-left: 2px solid rgba(253, 224, 71, 0.75);
+}
+.cq-corner-brackets::after {
+  bottom: 4px;
+  right: 4px;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.7);
+  border-right: 2px solid rgba(56, 189, 248, 0.7);
+}
+
+.cq-jjk-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: skewX(-10deg);
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.cq-hxh-license-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 14%, rgba(56, 189, 248, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 12% 85%, rgba(244, 63, 94, 0.18) 0%, transparent 50%),
+    linear-gradient(135deg, #160710 0%, #260d1c 52%, #0c1726 100%);
+}
+
+.cq-oaa-terminal-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(14, 165, 233, 0.18) 0%, transparent 48%),
+    linear-gradient(135deg, #0b1e2d 0%, #170a19 52%, #240b18 100%);
+}
+
+
 
 

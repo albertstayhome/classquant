@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="jjkSwirlGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    <radialGradient id="jjkCoreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#e11d48" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#09030a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#jjkCoreGlow)"/>
+  <!-- Outer Jujutsu Barrier Octagon -->
+  <polygon points="60,4 99,21 116,60 99,99 60,116 21,99 4,60 21,21" fill="#13050e" fill-opacity="0.88" stroke="url(#jjkSwirlGold)" stroke-width="2.5"/>
+  <polygon points="60,12 93,27 108,60 93,93 60,108 27,93 12,60 27,27" fill="none" stroke="#fde047" stroke-width="1" stroke-dasharray="5 3" opacity="0.65"/>
+  <!-- Jujutsu High Cursed Swirl Crest -->
+  <path d="M60 22C80.9 22 98 39.1 98 60C98 76.8 84.4 90.4 67.6 90.4C54.1 90.4 43.2 79.5 43.2 66C43.2 55.2 51.9 46.5 62.7 46.5C71.3 46.5 78.3 53.5 78.3 62.1C78.3 69 72.7 74.6 65.8 74.6C60.3 74.6 55.8 70.1 55.8 64.6" stroke="url(#jjkSwirlGold)" stroke-width="3.6" stroke-linecap="round"/>
+  <!-- Crossed Domain Lines -->
+  <line x1="60" y1="6" x2="60" y2="20" stroke="#fde047" stroke-width="2"/>
+  <line x1="60" y1="100" x2="60" y2="114" stroke="#fde047" stroke-width="2"/>
+  <line x1="6" y1="60" x2="20" y2="60" stroke="#fde047" stroke-width="2"/>
+  <line x1="100" y1="60" x2="114" y2="60" stroke="#fde047" stroke-width="2"/>
+  <circle cx="60" cy="60" r="5" fill="#38bdf8" stroke="#fde047" stroke-width="1.5"/>
+</svg>
